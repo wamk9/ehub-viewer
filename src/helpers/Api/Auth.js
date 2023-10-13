@@ -9,8 +9,9 @@ let Auth = {
       if (result.code == 200) {
         store.dispatch('setToken', result.response.token);
         router.go();
+      } else {
+        console.error (result.response);
       }
-
   },
   async logout() {
     let result = await Api.postAsync('/auth/logout');
@@ -19,36 +20,19 @@ let Auth = {
     if (result.code == 200) {
       store.dispatch('removeToken');
       router.go();
+    } else {
+      console.error (result.response);
     }
   },
-  
+  async register(data) {
+    let result = await Api.postAsync('/auth/register', data);
 
-
-
-
-
-
-  
-  register(data) {
-    axios.post(`http://127.0.0.1:8000/api/auth/register`, data)
-    .then(response => {
-      
-
-      return response.data
-    })
-    .catch(e => {
-      return e.data;
-    })
-  },
-  verifyUserToken() {
-    axios.get(`http://127.0.0.1:8000/api/user/token`)
-    .then(response => {
-      // JSON responses are automatically parsed.
-      return response.data
-    })
-    .catch(e => {
-      return e.data;
-    })
+    if (result.code == 200) {
+      store.dispatch('setToken', result.response.token);
+      router.go();
+    } else {
+      console.error (result.response);
+    }
   },
 }
 

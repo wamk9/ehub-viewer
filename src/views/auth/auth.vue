@@ -1,5 +1,6 @@
 <script setup>
 import ehubInput from '@/components/inputs/ehub-input.vue';
+import ehubButton from '@/components/inputs/ehub-button.vue';
 import Auth from '@/helpers/Api/Auth.js';
 </script>
 
@@ -26,18 +27,22 @@ import Auth from '@/helpers/Api/Auth.js';
 
         <div class="auth-inputs" v-if="isNewUser">
           <ehubInput
-            v-model="authForm.steamid"
+            v-model="authForm.steam_id"
             :icon="['fab', 'steam']"
             placeholder="Seu Steam ID"
           />
 
           <ehubInput
-            v-model="authForm.steamid"
+            v-model="authForm.name"
             icon="id-card"
             placeholder="Seu nome completo"
           />
         </div>
-        <a href="#" v-on:click="executeAction()" class="round btn btn-primary px-5">{{ AuthBtnAction }}</a>
+        <ehubButton 
+          @click="executeAction"
+          :text="AuthBtnAction"
+          :disabled="sendingToApi"
+        />
         <hr class="my-4">
         <p class="card-text">{{ authFormDescription }} <a href="#" v-on:click="changeAuthForm()">Clique aqui!</a></p>
       </div>
@@ -49,12 +54,13 @@ import Auth from '@/helpers/Api/Auth.js';
 export default {
   data() {
     return {
+      sendingToApi: false,
       isNewUser: false,
       authForm: {
         email: '',
         password: '',
-        fullname: '',
-        steamid: ''
+        name: '',
+        steam_id: ''
       },
       errors: []
     }
@@ -74,13 +80,15 @@ export default {
     changeAuthForm() {
       this.isNewUser = !this.isNewUser;
     },
-    executeAction() {
-      if (this.isNewUser) 
-      {
-        return;
-      }
+    async executeAction() {
+      this.sendingToApi = true;
 
-      Auth.login(this.authForm);
+      if (this.isNewUser) 
+        await Auth.register(this.authForm);
+      else
+        await Auth.login(this.authForm);
+
+      this.sendingToApi = false;
     },
   },
   // Fetches posts when the component is created.
@@ -110,9 +118,5 @@ export default {
 </style>
 
 <style>
-body {
-  background-image: url('https://cdn.pixabay.com/photo/2014/11/15/13/13/sports-ground-531919_960_720.jpg') !important;
-  background-size: cover;
-  backdrop-filter: blur(20px);
-}
+
 </style>

@@ -16,8 +16,8 @@ let Api = {
         'Accept': 'application/json',
         'Content-Type': 'application/json;charset=utf-8',
         'Access-Control-Allow-Origin': '*',
-                  'Access-Control-Allow-Headers': '*',
-                  'Access-Control-Allow-Credentials': 'true'
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Credentials': 'true'
       }
     })
     .then(response => {
@@ -30,7 +30,7 @@ let Api = {
     .catch(e => {
       return { 
         code: e.status,
-        response : this.errors.push(e)
+        response : e.message
       };
     })
   },
@@ -57,21 +57,20 @@ let Api = {
     .catch(e => {
       return { 
         code: e.status,
-        response : e.data
+        response : e.message
       };
     })
   },
-
   async postAsync(route, params) {
     return await axios.post(route, params, {
       //data : JSON.stringify(params),
       //withCredentials: true,
       headers: {
-        //'Accept': 'application/json',
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
-        //'Access-Control-Allow-Origin': '*',
-        //'Access-Control-Allow-Headers': '*',
-        //'Access-Control-Allow-Credentials': 'true'
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Credentials': 'true'
       }
     })
     .then(response => {
@@ -81,10 +80,62 @@ let Api = {
         response : response.data
       };
     })
-    .catch(e => {
+    .catch(e => {      
       return { 
-        code: e.status,
-        response : this.errors.push(e)
+        code: e.response.status,
+        response : e.response.data
+      };
+    })
+  },
+  async getAsync(route, params) {
+    return await axios.get(route, params, {
+      //data : JSON.stringify(params),
+      //withCredentials: true,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Credentials': 'true'
+      }
+    })
+    .then(response => {
+      // JSON responses are automatically parsed.
+      return { 
+        code: response.status,
+        response : response.data
+      };
+    })
+    .catch(e => {      
+      return { 
+        code: e.response.status,
+        response : e.response.data
+      };
+    })
+  },
+  async patchAsync(route, params) {
+    return await axios.patch(route, params, {
+      //data : JSON.stringify(params),
+      //withCredentials: true,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Credentials': 'true'
+      }
+    })
+    .then(response => {
+      // JSON responses are automatically parsed.
+      return { 
+        code: response.status,
+        response : response.data
+      };
+    })
+    .catch(e => {     
+      return { 
+        code: e.response.status,
+        response : e.response.data
       };
     })
   },

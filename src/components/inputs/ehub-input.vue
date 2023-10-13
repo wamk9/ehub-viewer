@@ -2,14 +2,15 @@
   <div class="input-group mb-3">
     <span class="input-group-text" v-if="icon"><font-awesome-icon class="fa-fw" :icon="icon"/></span>
     <input
+      :disabled="disabled"
       :type="type"
       :name="name"
       class="form-control"
       :placeholder="placeholder"
       :aria-label="placeholder"
       :value="modelValue"
-      @input="onInput"
       @change="onChange"
+      @input="onInput"
     >
   </div>
 </template>
@@ -32,6 +33,10 @@ export default {
     type: {
       type: String,
       default: 'text'
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     }
   },
   computed: {

@@ -2,44 +2,42 @@ import { createRouter, createWebHistory } from 'vue-router'
 import API from '../helpers/ApiConnection.js';
 import store from '@/store';
 
-import HomeView from '../views/HomeView.vue'
-import AuthView from '../views/auth/AuthView.vue'
-import LoginView from '../views/auth/LoginView.vue'
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: () => import('@/views/home.vue')
     },
     {
       path: '/auth',
       name: 'auth',
-      component: AuthView
+      component: () => import('@/views/auth/auth.vue')
     },
     {
-      path: '/auth/login',
-      name: 'login',
-      component: LoginView
+      path: '/league/:leagueRoute',
+      name: 'show-especific-league-info',
+      component: () => import('@/views/league/show.vue')
+    },
+    {
+      path: '/league/:leagueRoute/tournament/create',
+      name: 'create-tournament',
+      component: () => import('@/views/tournament/create.vue')
+    },
+    {
+      path: '/league/:leagueRoute/tournament/:tournamentRoute',
+      name: 'show-especific-tournament-info',
+      component: () => import('@/views/tournament/show.vue')
     },
     {
       path: '/league/create',
       name: 'create-league',
-      component: HomeView,
+      component: () => import('@/views/league/create.vue'),
       meta: {
         requiresAuth: true
       }
     },
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
-    }
   ]
 })
 

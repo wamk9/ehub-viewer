@@ -3,7 +3,7 @@
   <div class="container-fluid">
   <div class="d-flex align-items-center ">
     <a href="/" class="navbar-brand m-0 textColor fw-bold brand">
-      <img src="@/assets/images/ehub-logo.png">
+      <img class="desktop-navbar-logo" src="@/assets/images/ehub-logo.png">
     </a>
   </div>
   <div class="d-flex align-items-center">
@@ -136,9 +136,9 @@ export default {
 
 <style>
 .navbar {
-  background-color: #1c1c1c;
+  background-color: #303030;
   border-bottom-color: #0098D8 !important;
-  border-bottom-width: 10px !important;
+  border-bottom-width: 2px !important;
 }
 
 .mobile-navbar {
@@ -148,6 +148,10 @@ export default {
 
 .textColor {
   color: #fafafa;
+}
+
+.desktop-navbar-logo {
+  height: 35px;
 }
 
 .mobile-navbar-logo {

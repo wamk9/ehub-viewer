@@ -9,7 +9,10 @@ import {
   faEnvelope,
   faAsterisk,
   faIdCard,
-  faRightFromBracket
+  faRightFromBracket,
+  faLink,
+  faAddressCard,
+  faSpinner
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -28,7 +31,10 @@ library.add(
   faAsterisk,
   faSteam,
   faIdCard,
-  faRightFromBracket
+  faRightFromBracket,
+  faLink,
+  faAddressCard,
+  faSpinner
 );
 
 export default FontAwesomeIcon;
