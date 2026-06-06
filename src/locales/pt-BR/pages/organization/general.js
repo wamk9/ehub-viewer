@@ -101,6 +101,8 @@ export default {
     error_add: 'Falha ao convidar membro.',
     error_role: 'Falha ao atualizar papel.',
     error_remove: 'Falha ao remover membro.',
+    leave: 'Sair da organização',
+    error_leave: 'Falha ao sair da organização.',
     errors: {
       org_not_found: 'Organização não encontrada.',
       unauthorized: 'Você não tem permissão para realizar esta ação.',

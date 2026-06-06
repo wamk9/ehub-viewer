@@ -1,6 +1,6 @@
 <script setup>
-import { ref, reactive, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, nextTick, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import ehubInput    from '@/components/inputs/ehub-input.vue'
 import AvatarUpload from '@/components/inputs/AvatarUpload.vue'
@@ -8,19 +8,30 @@ import PhoneInput   from '@/components/inputs/PhoneInput.vue'
 import EmailVerify  from '@/components/inputs/EmailVerify.vue'
 import StepProgress from '@/components/general/StepProgress.vue'
 import Api          from '@/helpers/communication/Connection'
+import OrgApi       from '@/helpers/communication/Organization'
 import store        from '@/store'
 import inputValidation from '@/helpers/frontend/input-validation'
 import { i18n } from '@/helpers/i18n'
 
 const { t } = useI18n()
 const router = useRouter()
+const route  = useRoute()
 
 // ─── Form ─────────────────────────────────────────────────────
 const form = reactive({
   name: '', surname: '', mail: '', phone: '',
   username: '', password: '', password_confirm: '', image: '',
 })
+const inviteToken  = ref(null)
 const mailVerified = ref(false)
+
+onMounted(() => {
+  if (route.query.invite) inviteToken.value = route.query.invite
+  if (route.query.email) {
+    form.mail      = route.query.email
+    mailVerified.value = true
+  }
+})
 
 const inputs = ref([])
 function collectRef(el) {
@@ -90,7 +101,14 @@ async function submit() {
     if (result.code === 201) {
       loadingText.value = i18n.t('users.create.loading.created.title')
       store.dispatch('setToken', result.response.token)
-      setTimeout(() => router.push('/'), 2000)
+
+      if (inviteToken.value) {
+        await OrgApi.acceptInvite(inviteToken.value)
+        const org = route.query.org
+        setTimeout(() => router.push(org ? `/org/${org}` : '/organizations/mine'), 1500)
+      } else {
+        setTimeout(() => router.push('/'), 2000)
+      }
     } else {
       serverErrors.value = parseServerErrors(result.response)
       isLoading.value = false

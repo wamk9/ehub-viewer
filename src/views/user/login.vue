@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import ehubInput from '@/components/inputs/ehub-input.vue'
 import ehubButton from '@/components/inputs/ehub-button.vue'
@@ -9,6 +9,7 @@ import store from '@/store'
 
 const { t } = useI18n()
 const router = useRouter()
+const route  = useRoute()
 
 const form = reactive({ mail: '', password: '' })
 const loading = ref(false)
@@ -21,8 +22,12 @@ async function submit() {
     const result = await Api.postAsync('/auth/login', form)
     if (result.code === 200) {
       store.dispatch('setToken', result.response.token)
-      const last = localStorage.getItem('lastKnowRoute')
-      router.push(last ? JSON.parse(last) : { name: 'home' })
+      if (route.query.redirect)
+        router.push(route.query.redirect)
+      else {
+        const last = localStorage.getItem('lastKnowRoute')
+        router.push(last ? JSON.parse(last) : { name: 'home' })
+      }
     } else {
       error.value = result.response?.message ?? t('users.login.error')
     }

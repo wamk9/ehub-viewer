@@ -65,6 +65,22 @@ const router = createRouter({
       component: () => import('@/views/org/manage.vue')
     },
     {
+      path: '/org/:orgRoute/manage/finances',
+      name: 'manage-organization-finances',
+      component: () => import('@/views/org/manage.vue'),
+      props: () => ({ forceOption: ['finances'] })
+    },
+    {
+      path: '/invite/accept/:token',
+      name: 'invite-accept',
+      component: () => import('@/views/invite/accept.vue')
+    },
+    {
+      path: '/payment/gateway/error',
+      name: 'payment-gateway-error',
+      component: () => import('@/views/payment/gateway-error.vue')
+    },
+    {
       path: '/org/:orgRoute/manage/events/:eventRoute?/:eventRouteMenu?',
       name: 'manage-organization-events',
       component: () => import('@/views/org/manage.vue'),

@@ -1,8 +1,9 @@
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRoute } from 'vue-router';
 import ehubButton from '@/components/inputs/ehub-button.vue';
-import ehubSocket from '@/helpers/communication/Socket.js';
+import { useLivePoll } from '@/helpers/LivePoll.js';
+import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import manageEventStage from './manage.vue';
 import removeEventStage from './remove.vue';
 import saveEventStage from './save.vue';
@@ -61,14 +62,15 @@ function RemoveStage(item) {
     showRemove.value = true;
 }
 
-// lifecycle
-onMounted(() => {
-    ehubSocket.connectRoom(`${route.params.orgRoute}/${route.params.eventRoute}/stages`);
-});
+// polling: refresh event stages every 10 seconds
+async function fetchEvent() {
+    const result = await OrganizationEvent.show(route.params.orgRoute, route.params.eventRoute);
+    if (result.code === 200 && result.data) {
+        eventData.value = { ...result.data };
+    }
+}
 
-onBeforeUnmount(() => {
-    ehubSocket.leaveRoom(`${route.params.orgRoute}/${route.params.eventRoute}/stages`);
-});
+useLivePoll(fetchEvent, 10000);
 
 // watch for updates from parent
 watch(() => props.event, (newEvent) => {

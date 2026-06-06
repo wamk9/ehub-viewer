@@ -1,6 +1,7 @@
 <script setup>
 import orgManageGeneral from '@/components/modules/org-manage-general.vue';
 import manageEventsIndex from '@/components/modules/org/manage/events/index.vue';
+import manageFinancesIndex from '@/components/modules/org/manage/finances/index.vue';
 import manageNewsIndex from '@/components/modules/org/manage/news/index.vue';
 import Organization from '@/helpers/communication/Organization.js';
 </script>
@@ -57,6 +58,14 @@ import Organization from '@/helpers/communication/Organization.js';
 
             <div v-else-if="getOptionActivation('news')" key="news" class="manage-view">
                 <manageNewsIndex
+                    :orgRoute="$route.params.orgRoute"
+                    @close="resetOptionActivation"
+                />
+            </div>
+
+            <div v-else-if="getOptionActivation('finances')" key="finances" class="manage-view">
+                <manageFinancesIndex
+                    :show="true"
                     :orgRoute="$route.params.orgRoute"
                     @close="resetOptionActivation"
                 />

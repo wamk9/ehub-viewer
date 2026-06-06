@@ -101,6 +101,8 @@ export default {
     error_add: 'Error al invitar miembro.',
     error_role: 'Error al actualizar rol.',
     error_remove: 'Error al eliminar miembro.',
+    leave: 'Salir de la organización',
+    error_leave: 'Error al salir de la organización.',
     errors: {
       org_not_found: 'Organización no encontrada.',
       unauthorized: 'No tienes permiso para realizar esta acción.',

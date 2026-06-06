@@ -101,6 +101,8 @@ export default {
     error_add: 'Failed to invite member.',
     error_role: 'Failed to update role.',
     error_remove: 'Failed to remove member.',
+    leave: 'Leave organization',
+    error_leave: 'Failed to leave organization.',
     errors: {
       org_not_found: 'Organization not found.',
       unauthorized: 'You do not have permission to do this.',

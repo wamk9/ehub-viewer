@@ -5,7 +5,6 @@ import SystemVars from '@/helpers/General/SystemVars';
 import ehubModal from '@/components/modals/ehub-modal.vue';
 import EventBracket from '@/components/modules/event-bracket.vue';
 import Whiteboard from '@/components/modules/whiteboard.vue';
-import ehubSocket from '@/helpers/communication/Socket.js';
 </script>
 
 <template>
@@ -94,6 +93,8 @@ import ehubSocket from '@/helpers/communication/Socket.js';
 </template>
 
 <script>
+import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
+
 export default {
     props: {
         stage: {
@@ -113,7 +114,8 @@ export default {
         return {
             internalAdviceShow: false,
             internalShow: false,
-            stageToManage: {}
+            stageToManage: {},
+            _pollTimer: null,
         }
     },
     computed: {
@@ -153,9 +155,6 @@ export default {
 
             return ordered;
         },
-        roomName() {
-            return `${this.$route.params.orgRoute}/${this.$route.params.eventRoute}/${this.stageToManage.endpoint}`;
-        }
     },
     methods: {
         CloseAdvice() {
@@ -163,6 +162,7 @@ export default {
             this.$emit('update:show', this.internalAdviceShow);
         },
         CloseManage() {
+            this._stopPolling();
             this.internalShow = false;
             this.$emit('update:show', this.internalShow);
         },
@@ -194,22 +194,35 @@ export default {
                 //TODO: Create modal to confirm action
             } else {
                 //TODO: Do API call
+                this._stopPolling();
                 this.internalShow = false;
                 this.stageToManage.finished = true;
             }
         },
+        _startPolling() {
+            if (this._pollTimer) return;
+            this._fetchStageData();
+            this._pollTimer = setInterval(() => this._fetchStageData(), 5000);
+        },
+        _stopPolling() {
+            if (this._pollTimer) {
+                clearInterval(this._pollTimer);
+                this._pollTimer = null;
+            }
+        },
+        async _fetchStageData() {
+            if (!this.stageToManage.endpoint) return;
+            const result = await OrganizationEvent.show(
+                this.$route.params.orgRoute,
+                this.$route.params.eventRoute
+            );
+            if (result.code !== 200 || !result.data?.stages) return;
+            const fresh = result.data.stages.find(s => s.endpoint === this.stageToManage.endpoint);
+            if (!fresh) return;
+            this.stageToManage = { ...this.stageToManage, ...fresh };
+        },
     },
     watch: {
-        socketValues: {
-            handler(newUpdates) {
-                while (newUpdates.length > 0) {
-                    const newData = newUpdates.shift(); // FIFO
-                    this.stageToManage = ehubSocket.mergeData(this.stageToManage, newData);
-                    console.log(`Updated info in ${Date.now()}`);
-                }
-            },
-            deep: true
-        },
         stage: {
             handler(newUpdates) {
                 this.stageToManage = { ...this.stageToManage, ...newUpdates };
@@ -217,12 +230,14 @@ export default {
             deep: true
         },
         show: {
-            handler(newUpdates) {
+            handler(newValue) {
                 if (this.eventInitialized) {
                     this.internalAdviceShow = false;
-                    this.internalShow = newUpdates;
+                    this.internalShow = newValue;
+                    if (newValue) this._startPolling();
+                    else this._stopPolling();
                 } else {
-                    this.internalAdviceShow = newUpdates;
+                    this.internalAdviceShow = newValue;
                     this.internalShow = false;
                 }
             },
@@ -230,17 +245,15 @@ export default {
         }
     },
     mounted() {
-        console.log(this.stageToManage);
-
         if (!this.eventInitialized) {
             this.internalAdviceShow = this.show;
         } else {
-            ehubSocket.connectRoom(this.roomName);
             this.internalShow = this.show;
+            if (this.show) this._startPolling();
         }
     },
     beforeUnmount() {
-        ehubSocket.leaveRoom(this.roomName);
+        this._stopPolling();
     }
 }
 </script>

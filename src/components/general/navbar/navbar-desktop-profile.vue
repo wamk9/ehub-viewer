@@ -160,9 +160,27 @@ export default {
                 }
             } catch { /* keep placeholder */ }
         },
+        async loadNotifications() {
+            if (!this.isLogged) return
+            try {
+                const result = await Api.getAsync('/notification', {
+                    headers: { Authorization: 'Bearer ' + store.getters.getToken }
+                })
+                if (result.code === 200) {
+                    this.notifications = Array.isArray(result.response?.message)
+                        ? result.response.message
+                        : []
+                }
+            } catch { /* keep notifications empty */ }
+        },
     },
     mounted() {
         this.loadProfileData()
+        this.loadNotifications()
+        this._notifTimer = setInterval(() => this.loadNotifications(), 30000)
+    },
+    beforeUnmount() {
+        if (this._notifTimer) clearInterval(this._notifTimer)
     },
 }
 </script>

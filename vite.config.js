@@ -6,8 +6,12 @@ import vue from '@vitejs/plugin-vue'
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
-    host: true,  // equivalent to 0.0.0.0
-    port: 5173   // optional
+    host: true,
+    port: 5173,
+  },
+  build: {
+    outDir: '../ehub-api/public',
+    emptyOutDir: false,
   },
   plugins: [
     vue(),

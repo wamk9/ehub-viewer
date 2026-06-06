@@ -34,6 +34,14 @@ const Organization = {
         const result = await Api.postAsync('/organization/' + orgRoute + '/transfer-ownership', { email });
         return { code: result.code, data: result.response?.message };
     },
+    async leaveOrganization(orgRoute) {
+        const result = await Api.postAsync('/organization/' + orgRoute + '/leave');
+        return { code: result.code, data: result.response?.message };
+    },
+    async acceptInvite(token) {
+        const result = await Api.postAsync('/invite/accept/' + token);
+        return { code: result.code, data: result.response?.message };
+    },
     async getInvites(orgRoute) {
         const result = await Api.getAsync('/organization/' + orgRoute + '/invites');
         return { code: result.code, data: result.response?.message };

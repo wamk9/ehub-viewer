@@ -198,7 +198,8 @@ import SystemVars from '@/helpers/General/SystemVars';
                                 </span>
                             </td>
                             <td>
-                                <div v-if="member.role !== 'owner'" class="d-flex gap-2">
+                                <!-- Non-owner member: show role change + remove (never on own row) -->
+                                <div v-if="member.role !== 'owner' && member.user?.id !== myUserId && userRole === 'owner' || member.role !== 'owner' && member.user?.id !== myUserId && userRole === 'admin'" class="d-flex gap-2">
                                     <select
                                         class="form-select form-select-sm gen-role-select"
                                         :value="member.role"
@@ -212,7 +213,15 @@ import SystemVars from '@/helpers/General/SystemVars';
                                         <font-awesome-icon :icon="['fas', 'trash']" />
                                     </button>
                                 </div>
-                                <div v-else>
+                                <!-- Own non-owner row: leave button -->
+                                <div v-else-if="member.user?.id === myUserId && member.role !== 'owner'">
+                                    <button class="btn btn-outline-danger btn-sm" @click="leaveOrg">
+                                        <font-awesome-icon :icon="['fas', 'arrow-right-from-bracket']" class="me-1" />
+                                        {{ $t('pages.organization.general.staff.leave') }}
+                                    </button>
+                                </div>
+                                <!-- Owner row: show transfer button only if I am the owner -->
+                                <div v-else-if="member.role === 'owner' && member.user?.id === myUserId && userRole === 'owner'">
                                     <button
                                         class="btn btn-outline-warning btn-sm"
                                         @click="transfer.show = !transfer.show"
@@ -247,7 +256,7 @@ import SystemVars from '@/helpers/General/SystemVars';
                                 </div>
                             </td>
                             <td>
-                                <div class="d-flex gap-2">
+                                <div v-if="userRole === 'owner' || userRole === 'admin'" class="d-flex gap-2">
                                     <button class="btn btn-outline-secondary btn-sm" @click="resendInvite(invite)">
                                         <font-awesome-icon :icon="['fas', 'envelope']" class="me-1" />
                                         {{ $t('pages.organization.general.staff.resend') }}
@@ -296,8 +305,8 @@ import SystemVars from '@/helpers/General/SystemVars';
             </div>
         </div>
 
-        <!-- Invite member -->
-        <div class="gen-section">
+        <!-- Invite member (owner/admin only) -->
+        <div v-if="userRole === 'owner' || userRole === 'admin'" class="gen-section">
             <h6 class="gen-section__title">{{ $t('pages.organization.general.staff.add.title') }}</h6>
             <div class="gen-add-row">
                 <div class="gen-add-field">
@@ -310,7 +319,6 @@ import SystemVars from '@/helpers/General/SystemVars';
                     />
                 </div>
                 <div class="gen-add-role">
-                    <label class="gen-label">{{ $t('pages.organization.general.staff.add.role') }}</label>
                     <select class="form-select" v-model="addForm.role">
                         <option value="admin">{{ $t('pages.organization.general.staff.roles.admin') }}</option>
                         <option value="financial">{{ $t('pages.organization.general.staff.roles.financial') }}</option>
@@ -318,7 +326,6 @@ import SystemVars from '@/helpers/General/SystemVars';
                     </select>
                 </div>
                 <div class="gen-add-action">
-                    <label class="gen-label gen-label--spacer">&nbsp;</label>
                     <ehubButton
                         :text="$t('pages.organization.general.staff.add.button')"
                         buttonClass="btn-primary"
@@ -408,6 +415,7 @@ export default {
             aboutError: null,
             aboutSuccess: false,
 
+            myUserId: null,
             members: [],
             invites: [],
             staffError: null,
@@ -436,6 +444,7 @@ export default {
             if (result.code === 200 && result.data) {
                 const d = result.data;
                 this.userRole                = d.role ?? null;
+                this.myUserId                = d.my_user_id ?? null;
                 this.orgName                 = d.name ?? '';
                 this.aboutForm.logo_image    = d.logo_image ? SystemVars.baseUrl + 'storage/' + d.logo_image : '';
                 this.aboutForm.name          = d.name ?? '';
@@ -474,6 +483,8 @@ export default {
 
             if (membersResult.code === 200) {
                 this.members = membersResult.data ?? [];
+                const me = this.members.find(m => m.user?.id === this.myUserId);
+                if (me) this.userRole = me.role;
             } else {
                 this.staffError = this.$t('pages.organization.general.staff.error_load');
             }
@@ -577,6 +588,19 @@ export default {
                 this.staffSuccess = this.$t('pages.organization.general.staff.resend_success', { email: invite.email });
             } else {
                 this.staffError = this.$t('pages.organization.general.staff.resend_error');
+            }
+        },
+        async leaveOrg() {
+            this.staffError = null;
+            this.staffSuccess = null;
+            this.isLoading = true;
+            const result = await Organization.leaveOrganization(this.orgRoute);
+            this.isLoading = false;
+            if (result.code === 200) {
+                this.$emit('close');
+                this.$router.push({ name: 'my-organizations' });
+            } else {
+                this.staffError = this.$t('pages.organization.general.staff.error_leave');
             }
         },
         async removeInvite(invite) {
@@ -772,14 +796,24 @@ export default {
     flex: 1 1 240px;
 }
 
+.gen-add-field :deep(.input-group) {
+    margin-bottom: 0 !important;
+}
+
+.gen-add-field :deep(.input-feedback) {
+    display: none;
+}
+
 .gen-add-role {
     flex: 0 0 160px;
 }
 
+.gen-add-role .form-select {
+    height: 38px;
+}
+
 .gen-add-action {
     flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
 }
 
 .gen-label--spacer {

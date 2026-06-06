@@ -178,6 +178,7 @@ export default {
             articles: [],
             articlesLoaded: false,
             articlesLoading: false,
+            _pollTimer: null,
         };
     },
     async created() {
@@ -201,6 +202,7 @@ export default {
             if (val === 'about'    && !this.membersLoaded)  this.loadMembers();
             if (val === 'events'   && !this.eventsLoaded)   this.loadEvents();
             if (val === 'lastNews' && !this.articlesLoaded) this.loadArticles();
+            this._restartPoll(val);
         },
     },
     methods: {
@@ -229,6 +231,20 @@ export default {
             if (!dateStr) return '';
             return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
         },
+        _restartPoll(tab) {
+            if (this._pollTimer) {
+                clearInterval(this._pollTimer);
+                this._pollTimer = null;
+            }
+            if (tab === 'lastNews') {
+                this._pollTimer = setInterval(() => this.loadArticles(), 60000);
+            } else if (tab === 'events') {
+                this._pollTimer = setInterval(() => this.loadEvents(), 60000);
+            }
+        },
+    },
+    beforeUnmount() {
+        if (this._pollTimer) clearInterval(this._pollTimer);
     },
 }
 </script>
