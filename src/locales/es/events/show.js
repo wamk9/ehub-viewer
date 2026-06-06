@@ -37,6 +37,10 @@ export default {
     register: 'Inscribirse',
     pending: 'Pago pendiente',
     confirmed: 'Inscrito',
+    check_payment: 'Verificar pago',
+    retry_payment: 'Nuevo enlace de pago',
+    payment_now_confirmed: '¡Pago confirmado!',
+    payment_still_pending: 'Pago aún no identificado.',
     modal: {
       title: 'Inscripción al evento',
       fee_warning: 'Este evento requiere un pago de {fee} tras la inscripción.',

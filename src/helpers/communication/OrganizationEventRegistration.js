@@ -14,6 +14,14 @@ const OrganizationEventRegistration = {
         const result = await Api.deleteAsync(`/organization/${orgRoute}/event/${eventRoute}/register`);
         return { code: result.code };
     },
+    async checkPayment(orgRoute, eventRoute) {
+        const result = await Api.getAsync(`/organization/${orgRoute}/event/${eventRoute}/register/payment-check`);
+        return { code: result.code, data: result.response?.message };
+    },
+    async retryPayment(orgRoute, eventRoute) {
+        const result = await Api.postAsync(`/organization/${orgRoute}/event/${eventRoute}/register/payment-retry`, {});
+        return { code: result.code, data: result.response?.message };
+    },
 };
 
 export default OrganizationEventRegistration;

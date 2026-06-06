@@ -74,6 +74,7 @@ import {
   faClockRotateLeft,
   faRocket,
   faCalendar,
+  faCreditCard,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -165,6 +166,7 @@ library.add(
   faClockRotateLeft,
   faRocket,
   faCalendar,
+  faCreditCard,
 );
 
 export default FontAwesomeIcon;

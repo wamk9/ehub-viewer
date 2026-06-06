@@ -37,6 +37,10 @@ export default {
     register: 'Register',
     pending: 'Pending payment',
     confirmed: 'Registered',
+    check_payment: 'Check payment',
+    retry_payment: 'New payment link',
+    payment_now_confirmed: 'Payment confirmed!',
+    payment_still_pending: 'Payment not identified yet.',
     modal: {
       title: 'Register for event',
       fee_warning: 'This event requires payment of {fee} after registration.',

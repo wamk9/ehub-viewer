@@ -79,10 +79,33 @@
                         <div class="flex-shrink-0">
                             <!-- Already registered -->
                             <template v-if="event.user_registration">
-                                <span v-if="event.user_registration.payment_status === 'pending'" class="badge bg-warning text-dark p-2">
-                                    <font-awesome-icon :icon="['fas', 'clock']" class="me-1" />
-                                    {{ $t('events.show.registration.pending') }}
-                                </span>
+                                <!-- Pending payment -->
+                                <div v-if="event.user_registration.payment_status === 'pending'" class="d-flex flex-column align-items-end gap-2">
+                                    <span class="badge bg-warning text-dark p-2">
+                                        <font-awesome-icon :icon="['fas', 'clock']" class="me-1" />
+                                        {{ $t('events.show.registration.pending') }}
+                                    </span>
+                                    <div class="d-flex gap-2 flex-wrap justify-content-end">
+                                        <button class="btn btn-sm btn-outline-light"
+                                            :disabled="checkingPayment || retryingPayment"
+                                            @click="doCheckPayment">
+                                            <span v-if="checkingPayment" class="spinner-border spinner-border-sm me-1"></span>
+                                            <font-awesome-icon v-else :icon="['fas', 'rotate-right']" class="me-1" />
+                                            {{ $t('events.show.registration.check_payment') }}
+                                        </button>
+                                        <button class="btn btn-sm btn-warning text-dark"
+                                            :disabled="checkingPayment || retryingPayment"
+                                            @click="doRetryPayment">
+                                            <span v-if="retryingPayment" class="spinner-border spinner-border-sm me-1"></span>
+                                            <font-awesome-icon v-else :icon="['fas', 'credit-card']" class="me-1" />
+                                            {{ $t('events.show.registration.retry_payment') }}
+                                        </button>
+                                    </div>
+                                    <span v-if="paymentCheckMessage" class="small" :class="paymentCheckMessage === 'confirmed' ? 'text-success' : 'text-muted'">
+                                        {{ paymentCheckMessage === 'confirmed' ? $t('events.show.registration.payment_now_confirmed') : $t('events.show.registration.payment_still_pending') }}
+                                    </span>
+                                </div>
+                                <!-- Confirmed -->
                                 <span v-else class="badge bg-success p-2">
                                     <font-awesome-icon :icon="['fas', 'check']" class="me-1" />
                                     {{ $t('events.show.registration.confirmed') }}
@@ -348,7 +371,10 @@ export default {
             participantsLoaded: false,
             registering: false,
             showRegisterModal: false,
-            paymentReturnStatus: null, // success | failure | pending
+            paymentReturnStatus: null,
+            checkingPayment: false,
+            retryingPayment: false,
+            paymentCheckMessage: null,
             baseUrl: SystemVars.baseUrl,
         };
     },
@@ -444,6 +470,38 @@ export default {
                 if (result.data?.payment_url) {
                     window.location.href = result.data.payment_url;
                 }
+            }
+        },
+
+        async doCheckPayment() {
+            this.checkingPayment = true;
+            this.paymentCheckMessage = null;
+            const result = await OrganizationEventRegistration.checkPayment(
+                this.$route.params.orgRoute,
+                this.$route.params.eventRoute
+            );
+            this.checkingPayment = false;
+            if (result.code === 200) {
+                const status = result.data?.status;
+                if (status === 'confirmed') {
+                    this.event.user_registration.payment_status = 'confirmed';
+                    this.paymentCheckMessage = 'confirmed';
+                } else {
+                    this.paymentCheckMessage = 'pending';
+                }
+            }
+        },
+
+        async doRetryPayment() {
+            this.retryingPayment = true;
+            this.paymentCheckMessage = null;
+            const result = await OrganizationEventRegistration.retryPayment(
+                this.$route.params.orgRoute,
+                this.$route.params.eventRoute
+            );
+            this.retryingPayment = false;
+            if (result.code === 200 && result.data?.payment_url) {
+                window.location.href = result.data.payment_url;
             }
         },
 
