@@ -113,16 +113,21 @@
                             </template>
 
                             <!-- Can register -->
-                            <button
-                                v-else-if="!event.initialized && !event.finished"
-                                class="btn btn-primary"
-                                :disabled="registering"
-                                @click="handleRegister"
-                            >
-                                <span v-if="registering" class="spinner-border spinner-border-sm me-1"></span>
-                                <font-awesome-icon v-else :icon="['fas', 'user-plus']" class="me-2" />
-                                {{ $t('events.show.registration.register') }}
-                            </button>
+                            <div v-else-if="!event.initialized && !event.finished" class="d-flex flex-column align-items-end gap-2">
+                                <button
+                                    class="btn btn-primary"
+                                    :disabled="registering"
+                                    @click="handleRegister"
+                                >
+                                    <span v-if="registering" class="spinner-border spinner-border-sm me-1"></span>
+                                    <font-awesome-icon v-else :icon="['fas', 'user-plus']" class="me-2" />
+                                    {{ $t('events.show.registration.register') }}
+                                </button>
+                                <p v-if="registerError === 'no_compatible_gateway'" class="text-warning small mb-0" style="max-width:260px;text-align:right">
+                                    <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />
+                                    {{ $t('events.show.registration.no_compatible_gateway') }}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -448,6 +453,7 @@ export default {
             paymentCheckMessage: null,
             availableGateways: [],
             showGatewayModal: false,
+            registerError: null,
             baseUrl: SystemVars.baseUrl,
         };
     },
@@ -556,6 +562,11 @@ export default {
             );
             this.registering = false;
             this.showRegisterModal = false;
+
+            if (!result.registered && result.message === 'no_compatible_gateway') {
+                this.registerError = 'no_compatible_gateway';
+                return;
+            }
 
             if (result.registered) {
                 this.event.user_registration = result.data;

@@ -35,6 +35,7 @@ export default {
   },
   registration: {
     register: 'Register',
+    no_compatible_gateway: 'This event cannot accept registrations right now: no compatible payment gateway is configured. The administrators have been notified.',
     pending: 'Pending payment',
     confirmed: 'Registered',
     check_payment: 'Check payment',

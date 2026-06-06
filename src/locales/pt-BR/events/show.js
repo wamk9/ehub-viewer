@@ -35,6 +35,7 @@ export default {
   },
   registration: {
     register: 'Inscrever-se',
+    no_compatible_gateway: 'Este evento não pode aceitar inscrições no momento: nenhum gateway de pagamento compatível está configurado. Os responsáveis foram notificados.',
     pending: 'Aguardando pagamento',
     confirmed: 'Inscrito',
     check_payment: 'Verificar pagamento',

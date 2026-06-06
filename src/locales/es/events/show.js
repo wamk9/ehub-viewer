@@ -35,6 +35,7 @@ export default {
   },
   registration: {
     register: 'Inscribirse',
+    no_compatible_gateway: 'Este evento no puede aceptar inscripciones en este momento: no hay pasarela de pago compatible configurada. Los administradores han sido notificados.',
     pending: 'Pago pendiente',
     confirmed: 'Inscrito',
     check_payment: 'Verificar pago',

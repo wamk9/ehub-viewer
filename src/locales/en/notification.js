@@ -4,7 +4,8 @@ export default {
     article_published:  'New article: {title} — {org}',
     event_created:      'New event: {name} — {org}',
     billing_invoice:    'New invoice for {cycle} — {org}',
-    billing_card_saved: 'Payment method saved — {org}',
+    billing_card_saved:      'Payment method saved — {org}',
+    no_gateway_configured:   'Registration blocked for "{event}": no compatible payment gateway configured in {org}',
     empty:              'No notifications',
     clear_all:          'Clear all',
     time: {
