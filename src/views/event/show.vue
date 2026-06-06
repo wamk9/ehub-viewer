@@ -299,8 +299,11 @@
                             <div v-for="(p, i) in participants" :key="p.id" class="participant-row">
                                 <span class="participant-index">{{ i + 1 }}</span>
                                 <div class="participant-avatar">
-                                    <img v-if="p.user?.avatar" :src="baseUrl + 'storage/' + p.user.avatar" :alt="p.user.name" />
-                                    <span v-else class="participant-avatar__initials">{{ initials(p.user?.name) }}</span>
+                                    <img v-if="p.user?.username"
+                                        :src="baseUrl + 'storage/' + p.user.username + '/profile.webp'"
+                                        :alt="p.user.name"
+                                        @error="$event.target.style.display='none'; $event.target.nextSibling.style.display='flex'" />
+                                    <span class="participant-avatar__initials" :style="p.user?.username ? 'display:none' : ''">{{ initials(p.user?.name) }}</span>
                                 </div>
                                 <span class="participant-name">{{ p.user?.name || '—' }}</span>
                                 <span v-if="p.user?.username" class="participant-username">@{{ p.user.username }}</span>
