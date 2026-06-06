@@ -1,5 +1,6 @@
 <script setup>
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
+import SystemVars from '@/helpers/General/SystemVars';
 </script>
 
 <template>
@@ -95,7 +96,7 @@ import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
                 @keydown.enter="showEventManageModule(item)"
             >
                 <div class="event-row__cover">
-                    <img v-if="item.image" :src="item.image" :alt="item.name" />
+                    <img v-if="item.cover_image" :src="baseUrl + 'storage/' + item.cover_image" :alt="item.name" />
                     <div v-else class="event-row__cover-placeholder">
                         <font-awesome-icon :icon="['fas', 'calendar-days']" />
                     </div>
@@ -141,6 +142,7 @@ export default {
     },
     data() {
         return {
+            baseUrl: SystemVars.baseUrl,
             events: [],
             searchEventWord: '',
             showFreeEvents: true,

@@ -39,8 +39,8 @@
             <!-- Cover -->
             <div class="row mb-4">
                 <div class="col-12">
-                    <div class="event-cover ratio ratio-21x9" v-if="event.image">
-                        <img :src="baseUrl + 'storage/' + event.image" :alt="event.name" />
+                    <div class="event-cover ratio ratio-21x9" v-if="event.cover_image">
+                        <img :src="baseUrl + 'storage/' + event.cover_image" :alt="event.name" />
                     </div>
                     <div class="event-cover event-cover--placeholder ratio ratio-21x9" v-else>
                         <div class="d-flex align-items-center justify-content-center">

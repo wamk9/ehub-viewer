@@ -1,7 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
 import ehubInput from '@/components/inputs/ehub-input.vue';
-import AvatarUpload from '@/components/inputs/AvatarUpload.vue';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import SystemVars from '@/helpers/General/SystemVars';
 import { i18n } from '@/helpers/i18n';
@@ -21,11 +20,17 @@ const form = ref({
     fee: 0,
     currency: 'brl',
     max_registrations: '',
-    image: '',
 })
 
-const saving = ref(false)
-const saveError = ref(null)
+const logoPreview  = ref(null)
+const logoBase64   = ref(null)
+const coverPreview = ref(null)
+const coverBase64  = ref(null)
+const logoInput    = ref(null)
+const coverInput   = ref(null)
+
+const saving     = ref(false)
+const saveError  = ref(null)
 const saveSuccess = ref(false)
 
 watch(() => props.event, (newEvent) => {
@@ -36,19 +41,45 @@ watch(() => props.event, (newEvent) => {
         form.value.fee               = newEvent.fee               ?? 0
         form.value.currency          = newEvent.currency          ?? 'brl'
         form.value.max_registrations = newEvent.max_registrations ?? ''
-        form.value.image             = newEvent.image
-            ? SystemVars.baseUrl + 'storage/' + newEvent.image
-            : ''
+        logoPreview.value  = newEvent.logo_image  ? SystemVars.baseUrl + 'storage/' + newEvent.logo_image  : null
+        coverPreview.value = newEvent.cover_image ? SystemVars.baseUrl + 'storage/' + newEvent.cover_image : null
+        logoBase64.value   = null
+        coverBase64.value  = null
     }
 }, { immediate: true, deep: true })
 
+function pickLogo(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = ev => {
+        logoBase64.value  = ev.target.result
+        logoPreview.value = ev.target.result
+    }
+    reader.readAsDataURL(file)
+    e.target.value = ''
+}
+
+function pickCover(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = ev => {
+        coverBase64.value  = ev.target.result
+        coverPreview.value = ev.target.result
+    }
+    reader.readAsDataURL(file)
+    e.target.value = ''
+}
+
 async function save() {
-    saveError.value = null
+    saveError.value   = null
     saveSuccess.value = false
-    saving.value = true
+    saving.value      = true
 
     const payload = { ...form.value }
-    if (!payload.image?.startsWith('data:')) delete payload.image
+    if (logoBase64.value)  payload.logo_image  = logoBase64.value
+    if (coverBase64.value) payload.cover_image = coverBase64.value
 
     const result = await OrganizationEvent.update(
         route.params.orgRoute,
@@ -60,6 +91,8 @@ async function save() {
 
     if (result.code === 200) {
         saveSuccess.value = true
+        logoBase64.value  = null
+        coverBase64.value = null
     } else {
         saveError.value = result.data ?? i18n.t('events.manage.general.error')
     }
@@ -72,21 +105,37 @@ async function save() {
         <div v-if="saveError" class="alert alert-danger mb-4">{{ saveError }}</div>
         <div v-if="saveSuccess" class="alert alert-success mb-4">{{ $t('events.manage.general.success') }}</div>
 
-        <!-- Cover image -->
+        <!-- Images -->
         <div class="gen-section mb-4">
-            <h6 class="gen-section__title">{{ $t('events.manage.general.sections.cover') }}</h6>
-            <div class="cover-upload-wrap">
-                <AvatarUpload
-                    v-model="form.image"
-                    :buttonLabel="$t('events.manage.general.cover_upload')"
-                    :dropLabel="$t('events.manage.general.cover_drop')"
-                    fallbackType="event"
-                    :initialsSize="100"
-                />
-            </div>
-            <div class="alert alert-info d-flex align-items-center gap-2 mt-3 mb-0 py-2 small">
-                <font-awesome-icon :icon="['fas', 'circle-info']" class="flex-shrink-0" />
-                {{ $t('events.manage.general.cover_hint') }}
+            <h6 class="gen-section__title">{{ $t('events.manage.create.step2.sections.images') }}</h6>
+            <div class="row g-4">
+                <!-- Logo 1:1 -->
+                <div class="col-12 col-md-4">
+                    <label class="gen-label">{{ $t('events.manage.create.step2.form.logo.label') }}</label>
+                    <p class="field-hint mb-2">{{ $t('events.manage.create.step2.form.logo.help') }}</p>
+                    <div class="img-upload img-upload--square" @click="logoInput.click()">
+                        <img v-if="logoPreview" :src="logoPreview" class="img-upload__preview" />
+                        <div v-else class="img-upload__empty">
+                            <font-awesome-icon :icon="['fas', 'image']" class="mb-1" />
+                            <span>logo.webp</span>
+                        </div>
+                    </div>
+                    <input ref="logoInput" type="file" accept="image/*" class="d-none" @change="pickLogo" />
+                </div>
+
+                <!-- Cover 16:9 -->
+                <div class="col-12 col-md-8">
+                    <label class="gen-label">{{ $t('events.manage.create.step2.form.cover.label') }}</label>
+                    <p class="field-hint mb-2">{{ $t('events.manage.create.step2.form.cover.help') }}</p>
+                    <div class="img-upload img-upload--cover" @click="coverInput.click()">
+                        <img v-if="coverPreview" :src="coverPreview" class="img-upload__preview" />
+                        <div v-else class="img-upload__empty">
+                            <font-awesome-icon :icon="['fas', 'image']" class="mb-1" />
+                            <span>preview.webp · 16:9</span>
+                        </div>
+                    </div>
+                    <input ref="coverInput" type="file" accept="image/*" class="d-none" @change="pickCover" />
+                </div>
             </div>
         </div>
 
@@ -169,7 +218,33 @@ async function save() {
     margin-bottom: 0.35rem;
     color: rgba(255,255,255,0.75);
 }
-.cover-upload-wrap { display: flex; justify-content: center; }
+.field-hint {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 0.35rem;
+}
+.img-upload {
+    border: 2px dashed rgba(255,255,255,0.15);
+    border-radius: 10px;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s;
+}
+.img-upload:hover { border-color: rgba(255,255,255,0.35); }
+.img-upload--square { width: 100%; aspect-ratio: 1/1; max-width: 200px; }
+.img-upload--cover  { width: 100%; aspect-ratio: 16/9; }
+.img-upload__preview { width: 100%; height: 100%; object-fit: cover; }
+.img-upload__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    color: rgba(255,255,255,0.25);
+    font-size: 0.8rem;
+}
 .gen-select {
     background: rgba(255,255,255,0.05);
     border-color: rgba(255,255,255,0.12);

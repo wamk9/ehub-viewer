@@ -118,7 +118,7 @@ import { createSSE } from '@/helpers/communication/useLiveSSE.js';
                             >
                                 <div class="event-card h-100">
                                     <div class="event-card__cover ratio ratio-16x9">
-                                        <img v-if="event.image" :src="SystemVars.baseUrl + 'storage/' + event.image" :alt="event.name" />
+                                        <img v-if="event.cover_image" :src="SystemVars.baseUrl + 'storage/' + event.cover_image" :alt="event.name" />
                                         <div v-else class="event-card__cover-placeholder">
                                             <font-awesome-icon :icon="['fas', 'calendar-days']" />
                                         </div>
