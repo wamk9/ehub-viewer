@@ -7,6 +7,7 @@ import Organization from '@/helpers/communication/Organization.js';
 import Article from '@/helpers/communication/Article.js';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import SystemVars from '@/helpers/General/SystemVars';
+import { createSSE } from '@/helpers/communication/useLiveSSE.js';
 </script>
 
 <template>
@@ -178,12 +179,23 @@ export default {
             articles: [],
             articlesLoaded: false,
             articlesLoading: false,
-            _pollTimer: null,
+            _orgSSE: null,
         };
     },
     async created() {
         const result = await Organization.show(this.$route.params.orgRoute);
         if (result.code === 200) this.leagueData = result.data;
+
+        this._orgSSE = createSSE(
+            'org-content',
+            { orgRoute: this.$route.params.orgRoute },
+            (payload) => {
+                if (!payload) return
+                if (payload.events)   { this.events   = payload.events;   this.eventsLoaded   = true }
+                if (payload.articles) { this.articles = payload.articles; this.articlesLoaded = true }
+            }
+        )
+        this._orgSSE.connect()
     },
     computed: {
         canManage() {
@@ -202,7 +214,6 @@ export default {
             if (val === 'about'    && !this.membersLoaded)  this.loadMembers();
             if (val === 'events'   && !this.eventsLoaded)   this.loadEvents();
             if (val === 'lastNews' && !this.articlesLoaded) this.loadArticles();
-            this._restartPoll(val);
         },
     },
     methods: {
@@ -231,20 +242,9 @@ export default {
             if (!dateStr) return '';
             return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
         },
-        _restartPoll(tab) {
-            if (this._pollTimer) {
-                clearInterval(this._pollTimer);
-                this._pollTimer = null;
-            }
-            if (tab === 'lastNews') {
-                this._pollTimer = setInterval(() => this.loadArticles(), 60000);
-            } else if (tab === 'events') {
-                this._pollTimer = setInterval(() => this.loadEvents(), 60000);
-            }
-        },
     },
     beforeUnmount() {
-        if (this._pollTimer) clearInterval(this._pollTimer);
+        if (this._orgSSE) this._orgSSE.disconnect()
     },
 }
 </script>

@@ -2,8 +2,7 @@
 import { ref, computed, watch } from "vue";
 import { useRoute } from 'vue-router';
 import ehubButton from '@/components/inputs/ehub-button.vue';
-import { useLivePoll } from '@/helpers/LivePoll.js';
-import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
+import { useLiveSSE } from '@/helpers/communication/useLiveSSE.js';
 import manageEventStage from './manage.vue';
 import removeEventStage from './remove.vue';
 import saveEventStage from './save.vue';
@@ -62,15 +61,20 @@ function RemoveStage(item) {
     showRemove.value = true;
 }
 
-// polling: refresh event stages every 10 seconds
-async function fetchEvent() {
-    const result = await OrganizationEvent.show(route.params.orgRoute, route.params.eventRoute);
-    if (result.code === 200 && result.data) {
-        eventData.value = { ...result.data };
+// SSE: live stage updates pushed from server
+useLiveSSE(
+    'event-stages',
+    { orgRoute: route.params.orgRoute, eventRoute: route.params.eventRoute },
+    (payload) => {
+        if (!payload) return
+        eventData.value = {
+            ...eventData.value,
+            initialized: payload.initialized,
+            finished:    payload.finished,
+            stages:      payload.stages ?? eventData.value.stages,
+        }
     }
-}
-
-useLivePoll(fetchEvent, 10000);
+);
 
 // watch for updates from parent
 watch(() => props.event, (newEvent) => {

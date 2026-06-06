@@ -112,6 +112,7 @@ import Auth  from '@/helpers/communication/Auth.js'
 import Api   from '@/helpers/communication/Connection'
 import store from '@/store'
 import { i18n } from '@/helpers/i18n'
+import { createSSE } from '@/helpers/communication/useLiveSSE.js'
 
 export default {
     data() {
@@ -160,27 +161,18 @@ export default {
                 }
             } catch { /* keep placeholder */ }
         },
-        async loadNotifications() {
-            if (!this.isLogged) return
-            try {
-                const result = await Api.getAsync('/notification', {
-                    headers: { Authorization: 'Bearer ' + store.getters.getToken }
-                })
-                if (result.code === 200) {
-                    this.notifications = Array.isArray(result.response?.message)
-                        ? result.response.message
-                        : []
-                }
-            } catch { /* keep notifications empty */ }
-        },
     },
     mounted() {
         this.loadProfileData()
-        this.loadNotifications()
-        this._notifTimer = setInterval(() => this.loadNotifications(), 30000)
+        if (this.isLogged) {
+            this._notifSSE = createSSE('notifications', {}, (payload) => {
+                this.notifications = Array.isArray(payload) ? payload : []
+            })
+            this._notifSSE.connect()
+        }
     },
     beforeUnmount() {
-        if (this._notifTimer) clearInterval(this._notifTimer)
+        if (this._notifSSE) this._notifSSE.disconnect()
     },
 }
 </script>
