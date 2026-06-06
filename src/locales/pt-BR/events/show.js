@@ -49,6 +49,11 @@ export default {
       cancel: 'Cancelar',
       field_required: 'Campo obrigatório.',
     },
+    choose_gateway: {
+      title: 'Escolha a forma de pagamento',
+      mercadopago: 'MercadoPago',
+      stripe_connect: 'Cartão de crédito (Stripe)',
+    },
     payment_success: 'Pagamento confirmado! Sua inscrição está completa.',
     payment_pending: 'Pagamento em processamento. Sua inscrição será confirmada em breve.',
     payment_failure: 'Pagamento falhou. Tente se inscrever novamente.',

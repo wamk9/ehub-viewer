@@ -49,5 +49,10 @@ export default {
       cancel: 'Cancelar',
       field_required: 'Este campo es obligatorio.',
     },
+    choose_gateway: {
+      title: 'Elige el método de pago',
+      mercadopago: 'MercadoPago',
+      stripe_connect: 'Tarjeta de crédito (Stripe)',
+    },
   },
 }

@@ -18,8 +18,9 @@ const OrganizationEventRegistration = {
         const result = await Api.getAsync(`/organization/${orgRoute}/event/${eventRoute}/register/payment-check`);
         return { code: result.code, data: result.response?.message };
     },
-    async retryPayment(orgRoute, eventRoute) {
-        const result = await Api.postAsync(`/organization/${orgRoute}/event/${eventRoute}/register/payment-retry`, {});
+    async retryPayment(orgRoute, eventRoute, gateway = null) {
+        const body = gateway ? { gateway } : {};
+        const result = await Api.postAsync(`/organization/${orgRoute}/event/${eventRoute}/register/payment-retry`, body);
         return { code: result.code, data: result.response?.message };
     },
 };

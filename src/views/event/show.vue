@@ -323,6 +323,32 @@
 
         </template>
 
+        <!-- Gateway picker modal -->
+        <div v-if="showGatewayModal" class="modal-overlay" @click.self="showGatewayModal = false">
+            <div class="modal-card">
+                <div class="modal-card__header">
+                    <h5 class="mb-0">{{ $t('events.show.registration.choose_gateway.title') }}</h5>
+                    <button class="btn-close btn-close-white" @click="showGatewayModal = false"></button>
+                </div>
+                <div class="modal-card__body">
+                    <div class="gateway-list">
+                        <button
+                            v-for="gw in availableGateways"
+                            :key="gw"
+                            class="gateway-btn"
+                            :disabled="retryingPayment"
+                            @click="selectGateway(gw)"
+                        >
+                            <span v-if="retryingPayment" class="spinner-border spinner-border-sm me-2"></span>
+                            <font-awesome-icon v-else-if="gw === 'mercadopago'" :icon="['fas', 'credit-card']" class="me-2" />
+                            <font-awesome-icon v-else :icon="['fas', 'credit-card']" class="me-2" />
+                            {{ $t(`events.show.registration.choose_gateway.${gw}`) }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Register modal -->
         <div v-if="showRegisterModal" class="modal-overlay" @click.self="showRegisterModal = false">
             <div class="modal-card">
@@ -420,6 +446,8 @@ export default {
             checkingPayment: false,
             retryingPayment: false,
             paymentCheckMessage: null,
+            availableGateways: [],
+            showGatewayModal: false,
             baseUrl: SystemVars.baseUrl,
         };
     },
@@ -536,6 +564,9 @@ export default {
 
                 if (result.data?.payment_url) {
                     window.location.href = result.data.payment_url;
+                } else if (result.data?.available_gateways?.length) {
+                    this.availableGateways = result.data.available_gateways;
+                    this.showGatewayModal  = true;
                 }
             }
         },
@@ -559,17 +590,28 @@ export default {
             }
         },
 
-        async doRetryPayment() {
+        async doRetryPayment(gateway = null) {
             this.retryingPayment = true;
             this.paymentCheckMessage = null;
             const result = await OrganizationEventRegistration.retryPayment(
                 this.$route.params.orgRoute,
-                this.$route.params.eventRoute
+                this.$route.params.eventRoute,
+                gateway
             );
             this.retryingPayment = false;
+            if (result.code === 200 && result.data?.available_gateways?.length) {
+                this.availableGateways = result.data.available_gateways;
+                this.showGatewayModal  = true;
+                return;
+            }
+            this.showGatewayModal = false;
             if (result.code === 200 && result.data?.payment_url) {
                 window.location.href = result.data.payment_url;
             }
+        },
+
+        async selectGateway(gateway) {
+            await this.doRetryPayment(gateway);
         },
 
         checkPaymentReturn() {
@@ -818,4 +860,27 @@ export default {
     color: #fff;
 }
 .reg-input option { background: #1a1a2e; }
+
+/* ── Gateway picker ── */
+.gateway-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.gateway-btn {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: rgba(255,255,255,0.85);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    text-align: left;
+}
+.gateway-btn:hover:not(:disabled) {
+    background: rgba(255,255,255,0.09);
+    border-color: rgba(255,255,255,0.25);
+}
+.gateway-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>

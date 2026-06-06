@@ -49,6 +49,11 @@ export default {
       cancel: 'Cancel',
       field_required: 'This field is required.',
     },
+    choose_gateway: {
+      title: 'Choose payment method',
+      mercadopago: 'MercadoPago',
+      stripe_connect: 'Credit card (Stripe)',
+    },
     payment_success: 'Payment confirmed! Your registration is complete.',
     payment_pending: 'Payment is being processed. Your registration will be confirmed shortly.',
     payment_failure: 'Payment failed. Please try registering again.',
