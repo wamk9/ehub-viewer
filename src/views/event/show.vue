@@ -139,7 +139,7 @@
 
                     <div v-if="event.description" class="gen-section mb-3">
                         <p class="gen-section__title">{{ $t('events.show.info.description') }}</p>
-                        <div class="event-description">{{ event.description }}</div>
+                        <div class="event-description" v-html="event.description"></div>
                     </div>
 
                     <div class="gen-section">
@@ -528,8 +528,21 @@ export default {
     color: rgba(255,255,255,0.75);
     line-height: 1.7;
     font-size: 0.95rem;
-    white-space: pre-wrap;
 }
+.event-description:deep(h2) { font-size: 1.35rem; font-weight: 600; margin: 0.9rem 0 0.3rem; }
+.event-description:deep(h3) { font-size: 1.1rem;  font-weight: 600; margin: 0.7rem 0 0.25rem; }
+.event-description:deep(p)  { margin-bottom: 0.6rem; }
+.event-description:deep(ul),
+.event-description:deep(ol) { padding-left: 1.4rem; margin-bottom: 0.6rem; }
+.event-description:deep(blockquote) {
+    border-left: 3px solid rgba(255,255,255,0.2);
+    padding-left: 0.9rem;
+    color: rgba(255,255,255,0.45);
+    margin: 0.6rem 0;
+}
+.event-description:deep(a)      { color: #7eabff; }
+.event-description:deep(strong) { color: rgba(255,255,255,0.95); }
+.event-description:deep(em)     { font-style: italic; }
 .event-info-grid { display: flex; flex-direction: column; gap: 0.6rem; }
 .event-info-item { display: flex; align-items: center; }
 
