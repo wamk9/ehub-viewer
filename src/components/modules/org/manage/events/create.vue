@@ -37,11 +37,42 @@ const availableRunmodes = computed(() => {
     return cat?.runmodes ?? [];
 });
 
+const CATEGORY_ICONS = {
+    'simracing':        ['fas', 'flag-checkered'],
+    'esports-fps':      ['fas', 'crosshairs'],
+    'esports-moba':     ['fas', 'dragon'],
+    'esports-fighting': ['fas', 'hand-fist'],
+    'esports-strategy': ['fas', 'chess-pawn'],
+    'esports-sports':   ['fas', 'futbol'],
+    'motorsport':       ['fas', 'car'],
+    'motorbike':        ['fas', 'motorcycle'],
+    'cycling':          ['fas', 'bicycle'],
+    'running':          ['fas', 'person-running'],
+    'swimming':         ['fas', 'person-swimming'],
+    'triathlon':        ['fas', 'trophy'],
+    'hiking':           ['fas', 'mountain-sun'],
+    'crossfit':         ['fas', 'dumbbell'],
+    'rowing':           ['fas', 'water'],
+    'archery':          ['fas', 'bullseye'],
+    'chess':            ['fas', 'chess-knight'],
+    'drone-racing':     ['fas', 'helicopter'],
+};
+
+function categoryIcon(routeKey) {
+    return CATEGORY_ICONS[routeKey] ?? ['fas', 'trophy'];
+}
+
 watch(() => sel.value.category, async (val) => {
     sel.value.subcategory = '';
     sel.value.runmode     = '';
     subcategories.value   = [];
     if (!val) return;
+
+    const cat = categories.value.find(c => c.route === val);
+    if (cat?.runmodes?.length === 1) {
+        sel.value.runmode = cat.runmodes[0].key;
+    }
+
     loadingSubcats.value  = true;
     const r = await Api.getAsync(`/category/${val}/subcategories`);
     loadingSubcats.value  = false;
@@ -388,22 +419,32 @@ async function publishEvent() {
         <div v-if="step === 1" class="gen-section">
             <p class="step-description mb-4">{{ i18n.t('events.manage.create.step1.description') }}</p>
 
-            <!-- Category -->
+            <!-- Category grid -->
             <div class="field-group">
                 <label class="field-label">{{ i18n.t('events.manage.create.step1.form.category.label') }}</label>
                 <div v-if="loadingCategories" class="loading-row">
                     <span class="spinner-border spinner-border-sm"></span>
                     <span class="text-muted small ms-2">Carregando...</span>
                 </div>
-                <select v-else class="form-select ehub-select" v-model="sel.category">
-                    <option value="" disabled hidden>{{ i18n.t('events.manage.create.step1.form.category.placeholder') }}</option>
-                    <option v-for="cat in categories" :key="cat.id" :value="cat.route">
-                        {{ i18n.te(`categories.names.${cat.route}`) ? i18n.t(`categories.names.${cat.route}`) : cat.name }}
-                    </option>
-                </select>
+                <div v-else class="category-grid">
+                    <div v-for="cat in categories" :key="cat.id"
+                        class="category-card"
+                        :class="{ 'category-card--selected': sel.category === cat.route }"
+                        @click="sel.category = cat.route">
+                        <font-awesome-icon :icon="categoryIcon(cat.route)" class="category-card__icon" />
+                        <span class="category-card__name">{{ i18n.te(`categories.names.${cat.route}`) ? i18n.t(`categories.names.${cat.route}`) : cat.name }}</span>
+                        <span class="category-card__tags">
+                            <span v-for="rm in cat.runmodes" :key="rm.id"
+                                class="category-tag"
+                                :class="rm.key === 'online' ? 'category-tag--online' : 'category-tag--irl'">
+                                {{ rm.key === 'online' ? 'Online' : 'IRL' }}
+                            </span>
+                        </span>
+                    </div>
+                </div>
             </div>
 
-            <!-- Subcategory (always shown when category selected) -->
+            <!-- Subcategory (when category selected) -->
             <div class="field-group" v-if="sel.category">
                 <label class="field-label">{{ i18n.t('events.manage.create.step1.form.subcategory.label') }}</label>
                 <div v-if="loadingSubcats" class="loading-row">
@@ -423,17 +464,23 @@ async function publishEvent() {
                 </select>
             </div>
 
-            <!-- Runmode -->
-            <div class="field-group">
+            <!-- Runmode toggle — only shown when category has both IRL and Online -->
+            <div class="field-group" v-if="sel.category && availableRunmodes.length > 1">
                 <label class="field-label">{{ i18n.t('events.manage.create.step1.form.runmode.label') }}</label>
-                <select class="form-select ehub-select"
-                    v-model="sel.runmode"
-                    :disabled="!sel.category || availableRunmodes.length === 0">
-                    <option value="" disabled hidden>{{ i18n.t('events.manage.create.step1.form.runmode.placeholder') }}</option>
-                    <option v-for="rm in availableRunmodes" :key="rm.id" :value="rm.key">
+                <div class="runmode-toggle">
+                    <button v-for="rm in availableRunmodes" :key="rm.id"
+                        type="button"
+                        class="runmode-btn"
+                        :class="{
+                            'runmode-btn--active': sel.runmode === rm.key,
+                            'runmode-btn--irl':    rm.key === 'irl',
+                            'runmode-btn--online': rm.key === 'online',
+                        }"
+                        @click="sel.runmode = rm.key">
+                        <font-awesome-icon :icon="rm.key === 'irl' ? ['fas', 'location-dot'] : ['fas', 'globe']" class="me-2" />
                         {{ i18n.te(`categories.runmode.${rm.key}`) ? i18n.t(`categories.runmode.${rm.key}`) : rm.key }}
-                    </option>
-                </select>
+                    </button>
+                </div>
             </div>
 
             <p v-if="step1Error" class="text-danger small mt-2 mb-0">{{ step1Error }}</p>
@@ -1196,5 +1243,105 @@ textarea.ehub-input { resize: vertical; }
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 10px;
     padding: 1.1rem 1.2rem;
+}
+
+/* ─── Category grid ──────────────────────── */
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.6rem;
+}
+@media (max-width: 767px) {
+    .category-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.category-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.9rem 0.4rem 0.7rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.category-card:hover {
+    border-color: rgba(110,168,254,0.35);
+    background: rgba(110,168,254,0.06);
+}
+.category-card--selected {
+    border-color: #6ea8fe;
+    background: rgba(110,168,254,0.12);
+    box-shadow: 0 0 0 3px rgba(110,168,254,0.12);
+}
+.category-card__icon {
+    font-size: 1.65rem;
+    color: rgba(255,255,255,0.4);
+    transition: color 0.15s;
+}
+.category-card:hover .category-card__icon { color: rgba(255,255,255,0.7); }
+.category-card--selected .category-card__icon { color: #6ea8fe; }
+.category-card__name {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.25;
+    transition: color 0.15s;
+}
+.category-card--selected .category-card__name { color: #fff; }
+.category-card__tags {
+    display: flex;
+    gap: 0.2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.category-tag {
+    font-size: 0.52rem;
+    padding: 0.1rem 0.38rem;
+    border-radius: 999px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.category-tag--online { background: rgba(78,139,255,0.18); color: #6ea8fe; }
+.category-tag--irl    { background: rgba(25,200,100,0.14); color: #3dd68c; }
+
+/* ─── Runmode toggle ─────────────────────── */
+.runmode-toggle { display: flex; gap: 0.6rem; }
+.runmode-btn {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.runmode-btn:hover {
+    border-color: rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.85);
+}
+.runmode-btn--active.runmode-btn--online {
+    border-color: #6ea8fe;
+    background: rgba(110,168,254,0.12);
+    color: #6ea8fe;
+    box-shadow: 0 0 0 3px rgba(110,168,254,0.1);
+}
+.runmode-btn--active.runmode-btn--irl {
+    border-color: #3dd68c;
+    background: rgba(61,214,140,0.1);
+    color: #3dd68c;
+    box-shadow: 0 0 0 3px rgba(61,214,140,0.08);
 }
 </style>
