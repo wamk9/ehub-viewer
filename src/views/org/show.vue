@@ -129,7 +129,7 @@ import { createSSE } from '@/helpers/communication/useLiveSSE.js';
                                                 {{ event.finished ? $t('pages.organization.show.events.finished') : $t('pages.organization.show.events.active') }}
                                             </span>
                                             <span class="badge" :class="event.fee == 0 ? 'bg-info text-dark' : 'bg-primary'">
-                                                {{ event.fee == 0 ? $t('pages.organization.show.events.free') : (event.currency?.toUpperCase() + ' ' + event.fee) }}
+                                                {{ event.fee == 0 ? $t('pages.organization.show.events.free') : (event.currency?.toUpperCase() + ' ' + Number(event.fee).toFixed(2)) }}
                                             </span>
                                             <span v-if="event.category" class="event-card__category">{{ event.category }}</span>
                                         </div>

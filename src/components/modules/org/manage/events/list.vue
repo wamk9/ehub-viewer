@@ -108,7 +108,7 @@ import SystemVars from '@/helpers/General/SystemVars';
                             {{ item.finished ? $t('events.manage.list.filter_finished') : 'Active' }}
                         </span>
                         <span class="badge" :class="item.fee == 0 ? 'bg-info text-dark' : 'bg-primary'">
-                            {{ item.fee == 0 ? $t('events.manage.list.filter_free') : (item.currency?.toUpperCase() + ' ' + item.fee) }}
+                            {{ item.fee == 0 ? $t('events.manage.list.filter_free') : (item.currency?.toUpperCase() + ' ' + Number(item.fee).toFixed(2)) }}
                         </span>
                         <span v-if="item.category" class="event-row__category">
                             {{ item.category }}

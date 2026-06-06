@@ -61,7 +61,7 @@
                                     {{ event.finished ? $t('pages.organization.show.events.finished') : (event.initialized ? $t('events.show.in_progress') : $t('pages.organization.show.events.active')) }}
                                 </span>
                                 <span class="badge" :class="event.fee == 0 ? 'bg-info text-dark' : 'bg-primary'">
-                                    {{ event.fee == 0 ? $t('pages.organization.show.events.free') : (event.currency?.toUpperCase() + ' ' + event.fee) }}
+                                    {{ event.fee == 0 ? $t('pages.organization.show.events.free') : (event.currency?.toUpperCase() + ' ' + Number(event.fee).toFixed(2)) }}
                                 </span>
                                 <span v-if="event.category" class="event-meta">
                                     {{ event.category }}<template v-if="event.runmode"> · {{ event.runmode }}</template>
@@ -300,7 +300,7 @@
                                 <span class="participant-index">{{ i + 1 }}</span>
                                 <div class="participant-avatar">
                                     <img v-if="p.user?.username"
-                                        :src="baseUrl + 'storage/' + p.user.username + '/profile.webp'"
+                                        :src="baseUrl + 'storage/users/' + p.user.username + '/profile.webp'"
                                         :alt="p.user.name"
                                         @error="$event.target.style.display='none'; $event.target.nextSibling.style.display='flex'" />
                                     <span class="participant-avatar__initials" :style="p.user?.username ? 'display:none' : ''">{{ initials(p.user?.name) }}</span>
@@ -309,7 +309,7 @@
                                 <span v-if="p.user?.username" class="participant-username">@{{ p.user.username }}</span>
                                 <span class="ms-auto">
                                     <span class="badge" :class="p.payment_status === 'confirmed' ? 'bg-success' : 'bg-info text-dark'">
-                                        {{ p.payment_status === 'free' ? $t('pages.organization.show.events.free') : p.payment_status }}
+                                        {{ p.payment_status === 'free' ? $t('pages.organization.show.events.free') : $t('events.show.registration.confirmed') }}
                                     </span>
                                 </span>
                             </div>
@@ -369,7 +369,7 @@
 
                     <div v-if="event?.fee > 0" class="alert alert-warning small mb-3">
                         <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />
-                        {{ $t('events.show.registration.modal.fee_warning', { fee: event.currency?.toUpperCase() + ' ' + event.fee }) }}
+                        {{ $t('events.show.registration.modal.fee_warning', { fee: event.currency?.toUpperCase() + ' ' + Number(event.fee).toFixed(2) }) }}
                     </div>
 
                     <!-- Dynamic registration form fields -->
