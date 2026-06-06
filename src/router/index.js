@@ -151,7 +151,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   // Save last know route to redirect case user don't have a token.
   if (!to.matched.some(record => record.name == 'auth'))
-    localStorage.setItem("lastKnowRoute", JSON.stringify(to));
+    localStorage.setItem("lastKnowRoute", JSON.stringify({ name: to.name, params: to.params, query: to.query }));
 
   // If user don't have a token and page requires.
   if (to.matched.some(record => record.meta.requiresAuth) && !store.getters.getToken) {
