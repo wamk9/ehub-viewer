@@ -11,6 +11,8 @@ import lastLeagueTournaments from '@/components/modules/league/last-league-tourn
 import leagueDashboard from '@/components/modules/league/dashboard/dashboard.vue';
 
 import League from '@/helpers/Api/League.js';
+import SystemVars from '@/helpers/General/SystemVars';
+
 </script>
 
 <template>
@@ -71,7 +73,7 @@ export default {
       cacheTimestamp: Date.now(),
     }
   },
-  async mounted() {
+  async created() {
     await this.getLeagueInfo();
 
   },
@@ -91,7 +93,7 @@ export default {
       return allNav;
     },
     leagueLogo() {
-      return this.successRequest ? 'http://ehubapp.com/storage/league/' + this.$route.params.leagueRoute + '/logo.webp?cache=' + this.cacheTimestamp  : "";
+      return this.successRequest ?  SystemVars.baseUrl + 'storage/league/' + this.$route.params.leagueRoute + '/logo.webp?cache=' + this.cacheTimestamp  : "";
     }
   },
   methods: {
@@ -104,7 +106,7 @@ export default {
     },
     alternativeLeagueLogo(event) {
       if (this.successRequest)
-        event.target.src = "http://ehub.com/storage/league/default/logo.webp";
+        event.target.src = SystemVars.baseUrl + 'storage/league/default/logo.webp';
     },
     async getLeagueInfo() {
         let returnedData = await League.getLeagueResume(this.$route.params.leagueRoute);
@@ -113,8 +115,6 @@ export default {
         if (returnedData.code == 200)
           this.leagueData = returnedData.data;
       },
-  },
-  created() {
   }
 }
 </script>

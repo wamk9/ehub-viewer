@@ -2,37 +2,34 @@
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 import navbar from './components/general/navbar/navbar.vue'
+import customFooter from './components/general/footer.vue'
+import { useI18n } from 'vue-i18n'
+const { locale, t } = useI18n()
 </script>
 
 <template>
-<navbar/>
-
-<div class="container">
-    <div class="row justify-content-center">
-        <RouterView/>
+    <navbar />
+    <div class="page-content">
+      <RouterView :key="$route.fullPath" />
     </div>
-</div>
-
+    <customFooter />
 </template>
 
 <style>
-body {
-    min-height: 100vh;
-    background-image: url('https://cdn.pixabay.com/photo/2014/11/15/13/13/sports-ground-531919_960_720.jpg') !important;
-    background-size: cover;
-    backdrop-filter: blur(20px) saturate(0%);
+.page-content {
+    padding-top: 80px;
 }
 
-.container {
-    display: flex;
+@media (max-width: 991.98px) {
+    .page-content {
+        padding-top: 0;
+        padding-bottom: 72px;
+    }
 }
 
-.row {
-    display: flex;
-    flex-grow: 1;
-}
-
-.container > .row {
-    min-height: calc(100vh + -91px);
+main.container {
+    margin-top: 50px;
+    margin-bottom: 50px;
+    min-height: calc(100vh - 100px - 75px);
 }
 </style>

@@ -115,6 +115,9 @@ export default {
     });
   },
   methods: {
+    async getTournamentsList() {
+        
+    }
   },
 }
 </script>

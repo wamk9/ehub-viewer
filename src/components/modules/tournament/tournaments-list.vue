@@ -12,7 +12,7 @@ import ehubButton from '@/components/inputs/ehub-button.vue';
         <h3 class="tournament-title">{{ tournament.title }}</h3>
         <p class="tournament-started" v-if="tournament.started">Inicia em {{ tournament.started }}</p>
         <p v-if="tournament.finished">Finalizado em {{ tournament.finished }}</p>
-        <ehubButton text="Saiba Mais" class="w-100 mt-auto"/>
+        <ehubButton text="Saiba Mais" containerClass="w-100 mt-auto" buttonClass="w-100"/>
     </div>
 </div>
 </template>

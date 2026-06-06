@@ -1,0 +1,1 @@
+export default { regex: /^[a-zA-Z0-9@._-]{5,180}$/, rewrite: true, onBlur: true };

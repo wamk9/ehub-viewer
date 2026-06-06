@@ -1,0 +1,1 @@
+export default { regex: /^[a-zA-Z0-9_-]{5,60}$/, rewrite: true, onBlur: true };

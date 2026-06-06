@@ -1,0 +1,1 @@
+export default { regex:  /^\+?[0-9]{8,15}$/, rewrite: true, onBlur: true };

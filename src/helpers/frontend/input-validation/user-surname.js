@@ -1,0 +1,1 @@
+export default { regex: /^[a-zA-Z ]{1,180}$/, rewrite: true, onBlur: true };

@@ -15,7 +15,7 @@ export default {
         type: String,
       },
       id: {
-        type: String,
+        type:  [Number, String],
         default: Math.floor(Math.random() * 9999),
       }
     },

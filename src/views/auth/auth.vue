@@ -1,7 +1,7 @@
 <script setup>
 import ehubInput from '@/components/inputs/ehub-input.vue';
 import ehubButton from '@/components/inputs/ehub-button.vue';
-import Auth from '@/helpers/Api/Auth.js';
+import Auth from '@/helpers/communication/auth.js';
 </script>
 
 <template>
@@ -10,39 +10,17 @@ import Auth from '@/helpers/Api/Auth.js';
       <div class="card-body align-self-center col-12 col-lg-10">
         <h1 class="card-title mb-4">{{ authFormTitle }}</h1>
         <div class="auth-inputs">
-          <ehubInput
-            v-model="authForm.email"
-            icon="envelope"
-            type="email"
-            placeholder="Seu email"
-          />
+          <ehubInput v-model="authForm.email" icon="envelope" type="email" placeholder="Seu email" />
 
-          <ehubInput
-            v-model="authForm.password"
-            icon="asterisk"
-            type="password"
-            placeholder="Sua senha"
-          />
+          <ehubInput v-model="authForm.password" icon="asterisk" type="password" placeholder="Sua senha" />
         </div>
 
         <div class="auth-inputs" v-if="isNewUser">
-          <ehubInput
-            v-model="authForm.steam_id"
-            :icon="['fab', 'steam']"
-            placeholder="Seu Steam ID"
-          />
+          <ehubInput v-model="authForm.steam_id" :icon="['fab', 'steam']" placeholder="Seu Steam ID" />
 
-          <ehubInput
-            v-model="authForm.name"
-            icon="id-card"
-            placeholder="Seu nome completo"
-          />
+          <ehubInput v-model="authForm.name" icon="id-card" placeholder="Seu nome completo" />
         </div>
-        <ehubButton 
-          @click="executeAction"
-          :text="AuthBtnAction"
-          :disabled="sendingToApi"
-        />
+        <ehubButton @click="executeAction" :text="AuthBtnAction" :disabled="sendingToApi" />
         <hr class="my-4">
         <p class="card-text">{{ authFormDescription }} <a href="#" v-on:click="changeAuthForm()">Clique aqui!</a></p>
       </div>
@@ -83,7 +61,7 @@ export default {
     async executeAction() {
       this.sendingToApi = true;
 
-      if (this.isNewUser) 
+      if (this.isNewUser)
         await Auth.register(this.authForm);
       else
         await Auth.login(this.authForm);
@@ -110,13 +88,11 @@ export default {
   font-weight: lighter;
   font-size: 2.2rem;
 }
+
 .auth-inputs {
   display: flex;
   flex-direction: column;
 }
-
 </style>
 
-<style>
-
-</style>
+<style></style>

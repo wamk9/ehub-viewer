@@ -3,6 +3,8 @@ import ehubInput from '@/components/inputs/ehub-input.vue';
 import ehubButton from '@/components/inputs/ehub-button.vue';
 import ehubInputImage from '@/components/inputs/ehub-input-image.vue';
 import League from '@/helpers/Api/League.js';
+import SystemVars from '@/helpers/General/SystemVars';
+
 </script>
 
 <template>
@@ -17,8 +19,6 @@ import League from '@/helpers/Api/League.js';
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @click="() => (resultCode = 0)"></button>
             </div>
 
-
-            
             <p>Aqui você poderá editar os dados iniciais de sua liga, como nome, link, descrição e imagem!</p>
 
             <div class="row align-items-center">
@@ -91,7 +91,7 @@ export default {
     },
     computed: {
         leagueImage() {
-            return !this.newLeagueImage ? 'http://ehubapp.com/storage/league/' + this.refersTo + '/logo.webp?cache=' + this.cacheTimestamp : this.newLeagueImage;
+            return !this.newLeagueImage ? SystemVars.baseUrl + 'storage/user/profile/' + Store.getters.getUserId + '/logo.webp?cache=' + this.cacheTimestamp : this.newLeagueImage;
         },
     },
     mounted() {
@@ -115,7 +115,7 @@ export default {
             this.sendingToApi = false;
         },
         defaultLeagueImage() {
-            return 'http://ehubapp.com/storage/league/default/logo.webp';
+            return SystemVars.baseUrl + 'storage/league/default/logo.webp';
         }
     },
     /*setup(props, { emit }) {
