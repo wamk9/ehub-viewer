@@ -47,6 +47,7 @@ export default {
       confirm_text: '¿Deseas inscribirte en este evento?',
       confirm: 'Confirmar inscripción',
       cancel: 'Cancelar',
+      field_required: 'Este campo es obligatorio.',
     },
   },
 }

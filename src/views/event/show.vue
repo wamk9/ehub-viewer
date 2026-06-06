@@ -323,7 +323,7 @@
 
         </template>
 
-        <!-- Register modal (simple confirm — form schema flow TBD) -->
+        <!-- Register modal -->
         <div v-if="showRegisterModal" class="modal-overlay" @click.self="showRegisterModal = false">
             <div class="modal-card">
                 <div class="modal-card__header">
@@ -338,7 +338,50 @@
                         {{ $t('events.show.registration.modal.fee_warning', { fee: event.currency?.toUpperCase() + ' ' + event.fee }) }}
                     </div>
 
-                    <p class="mb-0 small">{{ $t('events.show.registration.modal.confirm_text') }}</p>
+                    <!-- Dynamic registration form fields -->
+                    <template v-if="regTemplate.length">
+                        <div v-for="field in regTemplate" :key="field.name" class="reg-field mb-3">
+                            <label class="reg-field__label">
+                                {{ field.label }}
+                                <span v-if="field.required" class="text-danger ms-1">*</span>
+                            </label>
+
+                            <!-- text / number -->
+                            <input v-if="field.type === 'text' || field.type === 'number'"
+                                :type="field.type"
+                                class="form-control form-control-sm reg-input"
+                                :class="{ 'is-invalid': formErrors[field.name] }"
+                                v-model="formData[field.name]" />
+
+                            <!-- select -->
+                            <select v-else-if="field.type === 'select'"
+                                class="form-select form-select-sm reg-input"
+                                :class="{ 'is-invalid': formErrors[field.name] }"
+                                v-model="formData[field.name]">
+                                <option value="">—</option>
+                                <option v-for="opt in field.values" :key="opt" :value="opt">{{ opt }}</option>
+                            </select>
+
+                            <!-- switch -->
+                            <div v-else-if="field.type === 'switch'" class="form-check form-switch mt-1">
+                                <input class="form-check-input" type="checkbox"
+                                    :id="`reg-${field.name}`" v-model="formData[field.name]" />
+                                <label class="form-check-label small" :for="`reg-${field.name}`">{{ field.label }}</label>
+                            </div>
+
+                            <!-- checkbox -->
+                            <div v-else-if="field.type === 'checkbox'" class="form-check mt-1">
+                                <input class="form-check-input" type="checkbox"
+                                    :id="`reg-${field.name}`" v-model="formData[field.name]" />
+                                <label class="form-check-label small" :for="`reg-${field.name}`">{{ field.label }}</label>
+                            </div>
+
+                            <div v-if="formErrors[field.name]" class="invalid-feedback d-block" style="font-size:.75rem">
+                                {{ $t('events.show.registration.modal.field_required') }}
+                            </div>
+                        </div>
+                    </template>
+                    <p v-else class="mb-0 small">{{ $t('events.show.registration.modal.confirm_text') }}</p>
                 </div>
                 <div class="modal-card__footer">
                     <button class="btn btn-outline-secondary btn-sm" @click="showRegisterModal = false">
@@ -371,6 +414,8 @@ export default {
             participantsLoaded: false,
             registering: false,
             showRegisterModal: false,
+            formData: {},
+            formErrors: {},
             paymentReturnStatus: null,
             checkingPayment: false,
             retryingPayment: false,
@@ -386,6 +431,11 @@ export default {
         },
         startAtIsPreview() {
             return !this.event?.stages?.find(s => s.start_at);
+        },
+        regTemplate() {
+            return Array.isArray(this.event?.registration_form_template)
+                ? this.event.registration_form_template
+                : [];
         },
     },
 
@@ -448,15 +498,33 @@ export default {
                 this.$router.push({ name: 'user-login', query: { redirect: this.$route.fullPath } });
                 return;
             }
+            // Init form fields
+            const fd = {};
+            this.regTemplate.forEach(f => {
+                fd[f.name] = f.type === 'switch' || f.type === 'checkbox' ? false : '';
+            });
+            this.formData   = fd;
+            this.formErrors = {};
             this.showRegisterModal = true;
         },
 
         async confirmRegister() {
+            // Validate required fields
+            const errors = {};
+            this.regTemplate.forEach(f => {
+                if (f.required) {
+                    const val = this.formData[f.name];
+                    if (val === '' || val === null || val === undefined) errors[f.name] = true;
+                }
+            });
+            this.formErrors = errors;
+            if (Object.keys(errors).length) return;
+
             this.registering = true;
             const result = await OrganizationEventRegistration.store(
                 this.$route.params.orgRoute,
                 this.$route.params.eventRoute,
-                { form_data: null }
+                { form_data: this.regTemplate.length ? { ...this.formData } : null }
             );
             this.registering = false;
             this.showRegisterModal = false;
@@ -466,7 +534,6 @@ export default {
                 this.event.registrations_count = (this.event.registrations_count || 0) + 1;
                 this.participantsLoaded = false;
 
-                // Paid event: redirect to payment gateway
                 if (result.data?.payment_url) {
                     window.location.href = result.data.payment_url;
                 }
@@ -731,4 +798,24 @@ export default {
     padding: 0.9rem 1.4rem;
     border-top: 1px solid rgba(255,255,255,0.08);
 }
+.reg-field__label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 0.3rem;
+}
+.reg-input {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.9);
+    border-radius: 7px;
+}
+.reg-input:focus {
+    background: rgba(255,255,255,0.09);
+    border-color: rgba(255,255,255,0.3);
+    box-shadow: none;
+    color: #fff;
+}
+.reg-input option { background: #1a1a2e; }
 </style>

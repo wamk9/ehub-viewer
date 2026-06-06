@@ -47,6 +47,7 @@ export default {
       confirm_text: 'Deseja se inscrever neste evento?',
       confirm: 'Confirmar inscrição',
       cancel: 'Cancelar',
+      field_required: 'Campo obrigatório.',
     },
     payment_success: 'Pagamento confirmado! Sua inscrição está completa.',
     payment_pending: 'Pagamento em processamento. Sua inscrição será confirmada em breve.',

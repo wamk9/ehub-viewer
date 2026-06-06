@@ -47,6 +47,7 @@ export default {
       confirm_text: 'Do you want to register for this event?',
       confirm: 'Register',
       cancel: 'Cancel',
+      field_required: 'This field is required.',
     },
     payment_success: 'Payment confirmed! Your registration is complete.',
     payment_pending: 'Payment is being processed. Your registration will be confirmed shortly.',
