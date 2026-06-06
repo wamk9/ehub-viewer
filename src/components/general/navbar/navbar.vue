@@ -48,16 +48,46 @@
         <template v-if="isLogged">
           <!-- Notificações dropup -->
           <div class="dropup mobile-dropup">
-            <button class="mobile-nav-item mobile-drop-btn" data-bs-toggle="dropdown"
+            <button class="mobile-nav-item mobile-drop-btn position-relative" data-bs-toggle="dropdown"
               data-bs-display="static" aria-expanded="false">
-              <font-awesome-icon :icon="['fas', 'bell']" class="mobile-nav-icon" />
+              <span class="position-relative d-inline-block">
+                <font-awesome-icon :icon="['fas', 'bell']" class="mobile-nav-icon" />
+                <span v-if="hasUnread"
+                  class="position-absolute bg-danger border border-dark rounded-circle mobile-notif-dot"></span>
+              </span>
               <span class="mobile-nav-label">{{ $t('navbar.user.logged.notifications.title') }}</span>
             </button>
             <ul class="dropdown-menu ehub-dropdown-mobile">
-              <li><span class="dropdown-item text-muted small py-3 text-center d-block">
-                <font-awesome-icon :icon="['fas', 'bell']" class="me-2 opacity-50" />
-                Nenhuma notificação
-              </span></li>
+              <li class="px-3 py-2 d-flex align-items-center justify-content-between">
+                <span class="text-white fw-semibold" style="font-size:0.875rem">
+                  {{ $t('navbar.user.logged.notifications.title') }}
+                </span>
+                <button v-if="notifications.length" @click.prevent="handleClearAll"
+                  class="btn btn-link btn-sm text-muted p-0" style="font-size:0.75rem">
+                  {{ $t('notification.clear_all') }}
+                </button>
+              </li>
+              <li><hr class="dropdown-divider border-secondary my-1"></li>
+              <li v-for="notif in notifications" :key="notif.id">
+                <div class="d-flex align-items-start gap-2 px-3 py-2 mobile-notif-item"
+                     @click="handleNotifClick(notif)" role="button">
+                  <span class="mobile-notif-unread-dot flex-shrink-0 mt-1"
+                        :class="{ active: !notif.read_at }"></span>
+                  <div class="flex-grow-1 overflow-hidden">
+                    <div class="text-truncate" :class="notif.read_at ? 'text-muted' : 'text-white'"
+                         style="font-size:0.82rem">{{ notifText(notif) }}</div>
+                    <div class="text-muted" style="font-size:0.7rem">{{ timeAgo(notif.created_at) }}</div>
+                  </div>
+                  <button class="notif-delete-btn flex-shrink-0"
+                          @click.stop="handleDeleteNotif(notif.id)">×</button>
+                </div>
+              </li>
+              <li v-if="!notifications.length">
+                <span class="dropdown-item text-muted small py-3 text-center d-block">
+                  <font-awesome-icon :icon="['fas', 'bell']" class="me-2 opacity-50" />
+                  {{ $t('notification.empty') }}
+                </span>
+              </li>
             </ul>
           </div>
 
@@ -121,13 +151,15 @@
 </template>
 
 <script>
-import Auth from '@/helpers/communication/auth.js';
-import Api  from '@/helpers/communication/Connection';
+import Auth         from '@/helpers/communication/auth.js';
+import Api          from '@/helpers/communication/Connection';
+import Notification from '@/helpers/communication/Notification.js';
 import NavbarDesktopItem from '@/components/general/navbar/navbar-desktop-item.vue';
 import NavbarDesktopProfile from '@/components/general/navbar/navbar-desktop-profile.vue';
 import NavbarMobileItem from '@/components/general/navbar/navbar-mobile-item.vue';
 import InitialsAvatar from '@/components/general/InitialsAvatar.vue';
 import { i18n } from '@/helpers/i18n';
+import { createSSE } from '@/helpers/communication/useLiveSSE.js';
 import store from '@/store';
 export default {
   components: {
@@ -144,6 +176,7 @@ export default {
       mobileProfileImage: '',
       mobileProfileName: '',
       mobileProfileUsername: '',
+      notifications: [],
       unloggedProfileItems: [
         {
           name: i18n.t('navbar.user.unlogged.login.title'),
@@ -180,6 +213,9 @@ export default {
     isLogged() {
       return !!this.$store.getters.getToken;
     },
+    hasUnread() {
+      return this.notifications.some(n => !n.read_at);
+    },
     logBtnTitle() {
       return this.isLogged ? "Logout" : "Login";
     },
@@ -190,6 +226,15 @@ export default {
   mounted() {
     this.getNavbarItems();
     this.loadMobileProfile();
+    if (this.isLogged) {
+      this._notifSSE = createSSE('notifications', {}, (payload) => {
+        this.notifications = Array.isArray(payload) ? payload : [];
+      });
+      this._notifSSE.connect();
+    }
+  },
+  beforeUnmount() {
+    if (this._notifSSE) this._notifSSE.disconnect();
   },
   methods: {
     async loadMobileProfile() {
@@ -212,6 +257,37 @@ export default {
       } else {
         Auth.logout();
       }
+    },
+    notifText(notif) {
+      try {
+        const params = notif.description ? JSON.parse(notif.description) : {};
+        return this.$t(notif.title, params);
+      } catch {
+        return notif.title;
+      }
+    },
+    timeAgo(dateStr) {
+      if (!dateStr) return '';
+      const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+      if (diff < 60)    return this.$t('notification.time.just_now');
+      if (diff < 3600)  return this.$t('notification.time.minutes_ago', { n: Math.floor(diff / 60) });
+      if (diff < 86400) return this.$t('notification.time.hours_ago',   { n: Math.floor(diff / 3600) });
+      return this.$t('notification.time.days_ago', { n: Math.floor(diff / 86400) });
+    },
+    async handleNotifClick(notif) {
+      if (!notif.read_at) {
+        notif.read_at = new Date().toISOString();
+        await Notification.markRead(notif.id);
+      }
+      if (notif.route) this.$router.push(notif.route);
+    },
+    async handleDeleteNotif(id) {
+      await Notification.remove(id);
+      this.notifications = this.notifications.filter(n => n.id !== id);
+    },
+    async handleClearAll() {
+      await Notification.clearAll();
+      this.notifications = [];
     },
     getNavbarItems() {
       // const unloggedItem = [{
@@ -371,6 +447,28 @@ export default {
 .ehub-dropdown-mobile .logout-item { color: #e05050; }
 .ehub-dropdown-mobile .logout-item:hover { background: rgba(224,80,80,0.1); }
 .mobile-profile-header { border-bottom: none; }
+
+.mobile-notif-dot {
+  width: 7px; height: 7px;
+  top: -2px; right: -3px;
+}
+.mobile-notif-item {
+  cursor: pointer;
+  transition: background 0.15s;
+  border-radius: 4px;
+}
+.mobile-notif-item:hover { background: #2a2a2a; }
+.mobile-notif-unread-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: transparent; margin-top: 5px;
+}
+.mobile-notif-unread-dot.active { background: #6195f5; }
+.notif-delete-btn {
+  background: none; border: none; color: #666;
+  font-size: 1rem; line-height: 1; padding: 0 2px;
+  cursor: pointer; transition: color 0.15s;
+}
+.notif-delete-btn:hover { color: #e05050; }
 
 .textColor {
   color: #fafafa;
