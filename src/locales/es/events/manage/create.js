@@ -18,6 +18,7 @@ export default {
       subcategory: {
         label: 'Subcategoría',
         placeholder: 'Sin subcategoría (opcional)',
+        none: 'Sin subcategoría disponible',
       },
       runmode: {
         label: 'Modo',
@@ -70,7 +71,8 @@ export default {
         help:  'Deja en blanco para inscripciones ilimitadas.',
       },
       start_at: {
-        label: 'Fecha y hora de inicio',
+        label: 'Fecha de inicio estimada',
+        help:  'Fecha aproximada de inicio. Cuando se cree la primera etapa, la fecha real será definida por esa etapa.',
       },
       logo: {
         label: 'Logo del evento',
@@ -87,6 +89,7 @@ export default {
   step3: {
     description: 'Completa los detalles específicos de la categoría y modo seleccionados. Estos datos se guardarán junto al evento.',
     advice:     'Formulario de categoría actualizado el {date}.',
+    no_schema:  'No hay formulario específico registrado para esta categoría y modo.',
     load_error: 'No se pudo cargar el formulario de categoría. Inténtalo de nuevo.',
     back: 'Volver',
     next: 'Continuar',

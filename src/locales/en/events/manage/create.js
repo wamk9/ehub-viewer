@@ -18,6 +18,7 @@ export default {
       subcategory: {
         label: 'Subcategory',
         placeholder: 'No subcategory (optional)',
+        none: 'No subcategory available',
       },
       runmode: {
         label: 'Mode',
@@ -70,7 +71,8 @@ export default {
         help:  'Leave blank for unlimited registrations.',
       },
       start_at: {
-        label: 'Start date and time',
+        label: 'Estimated start date',
+        help:  'Approximate start date. Once the first stage is created, the real date is set by that stage.',
       },
       logo: {
         label: 'Event logo',
@@ -87,6 +89,7 @@ export default {
   step3: {
     description: 'Fill in the details specific to the chosen category and mode. This data will be saved with the event.',
     advice:     'Category form last updated on {date}.',
+    no_schema:  'No specific form registered for this category and mode.',
     load_error: 'Could not load the category form. Please try again.',
     back: 'Back',
     next: 'Continue',

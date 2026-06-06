@@ -145,9 +145,14 @@
                     <div class="gen-section">
                         <p class="gen-section__title">{{ $t('events.show.info.details') }}</p>
                         <div class="event-info-grid">
-                            <div v-if="event.start_at" class="event-info-item">
+                            <div v-if="effectiveStartAt" class="event-info-item">
                                 <font-awesome-icon :icon="['fas', 'calendar']" class="me-2 text-muted" />
-                                <span class="text-muted small">{{ formatDate(event.start_at) }}</span>
+                                <span class="text-muted small">
+                                    <span v-if="startAtIsPreview" class="badge bg-secondary me-1 fw-normal" style="font-size:.7em">
+                                        {{ $t('events.show.info.start_at_preview') }}
+                                    </span>
+                                    {{ formatDate(effectiveStartAt) }}
+                                </span>
                             </div>
                             <div v-if="event.max_registrations" class="event-info-item">
                                 <font-awesome-icon :icon="['fas', 'users']" class="me-2 text-muted" />
@@ -346,6 +351,16 @@ export default {
             paymentReturnStatus: null, // success | failure | pending
             baseUrl: SystemVars.baseUrl,
         };
+    },
+
+    computed: {
+        effectiveStartAt() {
+            const stageStart = this.event?.stages?.find(s => s.start_at)?.start_at;
+            return stageStart || this.event?.start_at || null;
+        },
+        startAtIsPreview() {
+            return !this.event?.stages?.find(s => s.start_at);
+        },
     },
 
     async created() {

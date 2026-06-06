@@ -9,6 +9,8 @@ export default {
     description: 'Description',
     details: 'Details',
     max_registrations: 'Up to {n} participants',
+    start_at: 'Starts',
+    start_at_preview: 'Estimated start',
   },
   stages: {
     empty: 'No stages configured yet.',

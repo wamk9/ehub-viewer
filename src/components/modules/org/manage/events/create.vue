@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick, useTemplateRef } from "vue";
+import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount, nextTick, useTemplateRef } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
@@ -75,7 +75,7 @@ const basicErrors   = ref({});
 const nameAutoSlug  = ref(true);
 const logoInput     = ref(null);
 const coverInput    = ref(null);
-const editor        = ref(null);
+const editor        = shallowRef(null);
 
 watch(() => basic.value.name, (val) => {
     if (!nameAutoSlug.value) return;
@@ -403,14 +403,20 @@ async function publishEvent() {
                 </select>
             </div>
 
-            <!-- Subcategory (only if exists) -->
-            <div class="field-group" v-if="sel.category && subcategories.length > 0">
+            <!-- Subcategory (always shown when category selected) -->
+            <div class="field-group" v-if="sel.category">
                 <label class="field-label">{{ i18n.t('events.manage.create.step1.form.subcategory.label') }}</label>
                 <div v-if="loadingSubcats" class="loading-row">
                     <span class="spinner-border spinner-border-sm"></span>
+                    <span class="text-muted small ms-2">Carregando...</span>
                 </div>
-                <select v-else class="form-select ehub-select" v-model="sel.subcategory">
-                    <option value="">{{ i18n.t('events.manage.create.step1.form.subcategory.placeholder') }}</option>
+                <select v-else class="form-select ehub-select" v-model="sel.subcategory"
+                    :disabled="subcategories.length === 0">
+                    <option value="">
+                        {{ subcategories.length === 0
+                            ? i18n.t('events.manage.create.step1.form.subcategory.none')
+                            : i18n.t('events.manage.create.step1.form.subcategory.placeholder') }}
+                    </option>
                     <option v-for="sub in subcategories" :key="sub.id" :value="sub.route">
                         {{ i18n.te(`categories.subcategories.${sub.route}`) ? i18n.t(`categories.subcategories.${sub.route}`) : sub.name }}
                     </option>
@@ -571,6 +577,7 @@ async function publishEvent() {
                         <div class="field-group mb-0">
                             <label class="field-label">{{ i18n.t('events.manage.create.step2.form.start_at.label') }}</label>
                             <input type="datetime-local" class="form-control ehub-input" v-model="basic.start_at" />
+                            <small class="text-muted d-block mt-1">{{ i18n.t('events.manage.create.step2.form.start_at.help') }}</small>
                         </div>
                     </div>
                 </div>
@@ -626,8 +633,18 @@ async function publishEvent() {
         <!-- ═══════════════════ STEP 3 ═══════════════════ -->
         <div v-else-if="step === 3">
 
-            <div class="gen-section mb-4">
+            <div class="gen-section mb-3">
                 <p class="step-description mb-0">{{ i18n.t('events.manage.create.step3.description') }}</p>
+            </div>
+
+            <!-- Schema update date badge -->
+            <div v-if="formSchemaDate" class="schema-date-badge mb-3">
+                <font-awesome-icon :icon="['fas', 'clock-rotate-left']" class="me-2" style="opacity:0.6" />
+                {{ i18n.t('events.manage.create.step3.advice', { date: i18n.d(formSchemaDate, 'dateOnly') }) }}
+            </div>
+            <div v-else-if="!formSchemaId" class="schema-date-badge schema-date-badge--warn mb-3">
+                <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-2" />
+                {{ i18n.t('events.manage.create.step3.no_schema') }}
             </div>
 
             <div class="gen-section mb-4">
@@ -686,9 +703,6 @@ async function publishEvent() {
                     </template>
                 </div>
 
-                <p v-if="formSchemaDate" class="text-muted small mb-0 mt-3">
-                    {{ i18n.t('events.manage.create.step3.advice', { date: i18n.d(formSchemaDate, 'dateOnly') }) }}
-                </p>
             </div>
 
             <div class="nav-row">
@@ -1090,6 +1104,23 @@ textarea.ehub-input { resize: vertical; }
 
 /* ─── Loading row ────────────────────────── */
 .loading-row { display: flex; align-items: center; min-height: 38px; }
+
+/* ─── Schema date badge ──────────────────── */
+.schema-date-badge {
+    display: flex;
+    align-items: center;
+    background: rgba(110,168,254,0.07);
+    border: 1px solid rgba(110,168,254,0.18);
+    border-radius: 8px;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.8rem;
+    color: rgba(110,168,254,0.85);
+}
+.schema-date-badge--warn {
+    background: rgba(255,193,7,0.07);
+    border-color: rgba(255,193,7,0.2);
+    color: rgba(255,193,7,0.85);
+}
 
 /* ─── Field builder ──────────────────────── */
 .empty-fields {
