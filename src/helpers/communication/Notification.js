@@ -16,6 +16,10 @@ const Notification = {
         const result = await Api.deleteAsync('/notification/' + id)
         return { code: result.code }
     },
+    async clearAll() {
+        const result = await Api.deleteAsync('/notification')
+        return { code: result.code }
+    },
 }
 
 export default Notification

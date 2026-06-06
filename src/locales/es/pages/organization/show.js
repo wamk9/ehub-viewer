@@ -1,5 +1,6 @@
 export default {
-  follow: 'Seguir',
+  follow:   'Seguir',
+  unfollow: 'Dejar de seguir',
   send_message: 'Enviar mensaje',
   manage: 'Gestionar',
   created_alert: '¡Tu organización fue creada con éxito! Ahora puedes gestionarla, crear eventos y conectar con tu comunidad.',

@@ -7,21 +7,44 @@
                 <div class="d-flex align-items-center justify-content-center mx-auto icon-wrap">
                     <font-awesome-icon icon="bell" class="nav-icon" />
                     <span v-if="hasUnread"
-                        class="position-absolute notif-dot p-1 bg-danger border border-dark rounded-circle">
+                        class="position-absolute notif-dot bg-danger border border-dark rounded-circle">
                     </span>
                 </div>
-                <div class="nav-label textColor">{{ i18n.t('navbar.user.logged.notifications.title') }}</div>
+                <div class="nav-label textColor">{{ $t('navbar.user.logged.notifications.title') }}</div>
                 <div class="active-bar"></div>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end ehub-dropdown" aria-labelledby="notifDropdown">
-                <li v-for="(item, idx) in notifications" :key="idx" class="dropdown-item-wrap">
-                    <a class="dropdown-item" href="#">{{ item.title }}</a>
-                </li>
-                <li v-if="!notifications.length">
-                    <span class="dropdown-item text-muted small py-3 text-center d-block">
-                        <font-awesome-icon icon="bell" class="me-2 opacity-50" />
-                        Nenhuma notificação
+            <ul class="dropdown-menu dropdown-menu-end ehub-dropdown notif-panel" aria-labelledby="notifDropdown">
+                <li class="px-3 py-2 d-flex align-items-center justify-content-between notif-header">
+                    <span class="text-white fw-semibold" style="font-size:0.875rem">
+                        {{ $t('navbar.user.logged.notifications.title') }}
                     </span>
+                    <button v-if="notifications.length" @click.prevent="handleClearAll"
+                        class="btn btn-link btn-sm text-muted p-0" style="font-size:0.75rem">
+                        {{ $t('notification.clear_all') }}
+                    </button>
+                </li>
+                <li><hr class="dropdown-divider border-secondary my-1"></li>
+
+                <li v-for="notif in notifications" :key="notif.id" class="notif-item-wrap">
+                    <div class="notif-item d-flex align-items-start gap-2 px-3 py-2"
+                         @click="handleNotifClick(notif)" role="button">
+                        <span class="notif-unread-dot flex-shrink-0 mt-1"
+                              :class="{ active: !notif.read_at }"></span>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="notif-text text-truncate"
+                                 :class="notif.read_at ? 'text-muted' : 'text-white'">
+                                {{ notifText(notif) }}
+                            </div>
+                            <div class="text-muted" style="font-size:0.7rem">{{ timeAgo(notif.created_at) }}</div>
+                        </div>
+                        <button class="notif-delete-btn flex-shrink-0"
+                                @click.stop="handleDeleteNotif(notif.id)">×</button>
+                    </div>
+                </li>
+
+                <li v-if="!notifications.length" class="py-3 text-center">
+                    <font-awesome-icon icon="bell" class="me-2 opacity-25" />
+                    <span class="text-muted small">{{ $t('notification.empty') }}</span>
                 </li>
             </ul>
         </li>
@@ -33,7 +56,7 @@
                 <div class="d-flex align-items-center justify-content-center mx-auto icon-wrap">
                     <font-awesome-icon icon="user" class="nav-icon" />
                 </div>
-                <div class="nav-label textColor">{{ i18n.t('navbar.user.logged.profile.title') }}</div>
+                <div class="nav-label textColor">{{ $t('navbar.user.logged.profile.title') }}</div>
                 <div class="active-bar"></div>
             </a>
             <ul class="dropdown-menu dropdown-menu-end ehub-dropdown" aria-labelledby="profileDropdown"
@@ -82,7 +105,7 @@
                 <div class="d-flex align-items-center justify-content-center mx-auto icon-wrap">
                     <font-awesome-icon :icon="['fas', 'right-to-bracket']" class="nav-icon" />
                 </div>
-                <div class="nav-label textColor">{{ i18n.t('navbar.user.unlogged.login.title') }}</div>
+                <div class="nav-label textColor">{{ $t('navbar.user.unlogged.login.title') }}</div>
                 <div class="active-bar"></div>
             </router-link>
         </li>
@@ -91,7 +114,7 @@
                 <div class="d-flex align-items-center justify-content-center mx-auto icon-wrap">
                     <font-awesome-icon :icon="['fas', 'user-plus']" class="nav-icon" />
                 </div>
-                <div class="nav-label textColor">{{ i18n.t('navbar.user.unlogged.register.title') }}</div>
+                <div class="nav-label textColor">{{ $t('navbar.user.unlogged.register.title') }}</div>
                 <div class="active-bar"></div>
             </router-link>
         </li>
@@ -108,10 +131,10 @@ defineProps({
 </script>
 
 <script>
-import Auth  from '@/helpers/communication/Auth.js'
-import Api   from '@/helpers/communication/Connection'
-import store from '@/store'
-import { i18n } from '@/helpers/i18n'
+import Auth         from '@/helpers/communication/Auth.js'
+import Api          from '@/helpers/communication/Connection'
+import Notification from '@/helpers/communication/Notification.js'
+import store        from '@/store'
 import { createSSE } from '@/helpers/communication/useLiveSSE.js'
 
 export default {
@@ -133,7 +156,6 @@ export default {
         profileItems() {
             const items = this.isLogged ? this.loggedOptions : this.unloggedOptions
             if (!this.isLogged) return items
-            // inject divider before logout
             const result = []
             items.forEach((item, i) => {
                 if (item.action === 'logout' && i > 0) result.push({ divider: true })
@@ -160,6 +182,37 @@ export default {
                     if (d.username) this.profileUsername  = d.username
                 }
             } catch { /* keep placeholder */ }
+        },
+        notifText(notif) {
+            try {
+                const params = notif.description ? JSON.parse(notif.description) : {}
+                return this.$t(notif.title, params)
+            } catch {
+                return notif.title
+            }
+        },
+        timeAgo(dateStr) {
+            if (!dateStr) return ''
+            const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000)
+            if (diff < 60)    return this.$t('notification.time.just_now')
+            if (diff < 3600)  return this.$t('notification.time.minutes_ago', { n: Math.floor(diff / 60) })
+            if (diff < 86400) return this.$t('notification.time.hours_ago',   { n: Math.floor(diff / 3600) })
+            return this.$t('notification.time.days_ago', { n: Math.floor(diff / 86400) })
+        },
+        async handleNotifClick(notif) {
+            if (!notif.read_at) {
+                notif.read_at = new Date().toISOString()
+                await Notification.markRead(notif.id)
+            }
+            if (notif.route) this.$router.push(notif.route)
+        },
+        async handleDeleteNotif(id) {
+            await Notification.remove(id)
+            this.notifications = this.notifications.filter(n => n.id !== id)
+        },
+        async handleClearAll() {
+            await Notification.clearAll()
+            this.notifications = []
         },
     },
     mounted() {
@@ -193,14 +246,12 @@ export default {
 .nav-item:hover .active-bar { width: 100%; background: #6195f5; }
 .nav-item:hover .nav-icon, .nav-item:hover .nav-label { color: #6195f5; }
 
-.notif-dot { position: absolute; top: -2px; right: -4px; width: 8px; height: 8px; }
-
-.nav-label-spacer {
-    height: calc(13px * 1.4);
-    margin-top: 2px;
+.notif-dot {
+    position: absolute; top: -2px; right: -4px;
+    width: 8px; height: 8px;
 }
 
-/* Dropdown */
+/* Dropdown base */
 .ehub-dropdown {
     background-color: #1e1e1e;
     border: 1px solid #333;
@@ -210,8 +261,36 @@ export default {
     padding: 4px 0;
 }
 
-.user-header { border-bottom: none; }
+/* Notification panel */
+.notif-panel { min-width: 300px; max-width: 340px; }
+.notif-header { border-bottom: none; }
+.notif-header button { background: none; border: none; cursor: pointer; }
+.notif-header button:hover { color: #fff !important; }
 
+.notif-item-wrap + .notif-item-wrap { border-top: 1px solid #2a2a2a; }
+.notif-item {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.notif-item:hover { background: #2a2a2a; }
+
+.notif-unread-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: transparent; flex-shrink: 0; margin-top: 5px;
+}
+.notif-unread-dot.active { background: #6195f5; }
+
+.notif-text { font-size: 0.8rem; line-height: 1.3; }
+
+.notif-delete-btn {
+    background: none; border: none; color: #666;
+    font-size: 1rem; line-height: 1; padding: 0 2px;
+    cursor: pointer; transition: color 0.15s;
+}
+.notif-delete-btn:hover { color: #e05050; }
+
+/* Profile dropdown */
+.user-header { border-bottom: none; }
 .dropdown-item {
     color: #d0d0d0;
     font-size: 0.875rem;
@@ -224,7 +303,6 @@ export default {
     display: block;
 }
 .dropdown-item:hover { background: #2e2e2e; color: #fff; }
-
 .logout-item { color: #e05050; }
 .logout-item:hover { background: rgba(224,80,80,0.1); color: #e05050; }
 </style>

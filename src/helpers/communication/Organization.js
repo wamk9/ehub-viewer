@@ -62,6 +62,14 @@ const Organization = {
         const result = await Api.deleteAsync('/organization/' + orgRoute + '/member/' + userId);
         return { code: result.code, data: result.response?.message };
     },
+    async follow(orgRoute) {
+        const result = await Api.postAsync('/organization/' + orgRoute + '/follow');
+        return { code: result.code };
+    },
+    async unfollow(orgRoute) {
+        const result = await Api.deleteAsync('/organization/' + orgRoute + '/follow');
+        return { code: result.code };
+    },
 };
 
 export default Organization;

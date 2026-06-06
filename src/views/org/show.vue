@@ -7,6 +7,7 @@ import Organization from '@/helpers/communication/Organization.js';
 import Article from '@/helpers/communication/Article.js';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import SystemVars from '@/helpers/General/SystemVars';
+import store from '@/store';
 import { createSSE } from '@/helpers/communication/useLiveSSE.js';
 </script>
 
@@ -35,9 +36,11 @@ import { createSSE } from '@/helpers/communication/useLiveSSE.js';
                 <h1>{{ leagueData.name }}</h1>
                 <p>{{ leagueData.description }}</p>
                 <div class="d-flex gap-2 flex-wrap mt-3">
-                    <button class="btn btn-primary">
-                        <font-awesome-icon :icon="['fas', 'bell']" class="me-2" />
-                        {{ $t('pages.organization.show.follow') }}
+                    <button v-if="isLoggedIn" @click="toggleFollow"
+                        :class="isFollowing ? 'btn btn-outline-secondary' : 'btn btn-primary'"
+                        :disabled="followLoading">
+                        <font-awesome-icon :icon="['fas', isFollowing ? 'bell-slash' : 'bell']" class="me-2" />
+                        {{ isFollowing ? $t('pages.organization.show.unfollow') : $t('pages.organization.show.follow') }}
                     </button>
                     <button class="btn btn-secondary">
                         <font-awesome-icon :icon="['fas', 'envelope']" class="me-2" />
@@ -158,6 +161,7 @@ import Organization from '@/helpers/communication/Organization.js';
 import Article from '@/helpers/communication/Article.js';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import SystemVars from '@/helpers/General/SystemVars';
+import store from '@/store';
 
 export default {
     data() {
@@ -170,6 +174,8 @@ export default {
                 logo_image: '',
                 hierarchies: { config: [] },
             },
+            isFollowing:   false,
+            followLoading: false,
             members: [],
             membersLoaded: false,
             membersLoading: false,
@@ -184,7 +190,10 @@ export default {
     },
     async created() {
         const result = await Organization.show(this.$route.params.orgRoute);
-        if (result.code === 200) this.leagueData = result.data;
+        if (result.code === 200) {
+            this.leagueData  = result.data;
+            this.isFollowing = !!result.data.is_following;
+        }
 
         this._orgSSE = createSSE(
             'org-content',
@@ -198,6 +207,9 @@ export default {
         this._orgSSE.connect()
     },
     computed: {
+        isLoggedIn() {
+            return !!store.getters.getToken;
+        },
         canManage() {
             return ['owner', 'admin'].includes(this.leagueData.role);
         },
@@ -237,6 +249,17 @@ export default {
             this.articlesLoading = false;
             this.articlesLoaded = true;
             if (result.code === 200) this.articles = result.data ?? [];
+        },
+        async toggleFollow() {
+            this.followLoading = true;
+            if (this.isFollowing) {
+                await Organization.unfollow(this.$route.params.orgRoute);
+                this.isFollowing = false;
+            } else {
+                await Organization.follow(this.$route.params.orgRoute);
+                this.isFollowing = true;
+            }
+            this.followLoading = false;
         },
         formatArticleDate(dateStr) {
             if (!dateStr) return '';
