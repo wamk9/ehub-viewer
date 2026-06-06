@@ -1,67 +1,118 @@
 export default {
-  step0: {
-    title: 'Crie seu evento',
-    description: 'Informe o modo e categoria de seu evento, nós iremos organizar as informações necessárias para você preencher.',
-    form: {
-      runmode: {
-        placeholder: 'Onde você deseja aplicar este evento?',
-        validation: { 'min-length': 'Selecione o modo do seu evento para continuar a criação' }
-      },
-      category: {
-        placeholder: 'Qual a categoria do seu evento?',
-        validation: { 'min-length': 'Selecione a categoria do seu evento para continuar a criação' }
-      }
-    },
-    suggestion: {
-      title: 'Não encontrou a categoria que gostaria de utilizar?',
-      description: 'Nós sabemos que nossa lista pode ficar melhor, por isso criamos um espaço no qual você poderá sugerir categorias para serem adicionadas no eHub.',
-      call_action: 'Sugira agora!'
-    },
-    nextstep: 'Buscar informações'
+  title: 'Criar evento',
+  publish_error: 'Erro ao publicar evento. Verifique os dados e tente novamente.',
+  breadcrumb: {
+    step1: 'Categoria',
+    step2: 'Informações',
+    step3: 'Detalhes',
+    step4: 'Inscrição',
   },
   step1: {
-    title: "A categoria escolhida foi '{type}' no modo '{runMode}'!",
-    description: 'Agora precisaremos que você informe algumas informações básicas sobre seu evento antes de irmos para as informações específicas da categoria e modo escolhidos.',
+    description: 'Selecione a categoria, subcategoria e o modo do seu evento. Usaremos essas informações para montar o formulário correto.',
+    error_required: 'Selecione a categoria e o modo do evento para continuar.',
     form: {
-      'event-name': {
-        label: 'Nome',
-        placeholder: 'Nome do evento',
-        validation: { regex: 'É necessário ao menos {minLength} caracteres neste campo' }
+      category: {
+        label: 'Categoria',
+        placeholder: 'Selecione a categoria do evento',
       },
-      'event-endpoint': {
-        label: 'Identificador',
-        placeholder: 'Identificador do evento (usado comumente na URL)',
-        validation: {
-          regex: 'É necessário ao menos {minLength} caracteres neste campo',
-          in_use: 'Identificador já utilizado anteriormente pela organização, tente outra variação'
-        }
+      subcategory: {
+        label: 'Subcategoria',
+        placeholder: 'Sem subcategoria (opcional)',
       },
-      'event-short-description': {
-        label: 'Descrição curta',
-        placeholder: 'Descrição curta do evento (máximo de {maxQtd} caracteres - pode ser editado futuramente)'
+      runmode: {
+        label: 'Modo',
+        placeholder: 'Onde o evento será realizado?',
       },
-      'event-description': {
-        label: 'Descrição',
-        placeholder: 'Diga como o seu evento irá funcionar (máximo de {maxQtd} caracteres - pode ser editado futuramente)'
-      },
-      'event-currency': {
-        label: 'Moeda',
-        placeholder: 'Qual será a moeda utilizada no seu evento',
-        values: { free: 'Evento gratuito', brl: 'BRL (R$)', usd: 'USD (US$)' }
-      },
-      'event-register-fee': {
-        label: 'Taxa de registro',
-        placeholder: 'Preencha o valor que deseja que o eHub cobre no registro'
-      }
     },
-    nextstep: 'Buscar informações específicas'
+    next: 'Continuar',
   },
   step2: {
-    title: 'Ok! Agora vamos falar sobre o evento...',
-    description: 'Aqui você irá preencher informações específicas do seu evento, após essa etapa iremos publicá-lo na nossa plataforma!',
-    previouspage: 'Página anterior',
-    nextpage: 'Próxima página',
-    publish: 'Publicar',
-    updated_form_advice: 'O eHub normalmente realiza atualizações dos formulários de categoria baseado na sugestão dos usuários. A última atualização deste formulário foi em {date}.'
-  }
+    help: 'Estas informações serão exibidas publicamente na página do evento e nas listagens da plataforma.',
+    sections: {
+      identity:      'Identificação',
+      description:   'Descrição completa',
+      registrations: 'Inscrições',
+      images:        'Imagens',
+    },
+    form: {
+      name: {
+        label: 'Nome do evento',
+        error: 'O nome deve ter ao menos 5 caracteres.',
+      },
+      route: {
+        label: 'URL do evento',
+        help:  'Use apenas letras minúsculas, números e hífens. Ex: meu-campeonato-2026',
+        error: 'URL inválida. Use 3–60 caracteres: letras minúsculas, números e hífens.',
+      },
+      short_description: {
+        label: 'Descrição curta',
+        help:  'Resumo de até 180 caracteres exibido nos cards e listagens.',
+      },
+      description: {
+        label:       'Descrição completa',
+        placeholder: 'Conte como o evento vai funcionar, regras, premiações...',
+      },
+      currency: {
+        label: 'Tipo de inscrição',
+        options: {
+          free: 'Gratuito',
+          brl:  'Pago — BRL (R$)',
+          usd:  'Pago — USD (US$)',
+          eur:  'Pago — EUR (€)',
+        },
+      },
+      fee: {
+        label: 'Valor da inscrição',
+        error: 'Informe um valor válido (maior ou igual a zero).',
+      },
+      max_registrations: {
+        label: 'Máximo de inscritos',
+        help:  'Deixe em branco para inscrições ilimitadas.',
+      },
+      start_at: {
+        label: 'Data e hora de início',
+      },
+      logo: {
+        label: 'Logo do evento',
+        help:  'Imagem quadrada (1:1). Aparece nos cards e no perfil do evento. Será salva como logo.webp.',
+      },
+      cover: {
+        label: 'Imagem de capa',
+        help:  'Proporção 16:9. Exibida como banner na página do evento. Será salva como preview.webp.',
+      },
+    },
+    back: 'Voltar',
+    next: 'Continuar',
+  },
+  step3: {
+    description: 'Preencha os detalhes específicos da categoria e modo escolhidos. Esses dados serão salvos junto ao evento.',
+    advice:     'Formulário da categoria atualizado em {date}.',
+    load_error: 'Não foi possível carregar o formulário da categoria. Tente novamente.',
+    back: 'Voltar',
+    next: 'Continuar',
+  },
+  step4: {
+    description: 'Defina os campos que os participantes precisarão preencher ao se inscrever. Esta etapa é opcional — pule se não precisar coletar informações adicionais.',
+    empty:       'Nenhum campo adicionado. Clique em "Adicionar campo" para criar o formulário de inscrição.',
+    add_field:   'Adicionar campo',
+    edit_field:  'Editar campo',
+    save_field:  'Salvar campo',
+    cancel:      'Cancelar',
+    back:        'Voltar',
+    publish:     'Publicar evento',
+    field: {
+      type:           'Tipo do campo',
+      label:          'Nome do campo (label)',
+      required:       'Campo obrigatório',
+      values:         'Opções (separadas por vírgula)',
+      label_required: 'Informe o nome do campo.',
+    },
+    types: {
+      text:     'Texto livre',
+      number:   'Número',
+      select:   'Seleção (lista)',
+      switch:   'Liga / Desliga',
+      checkbox: 'Caixa de seleção',
+    },
+  },
 }
