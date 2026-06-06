@@ -74,7 +74,7 @@ watch(() => sel.value.category, async (val) => {
     }
 
     loadingSubcats.value  = true;
-    const r = await Api.getAsync(`/category/${val}/subcategories`);
+    const r = await Api.getAsync(`/category/${val}`);
     loadingSubcats.value  = false;
     if (r.code === 200 && Array.isArray(r.response?.message))
         subcategories.value = r.response.message;
