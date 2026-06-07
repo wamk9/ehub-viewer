@@ -438,9 +438,13 @@ function stageTypeBadge(stage) {
 function canEdit(stage)   { return !eventInitialized.value && !stage.initialized }
 function canDelete(stage) { return !eventInitialized.value && !stage.initialized }
 function canManage(index) {
-    if (!eventInitialized.value) return false
+    if (eventData.value?.finished) return false
     const stage = stages.value[index]
     if (!stage || stage.finished) return false
+    if (!eventInitialized.value) {
+        // event not yet started: only first stage (no previous) can open manage
+        return index === 0
+    }
     if (index === 0) return true
     return !!stages.value[index - 1]?.finished
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import ehubInput from '@/components/inputs/ehub-input.vue';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import SystemVars from '@/helpers/General/SystemVars';
@@ -30,7 +30,8 @@ const coverBase64  = ref(null)
 const logoInput    = ref(null)
 const coverInput   = ref(null)
 
-const saving     = ref(false)
+const saving       = ref(false)
+const eventLocked  = computed(() => !!props.event?.initialized)
 
 watch(() => props.event, (newEvent) => {
     if (newEvent) {
@@ -98,6 +99,11 @@ async function save() {
 
 <template>
     <div v-if="show">
+
+        <div v-if="eventLocked" class="alert alert-warning d-flex align-items-center gap-2 mb-4 small">
+            <font-awesome-icon :icon="['fas', 'lock']" class="flex-shrink-0" />
+            {{ $t('events.manage.general.locked') }}
+        </div>
 
         <!-- Images -->
         <div class="gen-section mb-4">
@@ -180,7 +186,7 @@ async function save() {
             </div>
         </div>
 
-        <div class="d-flex justify-content-end">
+        <div v-if="!eventLocked" class="d-flex justify-content-end">
             <button class="btn btn-primary px-5" @click="save" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>
                 {{ $t('events.manage.general.save') }}

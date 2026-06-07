@@ -1,4 +1,5 @@
 export default {
+  locked: 'El evento ha comenzado. La información general ya no puede modificarse.',
   success: 'Evento actualizado con éxito.',
   error: 'Error al actualizar el evento. Por favor, inténtalo de nuevo.',
   save: 'Guardar cambios',
