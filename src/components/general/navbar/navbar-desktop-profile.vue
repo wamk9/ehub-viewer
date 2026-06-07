@@ -31,7 +31,7 @@
                         <span class="notif-unread-dot flex-shrink-0 mt-1"
                               :class="{ active: !notif.read_at }"></span>
                         <div class="flex-grow-1 overflow-hidden">
-                            <div class="notif-text text-truncate"
+                            <div class="notif-text"
                                  :class="notif.read_at ? 'text-muted' : 'text-white'">
                                 {{ notifText(notif) }}
                             </div>
@@ -280,7 +280,14 @@ export default {
 }
 .notif-unread-dot.active { background: #6195f5; }
 
-.notif-text { font-size: 0.8rem; line-height: 1.3; }
+.notif-text {
+    font-size: 0.8rem;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 
 .notif-delete-btn {
     background: none; border: none; color: #666;
