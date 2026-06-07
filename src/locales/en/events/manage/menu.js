@@ -71,6 +71,7 @@ export default {
       manage_view: {
         back: 'Back',
         start_btn: 'Start stage',
+        manage_btn: 'Manage ongoing stage',
         finish_btn: 'Finish stage',
         save_btn: 'Save results',
         col_position: 'Pos.',

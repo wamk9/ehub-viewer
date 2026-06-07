@@ -71,6 +71,7 @@ export default {
       manage_view: {
         back: 'Voltar',
         start_btn: 'Iniciar etapa',
+        manage_btn: 'Gerenciar etapa em andamento',
         finish_btn: 'Finalizar etapa',
         save_btn: 'Salvar resultados',
         col_position: 'Pos.',

@@ -41,8 +41,12 @@
                         <button v-if="stage.finished" class="btn btn-sm btn-outline-light" disabled>
                             <font-awesome-icon :icon="['fas', 'trophy']" />
                         </button>
-                        <button v-else-if="canManage(index)" class="btn btn-sm btn-outline-light" @click="openManage(stage)">
-                            <font-awesome-icon :icon="['fas', 'play']" />
+                        <button v-else-if="canManage(index)"
+                            class="btn btn-sm"
+                            :class="stage.in_progress ? 'btn-warning text-dark' : 'btn-success'"
+                            @click="openManage(stage)">
+                            <font-awesome-icon :icon="stage.in_progress ? ['fas', 'cog'] : ['fas', 'play']" class="me-1" />
+                            {{ stage.in_progress ? $t('events.manage.menu.stages.manage.manage_view.manage_btn') : $t('events.manage.menu.stages.manage.manage_view.start_btn') }}
                         </button>
                         <button v-if="canEdit(stage)" class="btn btn-sm btn-outline-light" @click="openEdit(stage)">
                             <font-awesome-icon :icon="['fas', 'pen']" />
@@ -737,7 +741,7 @@ watch(() => props.event, (newEvent) => {
 .stage-row__body  { flex: 1; min-width: 0; }
 .stage-row__name  { font-size: 0.95rem; font-weight: 600; color: rgba(255,255,255,0.9); }
 .stage-row__desc  { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.stage-row__actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+.stage-row__actions { display: flex; gap: 0.4rem; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 .stage-row__thumb   { flex-shrink: 0; width: 60px; height: 34px; border-radius: 5px; overflow: hidden; background: rgba(255,255,255,0.06); }
 .stage-row__thumb img { width: 100%; height: 100%; object-fit: cover; }
 
