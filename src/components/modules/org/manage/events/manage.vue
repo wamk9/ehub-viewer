@@ -37,12 +37,7 @@
         <eventStagesIndex  :show="checkOptionIsActive('stages')"  :event="eventToManage" />
         <eventNotifications :show="checkOptionIsActive('notifications')" :event="eventToManage" />
         <eventNews :show="checkOptionIsActive('news')" :event="eventToManage" :orgRoute="route.params.orgRoute" />
-
-        <!-- Placeholder panels -->
-        <div v-if="checkOptionIsActive('participants')" class="gen-section text-center py-5">
-            <font-awesome-icon :icon="['fas', 'users']" class="mb-3 text-muted" style="font-size:2rem" />
-            <p class="text-muted mb-0">{{ $t('events.manage.menu.participants.description') }}</p>
-        </div>
+        <eventParticipants :show="checkOptionIsActive('participants')" :event="eventToManage" :orgRoute="route.params.orgRoute" />
 
         <div v-if="checkOptionIsActive('remove')" class="gen-section gen-section--danger">
             <h6 class="gen-section__title gen-section__title--danger">
@@ -78,6 +73,7 @@ import eventStagesIndex from './event-stages/index.vue'
 import eventGeneralInfo from './general.vue'
 import eventNotifications from './notifications.vue'
 import eventNews from './event-news.vue'
+import eventParticipants from './event-participants.vue'
 import { i18n } from '@/helpers/i18n'
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js'
 

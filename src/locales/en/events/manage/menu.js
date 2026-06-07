@@ -51,7 +51,17 @@ export default {
   },
   participants: {
     title: 'Event participants',
-    description: 'See all confirmed participants for your event.'
+    description: 'See all confirmed participants for your event.',
+    manage: {
+      total: '{n} registration(s)',
+      confirmed: 'Confirmed',
+      free: 'Free',
+      pending: 'Awaiting payment',
+      empty: 'No registrations yet.',
+      registered_at: 'Registered at',
+      gateway_label: 'Gateway',
+      form_data_label: 'Additional data',
+    },
   },
   remove: {
     title: 'Remove event',

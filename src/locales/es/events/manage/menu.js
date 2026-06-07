@@ -51,7 +51,17 @@ export default {
   },
   participants: {
     title: 'Participantes del evento',
-    description: 'Aquí verás toda la información sobre los participantes confirmados de tu evento.'
+    description: 'Aquí verás toda la información sobre los participantes confirmados de tu evento.',
+    manage: {
+      total: '{n} inscripción(es)',
+      confirmed: 'Confirmado',
+      free: 'Gratuito',
+      pending: 'Esperando pago',
+      empty: 'Sin inscripciones aún.',
+      registered_at: 'Inscrito el',
+      gateway_label: 'Gateway',
+      form_data_label: 'Datos adicionales',
+    },
   },
   remove: {
     title: 'Eliminar evento',
