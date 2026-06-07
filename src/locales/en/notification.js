@@ -5,6 +5,7 @@ export default {
     event_created:      'New event: {name} — {org}',
     billing_invoice:    'New invoice for {cycle} — {org}',
     billing_card_saved:      'Payment method saved — {org}',
+    event_article_published: 'New post in "{event}": {title}',
     no_gateway_configured:   'Registration blocked for "{event}": no compatible payment gateway configured in {org}',
     empty:              'No notifications',
     clear_all:          'Clear all',

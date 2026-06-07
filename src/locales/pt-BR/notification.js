@@ -5,6 +5,7 @@ export default {
     event_created:      'Novo evento: {name} — {org}',
     billing_invoice:    'Nova fatura de {cycle} — {org}',
     billing_card_saved:      'Método de pagamento salvo — {org}',
+    event_article_published: 'Nova publicação em "{event}": {title}',
     no_gateway_configured:   'Inscrição bloqueada em "{event}": nenhum gateway de pagamento compatível configurado em {org}',
     empty:              'Nenhuma notificação',
     clear_all:          'Limpar tudo',

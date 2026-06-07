@@ -5,7 +5,8 @@ const eventManageRoutes = [
   'stages',
   'participants',
   'remove',
-  'notifications'
+  'notifications',
+  'news'
 ];
 
 const router = createRouter({
@@ -108,6 +109,11 @@ const router = createRouter({
       path: '/org/:orgRoute/event/:eventRoute',
       name: 'show-event-info',
       component: () => import('@/views/event/show.vue')
+    },
+    {
+      path: '/org/:orgRoute/event/:eventRoute/news/:articleSlug',
+      name: 'show-event-article',
+      component: () => import('@/views/event/article.vue')
     },
     {
       path: '/org/:orgRoute/event/:eventRoute/manage',

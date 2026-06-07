@@ -36,6 +36,7 @@
         <eventGeneralInfo :show="checkOptionIsActive('general')" :event="eventToManage" />
         <eventStagesIndex  :show="checkOptionIsActive('stages')"  :event="eventToManage" />
         <eventNotifications :show="checkOptionIsActive('notifications')" :event="eventToManage" />
+        <eventNews :show="checkOptionIsActive('news')" :event="eventToManage" :orgRoute="route.params.orgRoute" />
 
         <!-- Placeholder panels -->
         <div v-if="checkOptionIsActive('participants')" class="gen-section text-center py-5">
@@ -76,6 +77,7 @@ import { useRoute, useRouter } from 'vue-router'
 import eventStagesIndex from './event-stages/index.vue'
 import eventGeneralInfo from './general.vue'
 import eventNotifications from './notifications.vue'
+import eventNews from './event-news.vue'
 import { i18n } from '@/helpers/i18n'
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js'
 
@@ -98,6 +100,7 @@ const options = ref([
     { stages:        { active: false } },
     { notifications: { active: false } },
     { participants:  { active: false } },
+    { news:          { active: false } },
     { remove:        { active: false } },
 ])
 

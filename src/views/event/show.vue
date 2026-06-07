@@ -157,6 +157,12 @@
                                 <span v-if="event.registrations_count" class="badge bg-secondary ms-1">{{ event.registrations_count }}</span>
                             </button>
                         </li>
+                        <li class="nav-item">
+                            <button class="nav-link" :class="{ active: activeTab === 'news' }" @click="loadArticles">
+                                <font-awesome-icon :icon="['fas', 'newspaper']" class="me-1" />
+                                {{ $t('events.show.tabs.news') }}
+                            </button>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -319,6 +325,46 @@
                 </div>
             </div>
 
+            <!-- Tab: News -->
+            <div v-if="activeTab === 'news'" class="row justify-content-center">
+                <div class="col-12 col-lg-10">
+
+                    <div v-if="articlesLoading" class="text-center py-4">
+                        <div class="spinner-border spinner-border-sm text-primary"></div>
+                    </div>
+
+                    <div v-else-if="!articles.length" class="gen-section text-center py-5">
+                        <font-awesome-icon :icon="['fas', 'newspaper']" class="mb-3 text-muted" style="font-size:2rem;opacity:.4" />
+                        <p class="text-muted mb-0">{{ $t('events.show.news.empty') }}</p>
+                    </div>
+
+                    <div v-else class="news-list">
+                        <router-link
+                            v-for="article in articles"
+                            :key="article.id"
+                            :to="`/org/${$route.params.orgRoute}/event/${$route.params.eventRoute}/news/${article.slug}`"
+                            class="news-card"
+                        >
+                            <div v-if="article.cover_image" class="news-card__cover">
+                                <img :src="baseUrl + 'storage/' + article.cover_image" :alt="article.title" />
+                            </div>
+                            <div class="news-card__body">
+                                <p class="news-card__date text-muted small mb-1">{{ formatDate(article.published_at) }}</p>
+                                <h5 class="news-card__title mb-1">{{ article.title }}</h5>
+                                <p v-if="article.excerpt" class="news-card__excerpt text-muted small mb-1">{{ article.excerpt }}</p>
+                                <span v-if="article.author" class="news-card__author small text-muted">
+                                    {{ $t('events.show.news.by') }} {{ article.author.name }}
+                                </span>
+                            </div>
+                            <div class="news-card__arrow">
+                                <font-awesome-icon :icon="['fas', 'chevron-right']" />
+                            </div>
+                        </router-link>
+                    </div>
+
+                </div>
+            </div>
+
             <!-- Back link -->
             <div class="row justify-content-center mt-4">
                 <div class="col-12 col-lg-10">
@@ -435,6 +481,7 @@
 <script>
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import OrganizationEventRegistration from '@/helpers/communication/OrganizationEventRegistration.js';
+import OrganizationEventArticle from '@/helpers/communication/OrganizationEventArticle.js';
 import SystemVars from '@/helpers/General/SystemVars';
 
 export default {
@@ -457,6 +504,9 @@ export default {
             availableGateways: [],
             showGatewayModal: false,
             registerError: null,
+            articles: [],
+            articlesLoading: false,
+            articlesLoaded: false,
             baseUrl: SystemVars.baseUrl,
         };
     },
@@ -626,6 +676,21 @@ export default {
 
         async selectGateway(gateway) {
             await this.doRetryPayment(gateway);
+        },
+
+        async loadArticles() {
+            this.activeTab = 'news';
+            if (this.articlesLoaded) return;
+            this.articlesLoading = true;
+            const result = await OrganizationEventArticle.getAll(
+                this.$route.params.orgRoute,
+                this.$route.params.eventRoute
+            );
+            this.articlesLoading = false;
+            this.articlesLoaded = true;
+            if (result.code === 200 && Array.isArray(result.data)) {
+                this.articles = result.data;
+            }
         },
 
         checkPaymentReturn() {
@@ -874,6 +939,28 @@ export default {
     color: #fff;
 }
 .reg-input option { background: #1a1a2e; }
+
+/* ── News ── */
+.news-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.news-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s, border-color 0.15s;
+}
+.news-card:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.15); }
+.news-card__cover { flex-shrink: 0; width: 90px; height: 58px; border-radius: 7px; overflow: hidden; }
+.news-card__cover img { width: 100%; height: 100%; object-fit: cover; }
+.news-card__body { flex: 1; min-width: 0; }
+.news-card__title { font-size: 0.95rem; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.news-card__excerpt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.news-card__arrow { flex-shrink: 0; color: rgba(255,255,255,0.25); font-size: 0.75rem; }
 
 /* ── Gateway picker ── */
 .gateway-list { display: flex; flex-direction: column; gap: 0.75rem; }

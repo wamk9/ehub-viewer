@@ -4,6 +4,12 @@ export default {
     info: 'Information',
     stages: 'Stages',
     participants: 'Participants',
+    news: 'News',
+  },
+  news: {
+    empty: 'No news published yet.',
+    read_more: 'Read more',
+    by: 'By',
   },
   info: {
     description: 'Description',
