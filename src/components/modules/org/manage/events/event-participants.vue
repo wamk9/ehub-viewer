@@ -24,7 +24,7 @@
                 <!-- Header -->
                 <div class="reg-row reg-row--header">
                     <span>#</span>
-                    <span>{{ $t('pages.organization.show.events.participants') || 'Participante' }}</span>
+                    <span>{{ $t('events.manage.menu.participants.title') }}</span>
                     <span>Status</span>
                     <span>{{ $t('events.manage.menu.participants.manage.registered_at') }}</span>
                     <span>{{ $t('events.manage.menu.participants.manage.gateway_label') }}</span>

@@ -186,7 +186,12 @@ export default {
         notifText(notif) {
             try {
                 const params = notif.description ? JSON.parse(notif.description) : {}
-                return this.$t(notif.title, params)
+                const result = this.$t(notif.title, params)
+                // fallback: old DB records stored keys without 'notification.' prefix
+                if (result === notif.title && !notif.title.startsWith('notification.')) {
+                    return this.$t('notification.' + notif.title, params)
+                }
+                return result
             } catch {
                 return notif.title
             }
