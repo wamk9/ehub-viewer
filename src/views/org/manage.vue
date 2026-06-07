@@ -83,14 +83,15 @@ export default {
         }
     },
     data() {
+        const forced = this.forceOption?.[0] ?? null;
         return {
             orgName: null,
-            direction: 'forward',
+            direction: forced ? 'none' : 'forward',
             options: [
-                { general:  { icon: ['fas', 'gear'],          color: 'blue',   active: false } },
-                { events:   { icon: ['fas', 'calendar-days'], color: 'green',  active: false } },
-                { news:     { icon: ['fas', 'newspaper'],     color: 'cyan',   active: false } },
-                { finances: { icon: ['fas', 'coins'],         color: 'yellow', active: false } },
+                { general:  { icon: ['fas', 'gear'],          color: 'blue',   active: forced === 'general' } },
+                { events:   { icon: ['fas', 'calendar-days'], color: 'green',  active: forced === 'events' } },
+                { news:     { icon: ['fas', 'newspaper'],     color: 'cyan',   active: forced === 'news' } },
+                { finances: { icon: ['fas', 'coins'],         color: 'yellow', active: forced === 'finances' } },
             ]
         }
     },
@@ -107,10 +108,6 @@ export default {
         const result = await Organization.show(this.$route.params.orgRoute);
         if (result.code === 200 && result.data) {
             this.orgName = result.data.name;
-        }
-
-        if (this.forceOption && this.forceOption.length) {
-            this.goToOption(this.forceOption.shift(), false, false);
         }
     },
     methods: {

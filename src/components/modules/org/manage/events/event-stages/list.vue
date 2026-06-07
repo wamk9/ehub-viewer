@@ -477,6 +477,7 @@ function openCreate() {
 }
 
 function openEdit(stage) {
+    console.log('[stage-edit]', { stage_type: stage.stage_type, config: stage.config, route: stage.route })
     editingStage.value = stage
     const cfg = JSON.parse(JSON.stringify(stage.config ?? {}))
     form.value = {
@@ -484,7 +485,7 @@ function openEdit(stage) {
         route:                 stage.route || slugify(stage.name ?? ''),
         description:           stage.description ?? '',
         start_at:              toDatetimeLocal(stage.start_at),
-        stage_type:            stage.stage_type ?? 'points',
+        stage_type:            ['points', 'bracket'].includes(stage.stage_type) ? stage.stage_type : 'points',
         preview_image:         null,
         preview_image_preview: stage.preview_image
             ? SystemVars.baseUrl + 'storage/' + stage.preview_image
@@ -542,7 +543,7 @@ async function save() {
 
     let result
     if (editingStage.value) {
-        result = await OrganizationEventStage.update(props.orgRoute, eventRoute.value, editingStage.value.route, payload)
+        result = await OrganizationEventStage.update(props.orgRoute, eventRoute.value, editingStage.value.route ?? editingStage.value.id, payload)
     } else {
         result = await OrganizationEventStage.create(props.orgRoute, eventRoute.value, payload)
     }
