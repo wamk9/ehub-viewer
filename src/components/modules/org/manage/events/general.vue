@@ -5,6 +5,7 @@ import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import SystemVars from '@/helpers/General/SystemVars';
 import { i18n } from '@/helpers/i18n';
 import { useRoute } from 'vue-router';
+import { toast } from '@/helpers/toast.js'
 
 const route = useRoute();
 
@@ -30,8 +31,6 @@ const logoInput    = ref(null)
 const coverInput   = ref(null)
 
 const saving     = ref(false)
-const saveError  = ref(null)
-const saveSuccess = ref(false)
 
 watch(() => props.event, (newEvent) => {
     if (newEvent) {
@@ -73,9 +72,7 @@ function pickCover(e) {
 }
 
 async function save() {
-    saveError.value   = null
-    saveSuccess.value = false
-    saving.value      = true
+    saving.value = true
 
     const payload = { ...form.value }
     if (logoBase64.value)  payload.logo_image  = logoBase64.value
@@ -90,20 +87,17 @@ async function save() {
     saving.value = false
 
     if (result.code === 200) {
-        saveSuccess.value = true
+        toast.success(i18n.t('events.manage.general.success'))
         logoBase64.value  = null
         coverBase64.value = null
     } else {
-        saveError.value = result.data ?? i18n.t('events.manage.general.error')
+        toast.error(result.data ?? i18n.t('events.manage.general.error'))
     }
 }
 </script>
 
 <template>
     <div v-if="show">
-
-        <div v-if="saveError" class="alert alert-danger mb-4">{{ saveError }}</div>
-        <div v-if="saveSuccess" class="alert alert-success mb-4">{{ $t('events.manage.general.success') }}</div>
 
         <!-- Images -->
         <div class="gen-section mb-4">

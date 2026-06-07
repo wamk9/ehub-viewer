@@ -10,15 +10,6 @@ import SystemVars from '@/helpers/General/SystemVars';
 <template>
     <div class="row">
         <div class="col-12 col-md-12 col-lg-12">
-            <div v-if="resultCode == 200" class="alert alert-success alert-dismissible fade show" role="alert">
-                Os dados da sua liga foram atualizados com sucesso!
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @click="() => (resultCode = 0)"></button>
-            </div>
-            <div v-else-if="resultCode > 200" class="alert alert-danger alert-dismissible fade show" role="alert">
-                Ops! Parece que algo deu errado ao salvar os dados da sua liga, que tal tentar novamente mais tarde?
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @click="() => (resultCode = 0)"></button>
-            </div>
-
             <p>Aqui você poderá editar os dados iniciais de sua liga, como nome, link, descrição e imagem!</p>
 
             <div class="row align-items-center">
@@ -70,6 +61,8 @@ import SystemVars from '@/helpers/General/SystemVars';
 </template>
 
 <script>
+import { toast } from '@/helpers/toast.js';
+
 export default {
     props: {
         refersTo: {
@@ -82,7 +75,6 @@ export default {
     },
     data() {
         return {
-            resultCode: 0,
             sendingToApi: false,
             newLeagueImage: '',
             updatedLeagueData:  JSON.parse(JSON.stringify(this.leagueData)), //Used to remove reactivity
@@ -100,17 +92,21 @@ export default {
     methods: {
         async executeAction() {
             this.sendingToApi = true;
-            
+
             const dataToSend = {
                 name: this.updatedLeagueData.name,
                 logo_image: this.newLeagueImage,
                 description: this.updatedLeagueData.description,
             };
 
-            this.resultCode = (await League.updateProfile(this.refersTo, dataToSend)).code;
-            
-            if (this.resultCode == 200)
+            const result = await League.updateProfile(this.refersTo, dataToSend);
+
+            if (result.code == 200) {
+                toast.success('Os dados da sua liga foram atualizados com sucesso!');
                 this.$emit('league-updated', JSON.stringify(this.updatedLeagueData));
+            } else {
+                toast.error('Ops! Parece que algo deu errado ao salvar os dados da sua liga, que tal tentar novamente mais tarde?');
+            }
 
             this.sendingToApi = false;
         },

@@ -22,6 +22,7 @@ export default {
     save_draft: 'Guardar Borrador',
     publish: 'Publicar',
     by: 'por',
+    save_success: '¡Artículo guardado con éxito!',
     save_error: 'Error al guardar el artículo. Inténtalo de nuevo.',
     delete: {
       title: '¿Eliminar artículo?',

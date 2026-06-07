@@ -1,10 +1,5 @@
 <template>
     <div v-if="show">
-        <div v-if="justConnected" class="alert alert-success small d-flex gap-2 align-items-center mb-3">
-            <font-awesome-icon :icon="['fas', 'circle-check']" />
-            {{ $t('finances.gateways.connect_success', { gateway: justConnected }) }}
-        </div>
-
         <div class="gen-section mb-4">
             <p class="gen-section__title">{{ $t('finances.gateways.title') }}</p>
             <p class="text-muted small mb-4">{{ $t('finances.gateways.description') }}</p>
@@ -76,6 +71,7 @@
 
 <script>
 import OrganizationBilling from '@/helpers/communication/OrganizationBilling.js';
+import { toast } from '@/helpers/toast.js';
 
 export default {
     props: {
@@ -88,7 +84,6 @@ export default {
             gateways: [],
             connecting: null,
             disconnecting: null,
-            justConnected: null,
         };
     },
     computed: {
@@ -102,7 +97,7 @@ export default {
         if (this.show) this.load();
         const connected = this.$route?.query?.connected;
         if (connected) {
-            this.justConnected = connected.replace('_', ' ');
+            toast.success(this.$t('finances.gateways.connect_success', { gateway: connected.replace('_', ' ') }));
             this.$router.replace({ query: {} });
         }
     },

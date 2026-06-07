@@ -1,8 +1,8 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { RouterView } from 'vue-router'
 import navbar from './components/general/navbar/navbar.vue'
 import customFooter from './components/general/footer.vue'
+import AppToast from './components/AppToast.vue'
 import { useI18n } from 'vue-i18n'
 const { locale, t } = useI18n()
 </script>
@@ -13,6 +13,7 @@ const { locale, t } = useI18n()
       <RouterView :key="$route.fullPath" />
     </div>
     <customFooter />
+    <AppToast />
 </template>
 
 <style>

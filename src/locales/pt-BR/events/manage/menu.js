@@ -79,6 +79,8 @@ export default {
         col_qualified: 'Classificado',
         no_participants: 'Nenhum participante confirmado encontrado.',
         load_error: 'Erro ao carregar participantes.',
+        start_success: 'Etapa iniciada com sucesso!',
+        finish_success: 'Etapa finalizada com sucesso!',
         start_error: 'Erro ao iniciar etapa.',
         finish_error: 'Erro ao finalizar etapa.',
         save_success: 'Resultados salvos!',
@@ -126,6 +128,7 @@ export default {
       save_draft: 'Salvar rascunho',
       publish: 'Publicar',
       cancel: 'Cancelar',
+      save_success: 'Artigo salvo com sucesso!',
       save_error: 'Erro ao salvar. Tente novamente.',
       delete: {
         title: 'Remover artigo',

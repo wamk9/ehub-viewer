@@ -57,7 +57,6 @@
 
         <!-- Form view -->
         <div v-else-if="view === 'form'" class="stage-form">
-            <div v-if="saveError" class="alert alert-danger mb-3">{{ saveError }}</div>
 
             <!-- Basic info -->
             <div class="gen-section mb-4">
@@ -250,9 +249,6 @@
                 </button>
             </div>
 
-            <div v-if="manageError" class="alert alert-danger mb-3 small py-2">{{ manageError }}</div>
-            <div v-if="manageSuccess" class="alert alert-success mb-3 small py-2">{{ manageSuccess }}</div>
-
             <!-- Loading -->
             <div v-if="loadingManage" class="text-center py-5">
                 <div class="spinner-border text-light" style="width:1.5rem;height:1.5rem"></div>
@@ -352,6 +348,7 @@ import { useLiveSSE } from '@/helpers/communication/useLiveSSE.js'
 import OrganizationEventStage from '@/helpers/communication/OrganizationEventStage.js'
 import OrganizationEventRegistration from '@/helpers/communication/OrganizationEventRegistration.js'
 import SystemVars from '@/helpers/General/SystemVars'
+import { toast } from '@/helpers/toast.js'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -366,7 +363,6 @@ const eventData    = ref({ ...props.event })
 const view         = ref('list')
 const saving       = ref(false)
 const deleting     = ref(false)
-const saveError    = ref(null)
 const editingStage = ref(null)
 const deleteTarget = ref(null)
 const jsonInput        = ref(null)
@@ -380,8 +376,6 @@ const manageResults    = ref([])
 const loadingManage    = ref(false)
 const savingResults    = ref(false)
 const controlLoading   = ref(false)
-const manageError      = ref(null)
-const manageSuccess    = ref(null)
 const showFinishConfirm    = ref(false)
 const routeManuallyEdited  = ref(false)
 
@@ -471,13 +465,11 @@ function openCreate() {
     editingStage.value = null
     routeManuallyEdited.value = false
     form.value = emptyForm()
-    saveError.value = null
     jsonAlert.value = { message: '', success: true }
     view.value = 'form'
 }
 
 function openEdit(stage) {
-    console.log('[stage-edit]', { stage_type: stage.stage_type, config: stage.config, route: stage.route })
     editingStage.value = stage
     const cfg = JSON.parse(JSON.stringify(stage.config ?? {}))
     form.value = {
@@ -498,26 +490,24 @@ function openEdit(stage) {
         },
     }
     routeManuallyEdited.value = !!stage.route
-    saveError.value = null
     jsonAlert.value = { message: '', success: true }
     view.value = 'form'
 }
 
 async function save() {
     if (!form.value.name?.trim()) {
-        saveError.value = t('events.manage.menu.stages.manage.form.name_required')
+        toast.error(t('events.manage.menu.stages.manage.form.name_required'))
         return
     }
     if (!form.value.route?.trim()) {
-        saveError.value = t('events.manage.menu.stages.manage.form.route_required')
+        toast.error(t('events.manage.menu.stages.manage.form.route_required'))
         return
     }
     if (!/^[a-z0-9-]+$/.test(form.value.route.trim())) {
-        saveError.value = t('events.manage.menu.stages.manage.form.route_invalid')
+        toast.error(t('events.manage.menu.stages.manage.form.route_invalid'))
         return
     }
     saving.value = true
-    saveError.value = null
 
     const config = form.value.stage_type === 'points'
         ? { points: form.value.config.points, extra_points: form.value.config.extra_points }
@@ -560,9 +550,9 @@ async function save() {
         }
         view.value = 'list'
     } else if (result.code === 409) {
-        saveError.value = t('events.manage.menu.stages.manage.form.route_in_use')
+        toast.error(t('events.manage.menu.stages.manage.form.route_in_use'))
     } else {
-        saveError.value = t('events.manage.menu.stages.manage.form.save_error')
+        toast.error(t('events.manage.menu.stages.manage.form.save_error'))
     }
 }
 
@@ -620,8 +610,6 @@ function onJsonUpload(e) {
 // ── Manage view ────────────────────────────────────────────────────
 async function openManage(stage) {
     managingStage.value = stage
-    manageError.value   = null
-    manageSuccess.value = null
     showFinishConfirm.value = false
     view.value = 'manage'
     loadingManage.value = true
@@ -643,14 +631,12 @@ async function openManage(stage) {
             }
         })
     } else {
-        manageError.value = t('events.manage.menu.stages.manage.manage_view.load_error')
+        toast.error(t('events.manage.menu.stages.manage.manage_view.load_error'))
     }
 }
 
 async function controlStage(action) {
     controlLoading.value = true
-    manageError.value    = null
-    manageSuccess.value  = null
     showFinishConfirm.value = false
 
     const result = await OrganizationEventStage.control(props.orgRoute, eventRoute.value, managingStage.value.route, action)
@@ -661,15 +647,15 @@ async function controlStage(action) {
         eventData.value.stages = eventData.value.stages.map(s =>
             s.route === managingStage.value.route ? { ...s, ...result.data } : s
         )
+        if (action === 'start')  toast.success(t('events.manage.menu.stages.manage.manage_view.start_success'))
+        if (action === 'finish') toast.success(t('events.manage.menu.stages.manage.manage_view.finish_success'))
     } else {
-        manageError.value = t(`events.manage.menu.stages.manage.manage_view.${action}_error`)
+        toast.error(t(`events.manage.menu.stages.manage.manage_view.${action}_error`))
     }
 }
 
 async function saveManageResults() {
     savingResults.value = true
-    manageError.value   = null
-    manageSuccess.value = null
 
     const results = manageResults.value.map(r => ({
         registration_id: r.registration_id,
@@ -682,9 +668,9 @@ async function saveManageResults() {
     savingResults.value = false
 
     if (result.code === 200) {
-        manageSuccess.value = t('events.manage.menu.stages.manage.manage_view.save_success')
+        toast.success(t('events.manage.menu.stages.manage.manage_view.save_success'))
     } else {
-        manageError.value = t('events.manage.menu.stages.manage.manage_view.save_error')
+        toast.error(t('events.manage.menu.stages.manage.manage_view.save_error'))
     }
 }
 

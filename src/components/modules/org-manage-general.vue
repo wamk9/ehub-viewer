@@ -39,8 +39,6 @@ import SystemVars from '@/helpers/General/SystemVars';
 
     <!-- About -->
     <div v-if="actualMenu === 'about'">
-        <div v-if="aboutError" class="alert alert-danger mb-4">{{ aboutError }}</div>
-        <div v-if="aboutSuccess" class="alert alert-success mb-4">{{ $t('pages.organization.general.about.success') }}</div>
 
         <!-- Logo -->
         <div class="gen-section mb-4">
@@ -157,8 +155,6 @@ import SystemVars from '@/helpers/General/SystemVars';
 
     <!-- Staff -->
     <div v-else-if="actualMenu === 'staff'">
-        <div v-if="staffError" class="alert alert-danger mb-4">{{ staffError }}</div>
-        <div v-if="staffSuccess" class="alert alert-success mb-4">{{ staffSuccess }}</div>
 
         <!-- Members list -->
         <div class="gen-section mb-4">
@@ -382,6 +378,7 @@ import SystemVars from '@/helpers/General/SystemVars';
 
 <script>
 import Organization from '@/helpers/communication/Organization.js';
+import { toast } from '@/helpers/toast.js';
 
 export default {
     components: { InitialsAvatar },
@@ -412,14 +409,10 @@ export default {
                 phone: '', contact_email: '',
             },
             aboutValidation: {},
-            aboutError: null,
-            aboutSuccess: false,
 
             myUserId: null,
             members: [],
             invites: [],
-            staffError: null,
-            staffSuccess: null,
 
             addForm: { email: '', role: 'event_manager' },
             addValidation: {},
@@ -459,8 +452,6 @@ export default {
             }
         },
         async saveAbout() {
-            this.aboutError = null;
-            this.aboutSuccess = false;
             this.aboutValidation = {};
             this.isLoading = true;
             const payload = { ...this.aboutForm };
@@ -468,9 +459,9 @@ export default {
             const result = await Organization.updateProfile(this.orgRoute, payload);
             this.isLoading = false;
             if (result.code === 200) {
-                this.aboutSuccess = true;
+                toast.success(this.$t('pages.organization.general.about.success'));
             } else {
-                this.aboutError = result.data?.message ?? this.$t('pages.organization.general.about.error');
+                toast.error(result.data?.message ?? this.$t('pages.organization.general.about.error'));
             }
         },
         async loadMembers() {
@@ -486,7 +477,7 @@ export default {
                 const me = this.members.find(m => m.user?.id === this.myUserId);
                 if (me) this.userRole = me.role;
             } else {
-                this.staffError = this.$t('pages.organization.general.staff.error_load');
+                toast.error(this.$t('pages.organization.general.staff.error_load'));
             }
 
             if (invitesResult.code === 200) {
@@ -509,8 +500,6 @@ export default {
         },
         async addMember() {
             this.addValidation = {};
-            this.staffError = null;
-            this.staffSuccess = null;
 
             const email = this.addForm.email.trim();
             if (!email) {
@@ -527,11 +516,11 @@ export default {
             this.isLoading = false;
 
             if (result.code === 201) {
-                this.staffSuccess = this.$t('pages.organization.general.staff.success_add', { email });
+                toast.success(this.$t('pages.organization.general.staff.success_add', { email }));
                 this.addForm.email = '';
                 await this.loadMembers();
             } else {
-                this.staffError = this.staffApiError(result.data, 'pages.organization.general.staff.error_add');
+                toast.error(this.staffApiError(result.data, 'pages.organization.general.staff.error_add'));
             }
         },
         async confirmTransfer() {
@@ -539,60 +528,50 @@ export default {
             if (!email) return;
 
             this.transfer.loading = true;
-            this.staffError = null;
-            this.staffSuccess = null;
             const result = await Organization.transferOwnership(this.orgRoute, email);
             this.transfer.loading = false;
 
             if (result.code === 200) {
-                this.staffSuccess = this.$t('pages.organization.general.staff.transfer.success');
+                toast.success(this.$t('pages.organization.general.staff.transfer.success'));
                 this.transfer.show = false;
                 this.transfer.email = '';
                 await this.loadMembers();
             } else {
-                this.staffError = this.staffApiError(result.data, 'pages.organization.general.staff.transfer.error');
+                toast.error(this.staffApiError(result.data, 'pages.organization.general.staff.transfer.error'));
             }
         },
         async changeRole(member, newRole) {
-            this.staffError = null;
-            this.staffSuccess = null;
             this.isLoading = true;
             const result = await Organization.updateMemberRole(this.orgRoute, member.user.id, newRole);
             this.isLoading = false;
             if (result.code === 200) {
                 member.role = newRole;
             } else {
-                this.staffError = this.$t('pages.organization.general.staff.error_role');
+                toast.error(this.$t('pages.organization.general.staff.error_role'));
             }
         },
         async removeMember(member) {
-            this.staffError = null;
-            this.staffSuccess = null;
             this.isLoading = true;
             const result = await Organization.removeMember(this.orgRoute, member.user.id);
             this.isLoading = false;
             if (result.code === 200) {
                 this.members = this.members.filter(m => m.id !== member.id);
-                this.staffSuccess = this.$t('pages.organization.general.staff.success_remove', { username: member.user.username });
+                toast.success(this.$t('pages.organization.general.staff.success_remove', { username: member.user.username }));
             } else {
-                this.staffError = this.$t('pages.organization.general.staff.error_remove');
+                toast.error(this.$t('pages.organization.general.staff.error_remove'));
             }
         },
         async resendInvite(invite) {
-            this.staffError = null;
-            this.staffSuccess = null;
             this.isLoading = true;
             const result = await Organization.resendInvite(this.orgRoute, invite.id);
             this.isLoading = false;
             if (result.code === 200) {
-                this.staffSuccess = this.$t('pages.organization.general.staff.resend_success', { email: invite.email });
+                toast.success(this.$t('pages.organization.general.staff.resend_success', { email: invite.email }));
             } else {
-                this.staffError = this.$t('pages.organization.general.staff.resend_error');
+                toast.error(this.$t('pages.organization.general.staff.resend_error'));
             }
         },
         async leaveOrg() {
-            this.staffError = null;
-            this.staffSuccess = null;
             this.isLoading = true;
             const result = await Organization.leaveOrganization(this.orgRoute);
             this.isLoading = false;
@@ -600,20 +579,18 @@ export default {
                 this.$emit('close');
                 this.$router.push({ name: 'my-organizations' });
             } else {
-                this.staffError = this.$t('pages.organization.general.staff.error_leave');
+                toast.error(this.$t('pages.organization.general.staff.error_leave'));
             }
         },
         async removeInvite(invite) {
-            this.staffError = null;
-            this.staffSuccess = null;
             this.isLoading = true;
             const result = await Organization.removeInvite(this.orgRoute, invite.id);
             this.isLoading = false;
             if (result.code === 200) {
                 this.invites = this.invites.filter(i => i.id !== invite.id);
-                this.staffSuccess = this.$t('pages.organization.general.staff.remove_invite_success');
+                toast.success(this.$t('pages.organization.general.staff.remove_invite_success'));
             } else {
-                this.staffError = this.$t('pages.organization.general.staff.remove_invite_error');
+                toast.error(this.$t('pages.organization.general.staff.remove_invite_error'));
             }
         },
         formatExpiry(dateStr) {

@@ -6,6 +6,7 @@ import AvatarUpload from '@/components/inputs/AvatarUpload.vue'
 import ehubInput    from '@/components/inputs/ehub-input.vue'
 import Api          from '@/helpers/communication/Connection'
 import store        from '@/store'
+import { toast } from '@/helpers/toast.js'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -14,7 +15,6 @@ const router = useRouter()
 const activeTab   = ref('personal')
 const isLoading   = ref(false)
 const loadingText = ref('')
-const fetchError  = ref('')
 
 const profile = reactive({
   name: '', surname: '', username: '', mail: '', phone: '',
@@ -22,15 +22,10 @@ const profile = reactive({
 })
 
 const personal = reactive({ name: '', surname: '', phone: '', username: '', image: '' })
-const personalSuccess = ref('')
-const personalErrors  = ref([])
 
 const pwd = reactive({ current_password: '', password: '', password_confirmation: '' })
-const pwdSuccess = ref('')
-const pwdErrors  = ref([])
 
 const deletePassword = ref('')
-const deleteError    = ref('')
 const deleteConfirm  = ref(false)
 
 // ─── Helpers ──────────────────────────────────────────────────
@@ -51,7 +46,6 @@ function withCache(url) {
 async function fetchProfile() {
   isLoading.value   = true
   loadingText.value = t('users.profile.loading.fetch')
-  fetchError.value  = ''
   try {
     const result = await Api.getAsync('/user/profile', {
       headers: { Authorization: 'Bearer ' + store.getters.getToken }
@@ -65,10 +59,10 @@ async function fetchProfile() {
       personal.username = d.username
       personal.image    = withCache(d.image) ?? ''
     } else {
-      fetchError.value = t('users.profile.error.fetch')
+      toast.error(t('users.profile.error.fetch'))
     }
   } catch {
-    fetchError.value = t('users.profile.error.fetch')
+    toast.error(t('users.profile.error.fetch'))
   } finally {
     isLoading.value = false
   }
@@ -76,10 +70,8 @@ async function fetchProfile() {
 
 // ─── Save personal ────────────────────────────────────────────
 async function savePersonal() {
-  personalSuccess.value = ''
-  personalErrors.value  = []
-  isLoading.value       = true
-  loadingText.value     = t('users.profile.loading.saving')
+  isLoading.value   = true
+  loadingText.value = t('users.profile.loading.saving')
 
   const payload = {
     name:     personal.name,
@@ -92,13 +84,13 @@ async function savePersonal() {
   try {
     const result = await Api.patchAsync('/user/profile', payload)
     if (result.code === 200) {
-      personalSuccess.value = t('users.profile.personal.success')
+      toast.success(t('users.profile.personal.success'))
       await fetchProfile()
     } else {
-      personalErrors.value = parseErrors(result.response)
+      toast.error(parseErrors(result.response).join('\n'))
     }
   } catch {
-    personalErrors.value = [t('users.profile.error.generic')]
+    toast.error(t('users.profile.error.generic'))
   } finally {
     isLoading.value = false
   }
@@ -106,11 +98,8 @@ async function savePersonal() {
 
 // ─── Change password ──────────────────────────────────────────
 async function savePassword() {
-  pwdSuccess.value = ''
-  pwdErrors.value  = []
-
   if (pwd.password !== pwd.password_confirmation) {
-    pwdErrors.value = [t('users.profile.password.error.mismatch')]
+    toast.error(t('users.profile.password.error.mismatch'))
     return
   }
 
@@ -124,17 +113,17 @@ async function savePassword() {
       password_confirmation: pwd.password_confirmation,
     })
     if (result.code === 200) {
-      pwdSuccess.value = t('users.profile.password.success')
+      toast.success(t('users.profile.password.success'))
       pwd.current_password = ''
       pwd.password         = ''
       pwd.password_confirmation = ''
     } else if (result.code === 403) {
-      pwdErrors.value = [t('users.profile.password.error.wrong')]
+      toast.error(t('users.profile.password.error.wrong'))
     } else {
-      pwdErrors.value = parseErrors(result.response)
+      toast.error(parseErrors(result.response).join('\n'))
     }
   } catch {
-    pwdErrors.value = [t('users.profile.error.generic')]
+    toast.error(t('users.profile.error.generic'))
   } finally {
     isLoading.value = false
   }
@@ -142,10 +131,8 @@ async function savePassword() {
 
 // ─── Delete account ───────────────────────────────────────────
 async function deleteAccount() {
-  deleteError.value = ''
-
   if (!deletePassword.value) {
-    deleteError.value = t('users.profile.password.error.wrong')
+    toast.error(t('users.profile.password.error.wrong'))
     return
   }
 
@@ -158,12 +145,12 @@ async function deleteAccount() {
       store.dispatch('removeToken')
       router.push({ name: 'home' })
     } else if (result.code === 403) {
-      deleteError.value = t('users.profile.password.error.wrong')
+      toast.error(t('users.profile.password.error.wrong'))
     } else {
-      deleteError.value = t('users.profile.error.generic')
+      toast.error(t('users.profile.error.generic'))
     }
   } catch {
-    deleteError.value = t('users.profile.error.generic')
+    toast.error(t('users.profile.error.generic'))
   } finally {
     isLoading.value = false
   }
@@ -199,12 +186,6 @@ onMounted(fetchProfile)
             <span class="text-muted small">@{{ profile.username }}</span>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div v-if="fetchError" class="row justify-content-center mb-3">
-      <div class="col-12 col-lg-9">
-        <div class="alert alert-danger">{{ fetchError }}</div>
       </div>
     </div>
 
@@ -247,16 +228,6 @@ onMounted(fetchProfile)
           <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
 
-              <div v-if="personalSuccess" class="alert alert-success py-2 small mb-3">
-                {{ personalSuccess }}
-              </div>
-              <div v-if="personalErrors.length" class="alert alert-danger py-2 small mb-3">
-                <ul class="mb-0 ps-3" v-if="personalErrors.length > 1">
-                  <li v-for="(e, i) in personalErrors" :key="i">{{ e }}</li>
-                </ul>
-                <span v-else>{{ personalErrors[0] }}</span>
-              </div>
-
               <div class="d-flex flex-column flex-md-row align-items-start gap-4 mb-4">
                 <AvatarUpload
                   v-model="personal.image"
@@ -296,16 +267,6 @@ onMounted(fetchProfile)
 
           <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
-
-              <div v-if="pwdSuccess" class="alert alert-success py-2 small mb-3">
-                {{ pwdSuccess }}
-              </div>
-              <div v-if="pwdErrors.length" class="alert alert-danger py-2 small mb-3">
-                <ul class="mb-0 ps-3" v-if="pwdErrors.length > 1">
-                  <li v-for="(e, i) in pwdErrors" :key="i">{{ e }}</li>
-                </ul>
-                <span v-else>{{ pwdErrors[0] }}</span>
-              </div>
 
               <ehubInput v-model="pwd.current_password" id="prof-pwd-current" type="password"
                 :label="$t('users.profile.password.form.current.label')"
@@ -359,8 +320,6 @@ onMounted(fetchProfile)
                 {{ $t('users.profile.account.danger.title') }}
               </h6>
               <p class="text-muted small mb-3">{{ $t('users.profile.account.danger.description') }}</p>
-
-              <div v-if="deleteError" class="alert alert-danger py-2 small mb-3">{{ deleteError }}</div>
 
               <div v-if="!deleteConfirm">
                 <button class="btn btn-outline-danger" @click="deleteConfirm = true">

@@ -93,11 +93,6 @@ import { i18n } from '@/helpers/i18n';
                             <small :class="charCounterClass(orgForm.description.length, 180)">{{ orgForm.description.length }}/180</small>
                         </div>
 
-                        <!-- General error -->
-                        <div v-if="formValidation.general" class="alert alert-danger mb-3 py-2">
-                            {{ formValidation.general }}
-                        </div>
-
                         <!-- Submit -->
                         <ehubButton
                             @click="executeAction"
@@ -117,6 +112,7 @@ import { i18n } from '@/helpers/i18n';
 import Organization from '@/helpers/communication/Organization.js';
 import router from '@/router';
 import { i18n } from '@/helpers/i18n';
+import { toast } from '@/helpers/toast.js';
 
 export default {
     data() {
@@ -216,7 +212,7 @@ export default {
                     for (const [key, value] of Object.entries(response.errors))
                         this.formValidation[key] = { type: 'error', text: Array.isArray(value) ? value[0] : value };
                 } else {
-                    this.formValidation.general = response.message || i18n.t('pages.organization.create.loading.error');
+                    toast.error(response.message || i18n.t('pages.organization.create.loading.error'));
                 }
             }
         },

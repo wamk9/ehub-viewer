@@ -26,9 +26,7 @@ import InitialsAvatar from '@/components/general/InitialsAvatar.vue';
 
         <hr class="mb-4" />
 
-        <div v-if="error" class="alert alert-danger">{{ error }}</div>
-
-        <div v-else-if="!isLoading && organizations.length === 0" class="text-center py-5">
+        <div v-if="!isLoading && organizations.length === 0" class="text-center py-5">
             <font-awesome-icon :icon="['fas', 'building']" size="4x" class="text-muted mb-4" />
             <h3 class="mb-2">{{ $t('pages.organization.mine.empty.title') }}</h3>
             <p class="text-muted mb-4">{{ $t('pages.organization.mine.empty.description') }}</p>
@@ -73,13 +71,13 @@ import InitialsAvatar from '@/components/general/InitialsAvatar.vue';
 <script>
 import Organization from '@/helpers/communication/Organization.js';
 import { i18n } from '@/helpers/i18n';
+import { toast } from '@/helpers/toast.js';
 
 export default {
     data() {
         return {
             organizations: [],
             isLoading: false,
-            error: null,
         };
     },
     async mounted() {
@@ -88,7 +86,6 @@ export default {
     methods: {
         async loadOrganizations() {
             this.isLoading = true;
-            this.error = null;
 
             const result = await Organization.getMine();
             this.isLoading = false;
@@ -96,7 +93,7 @@ export default {
             if (result.code === 200) {
                 this.organizations = result.data || [];
             } else {
-                this.error = i18n.t('pages.organization.mine.error.load');
+                toast.error(i18n.t('pages.organization.mine.error.load'));
             }
         },
         roleBadgeClass(role) {

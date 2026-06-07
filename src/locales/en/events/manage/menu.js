@@ -79,6 +79,8 @@ export default {
         col_qualified: 'Qualified',
         no_participants: 'No confirmed participants found.',
         load_error: 'Error loading participants.',
+        start_success: 'Stage started successfully!',
+        finish_success: 'Stage finished successfully!',
         start_error: 'Error starting stage.',
         finish_error: 'Error finishing stage.',
         save_success: 'Results saved!',
@@ -126,6 +128,7 @@ export default {
       save_draft: 'Save draft',
       publish: 'Publish',
       cancel: 'Cancel',
+      save_success: 'Article saved successfully!',
       save_error: 'Error saving. Please try again.',
       delete: {
         title: 'Delete article',

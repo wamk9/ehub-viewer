@@ -19,20 +19,6 @@
             </router-link>
         </div>
 
-        <!-- Payment return banner -->
-        <div v-if="paymentReturnStatus === 'success'" class="alert alert-success d-flex gap-2 align-items-center mb-3 small">
-            <font-awesome-icon :icon="['fas', 'circle-check']" />
-            {{ $t('events.show.registration.payment_success') }}
-        </div>
-        <div v-else-if="paymentReturnStatus === 'pending'" class="alert alert-warning d-flex gap-2 align-items-center mb-3 small">
-            <font-awesome-icon :icon="['fas', 'clock']" />
-            {{ $t('events.show.registration.payment_pending') }}
-        </div>
-        <div v-else-if="paymentReturnStatus === 'failure'" class="alert alert-danger d-flex gap-2 align-items-center mb-3 small">
-            <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />
-            {{ $t('events.show.registration.payment_failure') }}
-        </div>
-
         <!-- Event detail -->
         <template v-else>
 
@@ -483,6 +469,7 @@ import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import OrganizationEventRegistration from '@/helpers/communication/OrganizationEventRegistration.js';
 import OrganizationEventArticle from '@/helpers/communication/OrganizationEventArticle.js';
 import SystemVars from '@/helpers/General/SystemVars';
+import { toast } from '@/helpers/toast.js';
 
 export default {
     data() {
@@ -497,7 +484,6 @@ export default {
             showRegisterModal: false,
             formData: {},
             formErrors: {},
-            paymentReturnStatus: null,
             checkingPayment: false,
             retryingPayment: false,
             paymentCheckMessage: null,
@@ -697,11 +683,11 @@ export default {
             const payment = this.$route.query.payment;
             if (!payment) return;
             if (payment === 'success') {
-                this.paymentReturnStatus = 'success';
+                toast.success(this.$t('events.show.registration.payment_success'));
             } else if (payment === 'failure' || payment === 'cancelled') {
-                this.paymentReturnStatus = 'failure';
+                toast.error(this.$t('events.show.registration.payment_failure'));
             } else if (payment === 'pending') {
-                this.paymentReturnStatus = 'pending';
+                toast.warning(this.$t('events.show.registration.payment_pending'));
             }
             // Clear query from URL
             this.$router.replace({ query: {} });

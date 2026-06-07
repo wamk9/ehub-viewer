@@ -22,6 +22,7 @@ export default {
     save_draft: 'Save as Draft',
     publish: 'Publish',
     by: 'by',
+    save_success: 'Article saved successfully!',
     save_error: 'Failed to save article. Please try again.',
     delete: {
       title: 'Delete article?',

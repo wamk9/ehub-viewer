@@ -80,7 +80,6 @@ import SystemVars from '@/helpers/General/SystemVars';
 
         <!-- Editor view -->
         <div v-else-if="view === 'editor'" class="article-editor">
-            <div v-if="saveError" class="alert alert-danger mb-3">{{ saveError }}</div>
 
             <!-- Cover image -->
             <div class="mb-3">
@@ -204,6 +203,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
 import OrganizationEventArticle from '@/helpers/communication/OrganizationEventArticle.js';
 import SystemVars from '@/helpers/General/SystemVars';
+import { toast } from '@/helpers/toast.js';
 
 export default {
     props: {
@@ -219,7 +219,6 @@ export default {
             publishing: false,
             deleting: false,
             uploadingImage: false,
-            saveError: null,
             articles: [],
             editingArticle: null,
             deleteTarget: null,
@@ -255,12 +254,10 @@ export default {
         openCreate() {
             this.editingArticle = null;
             this.form = { title: '', excerpt: '', cover_image: null, cover_preview: null };
-            this.saveError = null;
             this.view = 'editor';
             this.$nextTick(() => this.initEditor(''));
         },
         async openEdit(article) {
-            this.saveError = null;
             this.view = 'editor';
             const result = await OrganizationEventArticle.show(this.orgRoute, this.eventRoute, article.slug);
             const full = (result.code === 200 && result.data) ? result.data : article;
@@ -324,12 +321,11 @@ export default {
         },
         async save(publish) {
             if (!this.form.title?.trim()) {
-                this.saveError = this.$t('events.manage.menu.news.manage.title_required');
+                toast.error(this.$t('events.manage.menu.news.manage.title_required'));
                 return;
             }
             this.saving     = true;
             this.publishing = publish;
-            this.saveError  = null;
 
             const payload = {
                 title:   this.form.title.trim(),
@@ -348,10 +344,11 @@ export default {
             this.saving = false;
 
             if (result.code === 200 || result.code === 201) {
+                toast.success(this.$t('events.manage.menu.news.manage.save_success'));
                 await this.loadArticles();
                 this.view = 'list';
             } else {
-                this.saveError = this.$t('events.manage.menu.news.manage.save_error');
+                toast.error(this.$t('events.manage.menu.news.manage.save_error'));
             }
         },
         confirmDelete(article) { this.deleteTarget = article; },

@@ -22,6 +22,7 @@ export default {
     save_draft: 'Salvar Rascunho',
     publish: 'Publicar',
     by: 'por',
+    save_success: 'Artigo salvo com sucesso!',
     save_error: 'Falha ao salvar artigo. Tente novamente.',
     delete: {
       title: 'Excluir artigo?',

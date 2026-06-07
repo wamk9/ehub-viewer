@@ -13,15 +13,6 @@ import { createSSE } from '@/helpers/communication/useLiveSSE.js';
 
 <template>
     <main class="container">
-        <div class="row justify-content-center mb-5" v-if="$route.query.created === 'true'">
-            <div class="col-12">
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ $t('pages.organization.show.created_alert') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            </div>
-        </div>
-
         <div class="row justify-content-center">
             <div class="col-12 col-lg-3 align-self-center text-center">
                 <InitialsAvatar
@@ -162,6 +153,7 @@ import Article from '@/helpers/communication/Article.js';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import SystemVars from '@/helpers/General/SystemVars';
 import store from '@/store';
+import { toast } from '@/helpers/toast.js';
 
 export default {
     data() {
@@ -189,6 +181,11 @@ export default {
         };
     },
     async created() {
+        if (this.$route.query.created === 'true') {
+            toast.success(this.$t('pages.organization.show.created_alert'));
+            this.$router.replace({ query: {} });
+        }
+
         const result = await Organization.show(this.$route.params.orgRoute);
         if (result.code === 200) {
             this.leagueData  = result.data;

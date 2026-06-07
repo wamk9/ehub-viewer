@@ -6,6 +6,7 @@ import ehubInput from '@/components/inputs/ehub-input.vue'
 import ehubButton from '@/components/inputs/ehub-button.vue'
 import Api from '@/helpers/communication/Connection'
 import store from '@/store'
+import { toast } from '@/helpers/toast.js'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -13,10 +14,8 @@ const route  = useRoute()
 
 const form = reactive({ mail: '', password: '' })
 const loading = ref(false)
-const error = ref('')
 
 async function submit() {
-  error.value = ''
   loading.value = true
   try {
     const result = await Api.postAsync('/auth/login', form)
@@ -29,10 +28,10 @@ async function submit() {
         router.push(last ? JSON.parse(last) : { name: 'home' })
       }
     } else {
-      error.value = result.response?.message ?? t('users.login.error')
+      toast.error(result.response?.message ?? t('users.login.error'))
     }
   } catch {
-    error.value = t('users.login.error')
+    toast.error(t('users.login.error'))
   } finally {
     loading.value = false
   }
@@ -51,8 +50,6 @@ async function submit() {
 
         <div class="card border-0 shadow-sm">
           <div class="card-body p-4">
-
-            <div v-if="error" class="alert alert-danger py-2 small">{{ error }}</div>
 
             <ehubInput
               v-model="form.mail"
