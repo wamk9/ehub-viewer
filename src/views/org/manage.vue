@@ -8,7 +8,7 @@ import Organization from '@/helpers/communication/Organization.js';
 
 <template>
     <main class="container manage-root">
-        <Transition :name="transitionName">
+        <Transition :name="transitionName" :css="direction !== 'none'">
             <div v-if="!anyOptionActive" key="dashboard" class="manage-view">
                 <div class="manage-header text-center mb-5">
                     <h1 class="manage-header__title">
@@ -99,6 +99,7 @@ export default {
             return this.options.some(o => Object.values(o)[0].active);
         },
         transitionName() {
+            if (this.direction === 'none') return '';
             return this.direction === 'forward' ? 'slide-forward' : 'slide-backward';
         },
     },
@@ -109,7 +110,7 @@ export default {
         }
 
         if (this.forceOption && this.forceOption.length) {
-            this.goToOption(this.forceOption.shift());
+            this.goToOption(this.forceOption.shift(), false, false);
         }
     },
     methods: {
@@ -127,8 +128,8 @@ export default {
                 Object.values(o)[0].active = false;
             });
         },
-        goToOption(action, needsRoute) {
-            this.direction = 'forward';
+        goToOption(action, needsRoute, animate = true) {
+            this.direction = animate ? 'forward' : 'none';
             this.options = this.options.map(optionObj => {
                 const key = Object.keys(optionObj)[0];
                 return {
