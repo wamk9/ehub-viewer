@@ -8,7 +8,7 @@
                     {{ stages.length }}
                     {{ stages.length !== 1 ? $t('events.manage.menu.stages.manage.stage_plural') : $t('events.manage.menu.stages.manage.stage_singular') }}
                 </p>
-                <button class="btn btn-primary btn-sm" @click="openCreate" :disabled="eventInitialized">
+                <button class="btn btn-primary btn-sm" @click="openCreate">
                     <font-awesome-icon :icon="['fas', 'plus']" class="me-1" />
                     {{ $t('events.manage.menu.stages.manage.new_stage') }}
                 </button>
@@ -17,7 +17,7 @@
             <div v-if="stages.length === 0" class="text-center py-5">
                 <font-awesome-icon :icon="['fas', 'flag-checkered']" class="mb-3 text-muted" style="font-size:2.5rem" />
                 <p class="text-muted">{{ $t('events.manage.menu.stages.manage.empty') }}</p>
-                <button v-if="!eventInitialized" class="btn btn-primary btn-sm" @click="openCreate">
+                <button class="btn btn-primary btn-sm" @click="openCreate">
                     {{ $t('events.manage.menu.stages.manage.create_first') }}
                 </button>
             </div>
@@ -241,7 +241,8 @@
             <!-- Stage control -->
             <div class="d-flex gap-2 mb-4" v-if="!managingStage.finished">
                 <button v-if="!managingStage.initialized" class="btn btn-success btn-sm"
-                    :disabled="controlLoading" @click="controlStage('start')">
+                    :disabled="controlLoading"
+                    @click="eventData.initialized ? controlStage('start') : (showStartConfirm = true)">
                     <span v-if="controlLoading" class="spinner-border spinner-border-sm me-1"></span>
                     <font-awesome-icon v-else :icon="['fas', 'play']" class="me-1" />
                     {{ $t('events.manage.menu.stages.manage.manage_view.start_btn') }}
@@ -304,6 +305,27 @@
                     <span v-if="savingResults" class="spinner-border spinner-border-sm me-1"></span>
                     {{ $t('events.manage.menu.stages.manage.manage_view.save_btn') }}
                 </button>
+            </div>
+
+            <!-- Start confirm (first start only — warns event will be locked) -->
+            <div v-if="showStartConfirm" class="modal-overlay" @click.self="showStartConfirm = false">
+                <div class="modal-card">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="text-warning fs-5" />
+                        <h5 class="mb-0">{{ $t('events.manage.menu.stages.manage.manage_view.start_confirm_title') }}</h5>
+                    </div>
+                    <p class="text-muted mb-4 small">{{ $t('events.manage.menu.stages.manage.manage_view.start_confirm_text') }}</p>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button class="btn btn-outline-secondary btn-sm" @click="showStartConfirm = false">
+                            {{ $t('events.manage.menu.stages.manage.manage_view.start_confirm_cancel') }}
+                        </button>
+                        <button class="btn btn-success btn-sm" @click="showStartConfirm = false; controlStage('start')" :disabled="controlLoading">
+                            <span v-if="controlLoading" class="spinner-border spinner-border-sm me-1"></span>
+                            <font-awesome-icon v-else :icon="['fas', 'play']" class="me-1" />
+                            {{ $t('events.manage.menu.stages.manage.manage_view.start_confirm_btn') }}
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Finish confirm -->
@@ -381,6 +403,7 @@ const loadingManage    = ref(false)
 const savingResults    = ref(false)
 const controlLoading   = ref(false)
 const showFinishConfirm    = ref(false)
+const showStartConfirm     = ref(false)
 const routeManuallyEdited  = ref(false)
 
 const form = ref(emptyForm())
@@ -439,8 +462,8 @@ function stageTypeBadge(stage) {
     return                                     { label: stage.stage_type, class: 'bg-secondary' }
 }
 
-function canEdit(stage)   { return !eventInitialized.value && !stage.initialized }
-function canDelete(stage) { return !eventInitialized.value && !stage.initialized }
+function canEdit(stage)   { return !stage.initialized }
+function canDelete(stage) { return !stage.initialized }
 function canManage(index) {
     if (eventData.value?.finished) return false
     const stage = stages.value[index]
