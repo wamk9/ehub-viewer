@@ -155,8 +155,10 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  const authRoutes = ['user-login', 'user-register']
+
   // Save last know route to redirect case user don't have a token.
-  if (!to.matched.some(record => record.name == 'auth'))
+  if (!to.matched.some(record => authRoutes.includes(record.name)))
     localStorage.setItem("lastKnowRoute", JSON.stringify({ name: to.name, params: to.params, query: to.query }));
 
   // If user don't have a token and page requires.
@@ -164,9 +166,9 @@ router.beforeEach((to, from, next) => {
     next({ name: 'user-login' });
     return;
   }
-  
+
   // Used after login or on access auth page with an token, send user to last know page.
-  if (to.matched.some(record => record.name == 'auth') && !!store.getters.getToken) {
+  if (to.matched.some(record => authRoutes.includes(record.name)) && !!store.getters.getToken) {
     next(localStorage.getItem("lastKnowRoute") != null ? JSON.parse(localStorage.getItem("lastKnowRoute")) : { name: 'home' })
     return;
   }
