@@ -3,7 +3,12 @@ import store from '@/store';
 import SystemVars from '@/helpers/General/SystemVars';
 
 axios.defaults.baseURL = SystemVars.baseUrlAPI;
-axios.defaults.headers.common['Authorization'] = "Bearer " + store.getters.getToken;
+
+axios.interceptors.request.use(config => {
+  const token = store.getters.getToken
+  if (token) config.headers['Authorization'] = `Bearer ${token}`
+  return config
+})
 
 // axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 //axios.defaults.headers.options['Access-Control-Allow-Origin'] = '*';

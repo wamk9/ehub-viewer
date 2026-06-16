@@ -9,8 +9,6 @@ let Auth = {
       if (result.code == 200) {
         store.dispatch('setToken', result.response.token);
         router.go();
-      } else {
-        console.error (result.response);
       }
   },
   async logout() {
@@ -20,8 +18,6 @@ let Auth = {
     if (result.code == 200) {
       store.dispatch('removeToken');
       router.go();
-    } else {
-      console.error (result.response);
     }
   },
   async register(data) {
@@ -30,8 +26,6 @@ let Auth = {
     if (result.code == 200) {
       store.dispatch('setToken', result.response.token);
       router.go();
-    } else {
-      console.error (result.response);
     }
   },
   verifyUserToken() {

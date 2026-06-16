@@ -12,6 +12,14 @@ const { t } = useI18n()
 const router = useRouter()
 const route  = useRoute()
 
+function isSafeRedirect(url) {
+  try {
+    return new URL(url, window.location.origin).origin === window.location.origin
+  } catch {
+    return false
+  }
+}
+
 const form = reactive({ mail: '', password: '' })
 const loading = ref(false)
 
@@ -21,7 +29,7 @@ async function submit() {
     const result = await Api.postAsync('/auth/login', form)
     if (result.code === 200) {
       store.dispatch('setToken', result.response.token)
-      if (route.query.redirect)
+      if (route.query.redirect && isSafeRedirect(route.query.redirect))
         router.push(route.query.redirect)
       else {
         const last = localStorage.getItem('lastKnowRoute')
