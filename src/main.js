@@ -6,7 +6,6 @@ import App from '@/App.vue'
 import router from '@/router'
 import FontAwesomeIcon from '@/helpers/General/FontAwesomeIcons.js'
 import store from '@/store';
-import VueCookies from 'vue-cookies';
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/css/index.css';
 import i18n from '@/helpers/i18n/init.js'
@@ -21,7 +20,6 @@ const app = createApp(App)
   .component('loading', Loading, { props: { "background-color": '#000000', opacity: 0.5, color: '#ffffff', "lock-scroll": true } })
   .use(router)
   .use(store)
-  .use(VueCookies, { expires: '7d'})
   .use(i18n)
   .use(hueColor)
   .mount('#app');

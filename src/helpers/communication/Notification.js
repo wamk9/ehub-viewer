@@ -1,11 +1,8 @@
 import Api from '@/helpers/communication/Connection.js'
-import store from '@/store'
 
 const Notification = {
     async getAll() {
-        const result = await Api.getAsync('/notification', {
-            headers: { Authorization: 'Bearer ' + store.getters.getToken }
-        })
+        const result = await Api.getAsync('/notification')
         return { code: result.code, data: result.response?.message }
     },
     async markRead(id) {

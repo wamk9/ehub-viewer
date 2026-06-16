@@ -240,9 +240,7 @@ export default {
     async loadMobileProfile() {
       if (!this.isLogged) return;
       try {
-        const result = await Api.getAsync('/user/profile', {
-          headers: { Authorization: 'Bearer ' + store.getters.getToken }
-        });
+        const result = await Api.getAsync('/user/profile');
         if (result.code === 200) {
           const d = result.response;
           if (d.image)    this.mobileProfileImage    = d.image;

@@ -47,9 +47,7 @@ async function fetchProfile() {
   isLoading.value   = true
   loadingText.value = t('users.profile.loading.fetch')
   try {
-    const result = await Api.getAsync('/user/profile', {
-      headers: { Authorization: 'Bearer ' + store.getters.getToken }
-    })
+    const result = await Api.getAsync('/user/profile')
     if (result.code === 200) {
       const d = result.response
       Object.assign(profile, { ...d, image: withCache(d.image) })

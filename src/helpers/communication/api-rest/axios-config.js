@@ -1,9 +1,8 @@
 import axios from "axios";
-import store from '@/store';
 import SystemVars from '@/helpers/General/SystemVars';
 
 axios.defaults.baseURL = SystemVars.baseUrlAPI;
-axios.defaults.headers.common['Authorization'] = "Bearer " + store.getters.getToken;
+axios.defaults.withCredentials = true;
 
 export const handleResponse = async (promise) => {
   try {

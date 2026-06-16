@@ -26,9 +26,10 @@ const loading = ref(false)
 async function submit() {
   loading.value = true
   try {
+    await Api.fetchCsrf()
     const result = await Api.postAsync('/auth/login', form)
     if (result.code === 200) {
-      store.dispatch('setToken', result.response.token)
+      store.dispatch('setAuthenticated', true)
       if (route.query.redirect && isSafeRedirect(route.query.redirect))
         router.push(route.query.redirect)
       else {

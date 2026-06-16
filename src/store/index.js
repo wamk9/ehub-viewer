@@ -1,43 +1,35 @@
-import VueCookies from 'vue-cookies'
 import { createStore } from 'vuex';
 
-//import  auth  from './auth.js';
-
-const auth =  {
+const auth = {
     state: {
-      token: null,
+        isAuthenticated: document.cookie.split(';').some(c => c.trim().startsWith('ehub_logged_in=')),
     },
     mutations: {
-      SET_TOKEN(state, payload) {
-        if (payload === null)
-          VueCookies.remove('token')
-        else
-          VueCookies.set('token', payload);
-
-        state.token = payload;
-      }
+        SET_AUTH(state, value) {
+            state.isAuthenticated = value;
+        }
     },
     actions: {
-      setToken(context, payload) {
-        /*console.log(payload)
-        const token = context.state.token
-        token.push(payload)
-*/      
-        context.commit('SET_TOKEN', payload)
-      },
-      removeToken(context) {
-        context.commit('SET_TOKEN', null)
-      }
+        setAuthenticated(context, value) {
+            context.commit('SET_AUTH', value);
+        },
+        setToken(context) {
+            context.commit('SET_AUTH', true);
+        },
+        removeToken(context) {
+            context.commit('SET_AUTH', false);
+        }
     },
     getters: {
-      getToken: state => state.token || VueCookies.get('token'),
+        isLoggedIn: state => state.isAuthenticated,
+        getToken:   state => state.isAuthenticated,
     },
-  };
+};
 
 const store = createStore({
     modules: {
-    auth : auth
-  }
-})
+        auth: auth
+    }
+});
 
 export default store;
