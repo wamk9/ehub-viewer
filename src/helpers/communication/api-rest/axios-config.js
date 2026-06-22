@@ -4,6 +4,16 @@ import SystemVars from '@/helpers/General/SystemVars';
 axios.defaults.baseURL = SystemVars.baseUrlAPI;
 axios.defaults.withCredentials = true;
 
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      window.dispatchEvent(new CustomEvent('ehub:unauthorized'));
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const handleResponse = async (promise) => {
   try {
     const response = await promise;

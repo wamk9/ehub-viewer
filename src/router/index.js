@@ -25,12 +25,14 @@ const router = createRouter({
     {
       path: '/register',
       name: 'user-register',
-      component: () => import('@/views/user/register.vue')
+      component: () => import('@/views/user/register.vue'),
+      meta: { authPage: true }
     },
     {
       path: '/login',
       name: 'user-login',
-      component: () => import('@/views/user/login.vue')
+      component: () => import('@/views/user/login.vue'),
+      meta: { authPage: true }
     },
     {
       path: '/profile',
@@ -39,7 +41,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/organizations/mine',
+      path: '/orgs',
+      name: 'organizations',
+      component: () => import('@/views/org/index.vue')
+    },
+    {
+      path: '/orgs/mine',
       name: 'my-organizations',
       component: () => import('@/views/org/mine.vue'),
       meta: { requiresAuth: true }
@@ -63,13 +70,15 @@ const router = createRouter({
     {
       path: '/org/:orgRoute/manage/',
       name: 'manage-organization',
-      component: () => import('@/views/org/manage.vue')
+      component: () => import('@/views/org/manage.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/org/:orgRoute/manage/finances',
       name: 'manage-organization-finances',
       component: () => import('@/views/org/manage.vue'),
-      props: () => ({ forceOption: ['finances'] })
+      props: () => ({ forceOption: ['finances'] }),
+      meta: { requiresAuth: true }
     },
     {
       path: '/invite/accept/:token',
@@ -85,25 +94,22 @@ const router = createRouter({
       path: '/org/:orgRoute/manage/events/:eventRoute?/:eventRouteMenu?',
       name: 'manage-organization-events',
       component: () => import('@/views/org/manage.vue'),
-      props: route => ({
-        forceOption: ['events']
-      })
+      props: route => ({ forceOption: ['events'] }),
+      meta: { requiresAuth: true }
     },
     {
       path: '/org/:orgRoute/manage/events/:eventRoute/:eventRouteMenu?',
       name: 'manage-organization-events-stages',
       component: () => import('@/views/org/manage.vue'),
-      props: route => ({
-        forceOption: ['events']
-      })
+      props: route => ({ forceOption: ['events'] }),
+      meta: { requiresAuth: true }
     },
     {
       path: '/org/:orgRoute/manage/create-event',
       name: 'manage-organization-events-create',
       component: () => import('@/views/org/manage.vue'),
-      props: route => ({
-        forceOption: ['events']
-      })
+      props: route => ({ forceOption: ['events'] }),
+      meta: { requiresAuth: true }
     },
     {
       path: '/org/:orgRoute/event/:eventRoute',
@@ -118,7 +124,8 @@ const router = createRouter({
     {
       path: '/org/:orgRoute/event/:eventRoute/manage',
       name: 'manage-event-info',
-      component: () => import('@/views/event/manage.vue')
+      component: () => import('@/views/event/manage.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/league/:leagueRoute',
@@ -147,12 +154,30 @@ const router = createRouter({
     path: `/org/:orgRoute/manage/events/:eventRoute/${menu}`,
     name: `manage-organization-events-${menu}`,
     component: () => import("@/views/org/manage.vue"),
-    props: route => ({
-        forceOption: ['events']
-      })
-  }))
+    props: route => ({ forceOption: ['events'] }),
+    meta: { requiresAuth: true }
+  })),
+  {
+    path: '/error',
+    name: 'error-page',
+    component: () => import('@/views/error.vue')
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () => import('@/views/error.vue')
+  }
   ]
 })
+
+window.addEventListener('ehub:unauthorized', () => {
+  store.dispatch('removeToken');
+  const current = router.currentRoute.value;
+  if (current.matched.some(r => r.meta.requiresAuth)) {
+    localStorage.setItem('lastKnowRoute', JSON.stringify({ name: current.name, params: current.params, query: current.query }));
+    router.push({ name: 'user-login' });
+  }
+});
 
 router.beforeEach((to, from, next) => {
   const authRoutes = ['user-login', 'user-register']
