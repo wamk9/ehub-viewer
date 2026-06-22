@@ -1,4 +1,5 @@
 import '@/assets/main.css'
+import '@/helpers/communication/api-rest/axios-config.js'
 
 import { createApp } from 'vue'
 import { createI18n } from 'vue-i18n'
