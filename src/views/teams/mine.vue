@@ -301,10 +301,10 @@ function goToTeam(team) {
           <p style="color:var(--ehub-muted);font-size:.88rem;margin:0;">{{ $t('pages.teams.mine.modal.subtitle') }}</p>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;">
-          <button class="btn btn-primary round w-100" @click="showModal = false">
+          <router-link to="/create-team" class="btn btn-primary round w-100" @click="showModal = false">
             <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />
             {{ $t('pages.teams.mine.modal.create') }}
-          </button>
+          </router-link>
           <button class="btn btn-outline-secondary round w-100" @click="joinCodeVisible = !joinCodeVisible">
             <font-awesome-icon :icon="['fas', 'key']" class="me-2" />
             {{ $t('pages.teams.mine.modal.join') }}

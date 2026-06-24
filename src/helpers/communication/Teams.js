@@ -18,6 +18,10 @@ const Teams = {
         const result = await Api.deleteAsync(`/teams/${teamRoute}/follow`);
         return { code: result.code };
     },
+    async create(data) {
+        const result = await Api.postAsync('/team', data);
+        return { code: result.code, data: result.response?.team, errors: result.response?.errors, message: result.response?.message };
+    },
 };
 
 export default Teams;

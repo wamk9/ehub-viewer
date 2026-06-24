@@ -62,6 +62,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/create-team',
+      name: 'create-team',
+      component: () => import('@/views/teams/create.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/my-orgs',
       name: 'my-organizations',
       component: () => import('@/views/org/mine.vue'),
