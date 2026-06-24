@@ -103,6 +103,14 @@ import {
   faDoorOpen,
   faHelmetSafety,
   faUserClock,
+  faGamepad,
+  faMedal,
+  faGraduationCap,
+  faPersonHiking,
+  faStar,
+  faComment,
+  faEarthAmericas,
+  faPenToSquare,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -225,6 +233,14 @@ library.add(
   faHelmetSafety,
   faUserClock,
   faDiscord,
+  faGamepad,
+  faMedal,
+  faGraduationCap,
+  faPersonHiking,
+  faStar,
+  faComment,
+  faEarthAmericas,
+  faPenToSquare,
 );
 
 export default FontAwesomeIcon;

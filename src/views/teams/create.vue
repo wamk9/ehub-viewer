@@ -166,7 +166,9 @@
                       class="cat-card"
                       @click="form.category = cat.route"
                     >
-                      <div class="cat-ico">{{ cat.icon || '🎮' }}</div>
+                      <div class="cat-ico">
+                        <font-awesome-icon :icon="categoryIcons[cat.route] || 'gamepad'" />
+                      </div>
                       <div class="cat-name">{{ $t(`categories.names.${cat.route}`, cat.name) }}</div>
                     </div>
                   </div>
@@ -176,7 +178,7 @@
 
               <div v-else class="cat-sel-badge badge-reveal">
                 <div class="cat-sel-ico">
-                  <span>{{ selectedCategoryIcon }}</span>
+                  <font-awesome-icon :icon="categoryIcons[form.category] || 'gamepad'" />
                 </div>
                 <div>
                   <div class="cat-sel-name">{{ $t(`categories.names.${form.category}`, form.category) }}</div>
@@ -440,8 +442,28 @@ export default {
         { key: 'review' },
       ],
       skillLevels: ['casual', 'semi', 'pro', 'academy'],
-      levelIcons: { casual: 'gamepad', semi: 'trophy', pro: 'medal', academy: 'graduation-cap' },
+      levelIcons: { casual: 'gamepad', semi: 'trophy', pro: 'crown', academy: 'graduation-cap' },
       accentColors: ['#0098D8', '#7C3AED', '#dc2626', '#059669', '#d97706', '#db2777', '#0f172a', '#374151'],
+      categoryIcons: {
+        'simracing':          'flag-checkered',
+        'esports-fps':        'crosshairs',
+        'esports-moba':       'dragon',
+        'esports-fighting':   'hand-fist',
+        'esports-strategy':   'chess-pawn',
+        'esports-sports':     'futbol',
+        'motorsport':         'car-side',
+        'motorbike':          'motorcycle',
+        'cycling':            'bicycle',
+        'running':            'person-running',
+        'swimming':           'person-swimming',
+        'triathlon':          'bolt',
+        'hiking':             'person-hiking',
+        'crossfit':           'dumbbell',
+        'rowing':             'water',
+        'archery':            'bullseye',
+        'chess':              'chess-knight',
+        'drone-racing':       'helicopter',
+      },
       regions: [
         { id: 'BR', flag: '🇧🇷', name: 'Brasil' },
         { id: 'LATAM', flag: '🌎', name: 'América Latina' },
@@ -479,10 +501,6 @@ export default {
       return this.categories.filter(c =>
         c.name.toLowerCase().includes(q) || c.route.toLowerCase().includes(q)
       );
-    },
-    selectedCategoryIcon() {
-      const cat = this.categories.find(c => c.route === this.form.category);
-      return cat?.icon || '🎮';
     },
     bannerBgStyle() {
       if (this.bannerPreview) return { backgroundImage: `url(${this.bannerPreview})`, backgroundSize: 'cover', backgroundPosition: 'center' };
