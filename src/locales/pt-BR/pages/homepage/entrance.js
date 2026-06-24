@@ -1,6 +1,9 @@
 export default {
-  title: 'Faça acontecer!',
-  subtitle: 'Com o eHub, seus eventos podem ser criados e gerenciados de forma mais rápida e fácil.',
-  search_placeholder: 'Buscar eventos, campeonatos, organizações...',
-  create_button: 'Criar seu evento'
+  title_part1: 'Descubra',
+  title_accent: 'eventos',
+  title_part2: 'e competições',
+  subtitle: 'Encontre campeonatos de e-sports e esportes, online ou presenciais, e inscreva-se em segundos.',
+  search_placeholder: 'Buscar eventos ou organizações...',
+  create_button: 'Criar seu evento',
+  footer: 'eHub — Plataforma de gestão de campeonatos e organizações.'
 }

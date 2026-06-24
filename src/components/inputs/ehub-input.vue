@@ -32,7 +32,7 @@ import demo from '@/helpers/frontend/demo'
     <label v-if="!!label" class="form-label" :for="id">
       {{ label }}
     </label>
-    <div class="input-group mb-3" :class="haveFeedback ? 'has-validation' : ''">
+    <div class="mb-3" :class="[!!icon ? 'input-group' : '', haveFeedback ? 'has-validation' : '']">
       <span class="input-group-text" v-if="!!icon">
         <font-awesome-icon class="fa-fw" :icon="icon" />
       </span>
@@ -53,7 +53,7 @@ import demo from '@/helpers/frontend/demo'
           :placeholder="placeholder" :aria-label="placeholder" :value="actualValue" @change="onChange" @input="onInput"
           @blur="onBlur" />
 
-        <label v-if="!!placeholder" :for="id" class="form-label">
+        <label v-if="floating && !!placeholder" :for="id" class="form-label">
           {{ placeholder }}
         </label>
 
@@ -116,6 +116,10 @@ export default {
       type: String,
       default: 'text'
     },
+    floating: {
+      type: Boolean,
+      default: false,
+    },
     disabled: {
       type: Boolean,
       default: false,
@@ -175,7 +179,7 @@ export default {
       ];
     },
     floatingClass() {
-      return this.placeholder ? 'form-floating' : 'flex-grow-1';
+      return (this.floating && !!this.placeholder) ? 'form-floating' : 'flex-grow-1';
     },
     iconClass() {
       if (Array.isArray(this.icon))
@@ -369,10 +373,49 @@ export default {
   text-overflow: ellipsis;
 }
 
-.flex-grow-1 > .form-control,
-.flex-grow-1 > .form-select {
-  height: calc(3.5rem + calc(var(--bs-border-width, 1px) * 2));
-  min-height: calc(3.5rem + calc(var(--bs-border-width, 1px) * 2));
-  padding: 1rem 0.75rem;
+.input-group-text {
+  background: var(--ehub-field-bg);
+  color: var(--ehub-muted);
+  border-color: var(--ehub-line);
+  border-right: 0;
+  transition: border-color .15s, color .15s;
+}
+
+/* Bootstrap input-group não alcança .form-control dentro do wrapper div */
+.input-group .flex-grow-1>.form-control,
+.input-group .flex-grow-1>.form-select {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: 0;
+}
+
+.input-group>.input-group-text {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input-group:focus-within .input-group-text {
+  border-color: var(--ehub-primary);
+  color: var(--ehub-primary);
+}
+
+.input-group:has(.form-control.is-valid) .input-group-text {
+  border-color: var(--bs-success);
+  color: var(--bs-success);
+}
+
+.form-control.is-valid,
+.was-validated .form-control:valid {
+  border-color: var(--bs-success);
+}
+
+.input-group:has(.form-control.is-invalid) .input-group-text {
+  border-color: var(--bs-danger);
+  color: var(--bs-danger);
+}
+
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+  border-color: var(--bs-danger);
 }
 </style>

@@ -12,6 +12,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600&display=swap" rel="stylesheet">
   </head>
   <body>
+    <script>
+      var t = localStorage.getItem('ehub_theme');
+      if (t) document.documentElement.setAttribute('data-bs-theme', t);
+    </script>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
   </body>

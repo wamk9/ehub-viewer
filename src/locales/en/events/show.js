@@ -3,8 +3,49 @@ export default {
   tabs: {
     info: 'Information',
     stages: 'Stages',
+    standings: 'Standings',
     participants: 'Participants',
+    regulation: 'Rules',
     news: 'News',
+  },
+  highlights: {
+    leader: 'Championship leader',
+    champion: 'Champion',
+    next_stage: 'Next stage',
+    pts: 'pts',
+  },
+  standings: {
+    empty: 'Results available after the first completed stage.',
+    pos: 'Pos',
+    participant: 'Participant',
+    total: 'Total',
+    stage_abbr: 'R',
+  },
+  regulation: {
+    points: [
+      { t: 'Format', i: 'flag-checkered', b: 'Points league across several stages. Points accumulate and define the final standings of the season.' },
+      { t: 'Scoring', i: 'coins', b: 'Points system defined by the organization for top finishers in each stage, with wins as a tie-breaker.' },
+      { t: 'Conduct', i: 'flag', b: 'Unsporting conduct is reviewed by officials upon protest, with time, points or position penalties.' },
+      { t: 'Registration', i: 'clipboard-list', b: 'Open until 48h before each stage. Entrants must meet the organization minimum requirements.' },
+    ],
+    bracket: [
+      { t: 'Format', i: 'arrow-right', b: 'Single elimination. Lose and you are out; winners advance all the way to the grand final.' },
+      { t: 'Matches', i: 'flag-checkered', b: 'Best-of series defined per phase. Ties are settled by overtime or the discipline tie-break rule.' },
+      { t: 'Seeding', i: 'list-ul', b: 'The bracket is seeded by ranking. Top seeds are spread out to meet only in the later rounds.' },
+      { t: 'Registration', i: 'clipboard-list', b: 'Slots limited to the bracket size. Entries close before the draw.' },
+    ],
+    time: [
+      { t: 'Format', i: 'person-running', b: 'Single race ranked by time. The fastest to cross the finish line wins.' },
+      { t: 'Timing', i: 'calendar', b: 'Official chip timing. Wave starts when applicable; overall and category rankings.' },
+      { t: 'Course', i: 'location-dot', b: 'Marked course with mandatory checkpoints and hydration stations along the way.' },
+      { t: 'Registration', i: 'clipboard-list', b: 'Tiered registration. Kit pickup with ID and medical clearance when required.' },
+    ],
+    groups: [
+      { t: 'Format', i: 'people-group', b: 'Group stage with round-robin play followed by a knockout bracket for the qualifiers.' },
+      { t: 'Group stage', i: 'list-ul', b: 'Each group plays round-robin. Win = 3 pts, draw = 1 pt, loss = 0. Tiebreakers: wins, goal diff, head-to-head.' },
+      { t: 'Qualification', i: 'chevron-right', b: 'Top finishers from each group advance to the knockout bracket, seeded to avoid same-group clashes early.' },
+      { t: 'Registration', i: 'clipboard-list', b: 'Limited slots distributed across groups. Entries close before the group draw.' },
+    ],
   },
   news: {
     empty: 'No news published yet.',

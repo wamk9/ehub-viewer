@@ -3,8 +3,49 @@ export default {
   tabs: {
     info: 'Informações',
     stages: 'Etapas',
+    standings: 'Classificação',
     participants: 'Participantes',
+    regulation: 'Regulamento',
     news: 'Notícias',
+  },
+  highlights: {
+    leader: 'Líder do campeonato',
+    champion: 'Campeão',
+    next_stage: 'Próxima etapa',
+    pts: 'pts',
+  },
+  standings: {
+    empty: 'Resultados disponíveis após a primeira etapa concluída.',
+    pos: 'Pos',
+    participant: 'Participante',
+    total: 'Total',
+    stage_abbr: 'E',
+  },
+  regulation: {
+    points: [
+      { t: 'Formato', i: 'flag-checkered', b: 'Campeonato em pontos corridos ao longo de várias etapas. A pontuação é cumulativa e define a classificação final da temporada.' },
+      { t: 'Pontuação', i: 'coins', b: 'Sistema de pontos definido pela organização para os primeiros colocados de cada etapa, com critérios de desempate por número de vitórias.' },
+      { t: 'Conduta', i: 'flag', b: 'Condutas antidesportivas são avaliadas pela direção mediante protesto, com penalidades de tempo, pontos ou posições.' },
+      { t: 'Inscrições', i: 'clipboard-list', b: 'Abertas até 48h antes de cada etapa. Participantes devem cumprir os requisitos mínimos da organização.' },
+    ],
+    bracket: [
+      { t: 'Formato', i: 'arrow-right', b: 'Eliminatória simples (mata-mata). Quem perde está fora; os vencedores avançam até a grande final.' },
+      { t: 'Partidas', i: 'flag-checkered', b: 'Confrontos em série definida por fase. Em caso de empate, prorrogação ou critério de desempate da modalidade.' },
+      { t: 'Seeding', i: 'list-ul', b: 'O chaveamento é definido por ranking/seed. Cabeças de chave são distribuídos para se enfrentarem apenas nas fases finais.' },
+      { t: 'Inscrições', i: 'clipboard-list', b: 'Vagas limitadas ao número de chaves. Inscrições encerram antes do sorteio do chaveamento.' },
+    ],
+    time: [
+      { t: 'Formato', i: 'person-running', b: 'Prova única classificada por tempo. Vence quem cruzar a linha de chegada no menor tempo.' },
+      { t: 'Cronometragem', i: 'calendar', b: 'Tempo oficial por chip. Largadas em baterias quando aplicável; classificação geral e por categoria.' },
+      { t: 'Percurso', i: 'location-dot', b: 'Percurso demarcado com pontos de controle obrigatórios e postos de hidratação ao longo do trajeto.' },
+      { t: 'Inscrições', i: 'clipboard-list', b: 'Inscrições por lotes. Retirada do kit mediante documento e atestado quando exigido.' },
+    ],
+    groups: [
+      { t: 'Formato', i: 'people-group', b: 'Fase de grupos por pontos corridos seguida de mata-mata entre os classificados.' },
+      { t: 'Fase de grupos', i: 'list-ul', b: 'Cada grupo disputa confrontos em round-robin. Vitória = 3 pts, empate = 1 pt, derrota = 0.' },
+      { t: 'Classificação', i: 'chevron-right', b: 'Avançam os melhores colocados de cada grupo para o mata-mata, evitando confrontos entre times do mesmo grupo.' },
+      { t: 'Inscrições', i: 'clipboard-list', b: 'Vagas limitadas distribuídas por grupos. Inscrições encerram antes do sorteio dos grupos.' },
+    ],
   },
   news: {
     empty: 'Nenhuma notícia publicada ainda.',

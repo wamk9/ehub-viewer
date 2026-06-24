@@ -1,0 +1,36 @@
+export default {
+  hero: {
+    title_pre: 'Conheça as',
+    title_accent: 'equipes',
+    title_suf: '',
+    subtitle: 'Times que competem nos melhores campeonatos. Siga seus favoritos e candidate-se para fazer parte.',
+    search: 'Buscar equipes...',
+  },
+  filters: {
+    category: 'Categoria',
+    show: 'Exibir',
+    sort: 'Ordenar',
+    all: 'Todas',
+    following: 'Seguindo',
+    open: 'Abertas',
+    verified: 'Verificadas',
+    category_all: 'Todas as categorias',
+  },
+  sort: {
+    wins: 'Mais títulos',
+    events: 'Mais eventos',
+    players: 'Mais jogadores',
+    name: 'Nome (A–Z)',
+  },
+  card: {
+    players: 'jogadores',
+    wins: 'títulos',
+    events: 'eventos',
+    follow: 'Seguir',
+    following: 'Seguindo',
+    open: 'Vagas abertas',
+    verified: 'Verificada',
+  },
+  results: '{n} equipes',
+  empty: 'Nenhuma equipe encontrada com esses filtros.',
+}

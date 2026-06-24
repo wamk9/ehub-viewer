@@ -4,12 +4,12 @@ export default {
   form: {
     name: {
       label: 'Nome',
-      placeholder: 'Insira seu nome, ele será utilizado para identificá-lo nos eventos',
+      placeholder: 'Seu nome',
       validation: { 'min-length': 'Insira ao menos {length} caractere neste campo | Insira ao menos {length} caracteres neste campo' }
     },
     surname: {
       label: 'Sobrenome',
-      placeholder: 'Insira seu sobrenome, ele será utilizado junto com seu nome para identificá-lo nos eventos',
+      placeholder: 'Seu sobrenome',
       validation: { 'min-length': 'Insira ao menos {length} caractere neste campo | Insira ao menos {length} caracteres neste campo' }
     },
     mail: {

@@ -488,7 +488,13 @@ onBeforeUnmount(() => {
         <div class="spinner-border text-primary" role="status"></div>
       </div>
       <div v-else class="members-grid">
-        <div v-for="m in members" :key="m.id" class="member-card">
+        <router-link
+          v-for="m in members"
+          :key="m.id"
+          :to="m.user?.username ? `/profile/${m.user.username}` : '#'"
+          class="member-card"
+          style="text-decoration:none;color:inherit;"
+        >
           <span class="member-av" :style="!m.user?.image ? { background: catGrad(events[0]?.category) } : {}">
             <img v-if="m.user?.image" :src="imgUrl(m.user.image)" :alt="`${m.user.name} ${m.user.surname}`" />
             <template v-else>{{ initials(`${m.user?.name || ''} ${m.user?.surname || ''}`) }}</template>
@@ -497,7 +503,7 @@ onBeforeUnmount(() => {
             <div class="member-name">{{ m.user?.name }} {{ m.user?.surname }}</div>
             <span class="role-chip" :class="m.role">{{ roleLabel(m.role) }}</span>
           </div>
-        </div>
+        </router-link>
       </div>
     </section>
 

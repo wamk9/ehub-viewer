@@ -14,5 +14,29 @@ export default {
     subtitle: 'Busque ou crie seu próprio evento agora!',
     create_button: 'Criar',
     search_button: 'Buscar'
-  }
+  },
+  filters: {
+    fee: 'Inscrição',
+    mode: 'Formato',
+    all: 'Todos',
+    free: 'Gratuito',
+    paid: 'Pago',
+    online: 'Online',
+    irl: 'Presencial',
+    category_all: 'Todas as categorias',
+    sub_all: 'Todas as subcategorias'
+  },
+  sections: {
+    upcoming: 'Próximos eventos',
+    latest: 'Últimos eventos',
+    see_all: 'Ver todos'
+  },
+  empty_upcoming: 'Nenhum evento próximo com esses filtros.',
+  empty_latest: 'Nenhum evento recente com esses filtros.',
+  card: {
+    free: 'Gratuito',
+    online: 'Online',
+    irl: 'Presencial'
+  },
+  results: '{n} eventos'
 }

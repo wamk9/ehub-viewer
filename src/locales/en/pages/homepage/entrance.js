@@ -1,6 +1,9 @@
 export default {
-  title: 'Make it Happen!',
-  subtitle: 'With eHub, your events can be created and managed faster and easily.',
-  search_placeholder: 'Search events, championships, organizations...',
-  create_button: 'Create your event'
+  title_part1: 'Discover',
+  title_accent: 'events',
+  title_part2: 'and competitions',
+  subtitle: 'Find e-sports and sports championships, online or in person, and sign up in seconds.',
+  search_placeholder: 'Search events or organizations...',
+  create_button: 'Create your event',
+  footer: 'eHub — Championship & organization management platform.'
 }

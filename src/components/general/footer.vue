@@ -56,14 +56,21 @@ export default {
 
 <style>
 footer {
-    background-color: #303030;
-    border-top-color: #0098D8 !important;
-    border-top-width: 2px !important;
-    border-top-style: solid;
+    background-color: var(--ehub-card);
+    color: var(--ehub-ink);
+    border-top: 2px solid var(--ehub-primary);
+}
+
+footer h5 {
+    color: var(--ehub-ink);
 }
 
 footer a {
-    color: #fafafa;
+    color: var(--ehub-muted);
     text-decoration: none;
+}
+
+footer a:hover {
+    color: var(--ehub-primary);
 }
 </style>

@@ -1,6 +1,7 @@
 <script>
 import Organization from '@/helpers/communication/Organization.js';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
+import OrganizationBilling from '@/helpers/communication/OrganizationBilling.js';
 import SystemVars from '@/helpers/General/SystemVars';
 import { toast } from '@/helpers/toast.js';
 
@@ -30,7 +31,7 @@ export default {
 
   data() {
     const forced = this.forceOption?.[0] ?? null;
-    const panelMap = { general: 'settings', events: 'events', finances: 'settings' };
+    const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
     return {
       activePanel: panelMap[forced] ?? 'overview',
       org: null,
@@ -65,6 +66,26 @@ export default {
       coverLocalPreview: null,
       coverVersion: Date.now(),
       hasCover: true,
+
+      // financeiro
+      finBilling: null,
+      finBillingLoading: false,
+      finGateways: [],
+      finGatewaysLoading: false,
+      finLoaded: false,
+      finConnecting: null,
+      finDisconnecting: null,
+      finSelectedInvoice: null,
+      finInvoiceLoading: false,
+      finSettingUpCard: false,
+
+      // reports
+      repTab: 'standard',
+      customReports: [],
+      repNewForm: false,
+      repNewName: '',
+      repNewType: 'registrations',
+      repNewPeriod: '30d',
     };
   },
 
@@ -107,6 +128,23 @@ export default {
     },
     myUserId() {
       return this.$store?.getters?.getUser?.id;
+    },
+    standardReports() {
+      return [
+        { key: 'registrations', icon: 'user-plus', bg: 'var(--ehub-primary-tint)', color: 'var(--ehub-primary)' },
+        { key: 'revenue', icon: 'dollar-sign', bg: 'color-mix(in srgb, #1f8a5b 14%, transparent)', color: '#1f8a5b' },
+        { key: 'members', icon: 'users', bg: 'color-mix(in srgb, var(--ehub-gold) 18%, transparent)', color: 'color-mix(in srgb, var(--ehub-gold), #000 28%)' },
+        { key: 'events', icon: 'calendar-days', bg: 'color-mix(in srgb, #7C3AED 14%, transparent)', color: '#7C3AED' },
+      ];
+    },
+  },
+
+  watch: {
+    forceOption(val) {
+      const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
+      const panel = panelMap[val?.[0]] ?? 'overview';
+      this.activePanel = panel;
+      if (panel === 'financeiro' && !this.finLoaded) this.loadFinances();
     },
   },
 
@@ -219,8 +257,21 @@ export default {
 
     async switchPanel(panel) {
       this.activePanel = panel;
+      const routeMap = {
+        overview: 'manage-organization',
+        events: 'manage-organization-events',
+        members: 'manage-organization-members',
+        financeiro: 'manage-organization-finances',
+        reports: 'manage-organization-reports',
+        settings: 'manage-organization-settings',
+      };
+      const routeName = routeMap[panel];
+      if (routeName && this.$route.name !== routeName) {
+        this.$router.replace({ name: routeName, params: { orgRoute: this.orgRoute } });
+      }
       if (panel === 'events' && !this.events.length) await this.loadEvents();
       if (panel === 'members' && !this.members.length) await this.loadMembers();
+      if (panel === 'financeiro' && !this.finLoaded) await this.loadFinances();
     },
 
     async loadEvents() {
@@ -371,7 +422,7 @@ export default {
       const result = await Organization.delete(this.orgRoute);
       if (result.code === 200) {
         toast.success(this.$t('pages.organization.manage.settings.deleted'));
-        this.$router.push('/orgs/mine');
+        this.$router.push('/my-orgs');
       } else {
         toast.error(this.$t('pages.organization.manage.settings.delete_error'));
       }
@@ -383,6 +434,82 @@ export default {
 
     goCreateEvent() {
       this.$router.push({ name: 'manage-organization-events-create', params: { orgRoute: this.orgRoute } });
+    },
+
+    // ── Financeiro ──────────────────────────────────────────────────────
+    async loadFinances() {
+      this.finBillingLoading = true;
+      this.finGatewaysLoading = true;
+      const [billingRes, gwRes] = await Promise.all([
+        OrganizationBilling.getBilling(this.orgRoute),
+        OrganizationBilling.getGateways(this.orgRoute),
+      ]);
+      this.finBillingLoading = false;
+      this.finGatewaysLoading = false;
+      this.finLoaded = true;
+      if (billingRes.code === 200) this.finBilling = billingRes.data;
+      if (gwRes.code === 200 && Array.isArray(gwRes.data)) this.finGateways = gwRes.data;
+      const connected = this.$route?.query?.connected;
+      if (connected) {
+        toast.success(this.$t('finances.gateways.connect_success', { gateway: connected.replace('_', ' ') }));
+        this.$router.replace({ query: {} });
+      }
+    },
+
+    finGateway(gw) { return this.finGateways.find(g => g.gateway === gw) ?? null; },
+
+    async finConnect(gateway) {
+      this.finConnecting = gateway;
+      const result = await OrganizationBilling.connectGateway(this.orgRoute, gateway);
+      this.finConnecting = null;
+      if (result.code === 200 && result.url) window.location.href = result.url;
+    },
+
+    async finDisconnect(gateway) {
+      if (!confirm(this.$t('pages.organization.manage.financeiro.gw_confirm_disconnect'))) return;
+      this.finDisconnecting = gateway;
+      const result = await OrganizationBilling.disconnectGateway(this.orgRoute, gateway);
+      this.finDisconnecting = null;
+      if (result.code === 200) this.finGateways = this.finGateways.filter(g => g.gateway !== gateway);
+    },
+
+    async finSetupCard() {
+      this.finSettingUpCard = true;
+      const returnUrl = window.location.origin + '/org/' + this.orgRoute + '/manage';
+      const res = await OrganizationBilling.getStripePortal(this.orgRoute, returnUrl);
+      this.finSettingUpCard = false;
+      if (res.code === 200 && res.url) {
+        window.location.href = res.url;
+      }
+    },
+
+    async finOpenInvoice(cycle) {
+      this.finSelectedInvoice = { billing_cycle: cycle, items: [] };
+      this.finInvoiceLoading = true;
+      const result = await OrganizationBilling.getInvoice(this.orgRoute, cycle);
+      this.finInvoiceLoading = false;
+      if (result.code === 200) this.finSelectedInvoice = result.data;
+    },
+
+    finFormatAmount(val) {
+      return parseFloat(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    },
+
+    // ── Reports ─────────────────────────────────────────────────────────
+    repAddReport() {
+      if (!this.repNewName.trim()) return;
+      this.customReports.push({
+        id: Date.now(),
+        name: this.repNewName.trim(),
+        type: this.repNewType,
+        period: this.repNewPeriod,
+      });
+      this.repNewForm = false;
+      this.repNewName = '';
+    },
+
+    repDeleteReport(id) {
+      this.customReports = this.customReports.filter(r => r.id !== id);
     },
   },
 };
@@ -419,6 +546,14 @@ export default {
           <font-awesome-icon :icon="['fas', 'users']" />
           <span>{{ $t('pages.organization.manage.nav.members') }}</span>
         </button>
+        <button class="nav-item" :class="{ active: activePanel === 'financeiro' }" @click="switchPanel('financeiro')">
+          <font-awesome-icon :icon="['fas', 'file-invoice-dollar']" />
+          <span>{{ $t('pages.organization.manage.nav.financeiro') }}</span>
+        </button>
+        <button class="nav-item" :class="{ active: activePanel === 'reports' }" @click="switchPanel('reports')">
+          <font-awesome-icon :icon="['fas', 'chart-bar']" />
+          <span>{{ $t('pages.organization.manage.nav.reports') }}</span>
+        </button>
         <button class="nav-item" :class="{ active: activePanel === 'settings' }" @click="switchPanel('settings')">
           <font-awesome-icon :icon="['fas', 'gear']" />
           <span>{{ $t('pages.organization.manage.nav.settings') }}</span>
@@ -428,7 +563,7 @@ export default {
           <font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" />
           <span>{{ $t('pages.organization.manage.nav.public') }}</span>
         </router-link>
-        <router-link to="/orgs/mine" class="nav-item">
+        <router-link to="/my-orgs" class="nav-item">
           <font-awesome-icon :icon="['fas', 'arrow-left']" />
           <span>{{ $t('pages.organization.manage.nav.back') }}</span>
         </router-link>
@@ -703,6 +838,285 @@ export default {
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- ═══ FINANCEIRO ═══ -->
+      <section v-show="activePanel === 'financeiro'" class="mgmt-pane">
+        <div class="pnl-hd">
+          <div>
+            <h1>{{ $t('pages.organization.manage.financeiro.title') }}</h1>
+            <p>{{ $t('pages.organization.manage.financeiro.sub') }}</p>
+          </div>
+        </div>
+
+        <div v-if="finBilling?.billing_blocked" class="alert alert-danger d-flex gap-2 align-items-center mb-4" style="font-size:.85rem">
+          <font-awesome-icon :icon="['fas', 'ban']" class="flex-shrink-0" />
+          <span>{{ $t('pages.organization.manage.financeiro.billing_blocked') }}</span>
+        </div>
+
+        <!-- Volumetria -->
+        <div class="set-card" style="padding:0;overflow:hidden;margin-bottom:16px">
+          <div class="fin-vol-hd" style="padding:18px 24px 14px">
+            <span class="fin-sec-title">{{ $t('pages.organization.manage.financeiro.vol_title') }}</span>
+            <p class="set-desc mb-0">{{ $t('pages.organization.manage.financeiro.vol_desc') }}</p>
+          </div>
+          <div v-if="finBillingLoading" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></div>
+          <template v-else>
+            <div class="vol-banner" :style="{ background: orgGrad }">
+              <div class="vol-body">
+                <div class="vol-period">{{ $t('pages.organization.manage.financeiro.vol_period') }}: {{ finBilling?.current_cycle || '—' }}</div>
+                <div class="vol-title-text">{{ $t('pages.organization.manage.financeiro.vol_desc') }}</div>
+                <div class="vol-metric-row">
+                  <div>
+                    <div class="vol-metric-val">{{ activeEvents }}</div>
+                    <div class="vol-metric-lbl">{{ $t('pages.organization.manage.financeiro.vol_events') }}</div>
+                  </div>
+                  <div>
+                    <div class="vol-metric-val">{{ finBilling?.pending_items ?? '—' }}</div>
+                    <div class="vol-metric-lbl">{{ $t('pages.organization.manage.financeiro.vol_regs') }}</div>
+                  </div>
+                  <div>
+                    <div class="vol-metric-val">{{ members.length || '—' }}</div>
+                    <div class="vol-metric-lbl">{{ $t('pages.organization.manage.financeiro.vol_members') }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="vol-aside">
+                <div class="vol-total-lbl">{{ $t('pages.organization.manage.financeiro.vol_total') }}</div>
+                <div class="vol-total-val">R$ {{ finFormatAmount(finBilling?.pending_total) }}</div>
+                <div class="vol-due">{{ $t('pages.organization.manage.financeiro.vol_due') }}: dia 5</div>
+                <span class="vol-status-badge" :class="(finBilling?.pending_total ?? 0) > 0 ? 'pending' : 'paid'">
+                  <font-awesome-icon :icon="['fas', (finBilling?.pending_total ?? 0) > 0 ? 'clock' : 'check']" />
+                  {{ (finBilling?.pending_total ?? 0) > 0 ? $t('pages.organization.manage.financeiro.vol_pending') : $t('pages.organization.manage.financeiro.vol_paid') }}
+                </span>
+              </div>
+            </div>
+            <div v-if="finBilling?.invoices?.length" class="fin-inv-list">
+              <div class="fin-inv-hd">{{ $t('pages.organization.manage.financeiro.history') }}</div>
+              <div v-for="inv in finBilling.invoices" :key="inv.id" class="fin-inv-row" @click="finOpenInvoice(inv.billing_cycle)">
+                <span class="fin-inv-cycle">{{ inv.billing_cycle }}</span>
+                <span class="s-badge" :class="inv.status === 'paid' ? 'active' : inv.status === 'pending' ? 'upcoming' : 'finished'">
+                  {{ $t('pages.organization.manage.financeiro.status_' + (inv.status || 'pending')) }}
+                </span>
+                <span style="flex:1"></span>
+                <span class="fin-inv-amount">R$ {{ finFormatAmount(inv.total_amount) }}</span>
+                <font-awesome-icon :icon="['fas', 'chevron-right']" style="color:var(--ehub-muted);font-size:.7rem" />
+              </div>
+            </div>
+            <div v-else style="padding:16px 24px;font-size:.83rem;color:var(--ehub-muted)">{{ $t('pages.organization.manage.financeiro.no_invoices') }}</div>
+          </template>
+        </div>
+
+        <!-- Cartão de Crédito -->
+        <div class="set-card" style="margin-bottom:16px">
+          <h3>{{ $t('pages.organization.manage.financeiro.card_title') }}</h3>
+          <p class="set-desc">{{ $t('pages.organization.manage.financeiro.card_desc') }}</p>
+          <div v-if="finBillingLoading" class="py-2"><div class="spinner-border spinner-border-sm text-primary"></div></div>
+          <div v-else class="d-flex align-items-center gap-3 flex-wrap">
+            <div v-if="finBilling?.has_card" class="d-flex align-items-center gap-2" style="font-size:.87rem;color:var(--ehub-ink)">
+              <font-awesome-icon :icon="['fas', 'credit-card']" style="color:var(--ehub-primary)" />
+              {{ $t('pages.organization.manage.financeiro.card_registered') }}
+            </div>
+            <span v-else style="font-size:.83rem;color:var(--ehub-muted)">{{ $t('pages.organization.manage.financeiro.no_card') }}</span>
+            <button class="btn btn-sm btn-outline-primary round px-3" :disabled="finSettingUpCard" @click="finSetupCard">
+              <span v-if="finSettingUpCard" class="spinner-border spinner-border-sm me-1"></span>
+              {{ finBilling?.has_card ? $t('pages.organization.manage.financeiro.change_card') : $t('pages.organization.manage.financeiro.add_card') }}
+            </button>
+          </div>
+          <p class="mt-2 mb-0" style="font-size:.72rem;color:var(--ehub-muted)">{{ $t('pages.organization.manage.financeiro.card_notice') }}</p>
+        </div>
+
+        <!-- Gateways -->
+        <div class="set-card">
+          <h3>{{ $t('pages.organization.manage.financeiro.gw_title') }}</h3>
+          <p class="set-desc">{{ $t('pages.organization.manage.financeiro.gw_desc') }}</p>
+          <div v-if="finGatewaysLoading" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>
+          <div v-else class="fin-gw-grid">
+            <!-- MercadoPago -->
+            <div class="fin-gw-card">
+              <div class="d-flex align-items-center gap-3" style="margin-bottom:14px">
+                <div class="fin-gw-logo fin-gw-mp">MP</div>
+                <div style="flex:1;min-width:0">
+                  <div class="fin-gw-name">MercadoPago</div>
+                  <div class="fin-gw-fees">{{ $t('pages.organization.manage.financeiro.mp_fees') }}</div>
+                </div>
+                <span v-if="finGateway('mercadopago')" class="s-badge active">
+                  <font-awesome-icon :icon="['fas', 'check']" /> {{ $t('pages.organization.manage.financeiro.gw_connected') }}
+                </span>
+              </div>
+              <button v-if="!finGateway('mercadopago')" class="btn btn-sm btn-primary w-100 round" :disabled="finConnecting === 'mercadopago'" @click="finConnect('mercadopago')">
+                <span v-if="finConnecting === 'mercadopago'" class="spinner-border spinner-border-sm me-1"></span>
+                {{ $t('pages.organization.manage.financeiro.gw_connect') }}
+              </button>
+              <button v-else class="btn btn-sm btn-outline-danger w-100 round" :disabled="finDisconnecting === 'mercadopago'" @click="finDisconnect('mercadopago')">
+                <span v-if="finDisconnecting === 'mercadopago'" class="spinner-border spinner-border-sm me-1"></span>
+                {{ $t('pages.organization.manage.financeiro.gw_disconnect') }}
+              </button>
+            </div>
+            <!-- Stripe Connect -->
+            <div class="fin-gw-card">
+              <div class="d-flex align-items-center gap-3" style="margin-bottom:14px">
+                <div class="fin-gw-logo fin-gw-sc">SC</div>
+                <div style="flex:1;min-width:0">
+                  <div class="fin-gw-name">Stripe</div>
+                  <div class="fin-gw-fees">{{ $t('pages.organization.manage.financeiro.stripe_fees') }}</div>
+                </div>
+                <span v-if="finGateway('stripe_connect')" class="s-badge active">
+                  <font-awesome-icon :icon="['fas', 'check']" /> {{ $t('pages.organization.manage.financeiro.gw_connected') }}
+                </span>
+              </div>
+              <button v-if="!finGateway('stripe_connect')" class="btn btn-sm btn-primary w-100 round" :disabled="finConnecting === 'stripe_connect'" @click="finConnect('stripe_connect')">
+                <span v-if="finConnecting === 'stripe_connect'" class="spinner-border spinner-border-sm me-1"></span>
+                {{ $t('pages.organization.manage.financeiro.gw_connect') }}
+              </button>
+              <button v-else class="btn btn-sm btn-outline-danger w-100 round" :disabled="finDisconnecting === 'stripe_connect'" @click="finDisconnect('stripe_connect')">
+                <span v-if="finDisconnecting === 'stripe_connect'" class="spinner-border spinner-border-sm me-1"></span>
+                {{ $t('pages.organization.manage.financeiro.gw_disconnect') }}
+              </button>
+            </div>
+          </div>
+          <div v-if="finGateways.length === 0 && !finGatewaysLoading" class="alert alert-warning mt-3 mb-0 small">
+            <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />
+            {{ $t('pages.organization.manage.financeiro.gw_warning') }}
+          </div>
+        </div>
+
+        <!-- Invoice detail modal -->
+        <div v-if="finSelectedInvoice" class="fin-modal-overlay" @click.self="finSelectedInvoice = null">
+          <div class="fin-modal-card">
+            <div class="fin-modal-hd">
+              <h5>{{ $t('pages.organization.manage.financeiro.invoice_detail', { cycle: finSelectedInvoice.billing_cycle }) }}</h5>
+              <button class="btn-close" @click="finSelectedInvoice = null"></button>
+            </div>
+            <div class="fin-modal-body">
+              <div v-if="finInvoiceLoading" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>
+              <template v-else>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <span class="s-badge" :class="finSelectedInvoice.status === 'paid' ? 'active' : 'upcoming'">
+                    {{ $t('pages.organization.manage.financeiro.status_' + (finSelectedInvoice.status || 'pending')) }}
+                  </span>
+                  <span style="font-weight:700;font-size:.95rem">R$ {{ finFormatAmount(finSelectedInvoice.total_amount) }}</span>
+                </div>
+                <div v-for="item in (finSelectedInvoice.items ?? [])" :key="item.id" class="fin-inv-item">
+                  <span class="td-muted">{{ item.user?.name ?? '—' }}</span>
+                  <span style="font-size:.83rem">{{ $t('finances.billing.type.' + item.billing_type) }}</span>
+                  <span style="font-weight:600;font-size:.83rem">R$ {{ finFormatAmount(item.fee_amount) }}</span>
+                </div>
+                <div v-if="!finSelectedInvoice.items?.length" class="text-center py-3 td-muted" style="font-size:.83rem">
+                  {{ $t('pages.organization.manage.financeiro.no_items') }}
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ REPORTS ═══ -->
+      <section v-show="activePanel === 'reports'" class="mgmt-pane">
+        <div class="pnl-hd">
+          <div>
+            <h1>{{ $t('pages.organization.manage.reports.title') }}</h1>
+            <p>{{ $t('pages.organization.manage.reports.sub') }}</p>
+          </div>
+          <div class="spacer"></div>
+          <button v-if="repTab === 'custom'" class="btn btn-primary round px-3" @click="repNewForm = true">
+            <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />
+            {{ $t('pages.organization.manage.reports.new') }}
+          </button>
+        </div>
+
+        <div class="sec-bar" style="margin-bottom:16px">
+          <div class="role-seg">
+            <button :class="{ active: repTab === 'standard' }" @click="repTab = 'standard'">{{ $t('pages.organization.manage.reports.standard') }}</button>
+            <button :class="{ active: repTab === 'custom' }" @click="repTab = 'custom'">{{ $t('pages.organization.manage.reports.custom') }}</button>
+          </div>
+        </div>
+
+        <!-- Standard reports -->
+        <div v-show="repTab === 'standard'" class="rep-grid">
+          <div v-for="rep in standardReports" :key="rep.key" class="rep-card">
+            <div class="rep-card-ico" :style="{ background: rep.bg, color: rep.color }">
+              <font-awesome-icon :icon="['fas', rep.icon]" />
+            </div>
+            <h4>{{ $t('pages.organization.manage.reports.type_' + rep.key) }}</h4>
+            <p>{{ $t('pages.organization.manage.reports.type_' + rep.key + '_desc') }}</p>
+            <div class="rep-card-foot">
+              <span class="rep-last">{{ $t('pages.organization.manage.reports.never') }}</span>
+              <button class="btn btn-sm btn-outline-secondary round px-3" disabled>
+                {{ $t('pages.organization.manage.reports.generate') }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom reports -->
+        <div v-show="repTab === 'custom'">
+          <div v-if="repNewForm" class="cc mb-3" style="padding:18px 20px">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label set-label">{{ $t('pages.organization.manage.reports.form_name') }}</label>
+                <input type="text" class="form-control" v-model="repNewName" :placeholder="$t('pages.organization.manage.reports.form_name_ph')" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label set-label">{{ $t('pages.organization.manage.reports.form_type') }}</label>
+                <select class="form-select" v-model="repNewType">
+                  <option value="registrations">{{ $t('pages.organization.manage.reports.type_registrations') }}</option>
+                  <option value="revenue">{{ $t('pages.organization.manage.reports.type_revenue') }}</option>
+                  <option value="members">{{ $t('pages.organization.manage.reports.type_members') }}</option>
+                  <option value="events">{{ $t('pages.organization.manage.reports.type_events') }}</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label set-label">{{ $t('pages.organization.manage.reports.form_period') }}</label>
+                <select class="form-select" v-model="repNewPeriod">
+                  <option value="30d">{{ $t('pages.organization.manage.reports.per30') }}</option>
+                  <option value="90d">{{ $t('pages.organization.manage.reports.per90') }}</option>
+                  <option value="365d">{{ $t('pages.organization.manage.reports.per365') }}</option>
+                </select>
+              </div>
+              <div class="col-12 d-flex gap-2 justify-content-end">
+                <button class="btn btn-outline-secondary round px-3" @click="repNewForm = false; repNewName = ''">{{ $t('pages.organization.manage.members.cancel') }}</button>
+                <button class="btn btn-primary round px-4" @click="repAddReport">{{ $t('pages.organization.manage.reports.create') }}</button>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="!customReports.length" class="empty-state">
+            <div class="ico"><font-awesome-icon :icon="['fas', 'chart-bar']" /></div>
+            <p>{{ $t('pages.organization.manage.reports.no_custom') }}</p>
+            <button class="btn btn-primary round px-4 mt-2" @click="repNewForm = true">
+              <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />
+              {{ $t('pages.organization.manage.reports.new') }}
+            </button>
+          </div>
+
+          <div v-else class="cc">
+            <table class="mgmt-tbl">
+              <thead>
+                <tr>
+                  <th>{{ $t('pages.organization.manage.reports.col_name') }}</th>
+                  <th>{{ $t('pages.organization.manage.reports.col_type') }}</th>
+                  <th>{{ $t('pages.organization.manage.reports.col_period') }}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="r in customReports" :key="r.id">
+                  <td class="td-name">{{ r.name }}</td>
+                  <td class="td-muted">{{ $t('pages.organization.manage.reports.type_' + r.type) }}</td>
+                  <td class="td-muted">{{ $t('pages.organization.manage.reports.per' + r.period.replace('d', '')) }}</td>
+                  <td>
+                    <div class="act-row">
+                      <button class="act-btn del" @click="repDeleteReport(r.id)">
+                        <font-awesome-icon :icon="['fas', 'trash']" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -1008,6 +1422,53 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 
 /* ── Invite box ── */
 .invite-box { margin-bottom: 0; }
+
+/* ── Financial panel ── */
+.fin-sec-title { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--ehub-muted); }
+.vol-banner { padding: 22px 26px; color: #fff; display: flex; align-items: flex-start; gap: 28px; flex-wrap: wrap; }
+.vol-body { flex: 1; min-width: 180px; }
+.vol-period { font-size: .78rem; opacity: .8; margin-bottom: 2px; }
+.vol-title-text { font-size: .96rem; font-weight: 700; margin-bottom: 16px; }
+.vol-metric-row { display: flex; gap: 22px; flex-wrap: wrap; }
+.vol-metric-val { font-size: 1.45rem; font-weight: 800; line-height: 1; }
+.vol-metric-lbl { font-size: .7rem; opacity: .75; margin-top: 2px; }
+.vol-aside { text-align: right; flex-shrink: 0; min-width: 130px; }
+.vol-total-lbl { font-size: .74rem; opacity: .75; margin-bottom: 3px; }
+.vol-total-val { font-size: 1.9rem; font-weight: 800; letter-spacing: -.03em; line-height: 1; margin-bottom: 5px; }
+.vol-due { font-size: .72rem; opacity: .75; margin-bottom: 10px; }
+.vol-status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 50rem; }
+.vol-status-badge.pending { background: rgba(255,255,255,.22); color: #fff; }
+.vol-status-badge.paid    { background: rgba(16,185,129,.3); color: #6ee7b7; }
+.fin-inv-list { border-top: 1px solid var(--ehub-line); }
+.fin-inv-hd { font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 9px 24px; border-bottom: 1px solid var(--ehub-line); }
+.fin-inv-row { display: flex; align-items: center; gap: 10px; padding: 10px 24px; border-bottom: 1px solid var(--ehub-line); cursor: pointer; transition: background .12s; font-size: .87rem; }
+.fin-inv-row:last-child { border-bottom: 0; }
+.fin-inv-row:hover { background: color-mix(in srgb, var(--ehub-field-bg) 55%, transparent); }
+.fin-inv-cycle { font-weight: 600; width: 6rem; color: var(--ehub-ink); }
+.fin-inv-amount { font-weight: 600; color: var(--ehub-ink); }
+.fin-gw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 13px; }
+.fin-gw-card { background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 12px; padding: 18px 20px; }
+.fin-gw-logo { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: .82rem; flex-shrink: 0; letter-spacing: -.01em; }
+.fin-gw-mp { background: rgba(0,158,227,.18); color: #009ee3; }
+.fin-gw-sc { background: rgba(99,91,255,.16); color: #635bff; }
+.fin-gw-name { font-size: .92rem; font-weight: 700; color: var(--ehub-ink); }
+.fin-gw-fees { font-size: .74rem; color: var(--ehub-muted); margin-top: 1px; }
+.fin-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; z-index: 1050; padding: 1rem; }
+.fin-modal-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); width: 100%; max-width: 480px; overflow: hidden; box-shadow: var(--ehub-shadow); }
+.fin-modal-hd { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--ehub-line); }
+.fin-modal-hd h5 { font-size: .95rem; font-weight: 800; color: var(--ehub-ink); margin: 0; }
+.fin-modal-body { padding: 18px 20px; max-height: 60vh; overflow-y: auto; }
+.fin-inv-item { display: grid; grid-template-columns: 1fr 1fr auto; gap: .5rem; align-items: center; padding: .45rem 0; border-bottom: 1px solid var(--ehub-line); }
+.fin-inv-item:last-child { border-bottom: 0; }
+
+/* ── Reports panel ── */
+.rep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin-bottom: 22px; }
+.rep-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); padding: 20px 22px; display: flex; flex-direction: column; }
+.rep-card-ico { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: .84rem; margin-bottom: 12px; flex-shrink: 0; }
+.rep-card h4 { font-size: .9rem; font-weight: 700; color: var(--ehub-ink); margin: 0 0 5px; }
+.rep-card p { font-size: .8rem; color: var(--ehub-muted); margin: 0 0 14px; line-height: 1.45; flex: 1; }
+.rep-card-foot { display: flex; align-items: center; gap: 7px; margin-top: auto; }
+.rep-last { font-size: .72rem; color: var(--ehub-muted); flex: 1; }
 
 /* ── Responsive ── */
 @media (max-width: 1100px) {

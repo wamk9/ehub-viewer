@@ -177,7 +177,20 @@ import SystemVars from '@/helpers/General/SystemVars';
                     <tbody>
                         <tr v-for="member in members" :key="member.id">
                             <td>
-                                <div class="d-flex align-items-center gap-2">
+                                <router-link
+                                    v-if="member.user?.username"
+                                    :to="`/profile/${member.user.username}`"
+                                    class="d-flex align-items-center gap-2 text-decoration-none"
+                                >
+                                    <InitialsAvatar
+                                        :name="`${member.user?.name ?? ''} ${member.user?.surname ?? ''}`"
+                                        :image="member.user?.image ?? ''"
+                                        type="user"
+                                        :size="32"
+                                    />
+                                    <span class="fw-medium" style="color:var(--ehub-ink)">{{ member.user?.username }}</span>
+                                </router-link>
+                                <div v-else class="d-flex align-items-center gap-2">
                                     <InitialsAvatar
                                         :name="`${member.user?.name ?? ''} ${member.user?.surname ?? ''}`"
                                         :image="member.user?.image ?? ''"

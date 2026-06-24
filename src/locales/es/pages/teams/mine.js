@@ -1,0 +1,53 @@
+export default {
+  hero: {
+    title_pre: 'Mis',
+    title_accent: 'Equipos',
+    title_suf: '',
+    subtitle: 'Equipos en los que eres miembro activo o reserva.',
+    new: 'Nuevo Equipo',
+  },
+  summary: {
+    teams: 'equipos',
+    total_wins: 'títulos conseguidos',
+    total_events: 'eventos disputados',
+  },
+  bar: {
+    role: 'Cargo',
+    all: 'Todos',
+    captain: 'Capitán',
+    vice: 'Vicecapitán',
+    player: 'Titular',
+    reserve: 'Reserva',
+  },
+  roles: {
+    captain: 'Capitán',
+    vice: 'Vicecapitán',
+    player: 'Titular',
+    reserve: 'Reserva',
+  },
+  card: {
+    players: 'miembros',
+    wins: 'títulos',
+    events: 'eventos',
+    open: 'Plazas abiertas para nuevos miembros',
+    manage: 'Gestionar',
+    roster: 'Plantilla',
+    calendar: 'Calendario',
+    results: 'Resultados',
+  },
+  modal: {
+    title: 'Nuevo Equipo',
+    subtitle: 'Crea un equipo o únete a uno existente con un código de invitación.',
+    create: 'Crear nuevo equipo',
+    join: 'Unirse con código de invitación',
+    code_placeholder: 'Pega el código aquí...',
+    enter: 'Unirse',
+    cancel: 'Cancelar',
+  },
+  new_card: {
+    label: 'Crear o unirse a un equipo',
+    sub: 'Arma tu plantilla y compite en campeonatos',
+  },
+  results: '{n} equipos',
+  empty: 'Ningún equipo coincide con este filtro.',
+}

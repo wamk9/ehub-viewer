@@ -80,7 +80,13 @@ export default {
       },
       cover: {
         label: 'Cover image',
-        help:  '16:9 ratio. Displayed as a banner on the event page. Saved as preview.webp.',
+        help:  '16:9 ratio. Displayed as a banner on the event page. Saved as cover.webp.',
+      },
+      color: {
+        label: 'Accent color',
+        help:  'Color used in the event hero and logo. Leave blank to use the category color.',
+        auto:  'Automatic (category color)',
+        reset: 'Remove',
       },
     },
     back: 'Back',

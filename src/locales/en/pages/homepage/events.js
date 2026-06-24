@@ -14,5 +14,29 @@ export default {
     subtitle: 'Search or create your own event now!',
     create_button: 'Create',
     search_button: 'Search'
-  }
+  },
+  filters: {
+    fee: 'Entry fee',
+    mode: 'Format',
+    all: 'All',
+    free: 'Free',
+    paid: 'Paid',
+    online: 'Online',
+    irl: 'In person',
+    category_all: 'All categories',
+    sub_all: 'All subcategories'
+  },
+  sections: {
+    upcoming: 'Upcoming events',
+    latest: 'Latest events',
+    see_all: 'See all'
+  },
+  empty_upcoming: 'No upcoming events match these filters.',
+  empty_latest: 'No recent events match these filters.',
+  card: {
+    free: 'Free',
+    online: 'Online',
+    irl: 'In person'
+  },
+  results: '{n} events'
 }

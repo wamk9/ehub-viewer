@@ -1,0 +1,36 @@
+export default {
+  hero: {
+    title_pre: 'Conoce los',
+    title_accent: 'equipos',
+    title_suf: '',
+    subtitle: 'Equipos que compiten en los mejores campeonatos. Sigue a tus favoritos y solicita unirte.',
+    search: 'Buscar equipos...',
+  },
+  filters: {
+    category: 'Categoría',
+    show: 'Mostrar',
+    sort: 'Ordenar',
+    all: 'Todos',
+    following: 'Siguiendo',
+    open: 'Abiertos',
+    verified: 'Verificados',
+    category_all: 'Todas las categorías',
+  },
+  sort: {
+    wins: 'Más títulos',
+    events: 'Más eventos',
+    players: 'Más jugadores',
+    name: 'Nombre (A–Z)',
+  },
+  card: {
+    players: 'jugadores',
+    wins: 'títulos',
+    events: 'eventos',
+    follow: 'Seguir',
+    following: 'Siguiendo',
+    open: 'Plazas abiertas',
+    verified: 'Verificado',
+  },
+  results: '{n} equipos',
+  empty: 'Ningún equipo con estos filtros.',
+}

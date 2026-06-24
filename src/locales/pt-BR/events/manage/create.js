@@ -80,7 +80,13 @@ export default {
       },
       cover: {
         label: 'Imagem de capa',
-        help:  'Proporção 16:9. Exibida como banner na página do evento. Será salva como preview.webp.',
+        help:  'Proporção 16:9. Exibida como banner na página do evento. Será salva como cover.webp.',
+      },
+      color: {
+        label: 'Cor de destaque',
+        help:  'Cor usada no hero e no logotipo do evento. Deixe em branco para usar a cor da categoria.',
+        auto:  'Cor automática (categoria)',
+        reset: 'Remover',
       },
     },
     back: 'Voltar',

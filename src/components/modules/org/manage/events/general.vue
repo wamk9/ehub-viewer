@@ -21,6 +21,7 @@ const form = ref({
     fee: 0,
     currency: 'brl',
     max_registrations: '',
+    color: '',
 })
 
 const logoPreview  = ref(null)
@@ -41,6 +42,7 @@ watch(() => props.event, (newEvent) => {
         form.value.fee               = newEvent.fee               ?? 0
         form.value.currency          = newEvent.currency          ?? 'brl'
         form.value.max_registrations = newEvent.max_registrations ?? ''
+        form.value.color             = newEvent.color             ?? ''
         logoPreview.value  = newEvent.logo_image  ? SystemVars.baseUrl + 'storage/' + newEvent.logo_image  : null
         coverPreview.value = newEvent.cover_image ? SystemVars.baseUrl + 'storage/' + newEvent.cover_image : null
         logoBase64.value   = null
@@ -135,6 +137,19 @@ async function save() {
                         </div>
                     </div>
                     <input ref="coverInput" type="file" accept="image/*" class="d-none" @change="pickCover" />
+                </div>
+            </div>
+
+            <!-- Cor de destaque -->
+            <div class="mt-4">
+                <label class="gen-label">{{ $t('events.manage.create.step2.form.color.label') }}</label>
+                <p class="field-hint mb-2">{{ $t('events.manage.create.step2.form.color.help') }}</p>
+                <div class="color-row">
+                    <input type="color" class="color-swatch" v-model="form.color" />
+                    <span class="color-hex">{{ form.color || $t('events.manage.create.step2.form.color.auto') }}</span>
+                    <button v-if="form.color" class="btn btn-sm btn-outline-secondary" style="border-radius:6px;font-size:.75rem" @click="form.color = ''">
+                        {{ $t('events.manage.create.step2.form.color.reset') }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -251,4 +266,7 @@ async function save() {
     color: rgba(255,255,255,0.88);
 }
 .gen-select:focus { box-shadow: none; border-color: rgba(255,255,255,0.3); }
+.color-row { display: flex; align-items: center; gap: 0.75rem; }
+.color-swatch { width: 44px; height: 44px; border-radius: 10px; border: 2px solid rgba(255,255,255,.15); padding: 2px; background: none; cursor: pointer; flex-shrink: 0; }
+.color-hex { font-size: 0.8rem; color: rgba(255,255,255,.55); font-family: monospace; }
 </style>

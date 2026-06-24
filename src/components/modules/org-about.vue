@@ -17,7 +17,10 @@
                 <h4>Staff</h4>
                 <div class="row g-2 mt-1">
                     <div class="col-12 col-md-6" v-for="m in members" :key="m.id">
-                        <div class="d-flex align-items-center gap-2">
+                        <router-link
+                            :to="m.user?.username ? `/profile/${m.user.username}` : '#'"
+                            class="d-flex align-items-center gap-2 text-decoration-none"
+                        >
                             <InitialsAvatar
                                 :name="`${m.user?.name ?? ''} ${m.user?.surname ?? ''}`"
                                 :image="m.user?.image ?? ''"
@@ -25,10 +28,10 @@
                                 :size="36"
                             />
                             <div>
-                                <div class="fw-semibold small">{{ m.user?.name }} {{ m.user?.surname }}</div>
+                                <div class="fw-semibold small" style="color:var(--ehub-ink)">{{ m.user?.name }} {{ m.user?.surname }}</div>
                                 <div class="text-muted" style="font-size:0.75rem">{{ roleLabel(m.role) }}</div>
                             </div>
-                        </div>
+                        </router-link>
                     </div>
                 </div>
             </div>

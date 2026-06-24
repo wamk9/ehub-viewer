@@ -1,0 +1,57 @@
+export default {
+  not_found: 'Profile not found or set to private.',
+  member_since: 'Member since',
+  followers: 'followers',
+  following: 'following',
+  edit_profile: 'Edit Profile',
+  share: 'Share',
+  tabs: {
+    overview: 'Overview',
+    results: 'Results',
+    teams: 'Teams',
+    orgs: 'Organizations',
+  },
+  stats: {
+    events: 'Events',
+    wins: 'Wins',
+    podiums: 'Podiums',
+    points: 'Points',
+    teams: 'Teams',
+    orgs: 'Orgs',
+  },
+  overview: {
+    recent_results: 'Recent Results',
+    view_all: 'View all',
+    about: 'About',
+    about_items: {
+      favorite_category: 'Favorite Category',
+      driving_style: 'Driving Style',
+      car_number: 'Car Number',
+      discord: 'Discord',
+      motto: 'Motto',
+    },
+    no_results: 'No results yet.',
+  },
+  results: {
+    pos: 'Pos.',
+    event: 'Event',
+    org: 'Organization',
+    pts: 'Pts',
+    empty: 'No results found.',
+  },
+  teams: {
+    empty: 'This user is not on any team.',
+    players: 'members',
+  },
+  orgs: {
+    empty: 'This user is not part of any organization.',
+  },
+  roles: {
+    captain: 'Captain',
+    vice: 'Vice-Captain',
+    player: 'Member',
+    reserve: 'Reserve',
+    admin: 'Admin',
+    member: 'Member',
+  },
+}

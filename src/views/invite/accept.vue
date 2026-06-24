@@ -34,7 +34,7 @@ onMounted(async () => {
     <div v-else-if="status === 'success'">
       <font-awesome-icon icon="check-circle" class="text-success fa-3x mb-3" />
       <h4>{{ $t('invite.accept.success') }}</h4>
-      <router-link class="btn btn-primary mt-3" to="/organizations/mine">
+      <router-link class="btn btn-primary mt-3" to="/my-orgs">
         {{ $t('invite.accept.go_orgs') }}
       </router-link>
     </div>

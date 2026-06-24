@@ -1,0 +1,53 @@
+export default {
+  hero: {
+    title_pre: 'My',
+    title_accent: 'Teams',
+    title_suf: '',
+    subtitle: 'Teams where you are an active member or reserve.',
+    new: 'New Team',
+  },
+  summary: {
+    teams: 'teams',
+    total_wins: 'titles won',
+    total_events: 'events competed',
+  },
+  bar: {
+    role: 'Role',
+    all: 'All',
+    captain: 'Captain',
+    vice: 'Vice-Captain',
+    player: 'Starter',
+    reserve: 'Reserve',
+  },
+  roles: {
+    captain: 'Captain',
+    vice: 'Vice-Captain',
+    player: 'Starter',
+    reserve: 'Reserve',
+  },
+  card: {
+    players: 'members',
+    wins: 'titles',
+    events: 'events',
+    open: 'Open spots for new members',
+    manage: 'Manage',
+    roster: 'Roster',
+    calendar: 'Calendar',
+    results: 'Results',
+  },
+  modal: {
+    title: 'New Team',
+    subtitle: 'Create a team or join an existing one with an invite code.',
+    create: 'Create new team',
+    join: 'Join with invite code',
+    code_placeholder: 'Paste code here...',
+    enter: 'Join',
+    cancel: 'Cancel',
+  },
+  new_card: {
+    label: 'Create or join a team',
+    sub: 'Build your roster and compete in championships',
+  },
+  results: '{n} teams',
+  empty: 'No team matches this filter.',
+}

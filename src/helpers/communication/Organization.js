@@ -12,7 +12,7 @@ const Organization = {
         return { created: false, errors: result.response?.errors, message: result.response?.message, code: result.code };
     },
     async getMine() {
-        const result = await Api.getAsync('/orgs/mine');
+        const result = await Api.getAsync('/my-orgs');
         return { code: result.code, data: result.response?.message };
     },
     async show(orgRoute) {

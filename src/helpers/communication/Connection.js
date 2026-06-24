@@ -47,7 +47,10 @@ const Api = {
   },
 
   async getAsync(route, params) {
-    return await axios.get(route, params)
+    return await axios.get(route, {
+      ...params,
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache', ...(params?.headers ?? {}) }
+    })
     .then(response => {
       return { code: response.status, response: response.data };
     })
@@ -59,6 +62,18 @@ const Api = {
   async patchAsync(route, params) {
     return await axios.patch(route, params, {
       headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+    })
+    .then(response => {
+      return { code: response.status, response: response.data };
+    })
+    .catch(e => {
+      return { code: e.response?.status || 500, response: e.response?.data || e.message };
+    })
+  },
+
+  async postFormAsync(route, formData) {
+    return await axios.post(route, formData, {
+      headers: { 'Accept': 'application/json' }
     })
     .then(response => {
       return { code: response.status, response: response.data };

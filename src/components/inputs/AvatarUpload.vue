@@ -44,7 +44,7 @@ const emit = defineEmits(['update:modelValue'])
   margin-bottom: 0.5rem !important;
   border-radius: 50% !important;
   overflow: hidden !important;
-  border: 3px solid var(--bs-border-color);
+  border: 3px solid var(--ehub-line);
 }
 .avatar-size :deep(.preview-wrapper::before) { display: none !important; }
 .avatar-size :deep(.preview-image) {

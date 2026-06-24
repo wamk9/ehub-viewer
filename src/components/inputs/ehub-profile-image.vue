@@ -11,8 +11,10 @@
                 :rounded="roundImage"
             />
         </div>
-        <img v-else :src="'https://placehold.co/400'" :id="dropFileElementId" class="preview-image"
-            :style="(roundImage ? 'border-radius: 50%' : '')" alt="Profile Image Preview" />
+        <div v-else class="preview-camera-state">
+            <font-awesome-icon :icon="['fas', 'camera']" class="camera-icon" />
+            <span class="camera-label">Foto</span>
+        </div>
 
         <div class="border-overlay" :style="(roundImage ? 'border-radius: 50%' : '')"></div>
         <span class="drop-text" :style="(roundImage ? 'border-radius: 50%' : '')">{{ dropLabel }}</span>
@@ -20,7 +22,7 @@
 
     <form class="my-form">
         <input type="file" :id="inputFileElementId" accept="image/*" @change="uploadByButton($event)">
-        <label class="btn w-100 btn-secondary" :for="inputFileElementId">{{ buttonLabel }}</label>
+        <label class="btn w-100 avatar-upload-btn" :for="inputFileElementId">{{ buttonLabel }}</label>
     </form>
 </template>
 
@@ -158,12 +160,11 @@ export default {
 .border-overlay {
     position: absolute;
     inset: 0;
-    border: 5px solid #ff0066;
+    border: 5px solid var(--ehub-primary);
     opacity: 0;
     pointer-events: none;
     z-index: 2;
     border-radius: inherit;
-    /* keeps rounded shape if needed */
 }
 
 .preview-wrapper.highlight .border-overlay {
@@ -187,15 +188,14 @@ export default {
 .drop-text {
     position: absolute;
     inset: 0;
-    /* fill wrapper */
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    color: #007bff;
+    color: var(--ehub-primary);
     font-weight: bold;
     font-size: 16px;
-    background: rgba(255, 255, 255, 0.6);
+    background: color-mix(in srgb, var(--ehub-card) 85%, transparent);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s;
@@ -209,18 +209,17 @@ export default {
 .rounded-border::before {
     border-radius: 50%;
     animation: spin 2s linear infinite !important;
-    border-top-color: #ff0066;
+    border-top-color: var(--ehub-primary);
     border-bottom-color: transparent;
     border-left-color: transparent;
     border-right-color: transparent;
-
 }
 
 .preview-wrapper::before {
     content: "";
     position: relative;
     inset: 0;
-    border-color: #ff0066;
+    border-color: var(--ehub-primary);
     border: 5px solid transparent;
     animation: fade 2s linear infinite;
     z-index: 2;
@@ -252,8 +251,44 @@ p {
     margin-bottom: 10px;
 }
 
+.avatar-upload-btn {
+    background: var(--ehub-field-bg);
+    color: var(--ehub-muted);
+    border: 1px solid var(--ehub-line);
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+}
+.avatar-upload-btn:hover {
+    border-color: var(--ehub-primary);
+    color: var(--ehub-primary);
+    background: var(--ehub-primary-tint);
+}
+
 input[id$=_file_input] {
     display: none;
+}
+
+.preview-camera-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--ehub-field-bg);
+    border-radius: inherit;
+}
+.camera-icon {
+    font-size: 1.5rem;
+    color: var(--ehub-primary);
+}
+.camera-label {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--ehub-muted);
 }
 
 .preview-initials-wrapper {
@@ -275,8 +310,8 @@ input[id$=_file_input] {
     object-fit: cover;
     border-width: 4px;
     border-style: solid;
-    border-color: gray;
-    background-color: gray;
+    border-color: var(--ehub-line);
+    background-color: var(--ehub-field-bg);
     margin-bottom: 2rem;
 }
 </style>

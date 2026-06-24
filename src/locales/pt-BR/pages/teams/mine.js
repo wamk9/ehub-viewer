@@ -1,0 +1,53 @@
+export default {
+  hero: {
+    title_pre: 'Meus',
+    title_accent: 'Times',
+    title_suf: '',
+    subtitle: 'Times nos quais você é membro ativo ou reserva.',
+    new: 'Novo Time',
+  },
+  summary: {
+    teams: 'times',
+    total_wins: 'títulos conquistados',
+    total_events: 'eventos disputados',
+  },
+  bar: {
+    role: 'Cargo',
+    all: 'Todos',
+    captain: 'Capitão',
+    vice: 'Vice-Capitão',
+    player: 'Titular',
+    reserve: 'Reserva',
+  },
+  roles: {
+    captain: 'Capitão',
+    vice: 'Vice-Capitão',
+    player: 'Titular',
+    reserve: 'Reserva',
+  },
+  card: {
+    players: 'membros',
+    wins: 'títulos',
+    events: 'eventos',
+    open: 'Vagas abertas para novos membros',
+    manage: 'Gerenciar',
+    roster: 'Elenco',
+    calendar: 'Calendário',
+    results: 'Resultados',
+  },
+  modal: {
+    title: 'Novo Time',
+    subtitle: 'Crie um time ou entre em um existente com um código de convite.',
+    create: 'Criar novo time',
+    join: 'Entrar com código de convite',
+    code_placeholder: 'Cole o código aqui...',
+    enter: 'Entrar',
+    cancel: 'Cancelar',
+  },
+  new_card: {
+    label: 'Criar ou entrar em um time',
+    sub: 'Monte seu elenco e dispute campeonatos',
+  },
+  results: '{n} times',
+  empty: 'Nenhum time encontrado com esse filtro.',
+}

@@ -41,12 +41,28 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/profile/:username',
+      name: 'public-profile',
+      component: () => import('@/views/user/public-profile.vue')
+    },
+    {
       path: '/orgs',
       name: 'organizations',
       component: () => import('@/views/org/index.vue')
     },
     {
-      path: '/orgs/mine',
+      path: '/teams',
+      name: 'teams',
+      component: () => import('@/views/teams/index.vue')
+    },
+    {
+      path: '/my-teams',
+      name: 'my-teams',
+      component: () => import('@/views/teams/mine.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/my-orgs',
       name: 'my-organizations',
       component: () => import('@/views/org/mine.vue'),
       meta: { requiresAuth: true }
@@ -74,10 +90,31 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/org/:orgRoute/manage/members',
+      name: 'manage-organization-members',
+      component: () => import('@/views/org/manage.vue'),
+      props: () => ({ forceOption: ['members'] }),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/org/:orgRoute/manage/finances',
       name: 'manage-organization-finances',
       component: () => import('@/views/org/manage.vue'),
       props: () => ({ forceOption: ['finances'] }),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/org/:orgRoute/manage/reports',
+      name: 'manage-organization-reports',
+      component: () => import('@/views/org/manage.vue'),
+      props: () => ({ forceOption: ['reports'] }),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/org/:orgRoute/manage/settings',
+      name: 'manage-organization-settings',
+      component: () => import('@/views/org/manage.vue'),
+      props: () => ({ forceOption: ['settings'] }),
       meta: { requiresAuth: true }
     },
     {

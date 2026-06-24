@@ -8,26 +8,21 @@ const { locale, t } = useI18n()
 </script>
 
 <template>
+  <template v-if="$route.meta.authPage">
+    <RouterView :key="$route.fullPath" />
+    <AppToast />
+  </template>
+  <template v-else>
     <navbar />
     <div class="page-content">
       <RouterView :key="$route.fullPath" />
     </div>
     <customFooter />
     <AppToast />
+  </template>
 </template>
 
 <style>
-.page-content {
-    padding-top: 80px;
-}
-
-@media (max-width: 991.98px) {
-    .page-content {
-        padding-top: 0;
-        padding-bottom: 72px;
-    }
-}
-
 main.container {
     margin-top: 50px;
     margin-bottom: 50px;

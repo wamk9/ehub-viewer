@@ -1,0 +1,57 @@
+export default {
+  not_found: 'Perfil não encontrado ou privado.',
+  member_since: 'Membro desde',
+  followers: 'seguidores',
+  following: 'seguindo',
+  edit_profile: 'Editar Perfil',
+  share: 'Compartilhar',
+  tabs: {
+    overview: 'Visão Geral',
+    results: 'Resultados',
+    teams: 'Times',
+    orgs: 'Organizações',
+  },
+  stats: {
+    events: 'Eventos',
+    wins: 'Vitórias',
+    podiums: 'Pódios',
+    points: 'Pontos',
+    teams: 'Times',
+    orgs: 'Orgs',
+  },
+  overview: {
+    recent_results: 'Resultados Recentes',
+    view_all: 'Ver todos',
+    about: 'Sobre',
+    about_items: {
+      favorite_category: 'Categoria Favorita',
+      driving_style: 'Estilo de pilotagem',
+      car_number: 'Número',
+      discord: 'Discord',
+      motto: 'Lema',
+    },
+    no_results: 'Sem resultados ainda.',
+  },
+  results: {
+    pos: 'Pos.',
+    event: 'Evento',
+    org: 'Organização',
+    pts: 'Pts',
+    empty: 'Nenhum resultado encontrado.',
+  },
+  teams: {
+    empty: 'Este usuário não está em nenhum time.',
+    players: 'membros',
+  },
+  orgs: {
+    empty: 'Este usuário não faz parte de nenhuma organização.',
+  },
+  roles: {
+    captain: 'Capitão',
+    vice: 'Vice-Capitão',
+    player: 'Membro',
+    reserve: 'Reserva',
+    admin: 'Admin',
+    member: 'Membro',
+  },
+}

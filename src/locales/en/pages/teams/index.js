@@ -1,0 +1,36 @@
+export default {
+  hero: {
+    title_pre: 'Meet the',
+    title_accent: 'teams',
+    title_suf: '',
+    subtitle: 'Teams competing in the best championships. Follow your favorites and apply to join them.',
+    search: 'Search teams...',
+  },
+  filters: {
+    category: 'Category',
+    show: 'Show',
+    sort: 'Sort',
+    all: 'All',
+    following: 'Following',
+    open: 'Open',
+    verified: 'Verified',
+    category_all: 'All categories',
+  },
+  sort: {
+    wins: 'Most titles',
+    events: 'Most events',
+    players: 'Most players',
+    name: 'Name (A–Z)',
+  },
+  card: {
+    players: 'players',
+    wins: 'titles',
+    events: 'events',
+    follow: 'Follow',
+    following: 'Following',
+    open: 'Open spots',
+    verified: 'Verified',
+  },
+  results: '{n} teams',
+  empty: 'No teams match these filters.',
+}

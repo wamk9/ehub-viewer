@@ -97,6 +97,7 @@ const basic = ref({
     fee:               '',
     max_registrations: '',
     start_at:          '',
+    color:             '',
     logo_preview:      null,
     logo_base64:       null,
     cover_preview:     null,
@@ -378,6 +379,7 @@ async function publishEvent() {
 
     if (basic.value.logo_base64)  payload.logo_image  = basic.value.logo_base64;
     if (basic.value.cover_base64) payload.cover_image = basic.value.cover_base64;
+    if (basic.value.color)        payload.color       = basic.value.color;
 
     const result = await OrganizationEvent.store(route.params.orgRoute, payload);
     publishing.value = false;
@@ -657,10 +659,23 @@ async function publishEvent() {
                             <img v-if="basic.cover_preview" :src="basic.cover_preview" class="img-upload__preview" />
                             <div v-else class="img-upload__empty">
                                 <font-awesome-icon :icon="['fas', 'image']" class="mb-1" />
-                                <span>preview.webp · 16:9</span>
+                                <span>cover.webp · 16:9</span>
                             </div>
                         </div>
                         <input ref="coverInput" type="file" accept="image/*" class="d-none" @change="pickCover" />
+                    </div>
+                </div>
+
+                <!-- Cor de destaque -->
+                <div class="field-group mt-4 mb-0">
+                    <label class="field-label">{{ i18n.t('events.manage.create.step2.form.color.label') }}</label>
+                    <p class="field-hint mb-2">{{ i18n.t('events.manage.create.step2.form.color.help') }}</p>
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" v-model="basic.color" />
+                        <span class="color-hex">{{ basic.color || i18n.t('events.manage.create.step2.form.color.auto') }}</span>
+                        <button v-if="basic.color" class="btn btn-sm btn-outline-secondary" style="border-radius:6px;font-size:.75rem" @click="basic.color = ''">
+                            {{ i18n.t('events.manage.create.step2.form.color.reset') }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -676,6 +691,7 @@ async function publishEvent() {
                 </button>
             </div>
         </div>
+
 
         <!-- ═══════════════════ STEP 3 ═══════════════════ -->
         <div v-else-if="step === 3">
@@ -1344,4 +1360,12 @@ textarea.ehub-input { resize: vertical; }
     color: #3dd68c;
     box-shadow: 0 0 0 3px rgba(61,214,140,0.08);
 }
+
+/* ─── Color picker ───────────────────────── */
+.color-row { display: flex; align-items: center; gap: 0.75rem; }
+.color-swatch {
+    width: 44px; height: 44px; border-radius: 10px; border: 2px solid rgba(255,255,255,.15);
+    padding: 2px; background: none; cursor: pointer; flex-shrink: 0;
+}
+.color-hex { font-size: 0.8rem; color: rgba(255,255,255,.55); font-family: monospace; }
 </style>
