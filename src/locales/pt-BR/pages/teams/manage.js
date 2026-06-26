@@ -6,6 +6,8 @@ export default {
   activity_empty: 'Nenhuma atividade recente.',
   activity_role_changed: '<strong>{actor}</strong> alterou a função de <strong>{target}</strong>: {old_role} → {new_role}',
   activity_member_removed: '<strong>{actor}</strong> removeu <strong>{target}</strong> ({role}) do time',
+  activity_member_joined_application: '<strong>{target}</strong> entrou no time como {role} (candidatura aceita por <strong>{actor}</strong>)',
+  activity_member_joined_invite: '<strong>{target}</strong> entrou no time como {role} (convidado por <strong>{actor}</strong>)',
   nav: {
     overview: 'Visão Geral',
     roster: 'Elenco',

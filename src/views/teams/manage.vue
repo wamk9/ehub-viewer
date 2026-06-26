@@ -141,7 +141,7 @@
             <div v-else-if="activities.length">
               <div v-for="a in activities" :key="a.id" class="act-item">
                 <div class="act-icon">
-                  <font-awesome-icon :icon="a.type === 'team_member_removed' ? 'user-minus' : 'user-pen'" />
+                  <font-awesome-icon :icon="a.type === 'team_member_removed' ? 'user-minus' : a.type === 'team_role_changed' ? 'user-pen' : 'user-plus'" />
                 </div>
                 <div class="act-body">
                   <div class="act-text">
@@ -152,6 +152,16 @@
                       new_role: $t(`pages.teams.manage.roles.${a.params.new_role}`),
                     })" />
                     <span v-else-if="a.type === 'team_member_removed'" v-html="$t('pages.teams.manage.activity_member_removed', {
+                      actor: a.params.actor,
+                      target: a.params.target,
+                      role: $t(`pages.teams.manage.roles.${a.params.role}`),
+                    })" />
+                    <span v-else-if="a.type === 'team_member_joined_application'" v-html="$t('pages.teams.manage.activity_member_joined_application', {
+                      actor: a.params.actor,
+                      target: a.params.target,
+                      role: $t(`pages.teams.manage.roles.${a.params.role}`),
+                    })" />
+                    <span v-else-if="a.type === 'team_member_joined_invite'" v-html="$t('pages.teams.manage.activity_member_joined_invite', {
                       actor: a.params.actor,
                       target: a.params.target,
                       role: $t(`pages.teams.manage.roles.${a.params.role}`),

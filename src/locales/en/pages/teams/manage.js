@@ -6,6 +6,8 @@ export default {
   activity_empty: 'No recent activity.',
   activity_role_changed: '<strong>{actor}</strong> changed <strong>{target}</strong>\'s role: {old_role} → {new_role}',
   activity_member_removed: '<strong>{actor}</strong> removed <strong>{target}</strong> ({role}) from the team',
+  activity_member_joined_application: '<strong>{target}</strong> joined the team as {role} (application accepted by <strong>{actor}</strong>)',
+  activity_member_joined_invite: '<strong>{target}</strong> joined the team as {role} (invited by <strong>{actor}</strong>)',
   nav: {
     overview: 'Overview',
     roster: 'Roster',

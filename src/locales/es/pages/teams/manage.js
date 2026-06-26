@@ -6,6 +6,8 @@ export default {
   activity_empty: 'Sin actividad reciente.',
   activity_role_changed: '<strong>{actor}</strong> cambió el rol de <strong>{target}</strong>: {old_role} → {new_role}',
   activity_member_removed: '<strong>{actor}</strong> retiró a <strong>{target}</strong> ({role}) del equipo',
+  activity_member_joined_application: '<strong>{target}</strong> se unió al equipo como {role} (solicitud aceptada por <strong>{actor}</strong>)',
+  activity_member_joined_invite: '<strong>{target}</strong> se unió al equipo como {role} (invitado por <strong>{actor}</strong>)',
   nav: {
     overview: 'Resumen',
     roster: 'Plantilla',
