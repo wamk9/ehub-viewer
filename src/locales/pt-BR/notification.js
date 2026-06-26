@@ -6,7 +6,11 @@ export default {
     billing_invoice:    'Nova fatura de {cycle} — {org}',
     billing_card_saved:      'Método de pagamento salvo — {org}',
     event_article_published: 'Nova publicação em "{event}": {title}',
-    no_gateway_configured:   'Inscrição bloqueada em "{event}": nenhum gateway de pagamento compatível configurado em {org}',
+    no_gateway_configured:        'Inscrição bloqueada em "{event}": nenhum gateway de pagamento compatível configurado em {org}',
+    team_application_accepted:    'Sua candidatura para {team} foi aceita! Bem-vindo(a) à equipe.',
+    team_application_rejected:    'Sua candidatura para {team} não foi aprovada desta vez.',
+    team_role_changed:             'Sua função em {team} foi alterada para {role}.',
+    team_removed:                  'Você foi removido(a) de {team}.',
     empty:              'Nenhuma notificação',
     clear_all:          'Limpar tudo',
     time: {

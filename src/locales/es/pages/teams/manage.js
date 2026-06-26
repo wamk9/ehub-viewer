@@ -4,6 +4,8 @@ export default {
   view_all: 'Ver todos',
   activity: 'Actividad reciente',
   activity_empty: 'Sin actividad reciente.',
+  activity_role_changed: '<strong>{actor}</strong> cambió el rol de <strong>{target}</strong>: {old_role} → {new_role}',
+  activity_member_removed: '<strong>{actor}</strong> retiró a <strong>{target}</strong> ({role}) del equipo',
   nav: {
     overview: 'Resumen',
     roster: 'Plantilla',

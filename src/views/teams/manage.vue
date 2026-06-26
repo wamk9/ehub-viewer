@@ -135,7 +135,33 @@
 
           <div class="cc">
             <div class="cc-hd"><h3>{{ $t('pages.teams.manage.activity') }}</h3></div>
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--ehub-muted)">
+            <div v-if="activitiesLoading" style="padding:32px;text-align:center;color:var(--ehub-muted);font-size:.83rem">
+              {{ $t('pages.teams.manage.loading') }}
+            </div>
+            <div v-else-if="activities.length">
+              <div v-for="a in activities" :key="a.id" class="act-item">
+                <div class="act-icon">
+                  <font-awesome-icon :icon="a.type === 'team_member_removed' ? 'user-minus' : 'user-pen'" />
+                </div>
+                <div class="act-body">
+                  <div class="act-text">
+                    <span v-if="a.type === 'team_role_changed'" v-html="$t('pages.teams.manage.activity_role_changed', {
+                      actor: a.params.actor,
+                      target: a.params.target,
+                      old_role: $t(`pages.teams.manage.roles.${a.params.old_role}`),
+                      new_role: $t(`pages.teams.manage.roles.${a.params.new_role}`),
+                    })" />
+                    <span v-else-if="a.type === 'team_member_removed'" v-html="$t('pages.teams.manage.activity_member_removed', {
+                      actor: a.params.actor,
+                      target: a.params.target,
+                      role: $t(`pages.teams.manage.roles.${a.params.role}`),
+                    })" />
+                  </div>
+                  <div class="act-time">{{ formatActivityTime(a.created_at) }}</div>
+                </div>
+              </div>
+            </div>
+            <div v-else style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--ehub-muted)">
               <font-awesome-icon icon="clock-rotate-left" style="font-size:1.5rem;opacity:.3;margin-bottom:8px" />
               <p style="margin:0;font-size:.83rem">{{ $t('pages.teams.manage.activity_empty') }}</p>
             </div>
@@ -497,6 +523,8 @@ export default {
       coverLocalPreview: null,
       coverUploading: false,
       coverVersion: Date.now(),
+      activities: [],
+      activitiesLoading: false,
       applications: [],
       applicationsLoading: false,
       rolesData: [],
@@ -593,6 +621,7 @@ export default {
       this.$router.replace({ query: { ...this.$route.query, tab: panel } })
       if (panel === 'applications' && this.team) this.loadApplications()
       if (panel === 'roles' && !this.rolesData.length) this.loadRoles()
+      if (panel === 'overview' && this.team) this.loadActivities()
     },
 
     async loadRoles() {
@@ -610,6 +639,22 @@ export default {
         if (root) { sorted.push(root); traverse(root.id) }
         this.rolesData = sorted
       }
+    },
+
+    formatActivityTime(ts) {
+      const diff = Math.floor((Date.now() - new Date(ts)) / 1000)
+      if (diff < 60) return this.$t('notification.time.just_now')
+      if (diff < 3600) return this.$t('notification.time.minutes_ago', { n: Math.floor(diff / 60) })
+      if (diff < 86400) return this.$t('notification.time.hours_ago', { n: Math.floor(diff / 3600) })
+      return this.$t('notification.time.days_ago', { n: Math.floor(diff / 86400) })
+    },
+
+    async loadActivities() {
+      if (!this.team) return
+      this.activitiesLoading = true
+      const res = await Teams.getActivities(this.team.id)
+      if (res.code === 200) this.activities = res.data
+      this.activitiesLoading = false
     },
 
     async loadApplications() {
@@ -824,9 +869,8 @@ export default {
     const tab = this.$route.query.tab
     if (tab) this.activePanel = tab
     this.loadTeam().then(() => {
-      if (this.activePanel === 'applications' && this.team) {
-        this.loadApplications()
-      }
+      if (this.activePanel === 'applications' && this.team) this.loadApplications()
+      if (this.activePanel === 'overview' && this.team) this.loadActivities()
     })
     this.loadRoles().then(() => {
       if (this.invitableRoles.length) this.inviteRole = this.invitableRoles[0].name
@@ -919,6 +963,14 @@ export default {
 .roles-legend { font-size: .75rem; color: var(--ehub-muted); margin-top: 12px; display: flex; align-items: center; gap: 6px; }
 html[data-bs-theme="dark"] .perm-dot--yes    { color: #51cf66; background: color-mix(in srgb,#51cf66 14%,transparent); }
 html[data-bs-theme="dark"] .perm-dot--always { color: var(--ehub-gold); }
+
+.act-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 15px; border-bottom: 1px solid var(--ehub-line); }
+.act-item:last-child { border-bottom: 0; }
+.act-icon { width: 28px; height: 28px; border-radius: 8px; background: var(--ehub-field-bg); color: var(--ehub-muted); display: flex; align-items: center; justify-content: center; font-size: .72rem; flex-shrink: 0; margin-top: 1px; }
+.act-body { flex: 1; min-width: 0; }
+.act-text { font-size: .82rem; color: var(--ehub-ink); line-height: 1.4; }
+.act-text strong { font-weight: 700; }
+.act-time { font-size: .72rem; color: var(--ehub-muted); margin-top: 2px; }
 
 .role-chip { font-size: .7rem; font-weight: 700; padding: 3px 9px; border-radius: 50rem; display: inline-block; }
 .role-select { font-size: .7rem; font-weight: 700; padding: 3px 8px; border-radius: 50rem; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); color: var(--ehub-ink); cursor: pointer; }

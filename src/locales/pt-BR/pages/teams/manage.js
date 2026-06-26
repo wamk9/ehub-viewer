@@ -4,6 +4,8 @@ export default {
   view_all: 'Ver todos',
   activity: 'Atividade recente',
   activity_empty: 'Nenhuma atividade recente.',
+  activity_role_changed: '<strong>{actor}</strong> alterou a função de <strong>{target}</strong>: {old_role} → {new_role}',
+  activity_member_removed: '<strong>{actor}</strong> removeu <strong>{target}</strong> ({role}) do time',
   nav: {
     overview: 'Visão Geral',
     roster: 'Elenco',

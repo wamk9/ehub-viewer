@@ -6,7 +6,11 @@ export default {
     billing_invoice:    'New invoice for {cycle} — {org}',
     billing_card_saved:      'Payment method saved — {org}',
     event_article_published: 'New post in "{event}": {title}',
-    no_gateway_configured:   'Registration blocked for "{event}": no compatible payment gateway configured in {org}',
+    no_gateway_configured:        'Registration blocked for "{event}": no compatible payment gateway configured in {org}',
+    team_application_accepted:    'Your application to {team} was accepted! Welcome to the team.',
+    team_application_rejected:    'Your application to {team} was not approved this time.',
+    team_role_changed:             'Your role in {team} was changed to {role}.',
+    team_removed:                  'You were removed from {team}.',
     empty:              'No notifications',
     clear_all:          'Clear all',
     time: {

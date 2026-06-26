@@ -86,6 +86,10 @@ const Teams = {
         const result = await Api.postAsync(`/team/${teamId}/applications/${appId}/reject`);
         return { code: result.code };
     },
+    async getActivities(teamId) {
+        const result = await Api.getAsync(`/team/${teamId}/activities`);
+        return { code: result.code, data: result.response?.message ?? [] };
+    },
     async getRoles() {
         const result = await Api.getAsync('/team-roles');
         return { code: result.code, data: result.response?.message ?? [] };
