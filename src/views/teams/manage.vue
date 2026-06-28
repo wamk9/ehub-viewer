@@ -393,7 +393,7 @@
               :swatches="colorSwatches"
             />
           </div>
-          <button class="btn btn-primary round px-4" :disabled="settingsSaving" @click="saveSettings">
+          <button class="btn btn-primary round px-4" :disabled="settingsSaving || !settingsChanged" @click="saveSettings">
             {{ settingsSaving ? $t('pages.teams.manage.settings.saving') : $t('pages.teams.manage.settings.save') }}
           </button>
         </div>
@@ -609,6 +609,15 @@ export default {
       if (!this.team || !this.rootRoleName) return false
       if (this.myRole !== this.rootRoleName) return false
       return (this.team.members?.filter(m => m.role === this.rootRoleName).length ?? 0) <= 1
+    },
+    settingsChanged() {
+      if (!this.team) return false
+      return (
+        this.settingsForm.name !== (this.team.name || '') ||
+        this.settingsForm.tag !== (this.team.tag || '') ||
+        this.settingsForm.description !== (this.team.description || '') ||
+        this.settingsForm.color !== (this.team.color || '#0098D8')
+      )
     },
     activitiesWithIcons() {
       return this.activities.map(a => ({
