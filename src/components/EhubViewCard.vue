@@ -185,7 +185,7 @@ function imgUrl(path) {
 }
 .vc-shield {
   position: absolute;
-  left: 12px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 2.2rem;
