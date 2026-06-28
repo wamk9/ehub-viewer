@@ -1,6 +1,22 @@
 <template>
-  <div v-if="loading" class="ts-state">
-    <font-awesome-icon icon="spinner" spin class="ts-spinner" />
+  <div v-if="loading" class="ts-skel-page">
+    <div class="skel" style="height:200px;border-radius:0;width:100%"></div>
+    <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem">
+      <div style="display:flex;gap:1rem;margin-top:-36px;align-items:flex-end;padding-bottom:1rem">
+        <div class="skel" style="width:80px;height:80px;border-radius:14px;flex-shrink:0;border:3px solid var(--ehub-card)"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-bottom:.5rem">
+          <div class="skel" style="height:22px;width:220px"></div>
+          <div class="skel" style="height:14px;width:140px"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:1.5rem;margin:1rem 0 1.5rem">
+        <div v-for="i in 4" :key="i" class="skel" :style="{ height:'52px', width:'90px', borderRadius:'10px', animationDelay: (i*0.09)+'s' }"></div>
+      </div>
+      <div style="display:flex;gap:.5rem;margin-bottom:1.5rem">
+        <div v-for="i in 3" :key="'t'+i" class="skel" :style="{ height:'36px', width:'110px', borderRadius:'8px', animationDelay: (i*0.07)+'s' }"></div>
+      </div>
+      <div class="skel" style="height:220px;border-radius:14px"></div>
+    </div>
   </div>
 
   <div v-else-if="!team" class="ts-state">
@@ -403,6 +419,7 @@ export default {
 <style scoped>
 /* ── Page ── */
 .ts-page { min-height: 100vh; }
+.ts-skel-page { background: var(--ehub-page); min-height: 100vh; }
 .ts-state { display: flex; align-items: center; justify-content: center; padding: 80px 20px; flex-direction: column; gap: 16px; }
 .ts-spinner { font-size: 1.8rem; color: var(--ehub-muted); }
 .ts-err { color: var(--ehub-muted); font-size: .95rem; }

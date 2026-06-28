@@ -208,8 +208,8 @@ async function toggleFollow(e, org) {
   <!-- CONTENT -->
   <main class="container-fluid px-4 py-4">
     <!-- Loading -->
-    <div v-if="loading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
+    <div v-if="loading" class="orgs-grid">
+      <div v-for="i in 6" :key="i" class="skel" :style="{ height: '260px', borderRadius: '16px', animationDelay: (i * 0.08) + 's' }"></div>
     </div>
 
     <!-- Empty -->

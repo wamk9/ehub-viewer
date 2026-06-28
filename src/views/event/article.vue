@@ -1,8 +1,18 @@
 <template>
     <main class="container py-4">
 
-        <div v-if="loading" class="text-center py-5">
-            <div class="spinner-border text-primary" role="status"></div>
+        <div v-if="loading" class="row justify-content-center">
+          <div class="col-12 col-lg-9">
+            <div class="skel" style="width:100%;height:280px;border-radius:12px;margin-bottom:1.5rem"></div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem">
+              <div class="skel" style="height:14px;width:120px;border-radius:6px"></div>
+              <div class="skel" style="height:36px;width:80%;border-radius:8px"></div>
+              <div class="skel" style="height:16px;width:55%;border-radius:6px"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div v-for="i in 8" :key="i" class="skel" :style="{ height: '16px', borderRadius: '6px', width: (96 - i * 3) + '%', animationDelay: (i * 0.06) + 's' }"></div>
+            </div>
+          </div>
         </div>
 
         <div v-else-if="notFound" class="text-center py-5 text-muted">

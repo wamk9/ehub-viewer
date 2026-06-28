@@ -37,6 +37,19 @@ function catGrad(category) {
   return g ? `linear-gradient(135deg, ${g[0]}, ${g[1]})` : 'linear-gradient(135deg, #0098D8, #00d4ff)'
 }
 
+function lightenHex(hex, amount) {
+  const num = parseInt((hex || '#0098D8').replace('#', ''), 16)
+  const r = Math.min(255, (num >> 16) + amount)
+  const g = Math.min(255, ((num >> 8) & 0xff) + amount)
+  const b = Math.min(255, (num & 0xff) + amount)
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('')
+}
+
+function teamGrad(team) {
+  if (team.color) return `linear-gradient(135deg, ${team.color}, ${lightenHex(team.color, 40)})`
+  return catGrad(team.category)
+}
+
 function initials(name) {
   return (name || '?').split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
 }
@@ -181,8 +194,8 @@ async function toggleFollow(e, team) {
 
   <!-- CONTENT -->
   <main class="container-fluid px-4 py-4">
-    <div v-if="loading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
+    <div v-if="loading" class="orgs-grid">
+      <div v-for="i in 6" :key="i" class="skel" :style="{ height: '260px', borderRadius: '16px', animationDelay: (i * 0.08) + 's' }"></div>
     </div>
 
     <div v-else-if="!filtered.length" class="empty-state">
@@ -201,7 +214,7 @@ async function toggleFollow(e, team) {
         style="cursor: pointer;"
       >
         <!-- Banner -->
-        <div class="org-banner" :style="{ background: catGrad(team.category) }">
+        <div class="org-banner" :style="{ background: teamGrad(team) }">
           <span v-if="team.is_open" class="team-open-badge">
             <font-awesome-icon :icon="['fas', 'door-open']" />
             {{ $t('pages.teams.index.card.open') }}
@@ -212,7 +225,7 @@ async function toggleFollow(e, team) {
         </div>
 
         <!-- Logo -->
-        <div class="org-logo" :style="!team.logo_image ? { background: catGrad(team.category) } : {}">
+        <div class="org-logo" :style="!team.logo_image ? { background: teamGrad(team) } : {}">
           <img v-if="team.logo_image" :src="imgUrl(team.logo_image)" :alt="team.name" />
           <template v-else>{{ initials(team.name) }}</template>
         </div>

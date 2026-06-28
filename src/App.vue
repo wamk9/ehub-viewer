@@ -24,13 +24,13 @@ router.afterEach(() => {
 <template>
   <TopLoadingBar :active="pageLoading" />
   <template v-if="$route.meta.authPage">
-    <RouterView :key="$route.fullPath" />
+    <RouterView :key="$route.path" />
     <AppToast />
   </template>
   <template v-else>
     <navbar />
     <div class="page-content">
-      <RouterView :key="$route.fullPath" />
+      <RouterView :key="$route.path" />
     </div>
     <customFooter />
     <AppToast />

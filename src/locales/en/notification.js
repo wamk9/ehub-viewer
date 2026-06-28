@@ -9,6 +9,7 @@ export default {
     no_gateway_configured:        'Registration blocked for "{event}": no compatible payment gateway configured in {org}',
     team_application_accepted:    'Your application to {team} was accepted! Welcome to the team.',
     team_application_rejected:    'Your application to {team} was not approved this time.',
+    team_invited:                  'You were invited to {team} as {role}.',
     team_role_changed:             'Your role in {team} was changed to {role}.',
     team_removed:                  'You were removed from {team}.',
     empty:              'No notifications',

@@ -33,7 +33,7 @@ const isOwnProfile = computed(() => myUsername.value && profile.value && myUsern
 async function loadProfile() {
   loading.value = true
   notFound.value = false
-  const res = await Api.getAsync('/user/' + route.params.username)
+  const res = await Api.getAsync('/profile/' + route.params.username)
   loading.value = false
   if (res.code === 200) {
     profile.value = res.response?.message
@@ -45,7 +45,7 @@ async function loadProfile() {
 async function loadMyUsername() {
   if (!store.getters.isLoggedIn) return
   const res = await Api.getAsync('/user/profile')
-  if (res.code === 200) myUsername.value = res.response?.message?.username
+  if (res.code === 200) myUsername.value = res.response?.username
 }
 
 onMounted(() => {
@@ -122,21 +122,25 @@ function teamLogoUrl(team) {
 }
 
 function teamGrad(team) {
+  if (team.color) {
+    const n = parseInt(team.color.replace('#', ''), 16)
+    const r = Math.min(255, (n >> 16) + 40)
+    const g = Math.min(255, ((n >> 8) & 0xff) + 40)
+    const b = Math.min(255, (n & 0xff) + 40)
+    const light = '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('')
+    return `linear-gradient(135deg, ${team.color}, ${light})`
+  }
   const CAT_COLORS = {
     simracing: ['#0098D8', '#00d4ff'],
-    racingcars: ['#0098D8', '#00d4ff'],
-    rally: ['#f08c00', '#ffc93c'],
     'esports-fps': ['#e23b3b', '#ff8a3b'],
     'esports-moba': ['#7C3AED', '#b06bff'],
     'esports-fighting': ['#d6336c', '#ff6b9d'],
-    'esports-strategy': ['#1a6e4f', '#51cf66'],
-    'esports-sports': ['#2563eb', '#60a5fa'],
     motorsport: ['#f08c00', '#ffc93c'],
+    chess: ['#495057', '#868e96'],
+    running: ['#1f8a5b', '#51cf66'],
   }
   const c = CAT_COLORS[team.category]
-  return c
-    ? `linear-gradient(135deg, ${c[0]}, ${c[1]})`
-    : 'linear-gradient(135deg, #495057, #868e96)'
+  return c ? `linear-gradient(135deg, ${c[0]}, ${c[1]})` : 'linear-gradient(135deg, #495057, #868e96)'
 }
 
 function orgLogoUrl(org) {
@@ -166,9 +170,31 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
 
 <template>
   <div class="pub-profile-page">
-    <!-- Loading -->
-    <div v-if="loading" class="pub-loading">
-      <div class="spinner-border text-primary"></div>
+    <!-- Loading skeleton -->
+    <div v-if="loading" class="pub-skel-page">
+      <div class="skel" style="height:200px;border-radius:0;width:100%"></div>
+      <div class="pub-container">
+        <div style="margin-top:-28px;padding-top:16px">
+          <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+            <div class="skel" style="width:116px;height:116px;border-radius:26px;flex-shrink:0;border:4px solid var(--ehub-card)"></div>
+            <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:9px;padding-top:8px">
+              <div class="skel" style="height:28px;width:220px;border-radius:8px"></div>
+              <div class="skel" style="height:14px;width:130px;border-radius:6px"></div>
+              <div class="skel" style="height:13px;width:80%;border-radius:6px"></div>
+              <div style="display:flex;gap:6px;margin-top:4px">
+                <div v-for="i in 4" :key="i" class="skel" :style="{ width:'30px', height:'30px', borderRadius:'8px', animationDelay: (i*0.06)+'s' }"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;margin-top:24px;border:1px solid var(--ehub-line);border-radius:var(--ehub-radius-card);overflow:hidden">
+            <div v-for="i in 6" :key="i" class="skel" :style="{ flex:1, height:'62px', borderRadius:0, animationDelay: (i*0.08)+'s' }"></div>
+          </div>
+          <div style="display:flex;gap:.5rem;margin-top:32px;margin-bottom:1.5rem;border-bottom:1px solid var(--ehub-line);padding-bottom:4px">
+            <div v-for="i in 4" :key="'tab'+i" class="skel" :style="{ height:'36px', width:'110px', borderRadius:'8px', animationDelay: (i*0.07)+'s' }"></div>
+          </div>
+          <div class="skel" style="height:200px;border-radius:14px"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Not found -->
@@ -259,7 +285,7 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
                 {{ $t('pages.user.public.edit_profile') }}
               </router-link>
               <button class="btn btn-ghost round" :title="$t('pages.user.public.share')">
-                <font-awesome-icon :icon="['fas', 'share-nodes']" />
+                <font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" />
               </button>
             </div>
           </div>
@@ -499,6 +525,9 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
 
 <style scoped>
 .pub-profile-page { min-height: 100vh; }
+
+/* Loading skeleton */
+.pub-skel-page { min-height: 100vh; background: var(--ehub-page); }
 
 /* Loading / not found */
 .pub-loading {

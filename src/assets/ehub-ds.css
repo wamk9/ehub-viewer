@@ -11,6 +11,7 @@
 
 :root {
   --ehub-primary:       #0098D8;
+  --skel-base:          #dde1e8;
   --ehub-gold:          #FBBF11;
 
   --ehub-primary-dark:  color-mix(in srgb, var(--ehub-primary), #000 18%);
@@ -45,6 +46,7 @@
 
 html[data-bs-theme="dark"] {
   --ehub-page:       #0a0c11;
+  --skel-base:       #1e232e;
   --ehub-glow:       color-mix(in srgb, var(--ehub-primary) 18%, transparent);
   --ehub-card:       #161922;
   --ehub-ink:        #e8ebf0;
@@ -56,6 +58,14 @@ html[data-bs-theme="dark"] {
   --ehub-shadow:     0 16px 48px rgba(0,0,0,.45);
   --ehub-ctrl-bg:    rgba(30,34,44,.7);
   --ehub-ctrl-border:#2a2f3b;
+}
+
+/* ── Skeleton ── */
+@keyframes skel-pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+.skel {
+  background: var(--skel-base);
+  border-radius: 8px;
+  animation: skel-pulse 1.6s ease-in-out infinite;
 }
 
 /* ── Base ── */

@@ -165,8 +165,8 @@ function goToTeam(team) {
 
   <!-- CONTENT -->
   <main class="container-fluid px-4 py-4">
-    <div v-if="loading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
+    <div v-if="loading" class="myteams-grid">
+      <div v-for="i in 6" :key="i" class="skel mteam-card-skel" :style="{ animationDelay: (i * 0.08) + 's' }"></div>
     </div>
 
     <template v-else>
@@ -400,6 +400,9 @@ function goToTeam(team) {
   font-size: .72rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: .05em; color: var(--ehub-muted); margin-right: 2px;
 }
+
+/* ── Skeleton card ── */
+.mteam-card-skel { height: 200px; border-radius: 16px; }
 
 /* ── Grid ── */
 .myteams-grid {

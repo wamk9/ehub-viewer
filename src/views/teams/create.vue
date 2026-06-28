@@ -169,7 +169,7 @@
                       <div class="cat-ico">
                         <font-awesome-icon :icon="categoryIcons[cat.route] || 'gamepad'" />
                       </div>
-                      <div class="cat-name">{{ $t(`categories.names.${cat.route}`, cat.name) }}</div>
+                      <div class="cat-name">{{ $t(`categories.names.${cat.route}`) }}</div>
                     </div>
                   </div>
                   <div v-if="filteredCategories.length === 0" class="cat-no-results">{{ $t('pages.teams.create.s2.cat_none') }}</div>
@@ -181,7 +181,7 @@
                   <font-awesome-icon :icon="categoryIcons[form.category] || 'gamepad'" />
                 </div>
                 <div>
-                  <div class="cat-sel-name">{{ $t(`categories.names.${form.category}`, form.category) }}</div>
+                  <div class="cat-sel-name">{{ $t(`categories.names.${form.category}`) }}</div>
                   <div class="cat-sel-hint">{{ $t('pages.teams.create.s2.cat_selected') }}</div>
                 </div>
                 <font-awesome-icon icon="circle-check" style="color:var(--ehub-primary);font-size:1.1rem;margin-left:auto" />
@@ -341,7 +341,7 @@
               <div class="rev-body">
                 <div class="rev-name">{{ form.name || $t('pages.teams.create.team_name_placeholder') }}</div>
                 <div class="rev-chips">
-                  <span v-if="form.category" class="rev-chip primary">{{ $t(`categories.names.${form.category}`, form.category) }}</span>
+                  <span v-if="form.category" class="rev-chip primary">{{ $t(`categories.names.${form.category}`) }}</span>
                   <span v-if="form.skill_level" class="rev-chip">{{ $t(`pages.teams.create.levels.${form.skill_level}`) }}</span>
                   <span class="rev-chip">{{ form.visibility === 'public' ? $t('pages.teams.create.vis.public') : $t('pages.teams.create.vis.private') }}</span>
                 </div>
@@ -422,7 +422,6 @@ import Teams from '@/helpers/communication/Teams.js';
 import Tournament from '@/helpers/communication/Tournament.js';
 import router from '@/router';
 import { toast } from '@/helpers/toast.js';
-import { i18n } from '@/helpers/i18n';
 
 export default {
   data() {
@@ -538,11 +537,11 @@ export default {
     nextStep() {
       this.errorMsg = '';
       if (this.currentStep === 0 && (!this.form.name.trim() || !this.form.tag.trim())) {
-        this.errorMsg = i18n.t('pages.teams.create.act.required');
+        this.errorMsg = this.$t('pages.teams.create.act.required');
         return;
       }
       if (this.currentStep === 1 && !this.form.category) {
-        this.errorMsg = i18n.t('pages.teams.create.act.required_cat');
+        this.errorMsg = this.$t('pages.teams.create.act.required_cat');
         return;
       }
       if (this.currentStep < this.steps.length - 1) this.currentStep++;
@@ -590,10 +589,10 @@ export default {
       const res = await Teams.create(payload);
       this.submitting = false;
       if (res.code === 201 && res.data) {
-        toast.success(i18n.t('pages.teams.create.act.create'));
+        toast.success(this.$t('pages.teams.create.act.create'));
         router.push('/my-teams');
       } else {
-        this.errorMsg = res.message || i18n.t('pages.teams.create.act.error');
+        this.errorMsg = res.message || this.$t('pages.teams.create.act.error');
       }
     },
   },

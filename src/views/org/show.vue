@@ -66,6 +66,9 @@ function catIcon(category) {
   return CAT_CONFIG[category]?.icon || 'trophy'
 }
 
+// ── Loading ─────────────────────────────────────────────────────────
+const loading = ref(true)
+
 // ── Data ────────────────────────────────────────────────────────────
 const org = ref({
   name: '', description: '', about: '', route: '', logo_image: '',
@@ -204,6 +207,7 @@ onMounted(async () => {
   }
 
   const result = await Organization.show(route.params.orgRoute)
+  loading.value = false
   if (result.code === 200) {
     org.value = result.data
     isFollowing.value = !!result.data.is_following
@@ -225,6 +229,31 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <!-- SKELETON -->
+  <template v-if="loading">
+    <div class="org-skel-page">
+      <div class="skel" style="height:200px;border-radius:0;width:100%"></div>
+      <div class="container-fluid px-4">
+        <div style="display:flex;gap:1rem;margin-top:-40px;align-items:flex-end;padding-bottom:1rem">
+          <div class="skel" style="width:90px;height:90px;border-radius:16px;flex-shrink:0;border:3px solid var(--ehub-card)"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-bottom:.5rem">
+            <div class="skel" style="height:26px;width:240px"></div>
+            <div class="skel" style="height:14px;width:160px"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:1.5rem;margin:1rem 0 1.5rem">
+          <div v-for="i in 3" :key="i" class="skel" :style="{ height:'52px', width:'90px', borderRadius:'10px', animationDelay: (i*0.09)+'s' }"></div>
+        </div>
+        <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--ehub-line);padding-bottom:4px">
+          <div v-for="i in 3" :key="'t'+i" class="skel" :style="{ height:'36px', width:'110px', borderRadius:'8px', animationDelay: (i*0.07)+'s' }"></div>
+        </div>
+        <div class="skel" style="height:280px;border-radius:14px"></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- PAGE CONTENT -->
+  <template v-else>
   <!-- HERO COVER -->
   <header class="org-hero">
     <div class="cover" :style="!org.route || coverImgError
@@ -512,9 +541,11 @@ onBeforeUnmount(() => {
   <footer class="home-footer" style="margin-top: 48px;">
     {{ $t('pages.homepage.entrance.footer') }}
   </footer>
+  </template>
 </template>
 
 <style scoped>
+.org-skel-page { background: var(--ehub-page); min-height: 100vh; }
 .empty-state {
   text-align: center;
   padding: 56px 20px;

@@ -495,9 +495,12 @@ const showMobileFilters = ref(false)
             </div>
 
             <!-- Loading -->
-            <div v-if="loading && !tournaments.length" class="text-center text-muted py-5">
-              <div class="spinner-border spinner-border-sm text-primary mb-3" role="status"></div>
-              <p class="mb-0 small">{{ $t('pages.search.results.loading') }}</p>
+            <div v-if="loading && !tournaments.length">
+              <div class="row g-3">
+                <div v-for="i in 6" :key="i" class="col-12 col-sm-6 col-xl-4">
+                  <div class="skel" :style="{ height: '280px', borderRadius: '10px', animationDelay: (i * 0.08) + 's' }"></div>
+                </div>
+              </div>
             </div>
 
             <!-- Empty state -->

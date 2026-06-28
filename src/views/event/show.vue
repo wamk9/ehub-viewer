@@ -322,9 +322,30 @@ export default {
 <template>
   <div :style="orgAccentStyle">
 
-    <!-- Loading -->
-    <div v-if="loading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
+    <!-- Loading skeleton -->
+    <div v-if="loading" class="ev-skel-page">
+      <div class="skel" style="height:230px;border-radius:0;width:100%"></div>
+      <div class="container-fluid px-4">
+        <div style="margin-top:-58px;padding-bottom:8px">
+          <div style="display:flex;gap:20px;align-items:flex-end;flex-wrap:wrap">
+            <div class="skel" style="width:110px;height:110px;border-radius:24px;flex-shrink:0;border:4px solid var(--ehub-card)"></div>
+            <div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:9px;padding-bottom:4px">
+              <div class="skel" style="height:14px;width:140px;border-radius:6px"></div>
+              <div class="skel" style="height:28px;width:280px;border-radius:8px"></div>
+              <div style="display:flex;gap:6px">
+                <div v-for="i in 3" :key="i" class="skel" :style="{ height:'22px', width:'72px', borderRadius:'50rem', animationDelay: (i*0.06)+'s' }"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:1.5rem;margin-top:22px">
+            <div v-for="i in 3" :key="'m'+i" class="skel" :style="{ height:'20px', width:'130px', borderRadius:'6px', animationDelay: (i*0.07)+'s' }"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:.5rem;margin-top:32px;border-bottom:1px solid var(--ehub-line);padding-bottom:4px">
+          <div v-for="i in 6" :key="'tab'+i" class="skel" :style="{ height:'36px', width:'100px', borderRadius:'8px', animationDelay: (i*0.06)+'s' }"></div>
+        </div>
+        <div class="skel" style="height:240px;border-radius:14px;margin-top:24px"></div>
+      </div>
     </div>
 
     <!-- Error -->
@@ -817,6 +838,9 @@ export default {
 </template>
 
 <style scoped>
+/* ── Skeleton ── */
+.ev-skel-page { background: var(--ehub-page); min-height: 100vh; }
+
 /* ── Hero ── */
 .ev-hero { position: relative; height: 230px; overflow: hidden; border-bottom: 1px solid var(--ehub-line); }
 .ev-hero .cover { position: absolute; inset: 0; overflow: hidden; }

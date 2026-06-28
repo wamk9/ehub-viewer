@@ -6,8 +6,15 @@ import SystemVars from '@/helpers/General/SystemVars';
 <template>
     <main class="container">
 
-        <div v-if="loading" class="text-center py-5">
-            <div class="spinner-border text-primary" role="status"></div>
+        <div v-if="loading" class="org-news-skel">
+          <div class="skel" style="width:100%;padding-top:56.25%;border-radius:12px;position:relative"></div>
+          <div style="margin-top:1.5rem;display:flex;flex-direction:column;gap:10px">
+            <div class="skel" style="height:32px;width:70%;border-radius:8px"></div>
+            <div class="skel" style="height:18px;width:50%;border-radius:8px"></div>
+          </div>
+          <div style="margin-top:1.5rem;display:flex;flex-direction:column;gap:10px">
+            <div v-for="i in 6" :key="i" class="skel" :style="{ height: '16px', borderRadius: '6px', width: (95 - i * 4) + '%', animationDelay: (i * 0.07) + 's' }"></div>
+          </div>
         </div>
 
         <div v-else-if="notFound" class="text-center py-5 text-muted">
@@ -97,6 +104,7 @@ export default {
 </script>
 
 <style scoped>
+.org-news-skel { padding: 1.5rem 0; }
 .article-content :deep(h1) { font-size: 1.9rem; font-weight: 700; margin: 1.2rem 0 0.5rem; }
 .article-content :deep(h2) { font-size: 1.5rem; font-weight: 600; margin: 1rem 0 0.4rem; }
 .article-content :deep(h3) { font-size: 1.2rem; font-weight: 600; margin: 0.8rem 0 0.3rem; }

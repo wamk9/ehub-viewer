@@ -30,6 +30,10 @@ const Teams = {
         const result = await Api.getAsync(`/team/route/${route}`);
         return { code: result.code, data: result.response?.message };
     },
+    async getMembersView(route) {
+        const result = await Api.getAsync(`/team/${route}/members-view`);
+        return { code: result.code, data: result.response?.message };
+    },
     async updateSettings(id, data) {
         const result = await Api.patchAsync(`/team/${id}`, data);
         return { code: result.code, data: result.response?.team, message: result.response?.message };
