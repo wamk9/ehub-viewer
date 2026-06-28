@@ -41,7 +41,6 @@ watch(() => route.path, () => { drawerOpen.value = false })
 const profileName = ref('')
 const profileUsername = ref('')
 const profileImage = ref('')
-const profileLoaded = ref(false)
 
 async function loadProfile() {
   if (!isLogged.value) return
@@ -54,7 +53,6 @@ async function loadProfile() {
       profileImage.value = d.image || ''
     }
   } catch { /* keep placeholder */ }
-  profileLoaded.value = true
 }
 
 // ── Notifications ──────────────────────────────────────────────────
@@ -192,21 +190,14 @@ onBeforeUnmount(() => {
       <div class="dropdown">
         <button class="nav-profile-btn d-none d-md-flex" data-bs-toggle="dropdown" aria-expanded="false">
           <img v-if="profileImage" :src="profileImage" class="nav-avatar" alt="avatar" />
-          <span v-else-if="profileLoaded" class="nav-avatar nav-avatar-initial">
-            {{ profileName[0]?.toUpperCase() || '?' }}
+          <span v-else class="nav-avatar nav-avatar-initial">
+            {{ (profileName || '?')[0].toUpperCase() }}
           </span>
-          <span v-else class="nav-avatar nav-avatar-skel"></span>
         </button>
         <div class="dropdown-menu dropdown-menu-end nav-dropdown" style="min-width:210px">
           <div class="nav-dropdown-header">
-            <template v-if="profileLoaded">
-              <div class="fw-semibold" style="font-size:.9rem">{{ profileName }}</div>
-              <div class="text-muted" style="font-size:.78rem">@{{ profileUsername }}</div>
-            </template>
-            <template v-else>
-              <div class="nav-skel" style="height:13px;border-radius:4px;width:70%;margin-bottom:5px"></div>
-              <div class="nav-skel" style="height:10px;border-radius:4px;width:45%"></div>
-            </template>
+            <div class="fw-semibold" style="font-size:.9rem">{{ profileName || '—' }}</div>
+            <div class="text-muted" style="font-size:.78rem">@{{ profileUsername || '…' }}</div>
           </div>
           <hr class="nav-dropdown-divider" />
           <router-link class="nav-dropdown-item" to="/profile">
@@ -424,9 +415,6 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
 }
-.nav-avatar-skel { background: var(--ehub-field-bg); animation: skel-pulse 1.4s ease-in-out infinite; }
-.nav-skel { background: rgba(255,255,255,.08); border-radius: 4px; animation: skel-pulse 1.4s ease-in-out infinite; }
-@keyframes skel-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 .nav-profile-name {
   font-size: .85rem;
   font-weight: 600;
