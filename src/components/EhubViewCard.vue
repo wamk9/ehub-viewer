@@ -63,30 +63,33 @@ function imgUrl(path) {
 <template>
   <div class="vc-card" :class="{ 'vc-clickable': clickable }" @click="clickable && $emit('click', team)">
 
-    <!-- Banner -->
+    <!-- Banner: gradient only, no absolute badges -->
     <div class="vc-banner" :style="{ background: grad }">
       <font-awesome-icon :icon="['fas', 'shield-halved']" class="vc-shield" />
-      <!-- Badges: top-right -->
-      <div class="vc-badges">
+    </div>
+
+    <!-- Head: logo (left) + status badges grid (right) -->
+    <div class="vc-head">
+      <div class="vc-logo" :style="{ background: grad }">
+        <img v-if="team.logo_image" :src="imgUrl(team.logo_image)" :alt="team.name" />
+        <template v-else>{{ teamInitials }}</template>
+      </div>
+      <!-- Status slot: auto-fills columns based on badge count -->
+      <div class="vc-status" @click.stop>
         <slot name="badges">
-          <span v-if="team.is_open" class="vc-badge-open">
+          <span v-if="team.is_open" class="vc-badge">
             <font-awesome-icon :icon="['fas', 'door-open']" />
             {{ $t('pages.teams.index.card.open') }}
           </span>
+          <span v-if="team.is_verified" class="vc-badge verified">
+            <font-awesome-icon :icon="['fas', 'circle-check']" />
+            {{ $t('pages.teams.index.card.verified') }}
+          </span>
         </slot>
-        <span v-if="team.is_verified" class="vc-badge-verified" :title="$t('pages.teams.index.card.verified')">
-          <font-awesome-icon :icon="['fas', 'circle-check']" />
-        </span>
       </div>
     </div>
 
-    <!-- Logo: always gradient bg so transparent images display correctly -->
-    <div class="vc-logo" :style="{ background: grad }">
-      <img v-if="team.logo_image" :src="imgUrl(team.logo_image)" :alt="team.name" />
-      <template v-else>{{ teamInitials }}</template>
-    </div>
-
-    <!-- Body -->
+    <!-- Body: name + chips + desc -->
     <div class="vc-body">
       <div class="vc-name">
         {{ team.name }}
@@ -102,28 +105,30 @@ function imgUrl(path) {
         </span>
       </div>
       <p class="vc-desc">{{ team.description || '—' }}</p>
-      <div class="vc-stats">
-        <div class="vc-stat">
-          <span class="v">{{ team.players_count ?? 0 }}</span>
-          <span class="l">{{ $t('pages.teams.index.card.players') }}</span>
-        </div>
-        <div class="vc-stat">
-          <span class="v">{{ team.wins_count ?? 0 }}</span>
-          <span class="l">{{ $t('pages.teams.index.card.wins') }}</span>
-        </div>
-        <div class="vc-stat">
-          <span class="v">{{ team.events_count ?? 0 }}</span>
-          <span class="l">{{ $t('pages.teams.index.card.events') }}</span>
-        </div>
+    </div>
+
+    <!-- Stats: centered bordered grid cards -->
+    <div class="vc-stats">
+      <div class="vc-stat">
+        <span class="v">{{ team.players_count ?? 0 }}</span>
+        <span class="l">{{ $t('pages.teams.index.card.players') }}</span>
+      </div>
+      <div class="vc-stat">
+        <span class="v">{{ team.wins_count ?? 0 }}</span>
+        <span class="l">{{ $t('pages.teams.index.card.wins') }}</span>
+      </div>
+      <div class="vc-stat">
+        <span class="v">{{ team.events_count ?? 0 }}</span>
+        <span class="l">{{ $t('pages.teams.index.card.events') }}</span>
       </div>
     </div>
 
-    <!-- Footer -->
+    <!-- Footer: actions auto-column grid -->
     <div class="vc-foot" @click.stop>
       <slot name="actions" :team="team">
         <button
-          class="btn-follow"
-          :class="{ following: team.is_following }"
+          class="vc-btn"
+          :class="{ 'vc-btn-active': team.is_following }"
           :disabled="followLoading"
           @click="$emit('follow', team)"
         >
@@ -153,11 +158,12 @@ function imgUrl(path) {
   border-color: color-mix(in srgb, var(--ehub-primary) 40%, var(--ehub-line));
 }
 
-/* Banner */
+/* Banner: gradient + stripe, no badges inside */
 .vc-banner {
   height: 64px;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
 }
 .vc-banner::after {
   content: '';
@@ -167,57 +173,30 @@ function imgUrl(path) {
 }
 .vc-shield {
   position: absolute;
-  left: 12px;
+  right: 16px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 2rem;
+  font-size: 2.2rem;
   color: rgba(255,255,255,.15);
 }
 
-/* Badges top-right */
-.vc-badges {
-  position: absolute;
-  top: 8px;
-  right: 8px;
+/* Head: logo (overlapping banner) + status badges */
+.vc-head {
   display: flex;
-  align-items: center;
-  gap: 5px;
-  z-index: 2;
-}
-.vc-badge-open {
-  font-size: .65rem;
-  font-weight: 700;
-  letter-spacing: .04em;
-  padding: 3px 9px;
-  border-radius: 50rem;
-  background: rgba(0,0,0,.38);
-  backdrop-filter: blur(6px);
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-}
-.vc-badge-verified {
-  background: rgba(0,0,0,.3);
-  backdrop-filter: blur(6px);
-  color: #fff;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: .72rem;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 0 12px 10px;
+  margin-top: -28px;
+  position: relative;
+  z-index: 1;
 }
 
-/* Logo: gradient bg ensures transparent images show correctly */
+/* Logo: always gradient bg for transparent images */
 .vc-logo {
-  width: 60px;
-  height: 60px;
-  border-radius: 16px;
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
   border: 3px solid var(--ehub-card);
-  margin: -30px 0 0 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -228,8 +207,6 @@ function imgUrl(path) {
   text-shadow: 0 1px 4px rgba(0,0,0,.3);
   overflow: hidden;
   flex-shrink: 0;
-  position: relative;
-  z-index: 1;
 }
 .vc-logo img {
   width: 100%;
@@ -237,9 +214,39 @@ function imgUrl(path) {
   object-fit: contain;
 }
 
+/* Status badges: auto-fill columns by count */
+.vc-status {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 5px;
+  align-self: flex-end;
+  padding-bottom: 2px;
+  min-width: 0;
+}
+.vc-badge {
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ehub-ink) 8%, transparent);
+  border: 1px solid var(--ehub-line);
+  color: var(--ehub-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vc-badge.verified { color: var(--ehub-primary); border-color: var(--ehub-primary-border); background: var(--ehub-primary-tint); }
+
 /* Body */
 .vc-body {
-  padding: 10px 16px 12px;
+  padding: 0 12px 10px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -253,35 +260,63 @@ function imgUrl(path) {
   align-items: center;
   gap: 6px;
 }
-.vc-ver { color: var(--ehub-primary); font-size: .82rem; }
-.vc-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.vc-ver { color: var(--ehub-primary); font-size: .8rem; }
+.vc-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
 .vc-desc {
   color: var(--ehub-muted);
   font-size: .82rem;
   line-height: 1.45;
-  margin: 0 0 10px;
+  margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  flex: 1;
 }
-.vc-stats {
-  display: flex;
-  gap: 14px;
-  margin-top: auto;
-  padding-top: 10px;
-  border-top: 1px solid var(--ehub-line);
-}
-.vc-stat { display: flex; flex-direction: column; }
-.vc-stat .v { font-size: .92rem; font-weight: 700; color: var(--ehub-ink); }
-.vc-stat .l { font-size: .68rem; font-weight: 500; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .03em; }
 
-/* Footer */
-.vc-foot {
-  padding: 10px 16px 14px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
+/* Stats: bordered grid cards, centered */
+.vc-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--ehub-line);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 10px 12px 10px;
 }
+.vc-stat {
+  padding: 10px 8px 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.vc-stat + .vc-stat { border-left: 1px solid var(--ehub-line); }
+.vc-stat .v { font-size: 1rem; font-weight: 700; color: var(--ehub-ink); line-height: 1; }
+.vc-stat .l { font-size: .65rem; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
+
+/* Footer: actions auto-column grid */
+.vc-foot {
+  padding: 0 12px 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 6px;
+}
+.vc-btn {
+  border: 1px solid var(--ehub-line);
+  background: var(--ehub-field-bg);
+  color: var(--ehub-ink);
+  font-size: .8rem;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.vc-btn:hover { background: var(--ehub-card); border-color: var(--ehub-primary); color: var(--ehub-primary); }
+.vc-btn.vc-btn-active { background: var(--ehub-primary); border-color: var(--ehub-primary); color: #fff; }
+.vc-btn.vc-btn-active:hover { filter: brightness(1.1); }
 </style>
