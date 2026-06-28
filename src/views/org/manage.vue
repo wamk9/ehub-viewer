@@ -524,15 +524,23 @@ export default {
     <!-- ── SIDEBAR ── -->
     <aside class="mgmt-sidebar">
       <div class="sb-org">
-        <div v-if="loading" class="sb-logo" style="background:var(--ehub-field-bg)"></div>
+        <div v-if="loading" class="sb-logo sb-skel"></div>
         <div v-else class="sb-logo" :style="{ background: orgGrad }">
           <img v-if="org?.route" :src="baseUrl + 'storage/org/' + org.route + '/logo.webp'" class="sb-logo-img" :alt="org?.name" @error="$event.target.style.display='none'" />
           <span>{{ orgInitials }}</span>
         </div>
-        <div>
-          <div class="sb-name">{{ org?.name || '—' }}</div>
-          <div class="sb-cat">{{ org?.category || '—' }}</div>
-        </div>
+        <template v-if="org">
+          <div>
+            <div class="sb-name">{{ org.name }}</div>
+            <div class="sb-cat">{{ org.category }}</div>
+          </div>
+        </template>
+        <template v-else>
+          <div style="flex:1;min-width:0">
+            <div class="sb-skel" style="height:12px;border-radius:4px;width:75%;margin-bottom:6px"></div>
+            <div class="sb-skel" style="height:10px;border-radius:4px;width:45%"></div>
+          </div>
+        </template>
       </div>
 
       <nav class="sb-nav">
@@ -1294,6 +1302,8 @@ export default {
   overflow-y: auto; display: flex; flex-direction: column;
 }
 .sb-org { padding: 15px 14px; border-bottom: 1px solid var(--ehub-line); display: flex; align-items: center; gap: 10px; }
+.sb-skel { background: var(--ehub-field-bg); animation: skel-pulse 1.4s ease-in-out infinite; }
+@keyframes skel-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 .sb-logo {
   width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;

@@ -4,14 +4,23 @@
     <!-- SIDEBAR -->
     <aside class="mgmt-sidebar">
       <div class="sb-team">
-        <div class="sb-logo" :style="sbLogoStyle">
-          <img v-if="team?.logo_image" :src="logoUrl" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:9px" />
-          <span v-else>{{ initials }}</span>
-        </div>
-        <div style="min-width:0">
-          <div class="sb-name">{{ team?.name || '—' }}</div>
-          <div class="sb-cat">{{ categoryName }}</div>
-        </div>
+        <template v-if="team">
+          <div class="sb-logo" :style="sbLogoStyle">
+            <img v-if="team.logo_image" :src="logoUrl" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:9px" />
+            <span v-else>{{ initials }}</span>
+          </div>
+          <div style="min-width:0">
+            <div class="sb-name">{{ team.name }}</div>
+            <div class="sb-cat">{{ categoryName }}</div>
+          </div>
+        </template>
+        <template v-else>
+          <div class="sb-logo sb-skel"></div>
+          <div style="flex:1;min-width:0">
+            <div class="sb-skel" style="height:12px;border-radius:4px;width:75%;margin-bottom:6px"></div>
+            <div class="sb-skel" style="height:10px;border-radius:4px;width:45%"></div>
+          </div>
+        </template>
       </div>
       <nav class="sb-nav">
         <button class="nav-item" :class="{ active: activePanel === 'overview' }" @click="setPanel('overview')">
@@ -931,6 +940,8 @@ export default {
   padding: 15px 14px; border-bottom: 1px solid var(--ehub-line);
   display: flex; align-items: center; gap: 10px;
 }
+.sb-skel { background: var(--ehub-field-bg); animation: skel-pulse 1.4s ease-in-out infinite; }
+@keyframes skel-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 .sb-logo {
   width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
