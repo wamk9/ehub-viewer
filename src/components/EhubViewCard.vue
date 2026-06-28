@@ -63,19 +63,13 @@ function imgUrl(path) {
 <template>
   <div class="vc-card" :class="{ 'vc-clickable': clickable }" @click="clickable && $emit('click', team)">
 
-    <!-- Banner: gradient only, no absolute badges -->
+    <!-- Banner: gradient bg + optional cover image + badges right -->
     <div class="vc-banner" :style="{ background: grad }">
+      <img v-if="team.cover_image" class="vc-cover" :src="imgUrl(team.cover_image)" />
+      <div class="vc-banner-stripe"></div>
       <font-awesome-icon :icon="['fas', 'shield-halved']" class="vc-shield" />
-    </div>
-
-    <!-- Head: logo (left) + status badges grid (right) -->
-    <div class="vc-head">
-      <div class="vc-logo" :style="{ background: grad }">
-        <img v-if="team.logo_image" :src="imgUrl(team.logo_image)" :alt="team.name" />
-        <template v-else>{{ teamInitials }}</template>
-      </div>
-      <!-- Status slot: auto-fills columns based on badge count -->
-      <div class="vc-status" @click.stop>
+      <!-- Badges: right side of banner, above cover image -->
+      <div class="vc-badges" @click.stop>
         <slot name="badges">
           <span v-if="team.is_open" class="vc-badge">
             <font-awesome-icon :icon="['fas', 'door-open']" />
@@ -86,6 +80,14 @@ function imgUrl(path) {
             {{ $t('pages.teams.index.card.verified') }}
           </span>
         </slot>
+      </div>
+    </div>
+
+    <!-- Head: logo overlapping banner -->
+    <div class="vc-head">
+      <div class="vc-logo" :style="{ background: grad }">
+        <img v-if="team.logo_image" :src="imgUrl(team.logo_image)" :alt="team.name" />
+        <template v-else>{{ teamInitials }}</template>
       </div>
     </div>
 
@@ -158,37 +160,77 @@ function imgUrl(path) {
   border-color: color-mix(in srgb, var(--ehub-primary) 40%, var(--ehub-line));
 }
 
-/* Banner: gradient + stripe, no badges inside */
+/* Banner: gradient bg, cover image on top, badges top-right */
 .vc-banner {
-  height: 64px;
+  height: 80px;
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
 }
-.vc-banner::after {
-  content: '';
+/* Cover image: on top of gradient, behind overlay */
+.vc-cover {
   position: absolute;
   inset: 0;
-  background-image: repeating-linear-gradient(118deg, transparent 0 28px, rgba(255,255,255,.07) 28px 30px);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+/* Stripe overlay: above image */
+.vc-banner-stripe {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-image: repeating-linear-gradient(118deg, transparent 0 28px, rgba(0,0,0,.08) 28px 30px);
 }
 .vc-shield {
   position: absolute;
-  right: 16px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 2.2rem;
   color: rgba(255,255,255,.15);
+  z-index: 3;
 }
+/* Badges: top-right of banner, above cover image */
+.vc-badges {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  max-width: 65%;
+}
+.vc-badge {
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: rgba(0,0,0,.42);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+  width: 100%;
+}
+.vc-badge.verified { background: color-mix(in srgb, var(--ehub-primary) 80%, #000 20%); }
 
-/* Head: logo (overlapping banner) + status badges */
+/* Head: logo overlapping banner, above cover image */
 .vc-head {
   display: flex;
   align-items: flex-end;
-  gap: 10px;
   padding: 0 12px 10px;
   margin-top: -28px;
   position: relative;
-  z-index: 1;
+  z-index: 5;
 }
 
 /* Logo: always gradient bg for transparent images */
@@ -213,36 +255,6 @@ function imgUrl(path) {
   height: 100%;
   object-fit: contain;
 }
-
-/* Status badges: auto-fill columns by count */
-.vc-status {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-  gap: 5px;
-  align-self: flex-end;
-  padding-bottom: 2px;
-  min-width: 0;
-}
-.vc-badge {
-  font-size: .62rem;
-  font-weight: 700;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  padding: 5px 8px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--ehub-ink) 8%, transparent);
-  border: 1px solid var(--ehub-line);
-  color: var(--ehub-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.vc-badge.verified { color: var(--ehub-primary); border-color: var(--ehub-primary-border); background: var(--ehub-primary-tint); }
 
 /* Body */
 .vc-body {
