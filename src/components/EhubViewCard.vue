@@ -61,38 +61,38 @@ function imgUrl(path) {
 </script>
 
 <template>
-  <div class="mc-card" :class="{ 'mc-clickable': clickable }" @click="clickable && $emit('click', team)">
+  <div class="vc-card" :class="{ 'vc-clickable': clickable }" @click="clickable && $emit('click', team)">
 
     <!-- Banner -->
-    <div class="mc-banner" :style="{ background: grad }">
-      <font-awesome-icon :icon="['fas', 'shield-halved']" class="mc-shield" />
+    <div class="vc-banner" :style="{ background: grad }">
+      <font-awesome-icon :icon="['fas', 'shield-halved']" class="vc-shield" />
       <!-- Badges: top-right -->
-      <div class="mc-badges">
+      <div class="vc-badges">
         <slot name="badges">
-          <span v-if="team.is_open" class="mc-badge-open">
+          <span v-if="team.is_open" class="vc-badge-open">
             <font-awesome-icon :icon="['fas', 'door-open']" />
             {{ $t('pages.teams.index.card.open') }}
           </span>
         </slot>
-        <span v-if="team.is_verified" class="mc-badge-verified" :title="$t('pages.teams.index.card.verified')">
+        <span v-if="team.is_verified" class="vc-badge-verified" :title="$t('pages.teams.index.card.verified')">
           <font-awesome-icon :icon="['fas', 'circle-check']" />
         </span>
       </div>
     </div>
 
     <!-- Logo: always gradient bg so transparent images display correctly -->
-    <div class="mc-logo" :style="{ background: grad }">
+    <div class="vc-logo" :style="{ background: grad }">
       <img v-if="team.logo_image" :src="imgUrl(team.logo_image)" :alt="team.name" />
       <template v-else>{{ teamInitials }}</template>
     </div>
 
     <!-- Body -->
-    <div class="mc-body">
-      <div class="mc-name">
+    <div class="vc-body">
+      <div class="vc-name">
         {{ team.name }}
-        <font-awesome-icon v-if="team.is_verified" :icon="['fas', 'circle-check']" class="mc-ver" />
+        <font-awesome-icon v-if="team.is_verified" :icon="['fas', 'circle-check']" class="vc-ver" />
       </div>
-      <div class="mc-chips">
+      <div class="vc-chips">
         <span v-if="team.category" class="cat-chip sub" style="font-size:.7rem;">
           {{ $t(`categories.names.${team.category}`) }}
         </span>
@@ -101,17 +101,17 @@ function imgUrl(path) {
           {{ team.org_name }}
         </span>
       </div>
-      <p class="mc-desc">{{ team.description || '—' }}</p>
-      <div class="mc-stats">
-        <div class="mc-stat">
+      <p class="vc-desc">{{ team.description || '—' }}</p>
+      <div class="vc-stats">
+        <div class="vc-stat">
           <span class="v">{{ team.players_count ?? 0 }}</span>
           <span class="l">{{ $t('pages.teams.index.card.players') }}</span>
         </div>
-        <div class="mc-stat">
+        <div class="vc-stat">
           <span class="v">{{ team.wins_count ?? 0 }}</span>
           <span class="l">{{ $t('pages.teams.index.card.wins') }}</span>
         </div>
-        <div class="mc-stat">
+        <div class="vc-stat">
           <span class="v">{{ team.events_count ?? 0 }}</span>
           <span class="l">{{ $t('pages.teams.index.card.events') }}</span>
         </div>
@@ -119,7 +119,7 @@ function imgUrl(path) {
     </div>
 
     <!-- Footer -->
-    <div class="mc-foot" @click.stop>
+    <div class="vc-foot" @click.stop>
       <slot name="actions" :team="team">
         <button
           class="btn-follow"
@@ -137,7 +137,7 @@ function imgUrl(path) {
 </template>
 
 <style scoped>
-.mc-card {
+.vc-card {
   background: var(--ehub-card);
   border: 1px solid var(--ehub-line);
   border-radius: 16px;
@@ -146,26 +146,26 @@ function imgUrl(path) {
   flex-direction: column;
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
-.mc-card.mc-clickable { cursor: pointer; }
-.mc-card.mc-clickable:hover {
+.vc-card.vc-clickable { cursor: pointer; }
+.vc-card.vc-clickable:hover {
   transform: translateY(-4px);
   box-shadow: var(--ehub-shadow);
   border-color: color-mix(in srgb, var(--ehub-primary) 40%, var(--ehub-line));
 }
 
 /* Banner */
-.mc-banner {
+.vc-banner {
   height: 64px;
   position: relative;
   overflow: hidden;
 }
-.mc-banner::after {
+.vc-banner::after {
   content: '';
   position: absolute;
   inset: 0;
   background-image: repeating-linear-gradient(118deg, transparent 0 28px, rgba(255,255,255,.07) 28px 30px);
 }
-.mc-shield {
+.vc-shield {
   position: absolute;
   left: 12px;
   top: 50%;
@@ -175,7 +175,7 @@ function imgUrl(path) {
 }
 
 /* Badges top-right */
-.mc-badges {
+.vc-badges {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -184,7 +184,7 @@ function imgUrl(path) {
   gap: 5px;
   z-index: 2;
 }
-.mc-badge-open {
+.vc-badge-open {
   font-size: .65rem;
   font-weight: 700;
   letter-spacing: .04em;
@@ -198,7 +198,7 @@ function imgUrl(path) {
   gap: 5px;
   white-space: nowrap;
 }
-.mc-badge-verified {
+.vc-badge-verified {
   background: rgba(0,0,0,.3);
   backdrop-filter: blur(6px);
   color: #fff;
@@ -212,7 +212,7 @@ function imgUrl(path) {
 }
 
 /* Logo: gradient bg ensures transparent images show correctly */
-.mc-logo {
+.vc-logo {
   width: 60px;
   height: 60px;
   border-radius: 16px;
@@ -231,20 +231,20 @@ function imgUrl(path) {
   position: relative;
   z-index: 1;
 }
-.mc-logo img {
+.vc-logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
 /* Body */
-.mc-body {
+.vc-body {
   padding: 10px 16px 12px;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
-.mc-name {
+.vc-name {
   font-size: 1rem;
   font-weight: 700;
   color: var(--ehub-ink);
@@ -253,9 +253,9 @@ function imgUrl(path) {
   align-items: center;
   gap: 6px;
 }
-.mc-ver { color: var(--ehub-primary); font-size: .82rem; }
-.mc-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
-.mc-desc {
+.vc-ver { color: var(--ehub-primary); font-size: .82rem; }
+.vc-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.vc-desc {
   color: var(--ehub-muted);
   font-size: .82rem;
   line-height: 1.45;
@@ -266,19 +266,19 @@ function imgUrl(path) {
   overflow: hidden;
   flex: 1;
 }
-.mc-stats {
+.vc-stats {
   display: flex;
   gap: 14px;
   margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid var(--ehub-line);
 }
-.mc-stat { display: flex; flex-direction: column; }
-.mc-stat .v { font-size: .92rem; font-weight: 700; color: var(--ehub-ink); }
-.mc-stat .l { font-size: .68rem; font-weight: 500; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .03em; }
+.vc-stat { display: flex; flex-direction: column; }
+.vc-stat .v { font-size: .92rem; font-weight: 700; color: var(--ehub-ink); }
+.vc-stat .l { font-size: .68rem; font-weight: 500; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .03em; }
 
 /* Footer */
-.mc-foot {
+.vc-foot {
   padding: 10px 16px 14px;
   display: flex;
   gap: 8px;

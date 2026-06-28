@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import Teams from '@/helpers/communication/Teams.js'
-import EhubManagementCard from '@/components/EhubManagementCard.vue'
+import EhubViewCard from '@/components/EhubViewCard.vue'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -169,7 +169,7 @@ async function toggleFollow(team) {
     </div>
 
     <div v-else class="orgs-grid">
-      <EhubManagementCard
+      <EhubViewCard
         v-for="team in filtered"
         :key="team.id"
         :team="team"
