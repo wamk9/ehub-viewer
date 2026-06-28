@@ -68,6 +68,23 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/teams/:teamRoute',
+      name: 'team-show',
+      component: () => import('@/views/teams/show.vue')
+    },
+    {
+      path: '/team/:teamRoute/manage/:tab?',
+      name: 'team-manage',
+      component: () => import('@/views/teams/manage.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/team/:teamRoute/members-view',
+      name: 'team-members-view',
+      component: () => import('@/views/teams/members-view.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/my-orgs',
       name: 'my-organizations',
       component: () => import('@/views/org/mine.vue'),

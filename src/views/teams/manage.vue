@@ -655,7 +655,7 @@ export default {
 
     setPanel(panel) {
       this.activePanel = panel
-      this.$router.replace({ query: { ...this.$route.query, tab: panel } })
+      this.$router.replace({ name: 'team-manage', params: { teamRoute: this.teamRoute, tab: panel } })
       if (panel === 'applications' && this.team) this.loadApplications()
       if (panel === 'roles' && !this.rolesData.length) this.loadRoles()
       if (panel === 'overview' && this.team) this.loadActivities()
@@ -904,7 +904,7 @@ export default {
   },
 
   created() {
-    const tab = this.$route.query.tab
+    const tab = this.$route.params.tab
     if (tab) this.activePanel = tab
     this.loadTeam().then(() => {
       if (this.activePanel === 'applications' && this.team) this.loadApplications()

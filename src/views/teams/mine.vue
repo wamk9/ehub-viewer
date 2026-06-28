@@ -247,7 +247,7 @@ function goToTeam(team) {
           <!-- Actions -->
           <div class="mteam-actions" @click.stop>
             <template v-if="team.role === 'captain' || team.role === 'vice'">
-              <button class="btn-maction primary-action">
+              <button class="btn-maction primary-action" @click="$router.push(`/team/${team.route}/manage`)">
                 <font-awesome-icon :icon="['fas', 'sliders']" />
                 {{ $t('pages.teams.mine.card.manage') }}
               </button>
