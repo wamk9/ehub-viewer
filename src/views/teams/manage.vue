@@ -411,7 +411,7 @@
               :current-url="logoUrl"
               :fallback-style="sbLogoStyle"
               @change="logoFile = $event"
-              @remove="removeLogo"
+              @remove="onRemoveLogo"
             >
               <template #fallback><span>{{ initials }}</span></template>
             </EhubProfileImageUpload>
@@ -426,13 +426,13 @@
               :current-url="coverUrl"
               :fallback-style="sbLogoStyle"
               @change="coverFile = $event"
-              @remove="removeCover"
+              @remove="onRemoveCover"
             />
           </div>
 
           <button
             class="btn btn-primary round px-4"
-            :disabled="visualSaving || (!logoFile && !coverFile)"
+            :disabled="visualSaving || (!logoFile && !coverFile && !logoRemoved && !coverRemoved)"
             @click="saveVisual"
           >
             {{ visualSaving ? $t('pages.teams.manage.settings.saving') : $t('pages.teams.manage.settings.save') }}
@@ -536,8 +536,10 @@ export default {
       modal: null,
       logoFile: null,
       logoVersion: Date.now(),
+      logoRemoved: false,
       coverFile: null,
       coverVersion: Date.now(),
+      coverRemoved: false,
       visualSaving: false,
       activities: [],
       activitiesLoading: false,
@@ -830,9 +832,23 @@ export default {
       this.visualSaving = true
       const tasks = []
       if (this.logoFile) tasks.push(this._uploadLogo())
+      else if (this.logoRemoved) tasks.push(this._removeLogo())
       if (this.coverFile) tasks.push(this._uploadCover())
+      else if (this.coverRemoved) tasks.push(this._removeCover())
       await Promise.all(tasks)
       this.visualSaving = false
+    },
+
+    onRemoveLogo() {
+      this.team.logo_image = null
+      this.logoFile = null
+      this.logoRemoved = true
+    },
+
+    onRemoveCover() {
+      this.team.cover_image = null
+      this.coverFile = null
+      this.coverRemoved = true
     },
 
     async _uploadLogo() {
@@ -848,11 +864,10 @@ export default {
       }
     },
 
-    async removeLogo() {
+    async _removeLogo() {
       const res = await Teams.removeLogo(this.team.id)
       if (res.code === 200) {
-        this.team.logo_image = null
-        this.logoFile = null
+        this.logoRemoved = false
         this.logoVersion = Date.now()
       }
     },
@@ -870,11 +885,10 @@ export default {
       }
     },
 
-    async removeCover() {
+    async _removeCover() {
       const res = await Teams.removeCover(this.team.id)
       if (res.code === 200) {
-        this.team.cover_image = null
-        this.coverFile = null
+        this.coverRemoved = false
         this.coverVersion = Date.now()
       }
     },
