@@ -4,6 +4,7 @@ import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import OrganizationBilling from '@/helpers/communication/OrganizationBilling.js';
 import SystemVars from '@/helpers/General/SystemVars';
 import { toast } from '@/helpers/toast.js';
+import EhubStatCard from '@/components/EhubStatCard.vue';
 
 const ORG_GRADS = [
   ['#0098D8', '#00d4ff'],
@@ -25,6 +26,8 @@ const ROLE_CLASS = {
 };
 
 export default {
+  components: { EhubStatCard },
+
   props: {
     forceOption: { type: Array, default: () => [] },
   },
@@ -589,35 +592,33 @@ export default {
 
         <!-- Stat cards -->
         <div class="stat-grid">
-          <div class="stat-card">
-            <div class="sc-row">
-              <div class="sc-ico primary"><font-awesome-icon :icon="['fas', 'calendar-check']" /></div>
-              <span class="sc-delta up"><font-awesome-icon :icon="['fas', 'arrow-trend-up']" /> {{ activeEvents }}</span>
-            </div>
-            <div class="sc-val">{{ activeEvents }}</div>
-            <div class="sc-lbl">{{ $t('pages.organization.manage.overview.stats.active') }}</div>
-          </div>
-          <div class="stat-card">
-            <div class="sc-row">
-              <div class="sc-ico gold"><font-awesome-icon :icon="['fas', 'users']" /></div>
-            </div>
-            <div class="sc-val">{{ org?.members_count ?? '—' }}</div>
-            <div class="sc-lbl">{{ $t('pages.organization.manage.overview.stats.members') }}</div>
-          </div>
-          <div class="stat-card">
-            <div class="sc-row">
-              <div class="sc-ico purple"><font-awesome-icon :icon="['fas', 'flag-checkered']" /></div>
-            </div>
-            <div class="sc-val">{{ org?.events_count ?? '—' }}</div>
-            <div class="sc-lbl">{{ $t('pages.organization.manage.overview.stats.total_events') }}</div>
-          </div>
-          <div class="stat-card">
-            <div class="sc-row">
-              <div class="sc-ico green"><font-awesome-icon :icon="['fas', 'flag']" /></div>
-            </div>
-            <div class="sc-val">{{ events.filter(e => !e.finished && isUpcoming(e)).length || '—' }}</div>
-            <div class="sc-lbl">{{ $t('pages.organization.manage.overview.stats.next') }}</div>
-          </div>
+          <EhubStatCard
+            :icon="['fas', 'calendar-check']"
+            icon-class="primary"
+            :value="activeEvents"
+            :label="$t('pages.organization.manage.overview.stats.active')"
+            :delta="String(activeEvents)"
+            :delta-icon="['fas', 'arrow-trend-up']"
+            delta-class="up"
+          />
+          <EhubStatCard
+            :icon="['fas', 'users']"
+            icon-class="gold"
+            :value="org?.members_count ?? '—'"
+            :label="$t('pages.organization.manage.overview.stats.members')"
+          />
+          <EhubStatCard
+            :icon="['fas', 'flag-checkered']"
+            icon-class="purple"
+            :value="org?.events_count ?? '—'"
+            :label="$t('pages.organization.manage.overview.stats.total_events')"
+          />
+          <EhubStatCard
+            :icon="['fas', 'flag']"
+            icon-class="green"
+            :value="events.filter(e => !e.finished && isUpcoming(e)).length || '—'"
+            :label="$t('pages.organization.manage.overview.stats.next')"
+          />
         </div>
 
         <!-- 2-col -->
@@ -1326,17 +1327,6 @@ export default {
 
 /* ── Stat cards ── */
 .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin-bottom: 22px; }
-.stat-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 13px; padding: 17px 19px; }
-.sc-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px; }
-.sc-ico { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .82rem; }
-.sc-ico.primary { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
-.sc-ico.gold { background: color-mix(in srgb, var(--ehub-gold) 18%, transparent); color: color-mix(in srgb, var(--ehub-gold), #000 28%); }
-.sc-ico.purple { background: color-mix(in srgb, #7C3AED 14%, transparent); color: #7C3AED; }
-.sc-ico.green { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: #1f8a5b; }
-.sc-delta { font-size: .72rem; font-weight: 700; display: flex; align-items: center; gap: 3px; }
-.sc-delta.up { color: #1f8a5b; }
-.sc-val { font-size: 1.75rem; font-weight: 800; color: var(--ehub-ink); letter-spacing: -.03em; line-height: 1; }
-.sc-lbl { font-size: .72rem; color: var(--ehub-muted); margin-top: 3px; font-weight: 500; }
 
 /* ── Dashboard 2-col ── */
 .dash-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; }

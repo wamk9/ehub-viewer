@@ -70,48 +70,39 @@
         </div>
 
         <div class="stat-grid">
-          <div class="stat-card">
-            <div class="sc-row">
-              <div class="sc-ico" style="background:var(--ehub-primary-tint);color:var(--ehub-primary)">
-                <font-awesome-icon icon="users" />
-              </div>
-              <span class="sc-delta">—</span>
-            </div>
-            <div class="sc-val">{{ team.players_count || 0 }}</div>
-            <div class="sc-lbl">{{ $t('pages.teams.manage.stats.players') }}</div>
-          </div>
-          <div class="stat-card">
-            <div class="sc-row">
-              <div class="sc-ico" style="background:color-mix(in srgb,var(--ehub-gold) 20%,transparent);color:color-mix(in srgb,var(--ehub-gold),#000 20%)">
-                <font-awesome-icon icon="trophy" />
-              </div>
-              <span class="sc-delta">—</span>
-            </div>
-            <div class="sc-val">{{ team.wins_count || 0 }}</div>
-            <div class="sc-lbl">{{ $t('pages.teams.manage.stats.wins') }}</div>
-          </div>
-          <div class="stat-card">
-            <div class="sc-row">
-              <div class="sc-ico" style="background:color-mix(in srgb,#1f8a5b 14%,transparent);color:#1f8a5b">
-                <font-awesome-icon icon="calendar-check" />
-              </div>
-              <span class="sc-delta">—</span>
-            </div>
-            <div class="sc-val">{{ team.events_count || 0 }}</div>
-            <div class="sc-lbl">{{ $t('pages.teams.manage.stats.events') }}</div>
-          </div>
-          <div class="stat-card">
-            <div class="sc-row">
-              <div class="sc-ico" style="background:var(--ehub-field-bg);color:var(--ehub-muted)">
-                <font-awesome-icon :icon="team.is_open ? 'door-open' : 'door-closed'" />
-              </div>
-              <span class="sc-delta">—</span>
-            </div>
-            <div class="sc-val" style="font-size:1.1rem">
-              {{ team.is_open ? $t('pages.teams.manage.settings.open') : $t('pages.teams.manage.settings.closed') }}
-            </div>
-            <div class="sc-lbl">{{ $t('pages.teams.manage.overview.status') }}</div>
-          </div>
+          <EhubStatCard
+            icon="users"
+            icon-bg="var(--ehub-primary-tint)"
+            icon-color="var(--ehub-primary)"
+            :value="team.players_count || 0"
+            :label="$t('pages.teams.manage.stats.players')"
+            delta="—"
+          />
+          <EhubStatCard
+            icon="trophy"
+            icon-bg="color-mix(in srgb,var(--ehub-gold) 20%,transparent)"
+            icon-color="color-mix(in srgb,var(--ehub-gold),#000 20%)"
+            :value="team.wins_count || 0"
+            :label="$t('pages.teams.manage.stats.wins')"
+            delta="—"
+          />
+          <EhubStatCard
+            icon="calendar-check"
+            icon-bg="color-mix(in srgb,#1f8a5b 14%,transparent)"
+            icon-color="#1f8a5b"
+            :value="team.events_count || 0"
+            :label="$t('pages.teams.manage.stats.events')"
+            delta="—"
+          />
+          <EhubStatCard
+            :icon="team.is_open ? 'door-open' : 'door-closed'"
+            icon-bg="var(--ehub-field-bg)"
+            icon-color="var(--ehub-muted)"
+            :value="team.is_open ? $t('pages.teams.manage.settings.open') : $t('pages.teams.manage.settings.closed')"
+            :value-style="{ fontSize: '1.1rem' }"
+            :label="$t('pages.teams.manage.overview.status')"
+            delta="—"
+          />
         </div>
 
         <div class="dash-grid">
@@ -122,7 +113,12 @@
             </div>
             <div v-if="team.members?.length">
               <div v-for="m in team.members.slice(0, 4)" :key="m.id" class="ev-mini">
-                <div class="m-av" :style="avatarStyle(m)">{{ memberInitials(m) }}</div>
+                <div class="m-av" :style="avatarStyle(m)">
+                    <img :src="m.avatar" class="m-av-img" alt=""
+                      @error="$event.target.style.display='none'"
+                      @load="$event.target.nextElementSibling.style.display='none'" />
+                    <span>{{ memberInitials(m) }}</span>
+                  </div>
                 <div class="ev-mini-body">
                   <div class="ev-mini-name">{{ m.name }}</div>
                   <div class="ev-mini-meta">@{{ m.username }}</div>
@@ -133,49 +129,37 @@
             <div v-else style="text-align:center;padding:32px 20px;color:var(--ehub-muted);font-size:.83rem">—</div>
           </div>
 
-          <div class="cc">
-            <div class="cc-hd"><h3>{{ $t('pages.teams.manage.activity') }}</h3></div>
-            <div v-if="activitiesLoading" style="padding:32px;text-align:center;color:var(--ehub-muted);font-size:.83rem">
-              {{ $t('pages.teams.manage.loading') }}
-            </div>
-            <div v-else-if="activities.length">
-              <div v-for="a in activities" :key="a.id" class="act-item">
-                <div class="act-icon">
-                  <font-awesome-icon :icon="a.type === 'team_member_removed' ? 'user-minus' : a.type === 'team_role_changed' ? 'user-pen' : 'user-plus'" />
-                </div>
-                <div class="act-body">
-                  <div class="act-text">
-                    <span v-if="a.type === 'team_role_changed'" v-html="$t('pages.teams.manage.activity_role_changed', {
-                      actor: a.params.actor,
-                      target: a.params.target,
-                      old_role: $t(`pages.teams.manage.roles.${a.params.old_role}`),
-                      new_role: $t(`pages.teams.manage.roles.${a.params.new_role}`),
-                    })" />
-                    <span v-else-if="a.type === 'team_member_removed'" v-html="$t('pages.teams.manage.activity_member_removed', {
-                      actor: a.params.actor,
-                      target: a.params.target,
-                      role: $t(`pages.teams.manage.roles.${a.params.role}`),
-                    })" />
-                    <span v-else-if="a.type === 'team_member_joined_application'" v-html="$t('pages.teams.manage.activity_member_joined_application', {
-                      actor: a.params.actor,
-                      target: a.params.target,
-                      role: $t(`pages.teams.manage.roles.${a.params.role}`),
-                    })" />
-                    <span v-else-if="a.type === 'team_member_joined_invite'" v-html="$t('pages.teams.manage.activity_member_joined_invite', {
-                      actor: a.params.actor,
-                      target: a.params.target,
-                      role: $t(`pages.teams.manage.roles.${a.params.role}`),
-                    })" />
-                  </div>
-                  <div class="act-time">{{ formatActivityTime(a.created_at) }}</div>
-                </div>
-              </div>
-            </div>
-            <div v-else style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--ehub-muted)">
-              <font-awesome-icon icon="clock-rotate-left" style="font-size:1.5rem;opacity:.3;margin-bottom:8px" />
-              <p style="margin:0;font-size:.83rem">{{ $t('pages.teams.manage.activity_empty') }}</p>
-            </div>
-          </div>
+          <EhubActivityLog
+            :title="$t('pages.teams.manage.activity')"
+            :activities="activitiesWithIcons"
+            :loading="activitiesLoading"
+            :loading-label="$t('pages.teams.manage.loading')"
+            :empty-label="$t('pages.teams.manage.activity_empty')"
+          >
+            <template #text="{ activity }">
+              <span v-if="activity.type === 'team_role_changed'" v-html="$t('pages.teams.manage.activity_role_changed', {
+                actor: activity.params.actor,
+                target: activity.params.target,
+                old_role: $t(`pages.teams.manage.roles.${activity.params.old_role}`),
+                new_role: $t(`pages.teams.manage.roles.${activity.params.new_role}`),
+              })" />
+              <span v-else-if="activity.type === 'team_member_removed'" v-html="$t('pages.teams.manage.activity_member_removed', {
+                actor: activity.params.actor,
+                target: activity.params.target,
+                role: $t(`pages.teams.manage.roles.${activity.params.role}`),
+              })" />
+              <span v-else-if="activity.type === 'team_member_joined_application'" v-html="$t('pages.teams.manage.activity_member_joined_application', {
+                actor: activity.params.actor,
+                target: activity.params.target,
+                role: $t(`pages.teams.manage.roles.${activity.params.role}`),
+              })" />
+              <span v-else-if="activity.type === 'team_member_joined_invite'" v-html="$t('pages.teams.manage.activity_member_joined_invite', {
+                actor: activity.params.actor,
+                target: activity.params.target,
+                role: $t(`pages.teams.manage.roles.${activity.params.role}`),
+              })" />
+            </template>
+          </EhubActivityLog>
         </div>
       </section>
 
@@ -202,14 +186,19 @@
               <tr v-for="m in team.members" :key="m.id">
                 <td>
                   <div style="display:flex;align-items:center;gap:8px">
-                    <div class="m-av" :style="avatarStyle(m)">{{ memberInitials(m) }}</div>
+                    <div class="m-av" :style="avatarStyle(m)">
+                      <img :src="m.avatar" class="m-av-img" alt=""
+                        @error="$event.target.style.display='none'"
+                        @load="$event.target.nextElementSibling.style.display='none'" />
+                      <span>{{ memberInitials(m) }}</span>
+                    </div>
                     <span class="td-name">{{ m.name }}</span>
                   </div>
                 </td>
                 <td class="td-muted">@{{ m.username }}</td>
                 <td>
                   <select
-                    v-if="can('manage_roster') && assignableRoleNames.includes(m.role)"
+                    v-if="can('manage_roster') && assignableRoleNames.includes(m.role) && m.id !== myId"
                     class="role-select"
                     :value="m.role"
                     @change="changeRole(m, $event.target.value)"
@@ -221,8 +210,8 @@
                   <span v-else class="role-chip" :class="m.role">{{ $t(`pages.teams.manage.roles.${m.role}`) }}</span>
                 </td>
                 <td>
-                  <div class="act-row" v-if="can('manage_roster') && assignableRoleNames.includes(m.role)">
-                    <button class="act-btn del" :title="$t('pages.teams.manage.roster.remove')" @click="doRemoveMember(m)">
+                  <div class="act-row" v-if="can('manage_roster') && assignableRoleNames.includes(m.role) && m.id !== myId">
+                    <button class="act-btn del" :title="$t('pages.teams.manage.roster.remove')" @click="openModal('remove_member', m)">
                       <font-awesome-icon icon="xmark" />
                     </button>
                   </div>
@@ -249,6 +238,21 @@
             </button>
           </div>
         </div>
+
+        <div class="set-card danger">
+          <h3>{{ $t('pages.teams.manage.settings.danger') }}</h3>
+          <p class="set-desc">{{ $t('pages.teams.manage.settings.leave_desc') }}</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-outline-secondary round px-4" @click="openModal('leave')" :disabled="isOnlyRoot">
+              <font-awesome-icon icon="right-from-bracket" class="me-2" />
+              {{ $t('pages.teams.manage.settings.leave') }}
+            </button>
+            <p v-if="isOnlyRoot" class="only-root-msg">
+              {{ $t('pages.teams.manage.settings.leave_only_root', { role: $t(`pages.teams.manage.roles.${rootRoleName}`) }) }}
+            </p>
+          </div>
+        </div>
+
       </section>
 
       <!-- APPLICATIONS -->
@@ -401,59 +405,46 @@
           <!-- LOGO -->
           <div class="mb-4">
             <label class="form-label">{{ $t('pages.teams.manage.settings.logo') }}</label>
-            <div class="vis-row">
-              <div class="vis-logo-thumb" :style="sbLogoStyle">
-                <img v-if="logoLocalPreview || logoUrl" :src="logoLocalPreview || logoUrl" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px" />
-                <span v-else>{{ initials }}</span>
-              </div>
-              <div class="vis-actions">
-                <label class="btn btn-outline-secondary round btn-sm" style="cursor:pointer">
-                  <font-awesome-icon icon="image" class="me-1" />
-                  {{ $t('pages.teams.manage.settings.upload') }}
-                  <input ref="logoInput" type="file" accept="image/*" style="display:none" @change="onLogoFile" />
-                </label>
-                <button v-if="logoFile" class="btn btn-primary round btn-sm" :disabled="logoUploading" @click="uploadLogo">
-                  {{ logoUploading ? $t('pages.teams.manage.settings.uploading') : $t('pages.teams.manage.settings.save') }}
-                </button>
-                <button v-if="team.logo_image && !logoFile" class="btn btn-outline-danger round btn-sm" @click="removeLogo">
-                  {{ $t('pages.teams.manage.settings.remove') }}
-                </button>
-              </div>
-            </div>
+            <EhubProfileImageUpload
+              ref="logoUpload"
+              type="logo"
+              :current-url="logoUrl"
+              :fallback-style="sbLogoStyle"
+              @change="logoFile = $event"
+              @remove="removeLogo"
+            >
+              <template #fallback><span>{{ initials }}</span></template>
+            </EhubProfileImageUpload>
           </div>
 
           <!-- COVER -->
-          <div>
+          <div class="mb-4">
             <label class="form-label">{{ $t('pages.teams.manage.settings.cover') }}</label>
-            <div class="vis-cover-wrap" :style="coverPreviewStyle">
-              <div class="vis-cover-overlay"></div>
-              <label class="vis-cover-btn" style="cursor:pointer">
-                <font-awesome-icon icon="image" class="me-1" />
-                {{ $t('pages.teams.manage.settings.upload') }}
-                <input ref="coverInput" type="file" accept="image/*" style="display:none" @change="onCoverFile" />
-              </label>
-            </div>
-            <div style="display:flex;gap:8px;margin-top:10px">
-              <button v-if="coverFile" class="btn btn-primary round btn-sm" :disabled="coverUploading" @click="uploadCover">
-                {{ coverUploading ? $t('pages.teams.manage.settings.uploading') : $t('pages.teams.manage.settings.save') }}
-              </button>
-              <button v-if="team.cover_image && !coverFile" class="btn btn-outline-danger round btn-sm" @click="removeCover">
-                {{ $t('pages.teams.manage.settings.remove') }}
-              </button>
-            </div>
+            <EhubProfileImageUpload
+              ref="coverUpload"
+              type="cover"
+              :current-url="coverUrl"
+              :fallback-style="sbLogoStyle"
+              @change="coverFile = $event"
+              @remove="removeCover"
+            />
           </div>
+
+          <button
+            class="btn btn-primary round px-4"
+            :disabled="visualSaving || (!logoFile && !coverFile)"
+            @click="saveVisual"
+          >
+            {{ visualSaving ? $t('pages.teams.manage.settings.saving') : $t('pages.teams.manage.settings.save') }}
+          </button>
         </div>
 
 
-        <div class="set-card danger">
+        <div class="set-card danger" v-if="can('manage_settings')">
           <h3>{{ $t('pages.teams.manage.settings.danger') }}</h3>
           <p class="set-desc">{{ $t('pages.teams.manage.settings.danger_desc') }}</p>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn btn-outline-secondary round px-4" @click="openModal('leave')">
-              <font-awesome-icon icon="right-from-bracket" class="me-2" />
-              {{ $t('pages.teams.manage.settings.leave') }}
-            </button>
-            <button v-if="can('manage_settings')" class="btn round px-4"
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button class="btn round px-4"
               style="background:color-mix(in srgb,#e23b3b 12%,transparent);color:#e23b3b;border:1px solid color-mix(in srgb,#e23b3b 35%,transparent)"
               @click="openModal('delete')">
               <font-awesome-icon icon="trash" class="me-2" />
@@ -470,21 +461,36 @@
       <transition name="modal-fade">
         <div v-if="modal" class="cm-overlay" @click.self="closeModal">
           <div class="cm-card">
-            <div class="cm-icon" :class="modal.type">
-              <font-awesome-icon :icon="modal.type === 'leave' ? 'right-from-bracket' : 'trash'" />
-            </div>
-            <h3 class="cm-title">
-              {{ $t(`pages.teams.manage.settings.${modal.type === 'leave' ? 'leave' : 'delete'}`) }}
-            </h3>
-            <p class="cm-desc">
-              {{ $t(`pages.teams.manage.settings.${modal.type === 'leave' ? 'leave_confirm' : 'delete_confirm'}`) }}
-            </p>
+            <!-- remove member -->
+            <template v-if="modal.type === 'remove_member'">
+              <div class="cm-icon remove_member">
+                <font-awesome-icon icon="user-minus" />
+              </div>
+              <h3 class="cm-title">{{ $t('pages.teams.manage.roster.remove_confirm_title') }}</h3>
+              <p class="cm-desc" v-html="$t('pages.teams.manage.roster.remove_confirm_desc', { name: modal.data?.name })" />
+            </template>
+            <!-- leave -->
+            <template v-else-if="modal.type === 'leave'">
+              <div class="cm-icon leave">
+                <font-awesome-icon icon="right-from-bracket" />
+              </div>
+              <h3 class="cm-title">{{ $t('pages.teams.manage.settings.leave') }}</h3>
+              <p class="cm-desc">{{ $t('pages.teams.manage.settings.leave_confirm') }}</p>
+            </template>
+            <!-- delete -->
+            <template v-else>
+              <div class="cm-icon delete">
+                <font-awesome-icon icon="trash" />
+              </div>
+              <h3 class="cm-title">{{ $t('pages.teams.manage.settings.delete') }}</h3>
+              <p class="cm-desc">{{ $t('pages.teams.manage.settings.delete_confirm') }}</p>
+            </template>
+
             <div class="cm-actions">
               <button class="btn btn-outline-secondary round px-4" @click="closeModal" :disabled="modal.loading">
                 {{ $t('pages.teams.manage.settings.cancel') }}
               </button>
-              <button class="btn btn-danger round px-4" :disabled="modal.loading"
-                @click="modal.type === 'leave' ? doLeave() : doDelete()">
+              <button class="btn btn-danger round px-4" :disabled="modal.loading" @click="onModalConfirm">
                 <font-awesome-icon v-if="modal.loading" icon="spinner" spin class="me-2" />
                 {{ $t('pages.teams.manage.settings.confirm') }}
               </button>
@@ -501,6 +507,9 @@ import Teams from '@/helpers/communication/Teams.js'
 import SystemVars from '@/helpers/General/SystemVars.js'
 import { toast } from '@/helpers/toast.js'
 import EhubColorPicker from '@/components/inputs/ehub-color-picker.vue'
+import EhubProfileImageUpload from '@/components/inputs/EhubProfileImageUpload.vue'
+import EhubStatCard from '@/components/EhubStatCard.vue'
+import EhubActivityLog from '@/components/EhubActivityLog.vue'
 
 const AVATAR_PALETTE = ['#0098D8', '#e23b3b', '#7C3AED', '#d6336c', '#f08c00', '#1f8a5b', '#495057', '#0f172a']
 
@@ -512,7 +521,7 @@ function strHash(s) {
 
 export default {
   name: 'TeamManage',
-  components: { EhubColorPicker },
+  components: { EhubColorPicker, EhubProfileImageUpload, EhubStatCard, EhubActivityLog },
 
   data() {
     return {
@@ -526,13 +535,10 @@ export default {
       colorSwatches: ['#0098D8', '#e23b3b', '#7C3AED', '#d6336c', '#f08c00', '#1f8a5b', '#495057', '#0f172a'],
       modal: null,
       logoFile: null,
-      logoLocalPreview: null,
-      logoUploading: false,
       logoVersion: Date.now(),
       coverFile: null,
-      coverLocalPreview: null,
-      coverUploading: false,
       coverVersion: Date.now(),
+      visualSaving: false,
       activities: [],
       activitiesLoading: false,
       applications: [],
@@ -594,15 +600,24 @@ export default {
       if (mine) traverse(mine.id)
       return result
     },
+    myId() {
+      return this.team?.my_id || null
+    },
+    isOnlyRoot() {
+      if (!this.team || !this.rootRoleName) return false
+      if (this.myRole !== this.rootRoleName) return false
+      return (this.team.members?.filter(m => m.role === this.rootRoleName).length ?? 0) <= 1
+    },
+    activitiesWithIcons() {
+      return this.activities.map(a => ({
+        ...a,
+        icon: a.type === 'team_member_removed' ? 'user-minus' : a.type === 'team_role_changed' ? 'user-pen' : 'user-plus',
+      }))
+    },
     activeColor() {
       return this.settingsForm.color || this.team?.color || '#0098D8'
     },
     sbLogoStyle() {
-      return { background: this.activeColor }
-    },
-    coverPreviewStyle() {
-      const src = this.coverLocalPreview || (this.team?.cover_image ? SystemVars.baseUrl + 'storage/' + this.team.cover_image + '?v=' + this.coverVersion : null)
-      if (src) return { backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' }
       return { background: this.activeColor }
     },
   },
@@ -622,6 +637,7 @@ export default {
         }
       } else {
         this.team = null
+        this.$router.push('/my-teams')
       }
       this.loading = false
     },
@@ -651,14 +667,6 @@ export default {
       }
     },
 
-    formatActivityTime(ts) {
-      const diff = Math.floor((Date.now() - new Date(ts)) / 1000)
-      if (diff < 60) return this.$t('notification.time.just_now')
-      if (diff < 3600) return this.$t('notification.time.minutes_ago', { n: Math.floor(diff / 60) })
-      if (diff < 86400) return this.$t('notification.time.hours_ago', { n: Math.floor(diff / 3600) })
-      return this.$t('notification.time.days_ago', { n: Math.floor(diff / 86400) })
-    },
-
     async loadActivities() {
       if (!this.team) return
       this.activitiesLoading = true
@@ -682,8 +690,9 @@ export default {
       const res = await Teams.acceptApplication(this.team.id, app.id)
       if (res.code === 200) {
         this.applications = this.applications.filter(a => a.id !== app.id)
-        if (this.team) this.team.players_count = (this.team.players_count || 0) + 1
         toast.success(this.$t('pages.teams.manage.applications.accepted'))
+        await this.loadTeam()
+        this.loadActivities()
       }
     },
 
@@ -725,16 +734,21 @@ export default {
     },
 
     async doRemoveMember(member) {
+      if (this.modal) this.modal.loading = true
       const res = await Teams.removeMember(this.team.id, member.id)
+      if (this.modal) this.modal.loading = false
       if (res.code === 200) {
+        this.modal = null
         this.team.members = this.team.members.filter(m => m.id !== member.id)
         this.team.players_count = Math.max(0, (this.team.players_count || 1) - 1)
         toast.success(this.$t('pages.teams.manage.roster.removed'))
       } else if (res.message === 'no_last_captain') {
+        this.modal = null
         toast.error(this.$t('pages.teams.manage.roster.no_last_captain', {
           role: this.$t(`pages.teams.manage.roles.${this.rootRoleName}`)
         }))
       } else {
+        this.modal = null
         const key = `pages.teams.manage.roster.${res.message}`
         toast.error(this.$te(key) ? this.$t(key) : this.$t('pages.teams.manage.roster.remove_error'))
       }
@@ -768,8 +782,14 @@ export default {
       }
     },
 
-    openModal(type) {
-      this.modal = { type, loading: false }
+    openModal(type, data = null) {
+      this.modal = { type, loading: false, data }
+    },
+
+    onModalConfirm() {
+      if (this.modal.type === 'remove_member') this.doRemoveMember(this.modal.data)
+      else if (this.modal.type === 'leave') this.doLeave()
+      else if (this.modal.type === 'delete') this.doDelete()
     },
 
     closeModal() {
@@ -806,24 +826,22 @@ export default {
       }
     },
 
-    onLogoFile(e) {
-      const file = e.target.files[0]
-      if (!file) return
-      this.logoFile = file
-      this.logoLocalPreview = URL.createObjectURL(file)
+    async saveVisual() {
+      this.visualSaving = true
+      const tasks = []
+      if (this.logoFile) tasks.push(this._uploadLogo())
+      if (this.coverFile) tasks.push(this._uploadCover())
+      await Promise.all(tasks)
+      this.visualSaving = false
     },
 
-    async uploadLogo() {
-      if (!this.logoFile) return
-      this.logoUploading = true
+    async _uploadLogo() {
       const res = await Teams.uploadLogo(this.team.id, this.logoFile)
-      this.logoUploading = false
       if (res.code === 200) {
         this.logoVersion = Date.now()
         this.team.logo_image = res.data?.logo_image || this.team.logo_image || `teams/${this.team.route}/logo.webp`
         this.logoFile = null
-        this.logoLocalPreview = null
-        if (this.$refs.logoInput) this.$refs.logoInput.value = ''
+        this.$refs.logoUpload?.reset()
         toast.success(this.$t('pages.teams.manage.settings.logo_uploaded'))
       } else {
         toast.error(this.$t('pages.teams.manage.settings.logo_upload_error'))
@@ -834,30 +852,18 @@ export default {
       const res = await Teams.removeLogo(this.team.id)
       if (res.code === 200) {
         this.team.logo_image = null
-        this.logoLocalPreview = null
         this.logoFile = null
         this.logoVersion = Date.now()
       }
     },
 
-    onCoverFile(e) {
-      const file = e.target.files[0]
-      if (!file) return
-      this.coverFile = file
-      this.coverLocalPreview = URL.createObjectURL(file)
-    },
-
-    async uploadCover() {
-      if (!this.coverFile) return
-      this.coverUploading = true
+    async _uploadCover() {
       const res = await Teams.uploadCover(this.team.id, this.coverFile)
-      this.coverUploading = false
       if (res.code === 200) {
         this.coverVersion = Date.now()
         this.team.cover_image = res.data?.cover_image || this.team.cover_image || `teams/${this.team.route}/cover.webp`
         this.coverFile = null
-        this.coverLocalPreview = null
-        if (this.$refs.coverInput) this.$refs.coverInput.value = ''
+        this.$refs.coverUpload?.reset()
         toast.success(this.$t('pages.teams.manage.settings.cover_uploaded'))
       } else {
         toast.error(this.$t('pages.teams.manage.settings.cover_upload_error'))
@@ -868,7 +874,6 @@ export default {
       const res = await Teams.removeCover(this.team.id)
       if (res.code === 200) {
         this.team.cover_image = null
-        this.coverLocalPreview = null
         this.coverFile = null
         this.coverVersion = Date.now()
       }
@@ -931,12 +936,6 @@ export default {
 .pnl-hd p { color: var(--ehub-muted); font-size: .84rem; margin: 0; }
 
 .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 13px; margin-bottom: 22px; }
-.stat-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 13px; padding: 17px 19px; }
-.sc-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px; }
-.sc-ico { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .82rem; }
-.sc-delta { font-size: .72rem; font-weight: 700; color: var(--ehub-muted); }
-.sc-val { font-size: 1.75rem; font-weight: 800; color: var(--ehub-ink); letter-spacing: -.03em; line-height: 1; }
-.sc-lbl { font-size: .72rem; color: var(--ehub-muted); margin-top: 3px; }
 
 .dash-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; }
 
@@ -960,7 +959,8 @@ export default {
 .act-btn.del:hover { background: color-mix(in srgb,#e23b3b 12%,transparent); color: #e23b3b; border-color: color-mix(in srgb,#e23b3b 35%,transparent); }
 .act-btn.up:hover  { background: var(--ehub-primary-tint); color: var(--ehub-primary); border-color: var(--ehub-primary-border); }
 
-.m-av { width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: .64rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+.m-av { width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: .64rem; font-weight: 700; color: #fff; flex-shrink: 0; overflow: hidden; position: relative; }
+.m-av-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 
 .roles-tbl th { text-align: center; font-size: .78rem; }
 .roles-tbl th:first-child { text-align: left; }
@@ -974,13 +974,6 @@ export default {
 html[data-bs-theme="dark"] .perm-dot--yes    { color: #51cf66; background: color-mix(in srgb,#51cf66 14%,transparent); }
 html[data-bs-theme="dark"] .perm-dot--always { color: var(--ehub-gold); }
 
-.act-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 15px; border-bottom: 1px solid var(--ehub-line); }
-.act-item:last-child { border-bottom: 0; }
-.act-icon { width: 28px; height: 28px; border-radius: 8px; background: var(--ehub-field-bg); color: var(--ehub-muted); display: flex; align-items: center; justify-content: center; font-size: .72rem; flex-shrink: 0; margin-top: 1px; }
-.act-body { flex: 1; min-width: 0; }
-.act-text { font-size: .82rem; color: var(--ehub-ink); line-height: 1.4; }
-.act-text strong { font-weight: 700; }
-.act-time { font-size: .72rem; color: var(--ehub-muted); margin-top: 2px; }
 
 .role-chip { font-size: .7rem; font-weight: 700; padding: 3px 9px; border-radius: 50rem; display: inline-block; }
 .role-select { font-size: .7rem; font-weight: 700; padding: 3px 8px; border-radius: 50rem; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); color: var(--ehub-ink); cursor: pointer; }
@@ -1020,6 +1013,8 @@ html[data-bs-theme="dark"] .perm-dot--always { color: var(--ehub-gold); }
 }
 .cm-icon.leave { background: var(--ehub-field-bg); color: var(--ehub-muted); }
 .cm-icon.delete { background: color-mix(in srgb,#e23b3b 12%,transparent); color: #e23b3b; }
+.cm-icon.remove_member { background: color-mix(in srgb,#e23b3b 12%,transparent); color: #e23b3b; }
+.only-root-msg { margin: 0; font-size: .8rem; color: var(--ehub-muted); max-width: 320px; }
 .cm-title { font-size: 1.05rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 8px; }
 .cm-desc  { font-size: .875rem; color: var(--ehub-muted); margin: 0 0 24px; line-height: 1.5; }
 .cm-actions { display: flex; gap: 10px; justify-content: center; }
@@ -1028,12 +1023,6 @@ html[data-bs-theme="dark"] .perm-dot--always { color: var(--ehub-gold); }
 .modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
 
 .swatch-row { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 10px; }
-.vis-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.vis-logo-thumb { width: 64px; height: 64px; border-radius: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; color: #fff; overflow: hidden; }
-.vis-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.vis-cover-wrap { position: relative; height: 100px; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.vis-cover-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.35); }
-.vis-cover-btn { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 50rem; background: rgba(255,255,255,.18); color: #fff; font-size: .82rem; font-weight: 600; border: 1px solid rgba(255,255,255,.3); backdrop-filter: blur(4px); }
 .grad-sw { width: 32px; height: 32px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: transform .12s, box-shadow .12s; }
 .grad-sw:hover { transform: scale(1.1); }
 .grad-sw.sel { border-color: var(--ehub-ink); box-shadow: 0 0 0 2px var(--ehub-card), 0 0 0 4px var(--ehub-ink); transform: scale(1.06); }
