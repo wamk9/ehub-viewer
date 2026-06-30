@@ -127,6 +127,13 @@ import {
   faFloppyDisk,
   faEye,
   faCamera,
+  faUserMinus,
+  faUserPen,
+  faCircleNotch,
+  faLockOpen,
+  faArrowDown,
+  faRotate,
+  faArrowDown19,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -273,6 +280,13 @@ library.add(
   faFloppyDisk,
   faEye,
   faCamera,
+  faUserMinus,
+  faUserPen,
+  faCircleNotch,
+  faLockOpen,
+  faArrowDown,
+  faRotate,
+  faArrowDown19,
 );
 
 export default FontAwesomeIcon;
