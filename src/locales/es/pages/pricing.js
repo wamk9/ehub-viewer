@@ -44,7 +44,7 @@ export default {
     title: 'Conversión de moneda extranjera',
     sub: 'Las inscripciones en monedas distintas al Real (BRL) pasan por un ciclo mensual de conversión con tipo de cambio oficial.',
     c1: { day: 'Día 5 del mes anterior', title: 'Inicio del período', desc: 'A partir de esta fecha, las inscripciones en moneda extranjera se registran por su valor original y esperan conversión.' },
-    c2: { day: 'Días 5 → 4', title: 'Período de cálculo', desc: 'Todas las inscripciones no-BRL realizadas en este intervalo quedan pendientes de conversión.' },
+    c2: { day: 'Días 4 → 5 del mes actual', title: 'Período de cálculo', desc: 'Todas las inscripciones no-BRL realizadas en este intervalo quedan pendientes de conversión.' },
     c3: { day: 'Día 5 del mes actual', title: 'Conversión aplicada', desc: 'Se captura el tipo de cambio oficial del día y se aplica a todas las inscripciones del período. Los valores se consolidan en BRL.', badge: 'Tipo actualizado' },
     ex_title: 'Ejemplo práctico',
     ex_desc: 'Evento con inscripción de US$ 20. El 5 de julio, el dólar cotiza a R$ 5,50. Todas las inscripciones del 5 de junio al 4 de julio se convierten: US$ 20 × R$ 5,50 = R$ 110,00. Tasa eHub: 2% × R$ 110,00 = R$ 2,20.',

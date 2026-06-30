@@ -44,7 +44,7 @@ export default {
     title: 'Conversão de moeda estrangeira',
     sub: 'Inscrições em moedas diferentes do Real (BRL) passam por um ciclo mensal de conversão com cotação oficial.',
     c1: { day: 'Dia 5 do mês anterior', title: 'Início do período', desc: 'A partir desta data, as inscrições em moeda estrangeira são registradas pelo valor original e aguardam conversão.' },
-    c2: { day: 'Dias 5 → 4', title: 'Período de apuração', desc: 'Todas as inscrições não-BRL realizadas neste intervalo ficam pendentes de conversão.' },
+    c2: { day: 'Dias 4 → 5 do mês atual', title: 'Período de apuração', desc: 'Todas as inscrições não-BRL realizadas neste intervalo ficam pendentes de conversão.' },
     c3: { day: 'Dia 5 do mês atual', title: 'Conversão aplicada', desc: 'A cotação oficial do dia é capturada e aplicada a todas as inscrições do período. Valores em BRL são consolidados.', badge: 'Cotação atualizada' },
     ex_title: 'Exemplo prático',
     ex_desc: 'Evento com inscrição de US$ 20. No dia 5 de julho, o dólar está cotado a R$ 5,50. Todas as inscrições entre 5 de junho e 4 de julho são convertidas: US$ 20 × R$ 5,50 = R$ 110,00. Taxa eHub: 2% × R$ 110,00 = R$ 2,20.',

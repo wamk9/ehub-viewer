@@ -44,7 +44,7 @@ export default {
     title: 'Foreign currency conversion',
     sub: 'Registrations in currencies other than the Brazilian Real (BRL) go through a monthly conversion cycle using official exchange rates.',
     c1: { day: '5th of previous month', title: 'Period starts', desc: 'From this date, foreign-currency registrations are recorded at their original value and await conversion.' },
-    c2: { day: '5th → 4th', title: 'Accrual period', desc: 'All non-BRL registrations made in this window are held pending conversion.' },
+    c2: { day: '4th → 5th of current month', title: 'Accrual period', desc: 'All non-BRL registrations made in this window are held pending conversion.' },
     c3: { day: '5th of current month', title: 'Conversion applied', desc: 'The official exchange rate for the day is captured and applied to all registrations in the period. Values are consolidated in BRL.', badge: 'Rate updated' },
     ex_title: 'Practical example',
     ex_desc: 'Event with a US$ 20 registration. On July 5th, the dollar is quoted at R$ 5.50. All registrations from June 5th to July 4th are converted: US$ 20 × R$ 5.50 = R$ 110.00. eHub fee: 2% × R$ 110.00 = R$ 2.20.',
