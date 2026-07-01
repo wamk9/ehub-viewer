@@ -138,9 +138,11 @@ function goToEvent(event) {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   width: 100%;
-  max-width: 360px;
+  max-width: 260px;
+  min-height: 340px;
   padding: 32px 20px;
   border: 1px dashed var(--ehub-line);
   border-radius: 16px;

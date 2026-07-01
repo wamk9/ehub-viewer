@@ -157,9 +157,11 @@ async function handleFollow(org) {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   width: 100%;
-  max-width: 360px;
+  max-width: 300px;
+  min-height: 360px;
   padding: 32px 20px;
   border: 1px dashed var(--ehub-line);
   border-radius: 16px;
