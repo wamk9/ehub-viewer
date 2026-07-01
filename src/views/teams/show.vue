@@ -131,7 +131,6 @@
             <span class="ts-role-group-label" :class="group.role">
               {{ $t('pages.teams.show.roles.' + group.role) }}
             </span>
-            <span class="ts-role-group-count">{{ group.members.length }}</span>
           </div>
           <div class="ts-roster-grid">
             <router-link v-for="member in group.members" :key="member.id"
