@@ -109,18 +109,18 @@
 
       <!-- TABS -->
       <div class="ts-tabs">
-        <button class="ts-tab" :class="{ active: activeTab === 'roster' }" @click="activeTab = 'roster'">
+        <button class="ts-tab" :class="{ active: activeTab === 'about' }" @click="setTab('about')">
+          <font-awesome-icon icon="circle-info" />
+          {{ $t('pages.teams.show.tabs.about') }}
+        </button>
+        <button class="ts-tab" :class="{ active: activeTab === 'roster' }" @click="setTab('roster')">
           <font-awesome-icon icon="users" />
           {{ $t('pages.teams.show.tabs.roster') }}
           <span class="ts-pill">{{ team.members?.length || 0 }}</span>
         </button>
-        <button class="ts-tab" :class="{ active: activeTab === 'results' }" @click="activeTab = 'results'">
+        <button class="ts-tab" :class="{ active: activeTab === 'results' }" @click="setTab('results')">
           <font-awesome-icon icon="trophy" />
           {{ $t('pages.teams.show.tabs.results') }}
-        </button>
-        <button class="ts-tab" :class="{ active: activeTab === 'about' }" @click="activeTab = 'about'">
-          <font-awesome-icon icon="circle-info" />
-          {{ $t('pages.teams.show.tabs.about') }}
         </button>
       </div>
 
@@ -211,10 +211,6 @@
         </div>
       </section>
 
-      <router-link to="/teams" class="ts-back">
-        <font-awesome-icon icon="arrow-left" />
-        {{ $t('pages.teams.show.back') }}
-      </router-link>
     </div>
 
     <!-- APPLY MODAL -->
@@ -301,12 +297,12 @@ export default {
     return {
       loading: true,
       team: null,
-      activeTab: 'roster',
       applyModal: false,
       applyForm: { message: '', role: '' },
       applyErrors: { message: false },
       coverVersion: Date.now(),
       baseUrl: SystemVars.baseUrl,
+      activeTab: this.$route.query.tab || 'about',
     }
   },
 
@@ -358,6 +354,11 @@ export default {
   },
 
   methods: {
+    setTab(tab) {
+      this.activeTab = tab
+      this.$router.replace({ query: { ...this.$route.query, tab } })
+    },
+
     async loadTeam() {
       this.loading = true
       const { code, data } = await Teams.getPublic(this.$route.params.teamRoute)
