@@ -4,37 +4,14 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import Organization from '@/helpers/communication/Organization.js'
-import SystemVars from '@/helpers/General/SystemVars'
+import EhubFilterBar from '@/components/EhubFilterBar.vue'
+import EhubViewCard from '@/components/EhubViewCard.vue'
 
 const router = useRouter()
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const store = useStore()
 
 const isLogged = computed(() => !!store.getters.getToken)
-
-// ── Category gradient map ──────────────────────────────────────────
-const CAT_GRAD = {
-  simracing:          ['#0098D8', '#00d4ff'],
-  racingcars:         ['#0098D8', '#00d4ff'],
-  rally:              ['#f08c00', '#ffc93c'],
-  'esports-fps':      ['#e23b3b', '#ff8a3b'],
-  'esports-moba':     ['#7C3AED', '#b06bff'],
-  'esports-fighting': ['#d6336c', '#ff6b9d'],
-  'esports-strategy': ['#1a6e4f', '#51cf66'],
-  'esports-sports':   ['#2563eb', '#60a5fa'],
-  motorsport:         ['#f08c00', '#ffc93c'],
-  motorbike:          ['#dc4f00', '#ff8a3b'],
-  cycling:            ['#1971c2', '#4dabf7'],
-  running:            ['#1f8a5b', '#51cf66'],
-  swimming:           ['#0284c7', '#38bdf8'],
-  triathlon:          ['#7C3AED', '#c084fc'],
-  hiking:             ['#4d7c0f', '#a3e635'],
-  crossfit:           ['#9a3412', '#fb923c'],
-  rowing:             ['#1d4ed8', '#93c5fd'],
-  archery:            ['#92400e', '#fbbf24'],
-  chess:              ['#495057', '#868e96'],
-  'drone-racing':     ['#0e7490', '#22d3ee'],
-}
 
 const ALL_CATEGORIES = [
   'simracing', 'esports-fps', 'esports-moba', 'esports-fighting',
@@ -43,22 +20,21 @@ const ALL_CATEGORIES = [
   'rowing', 'archery', 'chess', 'drone-racing',
 ]
 
-function catGrad(category) {
-  const g = CAT_GRAD[category]
-  return g ? `linear-gradient(135deg, ${g[0]}, ${g[1]})` : 'linear-gradient(135deg, #0098D8, #00d4ff)'
-}
-
-function initials(name) {
-  return (name || '?').split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
-
 function fmtNum(n) {
   if (!n) return '0'
   return n >= 1000 ? (n / 1000).toFixed(1).replace('.0', '') + 'k' : String(n)
 }
 
-function imgUrl(path) {
-  return path ? SystemVars.baseUrl + 'storage/' + path : ''
+function orgAsCard(org) {
+  return { ...org, category: org.primary_category, is_open: false }
+}
+
+function orgStats(org) {
+  return [
+    { value: org.events_count ?? 0,         label: t('pages.organization.index.card.events') },
+    { value: fmtNum(org.members_count),      label: t('pages.organization.index.card.members') },
+    { value: fmtNum(org.followers_count),    label: t('pages.organization.index.card.followers') },
+  ]
 }
 
 // ── Data ─────────────────────────────────────────────────────────────
@@ -69,13 +45,8 @@ const followLoading = ref({})
 // ── Filters ───────────────────────────────────────────────────────────
 const q        = ref('')
 const category = ref('')
-const showMode = ref('all') // all | following
+const showMode = ref('all')
 const sort     = ref('name')
-
-// ── Derived category for display ──────────────────────────────────────
-function primaryCategory(org) {
-  return org.primary_category || ''
-}
 
 // ── Filtered + sorted list ────────────────────────────────────────────
 const filtered = computed(() => {
@@ -118,13 +89,9 @@ async function load() {
 
 load()
 
-// ── Follow toggle ────────────────────────────────────────────────────
-async function toggleFollow(e, org) {
-  e.stopPropagation()
-  if (!isLogged.value) {
-    router.push('/login')
-    return
-  }
+// ── Follow ────────────────────────────────────────────────────────────
+async function handleFollow(org) {
+  if (!isLogged.value) { router.push('/login'); return }
   followLoading.value[org.id] = true
   if (org.is_following) {
     await Organization.unfollow(org.route)
@@ -165,51 +132,40 @@ async function toggleFollow(e, org) {
   </header>
 
   <!-- FILTER BAR -->
-  <div class="orgs-filter-bar">
-    <div class="container-fluid px-4">
-      <div class="filter-inner">
-        <!-- Category -->
-        <span class="fb-label">{{ $t('pages.organization.index.filters.category') }}</span>
-        <select v-model="category" class="form-select form-select-sm" style="width:auto; min-width:160px; max-width:220px; background:var(--ehub-field-bg); border-color:var(--ehub-line); color:var(--ehub-ink);">
+  <EhubFilterBar>
+    <template #filters>
+      <button class="fchip" :class="{ active: showMode === 'all' }" @click="showMode = 'all'">
+        {{ $t('pages.organization.index.filters.all') }}
+      </button>
+      <button v-if="isLogged" class="fchip" :class="{ active: showMode === 'following' }" @click="showMode = 'following'">
+        {{ $t('pages.organization.index.filters.following') }}
+      </button>
+      <span class="fchip-sep"></span>
+      <div class="fchip-sel">
+        <select v-model="category" class="fchip-select">
           <option value="">{{ $t('pages.organization.index.filters.category_all') }}</option>
           <option v-for="cat in ALL_CATEGORIES" :key="cat" :value="cat">
             {{ $t(`categories.names.${cat}`) }}
           </option>
         </select>
-
-        <!-- Show -->
-        <span class="fb-label ms-2">{{ $t('pages.organization.index.filters.show') }}</span>
-        <div class="seg seg-sm">
-          <button :class="{ active: showMode === 'all' }" @click="showMode = 'all'">
-            {{ $t('pages.organization.index.filters.all') }}
-          </button>
-          <button v-if="isLogged" :class="{ active: showMode === 'following' }" @click="showMode = 'following'">
-            {{ $t('pages.organization.index.filters.following') }}
-          </button>
-        </div>
-
-        <!-- Sort -->
-        <span class="fb-label ms-2">{{ $t('pages.organization.index.filters.sort') }}</span>
-        <select v-model="sort" class="form-select form-select-sm" style="width:auto; min-width:160px; max-width:200px; background:var(--ehub-field-bg); border-color:var(--ehub-line); color:var(--ehub-ink);">
+      </div>
+      <span class="fchip-sep"></span>
+      <div class="fchip-sel">
+        <select v-model="sort" class="fchip-select">
           <option value="name">{{ $t('pages.organization.index.sort.name') }}</option>
           <option value="followers">{{ $t('pages.organization.index.sort.followers') }}</option>
           <option value="events">{{ $t('pages.organization.index.sort.events') }}</option>
           <option value="members">{{ $t('pages.organization.index.sort.members') }}</option>
         </select>
-
-        <div style="flex:1"></div>
-        <span class="orgs-results-count">
-          {{ $t('pages.organization.index.results').replace('{n}', filtered.length) }}
-        </span>
       </div>
-    </div>
-  </div>
+    </template>
+  </EhubFilterBar>
 
   <!-- CONTENT -->
   <main class="container-fluid px-4 py-4">
     <!-- Loading -->
     <div v-if="loading" class="orgs-grid">
-      <div v-for="i in 6" :key="i" class="skel" :style="{ height: '260px', borderRadius: '16px', animationDelay: (i * 0.08) + 's' }"></div>
+      <div v-for="i in 6" :key="i" class="skel" :style="{ height: '300px', borderRadius: '16px', animationDelay: (i * 0.08) + 's' }"></div>
     </div>
 
     <!-- Empty -->
@@ -220,72 +176,24 @@ async function toggleFollow(e, org) {
 
     <!-- Grid -->
     <div v-else class="orgs-grid">
-      <router-link
+      <EhubViewCard
         v-for="org in filtered"
         :key="org.id"
-        :to="'/org/' + org.route"
-        class="text-decoration-none"
+        :team="orgAsCard(org)"
+        :follow-loading="!!followLoading[org.id]"
+        :stats="orgStats(org)"
+        @click="router.push('/org/' + org.route)"
+        @follow="handleFollow(org)"
       >
-      <div class="org-card">
-        <!-- Banner -->
-        <div class="org-banner" :style="org.cover_image ? { backgroundImage: 'url(' + imgUrl(org.cover_image) + ')', backgroundSize: 'cover', backgroundPosition: 'center' } : { background: catGrad(org.primary_category) }">
-          <span v-if="org.is_verified" class="org-verified" :title="$t('pages.organization.index.card.verified')">
+        <template #badges>
+          <span v-if="org.is_verified" class="vc-badge verified">
             <font-awesome-icon :icon="['fas', 'circle-check']" />
+            {{ $t('pages.organization.index.card.verified') }}
           </span>
-        </div>
-
-        <!-- Logo -->
-        <div class="org-logo" :style="!org.logo_image ? { background: catGrad(org.primary_category) } : {}">
-          <img v-if="org.logo_image" :src="imgUrl(org.logo_image)" :alt="org.name" />
-          <template v-else>{{ initials(org.name) }}</template>
-        </div>
-
-        <!-- Body -->
-        <div class="org-body">
-          <div class="org-name">
-            {{ org.name }}
-            <font-awesome-icon v-if="org.is_verified" :icon="['fas', 'circle-check']" class="badge-ver" />
-          </div>
-          <span v-if="org.primary_category" class="cat-chip sub mb-2" style="align-self:flex-start; font-size:.7rem;">
-            {{ $t(`categories.names.${org.primary_category}`) }}
-          </span>
-          <p class="org-desc">{{ org.description || '—' }}</p>
-          <div class="org-stats">
-            <div class="stat">
-              <span class="v">{{ org.events_count ?? 0 }}</span>
-              <span class="l">{{ $t('pages.organization.index.card.events') }}</span>
-            </div>
-            <div class="stat">
-              <span class="v">{{ fmtNum(org.members_count) }}</span>
-              <span class="l">{{ $t('pages.organization.index.card.members') }}</span>
-            </div>
-            <div class="stat">
-              <span class="v">{{ fmtNum(org.followers_count) }}</span>
-              <span class="l">{{ $t('pages.organization.index.card.followers') }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Foot -->
-        <div class="org-foot">
-          <button
-            class="btn-follow"
-            :class="{ following: org.is_following }"
-            :disabled="followLoading[org.id]"
-            @click.stop="toggleFollow($event, org)"
-          >
-            <font-awesome-icon :icon="['fas', org.is_following ? 'check' : 'plus']" />
-            {{ org.is_following ? $t('pages.organization.index.card.following') : $t('pages.organization.index.card.follow') }}
-          </button>
-        </div>
-      </div>
-      </router-link>
+        </template>
+      </EhubViewCard>
     </div>
   </main>
-
-  <footer class="home-footer" style="border-top:1px solid var(--ehub-line); padding:28px 20px; text-align:center; color:var(--ehub-muted); font-size:.82rem; margin-top:40px;">
-    {{ $t('pages.homepage.entrance.footer') }}
-  </footer>
 </template>
 
 <style scoped>
@@ -299,4 +207,22 @@ async function toggleFollow(e, org) {
   opacity: .4;
   margin-bottom: 12px;
 }
+.vc-badge {
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: rgba(0,0,0,.42);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+  width: 100%;
+}
+.vc-badge.verified { background: color-mix(in srgb, var(--ehub-primary) 80%, #000 20%); }
 </style>
