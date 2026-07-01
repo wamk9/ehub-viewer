@@ -72,8 +72,8 @@
               {{ $t(team.is_following ? 'pages.teams.show.head.following' : 'pages.teams.show.head.follow') }}
             </button>
             <button v-if="!team.is_member" class="ts-btn-apply" :class="{ 'is-closed': !team.is_open }" @click="openApplyModal">
-              <font-awesome-icon :icon="team.is_open ? 'paper-plane' : 'lock'" />
-              {{ $t(team.is_open ? 'pages.teams.show.head.apply' : 'pages.teams.show.head.closed') }}
+              <font-awesome-icon :icon="!team.is_open ? 'lock' : isLoggedIn ? 'paper-plane' : 'right-to-bracket'" />
+              {{ $t(!team.is_open ? 'pages.teams.show.head.closed' : isLoggedIn ? 'pages.teams.show.head.apply' : 'pages.teams.show.head.apply_login') }}
             </button>
             <button v-if="team.is_admin" class="ts-btn-manage" @click="goManage">
               <font-awesome-icon icon="screwdriver-wrench" />
@@ -126,18 +126,31 @@
 
       <!-- ROSTER -->
       <section v-if="activeTab === 'roster'" class="ts-pane">
-        <div class="ts-roster-grid">
-          <router-link v-for="member in team.members" :key="member.id"
-            :to="`/profile/${member.username}`" class="ts-player-card">
-            <div class="ts-player-av" :style="memberAvatarStyle(member)">{{ memberInitials(member) }}</div>
-            <div class="ts-player-info">
-              <div class="ts-player-name">{{ member.name }}</div>
-              <div class="ts-player-handle">@{{ member.username }}</div>
-              <span class="ts-role-chip" :class="member.role">
-                {{ $t('pages.teams.show.roles.' + (member.role || 'member')) }}
-              </span>
-            </div>
-          </router-link>
+        <div v-for="group in rosterGroups" :key="group.role" class="ts-role-group">
+          <div class="ts-role-group-hd">
+            <span class="ts-role-group-label" :class="group.role">
+              {{ $t('pages.teams.show.roles.' + group.role) }}
+            </span>
+            <span class="ts-role-group-count">{{ group.members.length }}</span>
+          </div>
+          <div class="ts-roster-grid">
+            <router-link v-for="member in group.members" :key="member.id"
+              :to="`/profile/${member.username}`" class="ts-player-card">
+              <div class="ts-player-av" :style="memberAvatarStyle(member)">
+                <img
+                  :src="baseUrl + 'storage/users/' + member.username + '/profile.webp'"
+                  class="ts-player-photo"
+                  @error="e => e.target.style.display = 'none'"
+                  alt=""
+                />
+                {{ memberInitials(member) }}
+              </div>
+              <div class="ts-player-info">
+                <div class="ts-player-name">{{ member.name }}</div>
+                <div class="ts-player-handle">@{{ member.username }}</div>
+              </div>
+            </router-link>
+          </div>
         </div>
       </section>
 
@@ -294,10 +307,26 @@ export default {
       applyForm: { message: '', role: '' },
       applyErrors: { message: false },
       coverVersion: Date.now(),
+      baseUrl: SystemVars.baseUrl,
     }
   },
 
   computed: {
+    rosterGroups() {
+      if (!this.team?.members?.length) return []
+      const groups = {}
+      for (const m of this.team.members) {
+        const role = m.role || 'member'
+        if (!groups[role]) groups[role] = []
+        groups[role].push(m)
+      }
+      const seen = new Set()
+      const orderedRoles = this.team.members
+        .map(m => m.role || 'member')
+        .filter(r => { if (seen.has(r)) return false; seen.add(r); return true })
+      return orderedRoles.map(role => ({ role, members: groups[role] }))
+    },
+
     teamInitials() {
       if (!this.team) return ''
       return this.team.name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
@@ -317,6 +346,9 @@ export default {
       const color = this.team?.color || '#0098D8'
       return { background: `linear-gradient(135deg, ${color}, ${this.lightenHex(color, 40)})` }
     },
+    isLoggedIn() {
+      return this.$store.getters.isLoggedIn
+    },
     categoryInfo() {
       if (!this.team?.category) return null
       const cat = CATEGORY_MAP[this.team.category]
@@ -332,6 +364,9 @@ export default {
       const { code, data } = await Teams.getPublic(this.$route.params.teamRoute)
       if (code === 200) {
         this.team = data
+        if (this.$route.query.openApply && this.team.is_open && this.$store.getters.isLoggedIn && !this.team.is_member) {
+          this.$nextTick(() => this.openApplyModal())
+        }
       }
       this.loading = false
     },
@@ -376,6 +411,15 @@ export default {
 
     openApplyModal() {
       if (!this.team.is_open) return
+      if (!this.$store.getters.isLoggedIn) {
+        localStorage.setItem('lastKnowRoute', JSON.stringify({
+          name: 'team-show',
+          params: { teamRoute: this.$route.params.teamRoute },
+          query: { openApply: '1' }
+        }))
+        this.$router.push({ name: 'user-login' })
+        return
+      }
       this.applyForm = { message: '', role: '' }
       this.applyErrors = { message: false }
       this.applyModal = true
@@ -521,6 +565,19 @@ export default {
 .ts-pane { padding-top: 26px; }
 
 /* ── Roster ── */
+.ts-role-group { margin-bottom: 28px; }
+.ts-role-group-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.ts-role-group-label { font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 11px; border-radius: 50rem; }
+.ts-role-group-label.captain { background: color-mix(in srgb, var(--ehub-gold) 20%, transparent); color: color-mix(in srgb, var(--ehub-gold), #000 28%); }
+.ts-role-group-label.vice    { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.ts-role-group-label.coach   { background: color-mix(in srgb, #7C3AED 14%, transparent); color: #7C3AED; }
+.ts-role-group-label.starter { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: #1f8a5b; }
+.ts-role-group-label.reserve { background: var(--ehub-field-bg); color: var(--ehub-muted); }
+.ts-role-group-label.member  { background: var(--ehub-field-bg); color: var(--ehub-muted); }
+html[data-bs-theme="dark"] .ts-role-group-label.captain { color: var(--ehub-gold); }
+html[data-bs-theme="dark"] .ts-role-group-label.coach   { color: #c89bff; background: color-mix(in srgb, #b06bff 18%, transparent); }
+html[data-bs-theme="dark"] .ts-role-group-label.starter { color: #51cf66; background: color-mix(in srgb, #51cf66 14%, transparent); }
+.ts-role-group-count { font-size: .75rem; font-weight: 600; color: var(--ehub-muted); }
 .ts-roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
 .ts-player-card {
   display: flex; align-items: center; gap: 14px; padding: 16px;
@@ -529,7 +586,8 @@ export default {
   text-decoration: none; color: inherit;
 }
 .ts-player-card:hover { border-color: color-mix(in srgb, var(--ehub-primary) 40%, var(--ehub-line)); transform: translateY(-2px); text-decoration: none; color: inherit; }
-.ts-player-av { width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: .01em; text-shadow: 0 1px 4px rgba(0,0,0,.3); }
+.ts-player-av { position: relative; overflow: hidden; width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: .01em; text-shadow: 0 1px 4px rgba(0,0,0,.3); }
+.ts-player-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
 .ts-player-info { min-width: 0; flex: 1; }
 .ts-player-name { font-size: .95rem; font-weight: 700; color: var(--ehub-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ts-player-handle { font-size: .78rem; color: var(--ehub-muted); margin-top: 1px; }
