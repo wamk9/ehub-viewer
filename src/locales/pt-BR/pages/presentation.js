@@ -7,10 +7,6 @@ export default {
     cta_primary: 'Criar minha conta',
     cta_secondary: 'Ver planos',
   },
-  preview: {
-    tab_events: 'Eventos',
-    tab_orgs: 'Organizações',
-  },
   how: {
     title: 'Do convite ao pódio, em quatro etapas',
     sub: 'Toda organização no eHub segue o mesmo fluxo simples — pronto para escalar de um campeonato local a uma liga com múltiplas temporadas.',

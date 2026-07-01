@@ -77,8 +77,10 @@ async function handleFollow(org) {
 
     <!-- Empty -->
     <div v-else-if="!orgs.length" class="ef-empty">
-      <font-awesome-icon :icon="['far', 'building']" />
-      <span>{{ $t('pages.organization.feed.empty') }}</span>
+      <div class="ef-empty-card">
+        <font-awesome-icon :icon="['fas', 'building']" />
+        <span>{{ $t('pages.organization.feed.empty') }}</span>
+      </div>
     </div>
 
     <!-- Cards -->
@@ -148,11 +150,27 @@ async function handleFollow(org) {
 
 .ef-empty {
   display: flex;
+  justify-content: center;
+  padding: 8px 4px;
+}
+.ef-empty-card {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: 20px 4px;
+  width: 100%;
+  max-width: 360px;
+  padding: 32px 20px;
+  border: 1px dashed var(--ehub-line);
+  border-radius: 16px;
+  background: var(--ehub-field-bg);
   color: var(--ehub-muted);
   font-size: .88rem;
+  text-align: center;
+}
+.ef-empty-card svg {
+  font-size: 1.5rem;
+  opacity: .5;
 }
 
 .vc-badge {

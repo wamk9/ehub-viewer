@@ -7,10 +7,6 @@ export default {
     cta_primary: 'Create my account',
     cta_secondary: 'See pricing',
   },
-  preview: {
-    tab_events: 'Events',
-    tab_orgs: 'Organizations',
-  },
   how: {
     title: 'From invite to podium, in four steps',
     sub: 'Every organization on eHub follows the same simple flow — ready to scale from a local championship to a multi-season league.',

@@ -41,11 +41,6 @@ import EhubOrgFeed from '@/components/EhubOrgFeed.vue'
             </div>
           </div>
           <div class="preview-body">
-            <div class="preview-tabs">
-              <span class="on">{{ $t('pages.presentation.preview.tab_events') }}</span>
-              <span>{{ $t('pages.presentation.preview.tab_orgs') }}</span>
-            </div>
-
             <EhubEventFeed type="upcoming" />
             <div class="preview-gap"></div>
             <EhubOrgFeed :limit="4" />
@@ -276,9 +271,6 @@ import EhubOrgFeed from '@/components/EhubOrgFeed.vue'
 .preview-address { margin-left: 12px; flex: 1; background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 50rem; padding: 5px 14px; font-size: .74rem; color: var(--ehub-muted); display: flex; align-items: center; gap: 7px; }
 .preview-address svg { font-size: .68rem; }
 .preview-body { padding: 28px; }
-.preview-tabs { display: flex; gap: 4px; margin-bottom: 20px; }
-.preview-tabs span { font-size: .82rem; font-weight: 700; padding: 6px 14px; border-radius: 50rem; color: var(--ehub-muted); }
-.preview-tabs span.on { background: var(--ehub-primary); color: #fff; }
 .preview-gap { height: 30px; }
 
 /* ── How it works ── */

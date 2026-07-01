@@ -62,8 +62,10 @@ function goToEvent(event) {
 
     <!-- Empty -->
     <div v-else-if="!events.length" class="ef-empty">
-      <font-awesome-icon :icon="['far', 'calendar-xmark']" />
-      <span>{{ $t('events.feed.empty') }}</span>
+      <div class="ef-empty-card">
+        <font-awesome-icon :icon="['fas', 'calendar-days']" />
+        <span>{{ $t('events.feed.empty') }}</span>
+      </div>
     </div>
 
     <!-- Cards -->
@@ -129,10 +131,26 @@ function goToEvent(event) {
 
 .ef-empty {
   display: flex;
+  justify-content: center;
+  padding: 8px 4px;
+}
+.ef-empty-card {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: 20px 4px;
+  width: 100%;
+  max-width: 360px;
+  padding: 32px 20px;
+  border: 1px dashed var(--ehub-line);
+  border-radius: 16px;
+  background: var(--ehub-field-bg);
   color: var(--ehub-muted);
   font-size: .88rem;
+  text-align: center;
+}
+.ef-empty-card svg {
+  font-size: 1.5rem;
+  opacity: .5;
 }
 </style>
