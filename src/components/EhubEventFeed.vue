@@ -141,7 +141,7 @@ function goToEvent(event) {
   justify-content: center;
   gap: 10px;
   width: 100%;
-  max-width: 260px;
+  max-width: 300px;
   min-height: 340px;
   padding: 32px 20px;
   border: 1px dashed var(--ehub-line);
