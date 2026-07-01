@@ -23,6 +23,17 @@ const router = createRouter({
       component: () => import('@/views/search.vue')
     },
     {
+      path: '/pricing',
+      name: 'pricing',
+      component: () => import('@/views/pricing.vue')
+    },
+    {
+      path: '/auth/return',
+      name: 'auth-return',
+      component: () => import('@/views/auth/return.vue'),
+      meta: { authPage: true }
+    },
+    {
       path: '/register',
       name: 'user-register',
       component: () => import('@/views/user/register.vue'),
@@ -68,7 +79,7 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/teams/:teamRoute',
+      path: '/team/:teamRoute',
       name: 'team-show',
       component: () => import('@/views/teams/show.vue')
     },
@@ -76,12 +87,6 @@ const router = createRouter({
       path: '/team/:teamRoute/manage/:tab?',
       name: 'team-manage',
       component: () => import('@/views/teams/manage.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/team/:teamRoute/members-view',
-      name: 'team-members-view',
-      component: () => import('@/views/teams/members-view.vue'),
       meta: { requiresAuth: true }
     },
     {
@@ -181,36 +186,7 @@ const router = createRouter({
       name: 'show-event-article',
       component: () => import('@/views/event/article.vue')
     },
-    {
-      path: '/org/:orgRoute/event/:eventRoute/manage',
-      name: 'manage-event-info',
-      component: () => import('@/views/event/manage.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/league/:leagueRoute',
-      name: 'show-especific-league-info',
-      component: () => import('@/views/league/show.vue')
-    },
-    {
-      path: '/league/:leagueRoute/tournament/create',
-      name: 'create-tournament',
-      component: () => import('@/views/tournament/create.vue')
-    },
-    // {
-    //   path: '/league/:leagueRoute/tournament/:tournamentRoute',
-    //   name: 'show-especific-tournament-info',
-    //   component: () => import('@/views/tournament/show.vue')
-    // },
-    {
-      path: '/league/create',
-      name: 'create-league',
-      component: () => import('@/views/league/create.vue'),
-      meta: {
-        requiresAuth: true
-      }
-    },
-    ...eventManageRoutes.map(menu => ({
+...eventManageRoutes.map(menu => ({
     path: `/org/:orgRoute/manage/events/:eventRoute/${menu}`,
     name: `manage-organization-events-${menu}`,
     component: () => import("@/views/org/manage.vue"),
@@ -240,7 +216,7 @@ window.addEventListener('ehub:unauthorized', () => {
 });
 
 router.beforeEach((to, from, next) => {
-  const authRoutes = ['user-login', 'user-register']
+  const authRoutes = ['user-login', 'user-register', 'auth-return']
 
   // Save last know route to redirect case user don't have a token.
   if (!to.matched.some(record => authRoutes.includes(record.name)))
@@ -254,6 +230,10 @@ router.beforeEach((to, from, next) => {
 
   // Used after login or on access auth page with an token, send user to last know page.
   if (to.matched.some(record => authRoutes.includes(record.name)) && !!store.getters.getToken) {
+    if (to.name === 'auth-return' && to.query.remember === 'prompt') {
+      next()
+      return
+    }
     next(localStorage.getItem("lastKnowRoute") != null ? JSON.parse(localStorage.getItem("lastKnowRoute")) : { name: 'home' })
     return;
   }

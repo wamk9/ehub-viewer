@@ -3,33 +3,12 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Teams from '@/helpers/communication/Teams.js'
-import SystemVars from '@/helpers/General/SystemVars'
+import { toast } from '@/helpers/toast.js'
+import EhubViewCard from '@/components/EhubViewCard.vue'
+import EhubFilterBar from '@/components/EhubFilterBar.vue'
 
 const router = useRouter()
 const { t } = useI18n()
-
-const CAT_GRAD = {
-  simracing:          ['#0098D8', '#00d4ff'],
-  racingcars:         ['#0098D8', '#00d4ff'],
-  rally:              ['#f08c00', '#ffc93c'],
-  'esports-fps':      ['#e23b3b', '#ff8a3b'],
-  'esports-moba':     ['#7C3AED', '#b06bff'],
-  'esports-fighting': ['#d6336c', '#ff6b9d'],
-  'esports-strategy': ['#1a6e4f', '#51cf66'],
-  'esports-sports':   ['#2563eb', '#60a5fa'],
-  motorsport:         ['#f08c00', '#ffc93c'],
-  motorbike:          ['#dc4f00', '#ff8a3b'],
-  cycling:            ['#1971c2', '#4dabf7'],
-  running:            ['#1f8a5b', '#51cf66'],
-  swimming:           ['#0284c7', '#38bdf8'],
-  triathlon:          ['#7C3AED', '#c084fc'],
-  hiking:             ['#4d7c0f', '#a3e635'],
-  crossfit:           ['#9a3412', '#fb923c'],
-  rowing:             ['#1d4ed8', '#93c5fd'],
-  archery:            ['#92400e', '#fbbf24'],
-  chess:              ['#495057', '#868e96'],
-  'drone-racing':     ['#0e7490', '#22d3ee'],
-}
 
 const ROLE_ICON = {
   captain: 'crown',
@@ -38,22 +17,11 @@ const ROLE_ICON = {
   reserve: 'user-clock',
 }
 
-function catGrad(cat) {
-  const g = CAT_GRAD[cat]
-  return g ? `linear-gradient(135deg, ${g[0]}, ${g[1]})` : 'linear-gradient(135deg, #0098D8, #00d4ff)'
-}
-
-function initials(name) {
-  return (name || '?').split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
-
-function fmtNum(n) {
-  if (!n) return '0'
-  return n >= 1000 ? (n / 1000).toFixed(1).replace('.0', '') + 'k' : String(n)
-}
-
-function imgUrl(path) {
-  return path ? SystemVars.baseUrl + 'storage/' + path : ''
+const ROLE_COLOR = {
+  captain: '#FBBF11',
+  vice: 'var(--ehub-primary)',
+  player: '#7C3AED',
+  reserve: 'var(--ehub-muted)',
 }
 
 const allTeams = ref([])
@@ -63,11 +31,46 @@ const showModal = ref(false)
 const joinCodeVisible = ref(false)
 const joinCode = ref('')
 
+const pendingInvites = ref([])
+const inviteAction = ref(null)
+
 async function load() {
   loading.value = true
-  const result = await Teams.myTeams()
+  const [teamsResult, invitesResult] = await Promise.all([
+    Teams.myTeams(),
+    Teams.myInvites(),
+  ])
   loading.value = false
-  if (result.code === 200) allTeams.value = result.data ?? []
+  if (teamsResult.code === 200) allTeams.value = teamsResult.data ?? []
+  if (invitesResult.code === 200) pendingInvites.value = invitesResult.data ?? []
+}
+
+async function acceptInvite(invite) {
+  inviteAction.value = invite.token + '_accept'
+  const result = await Teams.acceptTeamInvite(invite.token)
+  inviteAction.value = null
+  if (result.code === 200 || result.code === 201) {
+    pendingInvites.value = pendingInvites.value.filter(i => i.token !== invite.token)
+    toast.success(t('pages.teams.mine.invites.accepted', { team: invite.team?.name }))
+    const r = await Teams.myTeams()
+    if (r.code === 200) allTeams.value = r.data ?? []
+  } else if (result.code === 403) {
+    toast.error(t('pages.teams.mine.invites.error_authority'))
+  } else {
+    toast.error(t('pages.teams.mine.invites.error'))
+  }
+}
+
+async function rejectInvite(invite) {
+  inviteAction.value = invite.token + '_reject'
+  const result = await Teams.rejectInvite(invite.token)
+  inviteAction.value = null
+  if (result.code === 200) {
+    pendingInvites.value = pendingInvites.value.filter(i => i.token !== invite.token)
+    toast.success(t('pages.teams.mine.invites.rejected'))
+  } else {
+    toast.error(t('pages.teams.mine.invites.error'))
+  }
 }
 
 load()
@@ -83,10 +86,10 @@ const summary = computed(() => ({
   totalEvents: allTeams.value.reduce((s, t) => s + (t.events_count || 0), 0),
 }))
 
-const ROLES = ['all', 'captain', 'vice', 'player', 'reserve']
+const ROLES = ['all', 'captain', 'vice', 'starter', 'reserve']
 
 function goToTeam(team) {
-  if (team.route) router.push('/teams/' + team.route)
+  if (team.route) router.push('/team/' + team.route)
 }
 </script>
 
@@ -132,36 +135,73 @@ function goToTeam(team) {
             </div>
           </div>
         </div>
-        <button class="btn btn-primary round px-4" style="flex-shrink:0" @click="showModal = true">
-          <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />
-          {{ $t('pages.teams.mine.hero.new') }}
-        </button>
+
       </div>
     </div>
   </header>
 
   <!-- CONTROL BAR -->
-  <div class="control-bar">
-    <div class="container-fluid px-4">
-      <div class="control-inner">
-        <span class="fb-label">{{ $t('pages.teams.mine.bar.role') }}</span>
-        <div class="seg seg-sm">
+  <EhubFilterBar>
+    <template #filters>
+      <button
+        v-for="role in ROLES"
+        :key="role"
+        class="fchip"
+        :class="{ active: roleFilter === role }"
+        @click="roleFilter = role"
+      >
+        {{ $t('pages.teams.mine.bar.' + role) }}
+      </button>
+    </template>
+  </EhubFilterBar>
+
+  <!-- PENDING INVITES -->
+  <section v-if="pendingInvites.length" class="container-fluid px-4 pt-4">
+    <h3 class="invites-title">
+      <font-awesome-icon :icon="['fas', 'envelope-open-text']" />
+      {{ $t('pages.teams.mine.invites.title') }}
+      <span class="invites-badge">{{ pendingInvites.length }}</span>
+    </h3>
+    <div class="invites-list">
+      <div v-for="inv in pendingInvites" :key="inv.token" class="invite-card">
+        <div class="invite-logo" :style="inv.team?.color ? { background: inv.team.color, color: '#fff' } : {}">
+          <img v-if="inv.team?.logo_image" :src="inv.team.logo_image" :alt="inv.team?.name" />
+          <span v-else-if="inv.team?.name" class="invite-logo-initials">
+            {{ inv.team.name.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase() }}
+          </span>
+          <font-awesome-icon v-else :icon="['fas', 'shield-halved']" />
+        </div>
+        <div class="invite-info">
+          <span class="invite-team">{{ inv.team?.name ?? '—' }}</span>
+          <span class="invite-meta">
+            {{ $t('pages.teams.mine.invites.by', { name: inv.invited_by_name }) }} ·
+            {{ $t('pages.teams.mine.invites.role') }}:
+            <strong>{{ $t('pages.teams.mine.roles.' + inv.role) }}</strong>
+          </span>
+        </div>
+        <div class="invite-actions">
           <button
-            v-for="role in ROLES"
-            :key="role"
-            :class="{ active: roleFilter === role }"
-            @click="roleFilter = role"
+            class="inv-btn accept"
+            :disabled="!!inviteAction"
+            @click="acceptInvite(inv)"
           >
-            {{ $t('pages.teams.mine.bar.' + role) }}
+            <font-awesome-icon v-if="inviteAction === inv.token + '_accept'" :icon="['fas', 'spinner']" spin />
+            <font-awesome-icon v-else :icon="['fas', 'check']" />
+            {{ $t('pages.teams.mine.invites.accept') }}
+          </button>
+          <button
+            class="inv-btn reject"
+            :disabled="!!inviteAction"
+            @click="rejectInvite(inv)"
+          >
+            <font-awesome-icon v-if="inviteAction === inv.token + '_reject'" :icon="['fas', 'spinner']" spin />
+            <font-awesome-icon v-else :icon="['fas', 'xmark']" />
+            {{ $t('pages.teams.mine.invites.reject') }}
           </button>
         </div>
-        <div style="flex:1"></div>
-        <span v-if="!loading" style="font-size:.82rem;color:var(--ehub-muted);white-space:nowrap;">
-          {{ $t('pages.teams.mine.results').replace('{n}', filtered.length) }}
-        </span>
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- CONTENT -->
   <main class="container-fluid px-4 py-4">
@@ -170,82 +210,21 @@ function goToTeam(team) {
     </div>
 
     <template v-else>
-      <!-- Filter empty notice (only when there are teams but filter hides all) -->
-      <div v-if="!filtered.length && allTeams.length" class="empty-state">
-        <div class="ico"><font-awesome-icon :icon="['fas', 'shield-halved']" /></div>
-        <p class="mb-0">{{ $t('pages.teams.mine.empty') }}</p>
-      </div>
-
-      <!-- Grid — always rendered (even when allTeams is empty, shows only the new card) -->
       <div class="myteams-grid">
-        <!-- Team cards -->
-        <div
+        <EhubViewCard
           v-for="team in filtered"
           :key="team.id"
-          class="mteam-card"
-          :data-role="team.role"
+          :team="team"
+          :accent-color="ROLE_COLOR[team.role] ?? null"
           @click="goToTeam(team)"
         >
-          <!-- Banner -->
-          <div class="mteam-banner" :style="{ background: catGrad(team.category) }">
-            <font-awesome-icon :icon="['fas', 'shield-halved']" class="banner-shield" />
-            <span v-if="team.is_verified" class="banner-verified">
-              <font-awesome-icon :icon="['fas', 'circle-check']" />
-            </span>
-          </div>
-
-          <!-- Head -->
-          <div class="mteam-head">
-            <div class="mteam-logo" :style="{ background: catGrad(team.category) }">
-              <img v-if="team.logo_image" :src="imgUrl(team.logo_image)" :alt="team.name" style="width:100%;height:100%;object-fit:cover;border-radius:11px;" />
-              <template v-else>{{ initials(team.name) }}</template>
-            </div>
+          <template #badges>
             <span class="role-badge" :class="team.role">
               <font-awesome-icon :icon="['fas', ROLE_ICON[team.role] || 'shield-halved']" />
               {{ $t('pages.teams.mine.roles.' + team.role) }}
             </span>
-          </div>
-
-          <!-- Body -->
-          <div class="mteam-body">
-            <div class="mteam-name">
-              {{ team.name }}
-              <font-awesome-icon v-if="team.is_verified" :icon="['fas', 'circle-check']" class="ver" />
-            </div>
-            <div class="mteam-chips">
-              <span v-if="team.category" class="cat-chip sub" style="font-size:.7rem;">
-                {{ $t('categories.names.' + team.category) }}
-              </span>
-              <span v-if="team.org_name" class="cat-chip" style="font-size:.7rem;display:inline-flex;align-items:center;gap:4px;">
-                <font-awesome-icon :icon="['fas', 'building-flag']" style="opacity:.65;font-size:.65rem" />
-                {{ team.org_name }}
-              </span>
-            </div>
-            <p class="mteam-desc">{{ team.description || '—' }}</p>
-
-            <div class="mteam-stats">
-              <div class="mteam-stat">
-                <div class="sv">{{ fmtNum(team.players_count) }}</div>
-                <div class="sl">{{ $t('pages.teams.mine.card.players') }}</div>
-              </div>
-              <div class="mteam-stat highlight">
-                <div class="sv">{{ fmtNum(team.wins_count) }}</div>
-                <div class="sl">{{ $t('pages.teams.mine.card.wins') }}</div>
-              </div>
-              <div class="mteam-stat">
-                <div class="sv">{{ fmtNum(team.events_count) }}</div>
-                <div class="sl">{{ $t('pages.teams.mine.card.events') }}</div>
-              </div>
-            </div>
-
-            <div v-if="team.is_open && (team.role === 'captain' || team.role === 'vice')" class="open-alert">
-              <font-awesome-icon :icon="['fas', 'door-open']" />
-              <span>{{ $t('pages.teams.mine.card.open') }}</span>
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="mteam-actions" @click.stop>
+          </template>
+          <template #actions>
             <template v-if="team.role === 'captain' || team.role === 'vice'">
               <button class="btn-maction primary-action" @click="$router.push(`/team/${team.route}/manage`)">
                 <font-awesome-icon :icon="['fas', 'sliders']" />
@@ -270,8 +249,8 @@ function goToTeam(team) {
                 {{ $t('pages.teams.mine.card.results') }}
               </button>
             </template>
-          </div>
-        </div>
+          </template>
+        </EhubViewCard>
 
         <!-- New team card — always in grid -->
         <div class="new-team-card" @click="showModal = true">
@@ -285,9 +264,6 @@ function goToTeam(team) {
     </template>
   </main>
 
-  <footer class="home-footer">
-    {{ $t('pages.homepage.entrance.footer') }}
-  </footer>
 
   <!-- NEW TEAM MODAL -->
   <Transition name="fade">
@@ -387,22 +363,8 @@ function goToTeam(team) {
 .sp-lbl { font-size: .76rem; color: var(--ehub-muted); font-weight: 500; }
 .sp-text { display: flex; flex-direction: column; }
 
-/* ── Control bar ── */
-.control-bar {
-  position: sticky; top: 60px; z-index: 30;
-  background: color-mix(in srgb, var(--ehub-page) 90%, transparent);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--ehub-line);
-  padding: 10px 0;
-}
-.control-inner { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.fb-label {
-  font-size: .72rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .05em; color: var(--ehub-muted); margin-right: 2px;
-}
-
-/* ── Skeleton card ── */
-.mteam-card-skel { height: 200px; border-radius: 16px; }
+/* ── Skeleton ── */
+.mteam-card-skel { height: 360px; border-radius: 16px; }
 
 /* ── Grid ── */
 .myteams-grid {
@@ -411,96 +373,21 @@ function goToTeam(team) {
   gap: 20px;
 }
 
-/* ── Team card ── */
-.mteam-card {
-  background: var(--ehub-card); border: 1px solid var(--ehub-line);
-  border-radius: 16px; overflow: hidden;
-  display: flex; flex-direction: column;
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-  cursor: pointer;
-}
-.mteam-card:hover { transform: translateY(-3px); box-shadow: var(--ehub-shadow); border-color: color-mix(in srgb, var(--ehub-primary) 35%, var(--ehub-line)); }
-.mteam-card[data-role="captain"] { border-top: 3px solid #FBBF11; }
-.mteam-card[data-role="vice"]    { border-top: 3px solid var(--ehub-primary); }
-.mteam-card[data-role="player"]  { border-top: 3px solid #7C3AED; }
-.mteam-card[data-role="reserve"] { border-top: 3px solid var(--ehub-muted); }
-
-.mteam-banner {
-  height: 62px; position: relative; overflow: hidden;
-}
-.mteam-banner::after {
-  content: ''; position: absolute; inset: 0;
-  background-image: repeating-linear-gradient(118deg, transparent 0 28px, rgba(255,255,255,.07) 28px 30px);
-}
-.banner-shield {
-  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
-  font-size: 1.8rem; color: rgba(255,255,255,.18); z-index: 1;
-}
-.banner-verified {
-  position: absolute; top: 10px; right: 12px;
-  color: #fff; font-size: .88rem;
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,.4)); z-index: 2;
-}
-
-.mteam-head {
-  display: flex; align-items: flex-end; justify-content: space-between;
-  padding: 0 16px; margin-top: -22px; position: relative; z-index: 1;
-}
-.mteam-logo {
-  width: 56px; height: 56px; border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.3rem; font-weight: 800; color: #fff; letter-spacing: .02em;
-  text-shadow: 0 1px 4px rgba(0,0,0,.35);
-  border: 3px solid var(--ehub-card);
-  box-shadow: 0 4px 12px rgba(0,0,0,.22), inset 0 0 0 1px rgba(255,255,255,.18);
-  flex-shrink: 0; overflow: hidden;
-}
-
+/* ── Role badge (slot content inside vc-badges) ── */
 .role-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: .72rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
-  padding: 5px 11px; border-radius: 50rem; border: 1px solid;
-  margin-bottom: 4px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  font-size: .62rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  padding: 4px 9px; border-radius: 6px;
+  backdrop-filter: blur(8px); color: #fff;
+  white-space: nowrap; width: 100%;
 }
-.role-badge.captain { background: color-mix(in srgb, #FBBF11 14%, transparent); border-color: color-mix(in srgb, #FBBF11 30%, transparent); color: color-mix(in srgb, #FBBF11, #7a5400 30%); }
-.role-badge.vice    { background: var(--ehub-primary-tint); border-color: var(--ehub-primary-border); color: var(--ehub-primary); }
-.role-badge.player  { background: color-mix(in srgb, #7C3AED 12%, transparent); border-color: color-mix(in srgb, #7C3AED 24%, transparent); color: #7C3AED; }
-.role-badge.reserve { background: var(--ehub-field-bg); border-color: var(--ehub-line); color: var(--ehub-muted); }
+.role-badge.captain { background: color-mix(in srgb, #FBBF11 85%, rgba(0,0,0,.5)); color: #3a2700; }
+.role-badge.vice    { background: color-mix(in srgb, var(--ehub-primary) 85%, rgba(0,0,0,.5)); }
+.role-badge.player  { background: color-mix(in srgb, #7C3AED 85%, rgba(0,0,0,.5)); }
+.role-badge.reserve { background: rgba(0,0,0,.42); color: rgba(255,255,255,.8); }
 
-.mteam-body { padding: 10px 16px 0; flex: 1; display: flex; flex-direction: column; }
-.mteam-name {
-  font-size: 1rem; font-weight: 700; color: var(--ehub-ink); margin: 0 0 3px;
-  display: flex; align-items: center; gap: 6px;
-}
-.mteam-name .ver { color: var(--ehub-primary); font-size: .8rem; }
-.mteam-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-.mteam-desc {
-  color: var(--ehub-muted); font-size: .83rem; line-height: 1.45;
-  margin: 0 0 14px;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
-
-.mteam-stats {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  border: 1px solid var(--ehub-line); border-radius: 10px; overflow: hidden; margin-bottom: 14px;
-}
-.mteam-stat { padding: 10px 10px 9px; text-align: center; }
-.mteam-stat + .mteam-stat { border-left: 1px solid var(--ehub-line); }
-.mteam-stat .sv { font-size: 1rem; font-weight: 700; color: var(--ehub-ink); line-height: 1; }
-.mteam-stat .sl { font-size: .67rem; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 3px; }
-.mteam-stat.highlight .sv { color: #FBBF11; }
-
-.open-alert {
-  display: flex; align-items: center; gap: 8px;
-  background: color-mix(in srgb, #1f8a5b 8%, transparent);
-  border: 1px solid color-mix(in srgb, #1f8a5b 22%, transparent);
-  border-radius: 8px; padding: 8px 12px; margin-bottom: 14px;
-  font-size: .8rem; color: #1f8a5b; font-weight: 500;
-}
-
-.mteam-actions { padding: 0 16px 16px; display: flex; gap: 7px; flex-wrap: wrap; }
+/* ── Action buttons (slot content inside vc-foot) ── */
 .btn-maction {
-  flex: 1; min-width: 0;
   border: 1px solid var(--ehub-line); background: var(--ehub-field-bg);
   color: var(--ehub-ink); font-size: .8rem; font-weight: 600;
   padding: 8px 10px; border-radius: 9px; cursor: pointer;
@@ -520,6 +407,7 @@ function goToTeam(team) {
   text-align: center; min-height: 240px;
 }
 .new-team-card:hover { border-color: var(--ehub-primary); color: var(--ehub-primary); background: var(--ehub-primary-tint2); }
+.new-team-card:only-child { grid-column: 1 / -1; }
 .new-ico {
   width: 52px; height: 52px; border-radius: 50%; border: 2px dashed currentColor;
   display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
@@ -530,12 +418,6 @@ function goToTeam(team) {
 /* ── Empty state ── */
 .empty-state { text-align: center; padding: 60px 20px; color: var(--ehub-muted); }
 .empty-state .ico { font-size: 2.4rem; opacity: .4; margin-bottom: 12px; }
-
-/* ── Footer ── */
-.home-footer {
-  border-top: 1px solid var(--ehub-line); padding: 28px 20px;
-  text-align: center; color: var(--ehub-muted); font-size: .82rem; margin-top: 40px;
-}
 
 /* ── Modal ── */
 .modal-backdrop {
@@ -548,6 +430,55 @@ function goToTeam(team) {
   background: var(--ehub-primary-tint);
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 16px;
+}
+
+/* ── Pending invites ── */
+.invites-title {
+  font-size: .85rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--ehub-muted); display: flex; align-items: center; gap: 8px; margin: 0 0 12px;
+}
+.invites-badge {
+  background: var(--ehub-primary); color: #fff;
+  font-size: .7rem; font-weight: 700; border-radius: 20px; padding: 2px 7px;
+}
+.invites-list { display: flex; flex-direction: column; gap: 10px; }
+.invite-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--ehub-card); border: 1px solid var(--ehub-line);
+  border-radius: 14px; padding: 14px 16px;
+  border-left: 3px solid var(--ehub-primary);
+}
+.invite-logo {
+  width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+  background: var(--ehub-primary-tint); border: 1px solid var(--ehub-line);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ehub-primary); font-size: 1.1rem; overflow: hidden;
+}
+.invite-logo img { width: 100%; height: 100%; object-fit: cover; }
+.invite-logo-initials { font-size: .85rem; font-weight: 700; color: #fff; line-height: 1; }
+.invite-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.invite-team { font-size: .95rem; font-weight: 700; color: var(--ehub-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.invite-meta { font-size: .78rem; color: var(--ehub-muted); }
+.invite-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.inv-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 9px; font-size: .82rem; font-weight: 600;
+  border: 1px solid; cursor: pointer; transition: all .15s;
+}
+.inv-btn:disabled { opacity: .5; cursor: not-allowed; }
+.inv-btn.accept {
+  background: var(--ehub-primary); border-color: var(--ehub-primary); color: #fff;
+}
+.inv-btn.accept:hover:not(:disabled) { opacity: .88; }
+.inv-btn.reject {
+  background: transparent; border-color: var(--ehub-line); color: var(--ehub-muted);
+}
+.inv-btn.reject:hover:not(:disabled) { border-color: #e05454; color: #e05454; background: rgba(224,84,84,.06); }
+
+@media (max-width: 540px) {
+  .invite-card { flex-wrap: wrap; }
+  .invite-actions { width: 100%; }
+  .inv-btn { flex: 1; justify-content: center; }
 }
 
 /* ── Transitions ── */

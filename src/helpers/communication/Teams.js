@@ -30,10 +30,6 @@ const Teams = {
         const result = await Api.getAsync(`/team/route/${route}`);
         return { code: result.code, data: result.response?.message };
     },
-    async getMembersView(route) {
-        const result = await Api.getAsync(`/team/${route}/members-view`);
-        return { code: result.code, data: result.response?.message };
-    },
     async updateSettings(id, data) {
         const result = await Api.patchAsync(`/team/${id}`, data);
         return { code: result.code, data: result.response?.team, message: result.response?.message };
@@ -90,9 +86,15 @@ const Teams = {
         const result = await Api.postAsync(`/team/${teamId}/applications/${appId}/reject`);
         return { code: result.code };
     },
-    async getActivities(teamId) {
-        const result = await Api.getAsync(`/team/${teamId}/activities`);
-        return { code: result.code, data: result.response?.message ?? [] };
+    async getActivities(teamId, page = 1, perPage = 20) {
+        const result = await Api.getAsync(`/team/${teamId}/activities?page=${page}&per_page=${perPage}`);
+        return {
+            code: result.code,
+            data: result.response?.message ?? [],
+            total: result.response?.total ?? 0,
+            page: result.response?.page ?? 1,
+            perPage: result.response?.per_page ?? perPage,
+        };
     },
     async getRoles() {
         const result = await Api.getAsync('/team-roles');
@@ -105,6 +107,14 @@ const Teams = {
     async acceptTeamInvite(token) {
         const result = await Api.postAsync(`/team/invite/accept/${token}`);
         return { code: result.code, message: result.response?.message };
+    },
+    async rejectInvite(token) {
+        const result = await Api.postAsync(`/team/invite/${token}/reject`);
+        return { code: result.code, message: result.response?.message };
+    },
+    async myInvites() {
+        const result = await Api.getAsync('/team-invites');
+        return { code: result.code, data: result.response?.message ?? [] };
     },
 };
 

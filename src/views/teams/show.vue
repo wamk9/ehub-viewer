@@ -113,14 +113,14 @@
           <font-awesome-icon icon="circle-info" />
           {{ $t('pages.teams.show.tabs.about') }}
         </button>
+        <button class="ts-tab" :class="{ active: activeTab === 'results' }" @click="setTab('results')">
+          <font-awesome-icon icon="trophy" />
+          {{ $t('pages.teams.show.tabs.results') }}
+        </button>
         <button class="ts-tab" :class="{ active: activeTab === 'roster' }" @click="setTab('roster')">
           <font-awesome-icon icon="users" />
           {{ $t('pages.teams.show.tabs.roster') }}
           <span class="ts-pill">{{ team.members?.length || 0 }}</span>
-        </button>
-        <button class="ts-tab" :class="{ active: activeTab === 'results' }" @click="setTab('results')">
-          <font-awesome-icon icon="trophy" />
-          {{ $t('pages.teams.show.tabs.results') }}
         </button>
       </div>
 

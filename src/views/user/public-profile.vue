@@ -462,7 +462,7 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
             <router-link
               v-for="team in profile.teams"
               :key="team.route"
-              :to="`/teams/${team.route}`"
+              :to="`/team/${team.route}`"
               class="pt-item"
             >
               <div class="pt-logo" :style="{ background: teamGrad(team) }">

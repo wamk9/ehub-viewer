@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import Teams from '@/helpers/communication/Teams.js'
 import EhubViewCard from '@/components/EhubViewCard.vue'
+import EhubFilterBar from '@/components/EhubFilterBar.vue'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -103,57 +104,40 @@ async function toggleFollow(team) {
   </header>
 
   <!-- FILTER BAR -->
-  <div class="orgs-filter-bar">
-    <div class="container-fluid px-4">
-      <div class="filter-inner">
-
-        <!-- Row 1: selects + count -->
-        <div class="filter-row">
-          <div class="filter-group">
-            <span class="fb-label">{{ $t('pages.teams.index.filters.category') }}</span>
-            <select v-model="category" class="form-select form-select-sm fi-sel">
-              <option value="">{{ $t('pages.teams.index.filters.category_all') }}</option>
-              <option v-for="cat in ALL_CATEGORIES" :key="cat" :value="cat">
-                {{ $t(`categories.names.${cat}`) }}
-              </option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <span class="fb-label">{{ $t('pages.teams.index.filters.sort') }}</span>
-            <select v-model="sort" class="form-select form-select-sm fi-sel">
-              <option value="wins_count">{{ $t('pages.teams.index.sort.wins') }}</option>
-              <option value="events_count">{{ $t('pages.teams.index.sort.events') }}</option>
-              <option value="players_count">{{ $t('pages.teams.index.sort.players') }}</option>
-              <option value="name">{{ $t('pages.teams.index.sort.name') }}</option>
-            </select>
-          </div>
-          <span class="orgs-results-count ms-auto">
-            {{ $t('pages.teams.index.results').replace('{n}', filtered.length) }}
-          </span>
-        </div>
-
-        <!-- Row 2: show filter -->
-        <div class="filter-row">
-          <span class="fb-label">{{ $t('pages.teams.index.filters.show') }}</span>
-          <div class="seg seg-sm filter-seg">
-            <button :class="{ active: showMode === 'all' }" @click="showMode = 'all'">
-              {{ $t('pages.teams.index.filters.all') }}
-            </button>
-            <button v-if="isLogged" :class="{ active: showMode === 'following' }" @click="showMode = 'following'">
-              {{ $t('pages.teams.index.filters.following') }}
-            </button>
-            <button :class="{ active: showMode === 'open' }" @click="showMode = 'open'">
-              {{ $t('pages.teams.index.filters.open') }}
-            </button>
-            <button :class="{ active: showMode === 'verified' }" @click="showMode = 'verified'">
-              {{ $t('pages.teams.index.filters.verified') }}
-            </button>
-          </div>
-        </div>
-
+  <EhubFilterBar>
+    <template #filters>
+      <button class="fchip" :class="{ active: showMode === 'all' }" @click="showMode = 'all'">
+        {{ $t('pages.teams.index.filters.all') }}
+      </button>
+      <button v-if="isLogged" class="fchip" :class="{ active: showMode === 'following' }" @click="showMode = 'following'">
+        {{ $t('pages.teams.index.filters.following') }}
+      </button>
+      <button class="fchip" :class="{ active: showMode === 'open' }" @click="showMode = 'open'">
+        {{ $t('pages.teams.index.filters.open') }}
+      </button>
+      <button class="fchip" :class="{ active: showMode === 'verified' }" @click="showMode = 'verified'">
+        {{ $t('pages.teams.index.filters.verified') }}
+      </button>
+      <span class="fchip-sep"></span>
+      <div class="fchip-sel">
+        <select v-model="category" class="fchip-select">
+          <option value="">{{ $t('pages.teams.index.filters.category_all') }}</option>
+          <option v-for="cat in ALL_CATEGORIES" :key="cat" :value="cat">
+            {{ $t(`categories.names.${cat}`) }}
+          </option>
+        </select>
       </div>
-    </div>
-  </div>
+      <span class="fchip-sep"></span>
+      <div class="fchip-sel">
+        <select v-model="sort" class="fchip-select">
+          <option value="wins_count">{{ $t('pages.teams.index.sort.wins') }}</option>
+          <option value="events_count">{{ $t('pages.teams.index.sort.events') }}</option>
+          <option value="players_count">{{ $t('pages.teams.index.sort.players') }}</option>
+          <option value="name">{{ $t('pages.teams.index.sort.name') }}</option>
+        </select>
+      </div>
+    </template>
+  </EhubFilterBar>
 
   <!-- CONTENT -->
   <main class="container-fluid px-4 py-4">
@@ -174,15 +158,12 @@ async function toggleFollow(team) {
         :key="team.id"
         :team="team"
         :follow-loading="!!followLoading[team.id]"
-        @click="team.route && $router.push('/teams/' + team.route)"
+        @click="team.route && $router.push('/team/' + team.route)"
         @follow="toggleFollow"
       />
     </div>
   </main>
 
-  <footer class="home-footer" style="border-top:1px solid var(--ehub-line); padding:28px 20px; text-align:center; color:var(--ehub-muted); font-size:.82rem; margin-top:40px;">
-    {{ $t('pages.homepage.entrance.footer') }}
-  </footer>
 </template>
 
 <style scoped>
@@ -197,40 +178,5 @@ async function toggleFollow(team) {
   margin-bottom: 12px;
 }
 
-/* Filter bar restructured for responsive */
-.filter-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 2px 0;
-}
-.filter-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.filter-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.fi-sel {
-  background: var(--ehub-field-bg);
-  border-color: var(--ehub-line);
-  color: var(--ehub-ink);
-  width: auto;
-  min-width: 140px;
-  max-width: 200px;
-}
-.filter-seg {
-  flex-wrap: wrap;
-}
 
-@media (max-width: 480px) {
-  .fi-sel { min-width: 0; flex: 1; }
-  .filter-group { flex: 1; }
-  .filter-seg { gap: 4px; }
-  .filter-seg button { font-size: .72rem; padding: 3px 9px; }
-}
 </style>
