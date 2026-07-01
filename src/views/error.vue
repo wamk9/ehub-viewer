@@ -29,7 +29,7 @@ const errKey = computed(() => {
     <p class="error-sub">{{ $t(`${errKey}.sub`) }}</p>
 
     <div class="error-actions">
-      <router-link to="/" class="btn btn-primary round px-4">
+      <router-link :to="{ name: 'events' }" class="btn btn-primary round px-4">
         <font-awesome-icon :icon="['fas', 'house']" class="me-2" />
         {{ $t('pages.error.home') }}
       </router-link>
@@ -43,7 +43,7 @@ const errKey = computed(() => {
 
     <p class="quick-label">{{ $t('pages.error.quicknav') }}</p>
     <nav class="quick-nav" aria-label="Atalhos">
-      <router-link to="/" class="quick-chip">
+      <router-link :to="{ name: 'events' }" class="quick-chip">
         <font-awesome-icon :icon="['fas', 'calendar-days']" />
         {{ $t('pages.error.chip.events') }}
       </router-link>

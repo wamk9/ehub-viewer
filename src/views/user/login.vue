@@ -47,7 +47,7 @@ async function submit() {
         router.push(route.query.redirect)
       } else {
         const last = localStorage.getItem('lastKnowRoute')
-        router.push(last ? JSON.parse(last) : { name: 'home' })
+        router.push(last ? JSON.parse(last) : { name: 'events' })
       }
     } else {
       toast.error(result.response?.message ?? t('users.login.error'))

@@ -134,6 +134,10 @@ import {
   faArrowDown,
   faRotate,
   faArrowDown19,
+  faDiagramProject,
+  faBullhorn,
+  faLanguage,
+  faSwatchbook,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -287,6 +291,10 @@ library.add(
   faArrowDown,
   faRotate,
   faArrowDown19,
+  faDiagramProject,
+  faBullhorn,
+  faLanguage,
+  faSwatchbook,
 );
 
 export default FontAwesomeIcon;

@@ -89,6 +89,7 @@ export default {
       repNewName: '',
       repNewType: 'registrations',
       repNewPeriod: '30d',
+      mobileMenuOpen: false,
     };
   },
 
@@ -139,6 +140,21 @@ export default {
         { key: 'members', icon: 'users', bg: 'color-mix(in srgb, var(--ehub-gold) 18%, transparent)', color: 'color-mix(in srgb, var(--ehub-gold), #000 28%)' },
         { key: 'events', icon: 'calendar-days', bg: 'color-mix(in srgb, #7C3AED 14%, transparent)', color: '#7C3AED' },
       ];
+    },
+    activeNavLabel() {
+      const map = {
+        overview: this.$t('pages.organization.manage.nav.overview'),
+        events: this.$t('pages.organization.manage.nav.events'),
+        members: this.$t('pages.organization.manage.nav.members'),
+        financeiro: this.$t('pages.organization.manage.nav.financeiro'),
+        reports: this.$t('pages.organization.manage.nav.reports'),
+        settings: this.$t('pages.organization.manage.nav.settings'),
+      };
+      return map[this.activePanel] || this.activePanel;
+    },
+    activeNavIcon() {
+      const map = { overview: 'chart-line', events: 'calendar-days', members: 'users', financeiro: 'file-invoice-dollar', reports: 'chart-bar', settings: 'gear' };
+      return map[this.activePanel] || 'bars';
     },
   },
 
@@ -260,6 +276,7 @@ export default {
 
     async switchPanel(panel) {
       this.activePanel = panel;
+      this.mobileMenuOpen = false;
       const routeMap = {
         overview: 'manage-organization',
         events: 'manage-organization-events',
@@ -543,7 +560,13 @@ export default {
         </template>
       </div>
 
-      <nav class="sb-nav">
+      <button class="mob-menu-toggle" @click="mobileMenuOpen = !mobileMenuOpen">
+        <font-awesome-icon :icon="['fas', activeNavIcon]" style="width:15px;flex-shrink:0" />
+        <span>{{ activeNavLabel }}</span>
+        <font-awesome-icon :icon="['fas', 'chevron-down']" class="mob-chevron" :class="{ 'mob-chevron-open': mobileMenuOpen }" />
+      </button>
+
+      <nav class="sb-nav" :class="{ 'mob-open': mobileMenuOpen }">
         <button class="nav-item" :class="{ active: activePanel === 'overview' }" @click="switchPanel('overview')">
           <font-awesome-icon :icon="['fas', 'chart-line']" />
           <span>{{ $t('pages.organization.manage.nav.overview') }}</span>
@@ -570,16 +593,17 @@ export default {
           <span>{{ $t('pages.organization.manage.nav.settings') }}</span>
         </button>
         <div class="nav-div"></div>
-        <router-link :to="`/org/${orgRoute}`" class="nav-item">
+        <router-link :to="`/org/${orgRoute}`" class="nav-item sb-util">
           <font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" />
           <span>{{ $t('pages.organization.manage.nav.public') }}</span>
         </router-link>
-        <router-link to="/my-orgs" class="nav-item">
+        <router-link to="/my-orgs" class="nav-item sb-util">
           <font-awesome-icon :icon="['fas', 'arrow-left']" />
           <span>{{ $t('pages.organization.manage.nav.back') }}</span>
         </router-link>
       </nav>
     </aside>
+    <div v-if="mobileMenuOpen" class="mob-nav-backdrop" @click="mobileMenuOpen = false"></div>
 
     <!-- ── MAIN ── -->
     <main class="mgmt-main">
@@ -1303,6 +1327,8 @@ export default {
 }
 .sb-org { padding: 15px 14px; border-bottom: 1px solid var(--ehub-line); display: flex; align-items: center; gap: 10px; }
 .sb-skel { background: var(--ehub-field-bg); animation: skel-pulse 1.4s ease-in-out infinite; }
+.mob-menu-toggle { display: none; }
+.mob-nav-backdrop { display: none; }
 @keyframes skel-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 .sb-logo {
   width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
@@ -1477,11 +1503,51 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 }
 @media (max-width: 768px) {
   .mgmt-wrap { flex-direction: column; }
-  .mgmt-sidebar { width: 100%; height: auto; position: relative; top: 0; border-right: 0; border-bottom: 1px solid var(--ehub-line); flex-direction: row; overflow-x: auto; }
-  .sb-org { border-bottom: 0; border-right: 1px solid var(--ehub-line); flex-shrink: 0; }
-  .sb-nav { display: flex; flex-direction: row; padding: 8px; gap: 3px; overflow-x: auto; }
-  .nav-item { white-space: nowrap; flex-shrink: 0; margin-bottom: 0; }
-  .nav-div { display: none; }
+  .mgmt-sidebar {
+    width: 100%; height: auto; overflow-y: visible; overflow-x: visible;
+    position: sticky; top: 60px; z-index: 20;
+    flex-direction: column;
+    border-right: 0; border-bottom: 1px solid var(--ehub-line);
+  }
+  .sb-org { border-right: 0; border-bottom: 1px solid var(--ehub-line); flex-shrink: 0; padding: 8px 14px; }
+  .sb-logo { width: 32px; height: 32px; border-radius: 8px; font-size: .72rem; }
+  .sb-name { font-size: .78rem; }
+  .sb-cat  { font-size: .65rem; }
+
+  .mob-menu-toggle {
+    display: flex; align-items: center; gap: 9px; width: 100%;
+    padding: 11px 14px; border: 0; background: transparent;
+    color: var(--ehub-ink); font-size: .875rem; font-weight: 600;
+    cursor: pointer; text-align: left;
+  }
+  .mob-menu-toggle:hover { background: var(--ehub-field-bg); }
+  .mob-chevron { margin-left: auto; font-size: .75rem; transition: transform .2s; }
+  .mob-chevron-open { transform: rotate(180deg); }
+
+  .sb-nav {
+    display: none;
+    position: absolute; left: 0; right: 0; top: 100%;
+    flex-direction: column; padding: 6px; gap: 2px;
+    background: var(--ehub-card);
+    border-bottom: 1px solid var(--ehub-line);
+    box-shadow: 0 8px 24px rgba(0,0,0,.15);
+    z-index: 21;
+  }
+  .sb-nav.mob-open { display: flex; }
+  .mob-nav-backdrop { display: block; position: fixed; inset: 0; z-index: 19; }
+
+  .nav-item {
+    flex: unset; flex-direction: row; justify-content: flex-start; align-items: center;
+    padding: 10px 12px; border-radius: 9px; gap: 9px;
+    font-size: .875rem; white-space: nowrap; text-align: left;
+    margin-bottom: 0; border-bottom: 0; width: 100%;
+  }
+  .nav-item svg { font-size: .875rem; width: 15px; }
+  .nav-item:hover { background: var(--ehub-field-bg); color: var(--ehub-ink); }
+  .nav-item.active { background: var(--ehub-primary-tint); color: var(--ehub-primary); border-bottom: 0; }
+  .nav-div { display: block; }
+  .sb-util { display: flex !important; }
+
   .mgmt-main { padding: 18px 14px; }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
 }

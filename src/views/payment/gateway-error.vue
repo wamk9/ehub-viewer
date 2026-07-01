@@ -11,7 +11,7 @@
             >
                 {{ $t('finances.gateway_error.back') }}
             </router-link>
-            <router-link v-else to="/" class="btn btn-outline-secondary btn-sm">
+            <router-link v-else :to="{ name: 'events' }" class="btn btn-outline-secondary btn-sm">
                 {{ $t('finances.gateway_error.home') }}
             </router-link>
         </div>

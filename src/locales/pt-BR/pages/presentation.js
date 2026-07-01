@@ -1,0 +1,57 @@
+export default {
+  hero: {
+    eyebrow: 'Gestão de e-sports e competições',
+    title_pre: 'Organizações, eventos e times',
+    title_accent: 'conectados em um só lugar',
+    subtitle: 'O eHub reúne toda a sua operação competitiva em uma única plataforma: crie sua organização, publique campeonatos, gerencie etapas e times, e acompanhe resultados — do primeiro convite ao pódio.',
+    cta_primary: 'Criar minha conta',
+    cta_secondary: 'Ver planos',
+  },
+  preview: {
+    tab_events: 'Eventos',
+    tab_orgs: 'Organizações',
+  },
+  how: {
+    title: 'Do convite ao pódio, em quatro etapas',
+    sub: 'Toda organização no eHub segue o mesmo fluxo simples — pronto para escalar de um campeonato local a uma liga com múltiplas temporadas.',
+    s1: { title: 'Organização', desc: 'Crie sua organização e convide sua equipe de gestão.' },
+    s2: { title: 'Evento', desc: 'Publique campeonatos com categorias, regras de inscrição e formas de pagamento.' },
+    s3: { title: 'Etapas', desc: 'Cadastre etapas, datas e formatos — pontos corridos, mata-mata ou contrarrelógio.' },
+    s4: { title: 'Resultados', desc: 'Classificações atualizadas automaticamente, com histórico público para todos os inscritos.' },
+  },
+  orgs: {
+    title: 'Feito para quem organiza',
+    sub: 'Das inscrições aos pagamentos, o eHub cuida da operação para você focar na competição.',
+    c1: { title: 'Inscrições e pagamentos', desc: 'Receba inscrições pagas ou gratuitas com processamento integrado, sem depender de planilhas.' },
+    c2: { title: 'Página pública verificada', desc: 'Sua organização ganha um perfil público com selo de verificação, seguidores e estatísticas de eventos.' },
+    c3: { title: 'Marca própria (white-label)', desc: 'Personalize cores e logo da sua organização — sua marca em primeiro plano, com o eHub por trás.' },
+  },
+  teams: {
+    title: 'Feito para quem compete',
+    sub: 'Um único perfil para descobrir, se inscrever e acompanhar resultados em qualquer organização do eHub.',
+    c1: { title: 'Descubra eventos', desc: 'Filtre campeonatos por modalidade, categoria e formato — online ou presencial — em segundos.' },
+    c2: { title: 'Inscrição rápida', desc: 'Inscreva-se em qualquer evento com poucos cliques e pagamento seguro, quando aplicável.' },
+    c3: { title: 'Resultados em tempo real', desc: 'Acompanhe classificações e etapas assim que os resultados são publicados pela organização.' },
+    c4: { title: 'Times conectados', desc: 'Monte seu time, defina capitão e membros, e leve o histórico da equipe para cada nova competição.' },
+  },
+  features: {
+    title: 'Tudo que a sua operação precisa',
+    sub: 'Recursos pensados para organizações de qualquer tamanho — de uma liga amadora a um circuito com múltiplas temporadas.',
+    f1: { title: 'Inscrições & pagamentos', desc: 'Cobranças integradas, eventos gratuitos ou pagos, sem integrações externas.' },
+    f2: { title: 'Etapas & formatos flexíveis', desc: 'Pontos corridos, mata-mata ou contrarrelógio — o formato que o seu campeonato precisar.' },
+    f3: { title: 'Resultados & classificação automática', desc: 'Tabelas atualizadas a cada etapa, com histórico público.' },
+    f4: { title: 'Multilíngue', desc: 'Plataforma em português, inglês e espanhol, pronta para públicos internacionais.' },
+    f5: { title: 'Marca própria (white-label)', desc: 'Sua logo e cores na experiência do participante, com o eHub como infraestrutura.' },
+  },
+  pricingteaser: {
+    eyebrow: 'Sem mensalidade',
+    title: 'Comece de graça. Pague apenas quando tiver inscrições — gratuitas ou pagas.',
+    desc: 'Criar sua organização não custa nada. Uma pequena taxa se aplica a cada inscrição confirmada em seus eventos, seja ela gratuita ou paga — veja todos os detalhes.',
+    cta: 'Ver planos completos',
+  },
+  finalcta: {
+    title: 'Pronto para conectar sua organização ao eHub?',
+    sub: 'Crie sua conta gratuitamente e publique seu primeiro evento em minutos.',
+    btn: 'Criar minha conta',
+  },
+}

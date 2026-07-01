@@ -42,13 +42,13 @@ onMounted(async () => {
     <div v-else-if="status === 'mismatch'">
       <font-awesome-icon icon="triangle-exclamation" class="text-warning fa-3x mb-3" />
       <h4>{{ $t('invite.accept.mismatch') }}</h4>
-      <router-link class="btn btn-outline-secondary mt-3" to="/">{{ $t('invite.accept.home') }}</router-link>
+      <router-link class="btn btn-outline-secondary mt-3" :to="{ name: 'events' }">{{ $t('invite.accept.home') }}</router-link>
     </div>
 
     <div v-else>
       <font-awesome-icon icon="circle-xmark" class="text-danger fa-3x mb-3" />
       <h4>{{ $t('invite.accept.invalid') }}</h4>
-      <router-link class="btn btn-outline-secondary mt-3" to="/">{{ $t('invite.accept.home') }}</router-link>
+      <router-link class="btn btn-outline-secondary mt-3" :to="{ name: 'events' }">{{ $t('invite.accept.home') }}</router-link>
     </div>
   </main>
 </template>

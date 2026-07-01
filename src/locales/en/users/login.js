@@ -18,6 +18,12 @@ export default {
     email_registered_common: 'This e-mail is already registered with a password. Please sign in normally.',
     provider_mismatch:       'This e-mail is registered with a different login provider.',
   },
+  remember_prompt: {
+    title:       'Stay signed in?',
+    description: 'Would you like eHub to remember your login on this device?',
+    yes:         'Yes, remember for 30 days',
+    no:          'No, just this session',
+  },
   no_account:    "Don't have an account?",
   register_link: 'Sign up',
   terms:         "By continuing, you agree to eHub's {terms} and {privacy}.",

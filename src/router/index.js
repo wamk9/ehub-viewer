@@ -14,7 +14,12 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
+      name: 'presentation',
+      component: () => import('@/views/presentation.vue')
+    },
+    {
+      path: '/events',
+      name: 'events',
       component: () => import('@/views/home.vue')
     },
     {
@@ -234,7 +239,7 @@ router.beforeEach((to, from, next) => {
       next()
       return
     }
-    next(localStorage.getItem("lastKnowRoute") != null ? JSON.parse(localStorage.getItem("lastKnowRoute")) : { name: 'home' })
+    next(localStorage.getItem("lastKnowRoute") != null ? JSON.parse(localStorage.getItem("lastKnowRoute")) : { name: 'events' })
     return;
   }
 

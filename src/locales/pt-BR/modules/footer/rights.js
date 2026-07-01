@@ -1,3 +1,4 @@
 export default {
-  content: '2025 eHub. Uma plataforma JohnJohn 3D - CNPJ: 27.140.814/0001-88'
+  platform: 'eHub — Plataforma de gestão de campeonatos, equipes e organizações.',
+  credits: 'Criada por {company} — CNPJ: 27.140.814/0001-88',
 }

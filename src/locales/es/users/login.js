@@ -18,6 +18,12 @@ export default {
     email_registered_common: 'Este correo ya está registrado con contraseña. Inicia sesión normalmente.',
     provider_mismatch:       'Este correo está registrado con otro proveedor de inicio de sesión.',
   },
+  remember_prompt: {
+    title:       '¿Recordar acceso?',
+    description: '¿Deseas que eHub recuerde tu inicio de sesión en este dispositivo?',
+    yes:         'Sí, recordar por 30 días',
+    no:          'No, solo esta sesión',
+  },
   no_account:    '¿No tienes cuenta?',
   register_link: 'Regístrate',
   terms:         'Al continuar, aceptas los {terms} y la {privacy} de eHub.',

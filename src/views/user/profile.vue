@@ -274,7 +274,7 @@ async function deleteAccount() {
   isSaving.value = true
   try {
     const result = await Api.deleteAsync('/user', { password: deletePassword.value })
-    if (result.code === 200) { store.dispatch('removeToken'); router.push({ name: 'home' }) }
+    if (result.code === 200) { store.dispatch('removeToken'); router.push({ name: 'events' }) }
     else if (result.code === 403) toast.error(t('users.profile.privacy.password.error.wrong'))
     else toast.error(t('users.profile.error.generic'))
   } catch { toast.error(t('users.profile.error.generic')) }

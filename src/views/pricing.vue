@@ -223,8 +223,8 @@ const heroTitleHtml = computed(() => t('pages.pricing.hero.title', {
   letter-spacing: .06em; text-transform: uppercase;
   padding: 5px 14px; border-radius: 50rem; margin-bottom: 20px;
 }
-.pricing-hero h1 { position: relative; font-size: clamp(2rem, 4.5vw, 3rem); font-weight: 400; letter-spacing: -.025em; color: var(--ehub-ink); margin-bottom: 14px; line-height: 1.1; }
-.pricing-hero h1 :deep(.accent) { font-weight: 800; color: var(--ehub-primary); }
+.pricing-hero h1 { position: relative; font-size: clamp(2rem, 4.5vw, 3rem); font-weight: 800; letter-spacing: -.025em; color: var(--ehub-ink); margin-bottom: 14px; line-height: 1.1; }
+.pricing-hero h1 :deep(.accent) { font-weight: 400; color: var(--ehub-primary); }
 .pricing-hero p { position: relative; color: var(--ehub-muted); font-size: 1.08rem; max-width: 560px; margin: 0 auto; line-height: 1.65; }
 
 .pricing-wrap { max-width: 900px; margin: 0 auto; padding: 60px 20px; }

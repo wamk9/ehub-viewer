@@ -1,18 +1,8 @@
 <script>
 import Organization from '@/helpers/communication/Organization.js';
-import SystemVars from '@/helpers/General/SystemVars';
 import { toast } from '@/helpers/toast.js';
-
-const ORG_GRADS = [
-  ['#0098D8', '#00d4ff'],
-  ['#7C3AED', '#b06bff'],
-  ['#1f8a5b', '#51cf66'],
-  ['#f08c00', '#ffc93c'],
-  ['#e23b3b', '#ff8a3b'],
-  ['#d6336c', '#ff6b9d'],
-  ['#1971c2', '#4dabf7'],
-  ['#0e7490', '#22d3ee'],
-];
+import EhubViewCard from '@/components/EhubViewCard.vue';
+import EhubFilterBar from '@/components/EhubFilterBar.vue';
 
 const ROLE_ICON = {
   owner: 'crown',
@@ -28,13 +18,21 @@ const ROLE_CLASS = {
   financial: 'staff',
 };
 
+const ROLE_COLOR = {
+  owner: '#FBBF11',
+  admin: 'var(--ehub-primary)',
+  event_manager: '#7C3AED',
+  financial: 'var(--ehub-muted)',
+};
+
 export default {
+  components: { EhubViewCard, EhubFilterBar },
+
   data() {
     return {
       organizations: [],
       loading: true,
       activeRole: 'all',
-      baseUrl: SystemVars.baseUrl,
     };
   },
 
@@ -75,30 +73,17 @@ export default {
         toast.error(this.$t('pages.organization.mine.error.load'));
       }
     },
-    orgGrad(org) {
-      if (org.color && /^#[0-9A-Fa-f]{6}$/.test(org.color)) {
-        const n = parseInt(org.color.slice(1), 16);
-        const r = Math.max(0, ((n >> 16) & 0xff) - 50);
-        const g = Math.max(0, ((n >> 8) & 0xff) - 50);
-        const b = Math.max(0, (n & 0xff) - 50);
-        const dark = '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('');
-        return `linear-gradient(135deg, ${org.color}, ${dark})`;
-      }
-      const idx = org.name.charCodeAt(0) % ORG_GRADS.length;
-      const [c1, c2] = ORG_GRADS[idx];
-      return `linear-gradient(135deg, ${c1}, ${c2})`;
-    },
     roleClass(role) {
       return ROLE_CLASS[role] || 'staff';
     },
     roleIcon(role) {
       return ROLE_ICON[role] || 'id-badge';
     },
-    initials(name) {
-      if (!name) return '?';
-      return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+    roleColor(role) {
+      return ROLE_COLOR[role] || null;
     },
     fmtNum(n) {
+      if (!n) return '0';
       if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'k';
       return '' + n;
     },
@@ -106,9 +91,25 @@ export default {
       if (!dateStr) return '—';
       return new Date(dateStr).getFullYear();
     },
-    logoUrl(org) {
-      if (!org.logo_image) return null;
-      return this.baseUrl + 'storage/' + org.logo_image;
+    orgAsTeam(org) {
+      return {
+        name: org.name,
+        description: org.description,
+        logo_image: org.logo_image || null,
+        cover_image: org.cover_image || null,
+        color: org.color || null,
+        category: null,
+        org_name: null,
+        is_verified: false,
+        is_open: false,
+      };
+    },
+    orgStats(org) {
+      return [
+        { value: org.events_count ?? 0, label: this.$t('pages.organization.mine.stats.events') },
+        { value: this.fmtNum(org.members_count ?? 0), label: this.$t('pages.organization.mine.stats.members') },
+        { value: this.joinedYear(org.created_at), label: this.$t('pages.organization.mine.stats.since') },
+      ];
     },
   },
 };
@@ -146,86 +147,49 @@ export default {
             </div>
           </div>
         </div>
-        <router-link to="/create-org" class="btn btn-primary round px-4" style="flex-shrink:0">
-          <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />
-          {{ $t('pages.organization.mine.hero.new') }}
-        </router-link>
+
       </div>
     </div>
   </header>
 
   <!-- ══ CONTROL BAR ══ -->
-  <div class="control-bar">
-    <div class="container-fluid px-4">
-      <div class="control-inner">
-        <span class="fb-label">{{ $t('pages.organization.mine.bar.role') }}</span>
-        <div class="role-seg">
-          <button v-for="r in roles" :key="r.value"
-            :class="{ active: activeRole === r.value }"
-            @click="activeRole = r.value">
-            {{ $t('pages.organization.mine.bar.' + r.key) }}
-          </button>
-        </div>
-        <div style="flex:1"></div>
-        <span class="results-count">{{ $t('pages.organization.mine.results', { n: filtered.length }) }}</span>
-      </div>
-    </div>
-  </div>
+  <EhubFilterBar>
+    <template #filters>
+      <button
+        v-for="r in roles"
+        :key="r.value"
+        class="fchip"
+        :class="{ active: activeRole === r.value }"
+        @click="activeRole = r.value"
+      >
+        {{ $t('pages.organization.mine.bar.' + r.key) }}
+      </button>
+    </template>
+  </EhubFilterBar>
 
   <!-- ══ CONTENT ══ -->
   <main class="container-fluid px-4 py-4">
     <div v-if="loading" class="myorgs-grid">
-      <div v-for="i in 6" :key="i" class="skel" :style="{ height: '260px', borderRadius: '16px', animationDelay: (i * 0.08) + 's' }"></div>
+      <div v-for="i in 6" :key="i" class="skel" :style="{ height: '360px', borderRadius: '16px', animationDelay: (i * 0.08) + 's' }"></div>
     </div>
 
     <template v-else>
-      <!-- Grid -->
       <div class="myorgs-grid">
-        <div v-for="org in filtered" :key="org.id"
-          class="morg-card" :data-role="roleClass(org.role)"
-          @click="$router.push('/org/' + org.route)">
-
-          <!-- Banner -->
-          <div class="morg-banner" :style="{ background: orgGrad(org) }">
-            <img :src="baseUrl + 'storage/org/' + org.route + '/cover.webp'"
-              class="morg-banner-cover" @error="$event.target.style.display='none'" />
-          </div>
-
-          <!-- Head: logo + role badge -->
-          <div class="morg-head">
-            <div class="morg-logo" :style="{ background: orgGrad(org) }">
-              <img :src="baseUrl + 'storage/org/' + org.route + '/logo.webp'" :alt="org.name"
-                class="morg-logo-img" @error="$event.target.style.display='none'" />
-              <span>{{ initials(org.name) }}</span>
-            </div>
+        <EhubViewCard
+          v-for="org in filtered"
+          :key="org.id"
+          :team="orgAsTeam(org)"
+          :stats="orgStats(org)"
+          :accent-color="roleColor(org.role)"
+          @click="$router.push('/org/' + org.route)"
+        >
+          <template #badges>
             <span class="role-badge" :class="roleClass(org.role)">
               <font-awesome-icon :icon="['fas', roleIcon(org.role)]" />
               {{ $t('pages.organization.mine.roles.' + org.role) }}
             </span>
-          </div>
-
-          <!-- Body -->
-          <div class="morg-body">
-            <div class="morg-name">{{ org.name }}</div>
-            <div v-if="org.description" class="morg-desc">{{ org.description }}</div>
-            <div class="morg-stats">
-              <div class="morg-stat">
-                <div class="sv">{{ org.events_count ?? 0 }}</div>
-                <div class="sl">{{ $t('pages.organization.mine.stats.events') }}</div>
-              </div>
-              <div class="morg-stat">
-                <div class="sv">{{ fmtNum(org.members_count ?? 0) }}</div>
-                <div class="sl">{{ $t('pages.organization.mine.stats.members') }}</div>
-              </div>
-              <div class="morg-stat">
-                <div class="sv">{{ joinedYear(org.created_at) }}</div>
-                <div class="sl">{{ $t('pages.organization.mine.stats.since') }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="morg-actions" @click.stop>
+          </template>
+          <template #actions>
             <template v-if="org.role === 'owner' || org.role === 'admin'">
               <router-link :to="`/org/${org.route}/manage`" class="btn-maction primary-action">
                 <font-awesome-icon :icon="['fas', 'sliders']" /> {{ $t('pages.organization.mine.actions.manage') }}
@@ -250,8 +214,8 @@ export default {
                 <font-awesome-icon :icon="['fas', 'flag-checkered']" /> {{ $t('pages.organization.mine.actions.events') }}
               </router-link>
             </template>
-          </div>
-        </div>
+          </template>
+        </EhubViewCard>
 
         <!-- New org card -->
         <router-link to="/create-org" class="new-org-card">
@@ -261,26 +225,20 @@ export default {
         </router-link>
       </div>
 
-      <!-- Empty state (overlay inside grid area when filtered empty) -->
-      <div v-if="!filtered.length" class="empty-state">
-        <div class="ico"><font-awesome-icon :icon="['fas', 'building']" /></div>
-        <p class="mb-0">{{ $t('pages.organization.mine.empty.filter') }}</p>
-      </div>
     </template>
   </main>
 </template>
 
 <style scoped>
 /* ── Role CSS vars ── */
-:deep(:root),
 :root {
-  --role-owner:    #FBBF11;
-  --role-owner-bg: color-mix(in srgb, #FBBF11 14%, transparent);
-  --role-owner-br: color-mix(in srgb, #FBBF11 30%, transparent);
-  --role-admin:    var(--ehub-primary);
-  --role-admin-bg: var(--ehub-primary-tint);
-  --role-admin-br: var(--ehub-primary-border, color-mix(in srgb, var(--ehub-primary) 30%, transparent));
-  --role-manager:  #7C3AED;
+  --role-owner:      #FBBF11;
+  --role-owner-bg:   color-mix(in srgb, #FBBF11 14%, transparent);
+  --role-owner-br:   color-mix(in srgb, #FBBF11 30%, transparent);
+  --role-admin:      var(--ehub-primary);
+  --role-admin-bg:   var(--ehub-primary-tint);
+  --role-admin-br:   color-mix(in srgb, var(--ehub-primary) 30%, transparent);
+  --role-manager:    #7C3AED;
   --role-manager-bg: color-mix(in srgb, #7C3AED 12%, transparent);
   --role-manager-br: color-mix(in srgb, #7C3AED 24%, transparent);
 }
@@ -322,88 +280,24 @@ export default {
 .sp-lbl { font-size: .76rem; color: var(--ehub-muted); font-weight: 500; }
 .sp-text { display: flex; flex-direction: column; }
 
-/* ── Control bar ── */
-.control-bar {
-  position: sticky; top: 60px; z-index: 30;
-  background: color-mix(in srgb, var(--ehub-page) 90%, transparent);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--ehub-line);
-  padding: 10px 0;
-}
-.control-inner { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.fb-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); }
-.role-seg { display: flex; gap: 4px; flex-wrap: wrap; }
-.role-seg button {
-  background: var(--ehub-field-bg); border: 1px solid var(--ehub-line);
-  color: var(--ehub-muted); font-size: .78rem; font-weight: 600;
-  padding: 5px 13px; border-radius: 50rem; cursor: pointer; transition: all .14s;
-}
-.role-seg button:hover { border-color: var(--ehub-primary); color: var(--ehub-ink); }
-.role-seg button.active { background: var(--ehub-primary); border-color: var(--ehub-primary); color: #fff; }
-.results-count { font-size: .82rem; color: var(--ehub-muted); white-space: nowrap; }
-
 /* ── Grid ── */
 .myorgs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 
-/* ── Org card ── */
-.morg-card {
-  background: var(--ehub-card); border: 1px solid var(--ehub-line);
-  border-radius: 16px; overflow: hidden;
-  display: flex; flex-direction: column;
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-  cursor: pointer;
-}
-.morg-card:hover { transform: translateY(-3px); box-shadow: var(--ehub-shadow, 0 8px 32px rgba(0,0,0,.16)); border-color: color-mix(in srgb, var(--ehub-primary) 35%, var(--ehub-line)); }
-.morg-card[data-role="owner"]   { border-top: 3px solid var(--role-owner); }
-.morg-card[data-role="admin"]   { border-top: 3px solid var(--role-admin); }
-.morg-card[data-role="manager"] { border-top: 3px solid var(--role-manager); }
-.morg-card[data-role="staff"]   { border-top: 3px solid var(--ehub-muted); }
-
-.morg-banner { height: 62px; position: relative; overflow: hidden; flex-shrink: 0; }
-.morg-banner-cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.morg-banner::after {
-  content: ''; position: absolute; inset: 0;
-  background-image: repeating-linear-gradient(118deg, transparent 0 28px, rgba(255,255,255,.07) 28px 30px);
-}
-
-.morg-head { display: flex; align-items: flex-end; justify-content: space-between; padding: 0 16px; margin-top: -22px; position: relative; z-index: 1; }
-.morg-logo {
-  width: 56px; height: 56px; border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem; font-weight: 800; color: #fff; letter-spacing: .02em;
-  text-shadow: 0 1px 4px rgba(0,0,0,.35);
-  border: 3px solid var(--ehub-card);
-  box-shadow: 0 4px 12px rgba(0,0,0,.22), inset 0 0 0 1px rgba(255,255,255,.18);
-  flex-shrink: 0; overflow: hidden; position: relative;
-}
-.morg-logo-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 11px; }
-
+/* ── Role badge (slot content inside vc-badges) ── */
 .role-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: .72rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
-  padding: 5px 11px; border-radius: 50rem; border: 1px solid;
-  margin-bottom: 4px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  font-size: .62rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  padding: 4px 9px; border-radius: 6px;
+  backdrop-filter: blur(8px); color: #fff;
+  white-space: nowrap; width: 100%;
 }
-.role-badge.owner   { background: var(--role-owner-bg);   border-color: var(--role-owner-br);   color: color-mix(in srgb, var(--role-owner), #7a5400 30%); }
-.role-badge.admin   { background: var(--role-admin-bg);   border-color: var(--role-admin-br, color-mix(in srgb, var(--ehub-primary) 30%, transparent));   color: var(--role-admin); }
-.role-badge.manager { background: var(--role-manager-bg); border-color: var(--role-manager-br); color: var(--role-manager); }
-.role-badge.staff   { background: var(--ehub-field-bg);   border-color: var(--ehub-line);        color: var(--ehub-muted); }
-html[data-bs-theme="dark"] .role-badge.owner { color: var(--role-owner); }
+.role-badge.owner   { background: color-mix(in srgb, #FBBF11 85%, rgba(0,0,0,.5)); color: #3a2700; }
+.role-badge.admin   { background: color-mix(in srgb, var(--ehub-primary) 85%, rgba(0,0,0,.5)); }
+.role-badge.manager { background: color-mix(in srgb, #7C3AED 85%, rgba(0,0,0,.5)); }
+.role-badge.staff   { background: rgba(0,0,0,.42); color: rgba(255,255,255,.8); }
 
-.morg-body { padding: 10px 16px 0; flex: 1; display: flex; flex-direction: column; }
-.morg-name { font-size: 1rem; font-weight: 700; color: var(--ehub-ink); margin: 0 0 3px; }
-.morg-desc { color: var(--ehub-muted); font-size: .83rem; line-height: 1.45; margin: 0 0 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-.morg-stats { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--ehub-line); border-radius: 10px; overflow: hidden; margin-bottom: 14px; margin-top: 8px; }
-.morg-stat { padding: 10px 10px 9px; text-align: center; }
-.morg-stat + .morg-stat { border-left: 1px solid var(--ehub-line); }
-.morg-stat .sv { font-size: 1rem; font-weight: 700; color: var(--ehub-ink); line-height: 1; }
-.morg-stat .sl { font-size: .67rem; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 3px; }
-
-/* ── Actions ── */
-.morg-actions { padding: 0 16px 16px; display: flex; gap: 7px; flex-wrap: wrap; }
+/* ── Action buttons (slot content inside vc-foot) ── */
 .btn-maction {
-  flex: 1; min-width: 0;
   border: 1px solid var(--ehub-line); background: var(--ehub-field-bg);
   color: var(--ehub-ink); font-size: .8rem; font-weight: 600;
   padding: 8px 10px; border-radius: 9px; cursor: pointer;
@@ -423,6 +317,7 @@ html[data-bs-theme="dark"] .role-badge.owner { color: var(--role-owner); }
   text-align: center; min-height: 240px; text-decoration: none;
 }
 .new-org-card:hover { border-color: var(--ehub-primary); color: var(--ehub-primary); background: var(--ehub-primary-tint); }
+.new-org-card:only-child { grid-column: 1 / -1; }
 .new-ico { width: 52px; height: 52px; border-radius: 50%; border: 2px dashed currentColor; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
 .new-lbl { font-size: .9rem; font-weight: 600; }
 .new-sub { font-size: .78rem; opacity: .7; }

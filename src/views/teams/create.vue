@@ -419,7 +419,7 @@
 
 <script>
 import Teams from '@/helpers/communication/Teams.js';
-import Tournament from '@/helpers/communication/Tournament.js';
+import Category from '@/helpers/communication/Category.js';
 import router from '@/router';
 import { toast } from '@/helpers/toast.js';
 
@@ -518,7 +518,7 @@ export default {
     },
   },
   async mounted() {
-    const result = await Tournament.getAllCategories();
+    const result = await Category.getAll();
     if (result.code === 200 && result.data) this.categories = result.data;
   },
   methods: {

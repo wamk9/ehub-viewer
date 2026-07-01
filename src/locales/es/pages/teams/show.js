@@ -6,6 +6,7 @@ export default {
     follow: 'Seguir',
     following: 'Siguiendo',
     apply: 'Solicitar ingreso',
+    apply_login: 'Inicia sesión para aplicar',
     closed: 'Plantilla cerrada',
     verified: 'Verificado',
     manage: 'Gestionar',

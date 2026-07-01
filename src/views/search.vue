@@ -2,7 +2,8 @@
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import TournamentApi from '@/helpers/communication/Tournament'
+import CategoryApi from '@/helpers/communication/Category'
+import EventApi from '@/helpers/communication/Event'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -36,7 +37,7 @@ const subcategoryMap = ref({})
 const categoryModesMap = ref({})
 
 async function loadCategories() {
-  const result = await TournamentApi.getAllCategories()
+  const result = await CategoryApi.getAll()
   if (result.code === 200) {
     allCategories.value = result.data.map(c => ({
       key: c.route,
@@ -51,7 +52,7 @@ async function loadCategories() {
 async function loadSubcategories(categoryRoutes) {
   for (const catRoute of categoryRoutes) {
     if (subcategoryMap.value[catRoute]) continue
-    const result = await TournamentApi.getSubcategories(catRoute)
+    const result = await CategoryApi.getSubcategories(catRoute)
     if (result.code === 200) {
       subcategoryMap.value[catRoute] = result.data.map(s => ({ key: s.route, label: s.name }))
     }
@@ -165,15 +166,15 @@ function formatPrice(v) { return v === 0 ? t('events.manage.fee.free') : `R$ ${v
 
 // ─── API search ───────────────────────────────────────────────
 const PAGE_SIZE = 12
-const tournaments = ref([])
+const events = ref([])
 const totalCount = ref(0)
 const currentPage = ref(1)
 const loading = ref(false)
 
-const hasMore = computed(() => tournaments.value.length < totalCount.value)
+const hasMore = computed(() => events.value.length < totalCount.value)
 const loadProgress = computed(() =>
   totalCount.value === 0 ? 100
-    : Math.round((tournaments.value.length / totalCount.value) * 100)
+    : Math.round((events.value.length / totalCount.value) * 100)
 )
 
 let searchDebounce = null
@@ -196,15 +197,15 @@ function buildParams(page = 1) {
 async function fetchPage(page = 1, append = false) {
   loading.value = true
   try {
-    const result = await TournamentApi.search(buildParams(page))
+    const result = await EventApi.search(buildParams(page))
     if (result.code === 200) {
       const payload = result.data
       totalCount.value = payload.total
       currentPage.value = payload.current_page
       if (append) {
-        tournaments.value.push(...payload.data)
+        events.value.push(...payload.data)
       } else {
-        tournaments.value = payload.data
+        events.value = payload.data
       }
     }
   } finally {
@@ -233,8 +234,8 @@ watch(
 
 // ─── Helpers ─────────────────────────────────────────────────
 function slotsPercent(e) {
-  if (!e.subscription_limit) return 0
-  return Math.round((e.subscription_count / e.subscription_limit) * 100)
+  if (!e.max_registrations) return 0
+  return Math.round((e.subscription_count / e.max_registrations) * 100)
 }
 function slotsBarClass(e) {
   const p = slotsPercent(e)
@@ -248,7 +249,7 @@ function formatFee(e) {
 function feeClass(e) { return (!e.price || e.price === 0) ? 'bg-primary' : 'bg-success' }
 function runmodeLabel(e) { return e.runmode === 'online' ? 'Online' : 'IRL' }
 function runmodeClass(e) { return e.runmode === 'online' ? 'bg-info text-dark' : 'bg-warning text-dark' }
-function navigateToEvent(e) { router.push(`/tournament/${e.route}`) }
+function navigateToEvent(e) { router.push(`/org/${e.org_route}/event/${e.route}`) }
 
 function clearFilters() {
   filters.name = ''
@@ -495,7 +496,7 @@ const showMobileFilters = ref(false)
             </div>
 
             <!-- Loading -->
-            <div v-if="loading && !tournaments.length">
+            <div v-if="loading && !events.length">
               <div class="row g-3">
                 <div v-for="i in 6" :key="i" class="col-12 col-sm-6 col-xl-4">
                   <div class="skel" :style="{ height: '280px', borderRadius: '10px', animationDelay: (i * 0.08) + 's' }"></div>
@@ -504,7 +505,7 @@ const showMobileFilters = ref(false)
             </div>
 
             <!-- Empty state -->
-            <div v-else-if="!loading && tournaments.length === 0" class="text-center text-muted py-5">
+            <div v-else-if="!loading && events.length === 0" class="text-center text-muted py-5">
               <font-awesome-icon icon="magnifying-glass" size="3x" class="mb-3 d-block mx-auto opacity-25" />
               <p class="mb-2">{{ $t('pages.search.results.empty') }}</p>
               <button class="btn btn-outline-secondary btn-sm" @click="clearFilters">
@@ -515,13 +516,13 @@ const showMobileFilters = ref(false)
             <!-- Cards grid -->
             <div v-else>
               <div class="row g-3">
-                <div v-for="event in tournaments" :key="event.id"
+                <div v-for="event in events" :key="event.id"
                   class="col-12 col-sm-6 col-xl-4">
                   <div class="event-card card h-100 border-0 shadow-sm"
                     @click="navigateToEvent(event)" role="button">
                     <div class="event-thumb position-relative">
                       <div class="ratio ratio-16x9">
-                        <img :src="event.logo_url || '/images/tournament-placeholder.webp'"
+                        <img :src="event.logo_url || '/images/event-placeholder.webp'"
                           :alt="event.name" class="event-img rounded-top">
                       </div>
                       <span class="badge position-absolute top-0 start-0 m-2" :class="runmodeClass(event)">
@@ -533,7 +534,7 @@ const showMobileFilters = ref(false)
                     </div>
                     <div class="card-body px-3 py-2">
                       <h6 class="fw-bold mb-0 text-truncate" :title="event.name">{{ event.name }}</h6>
-                      <small class="text-muted d-block mb-2">{{ event.league_name }}</small>
+                      <small class="text-muted d-block mb-2">{{ event.org_name }}</small>
                       <p class="small text-muted mb-2 event-desc">{{ event.description }}</p>
                       <div class="d-flex align-items-center gap-2 mb-2">
                         <div class="progress flex-grow-1" style="height: 5px;">
@@ -541,7 +542,7 @@ const showMobileFilters = ref(false)
                             :style="{ width: slotsPercent(event) + '%' }"></div>
                         </div>
                         <small class="text-muted text-nowrap">
-                          {{ event.subscription_count }}/{{ event.subscription_limit }}
+                          {{ event.subscription_count }}/{{ event.max_registrations }}
                         </small>
                       </div>
                       <small v-if="event.start_at" class="text-muted d-block">
@@ -549,8 +550,8 @@ const showMobileFilters = ref(false)
                       </small>
                     </div>
                     <div class="card-footer px-3 py-2 border-0 bg-transparent">
-                      <span class="badge bg-secondary me-1">{{ event.category_name }}</span>
-                      <span class="badge bg-dark">{{ event.subcategory_name }}</span>
+                      <span class="badge bg-secondary me-1">{{ $t('categories.names.' + event.category, event.category) }}</span>
+                      <span v-if="event.subcategory" class="badge bg-dark">{{ $t('categories.subcategories.' + event.subcategory, event.subcategory) }}</span>
                     </div>
                   </div>
                 </div>
@@ -562,7 +563,7 @@ const showMobileFilters = ref(false)
                   <div class="d-flex justify-content-between mb-1">
                     <small class="text-muted">
                       {{ $t('pages.homepage.events.showing', {
-                        visible: tournaments.length,
+                        visible: events.length,
                         total: totalCount
                       }) }}
                     </small>

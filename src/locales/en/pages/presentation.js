@@ -1,0 +1,57 @@
+export default {
+  hero: {
+    eyebrow: 'E-sports & competition management',
+    title_pre: 'Organizations, events and teams',
+    title_accent: 'connected in one place',
+    subtitle: 'eHub brings your entire competitive operation into a single platform: create your organization, publish championships, manage stages and teams, and track results — from the first invite to the podium.',
+    cta_primary: 'Create my account',
+    cta_secondary: 'See pricing',
+  },
+  preview: {
+    tab_events: 'Events',
+    tab_orgs: 'Organizations',
+  },
+  how: {
+    title: 'From invite to podium, in four steps',
+    sub: 'Every organization on eHub follows the same simple flow — ready to scale from a local championship to a multi-season league.',
+    s1: { title: 'Organization', desc: 'Create your organization and invite your management team.' },
+    s2: { title: 'Event', desc: 'Publish championships with categories, registration rules and payment methods.' },
+    s3: { title: 'Stages', desc: 'Register stages, dates and formats — points, bracket or time trial.' },
+    s4: { title: 'Results', desc: 'Standings updated automatically, with a public history for every registrant.' },
+  },
+  orgs: {
+    title: 'Built for organizers',
+    sub: 'From registrations to payments, eHub runs the operation so you can focus on the competition.',
+    c1: { title: 'Registrations & payments', desc: 'Collect paid or free registrations with built-in processing — no spreadsheets needed.' },
+    c2: { title: 'Verified public page', desc: 'Your organization gets a public profile with a verification badge, followers and event stats.' },
+    c3: { title: 'Your own brand (white-label)', desc: "Customize your organization's colors and logo — your brand up front, eHub behind the scenes." },
+  },
+  teams: {
+    title: 'Built for competitors',
+    sub: 'One single profile to discover, register and follow results at any organization on eHub.',
+    c1: { title: 'Discover events', desc: 'Filter championships by sport, category and format — online or in person — in seconds.' },
+    c2: { title: 'Fast registration', desc: 'Sign up for any event in a few clicks, with secure payment when applicable.' },
+    c3: { title: 'Real-time results', desc: 'Follow standings and stages as soon as results are published by the organization.' },
+    c4: { title: 'Connected teams', desc: 'Build your team, set a captain and members, and carry your history into every new competition.' },
+  },
+  features: {
+    title: 'Everything your operation needs',
+    sub: 'Built for organizations of any size — from an amateur league to a circuit with multiple seasons.',
+    f1: { title: 'Registrations & payments', desc: 'Built-in billing, free or paid events, no external integrations.' },
+    f2: { title: 'Flexible stages & formats', desc: 'Points, bracket or time trial — whatever format your championship needs.' },
+    f3: { title: 'Results & automatic standings', desc: 'Tables updated after every stage, with public history.' },
+    f4: { title: 'Multilingual', desc: 'Platform in Portuguese, English and Spanish, ready for international audiences.' },
+    f5: { title: 'Your own brand (white-label)', desc: 'Your logo and colors in the participant experience, with eHub as the infrastructure.' },
+  },
+  pricingteaser: {
+    eyebrow: 'No monthly fee',
+    title: 'Start for free. Pay only when you have registrations — free or paid.',
+    desc: 'Creating your organization costs nothing. A small fee applies to every confirmed registration in your events, whether free or paid — see the full details.',
+    cta: 'See full pricing',
+  },
+  finalcta: {
+    title: 'Ready to connect your organization to eHub?',
+    sub: 'Create your account for free and publish your first event in minutes.',
+    btn: 'Create my account',
+  },
+}

@@ -12,13 +12,11 @@ let Auth = {
       }
   },
   async logout() {
-    let result = await Api.postAsync('/auth/logout');
+    await Api.fetchCsrf();
+    await Api.postAsync('/auth/logout');
+    document.cookie = 'ehub_logged_in=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     store.dispatch('removeToken');
-
-    if (result.code == 200) {
-      store.dispatch('removeToken');
-      router.go();
-    }
+    localStorage.removeItem('lastKnowRoute');
   },
   async register(data) {
     let result = await Api.postAsync('/auth/register', data);

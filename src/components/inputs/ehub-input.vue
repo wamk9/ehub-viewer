@@ -1,7 +1,6 @@
 <script setup>
 import { HueSlider } from 'vue-color';
 import { i18n } from '@/helpers/i18n';
-import demo from '@/helpers/frontend/demo'
 </script>
 
 <template>

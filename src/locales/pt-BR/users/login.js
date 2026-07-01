@@ -18,6 +18,12 @@ export default {
     email_registered_common: 'Este e-mail já está cadastrado com senha. Faça login normalmente.',
     provider_mismatch:       'Este e-mail está cadastrado com outro provedor de login.',
   },
+  remember_prompt: {
+    title:       'Lembrar acesso?',
+    description: 'Deseja que o eHub lembre seu login neste dispositivo?',
+    yes:         'Sim, lembrar por 30 dias',
+    no:          'Não, apenas esta sessão',
+  },
   no_account:    'Ainda não tem conta?',
   register_link: 'Cadastre-se',
   terms:         'Ao continuar, você concorda com os {terms} e a {privacy} do eHub.',

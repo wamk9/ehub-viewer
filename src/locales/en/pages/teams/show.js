@@ -6,6 +6,7 @@ export default {
     follow: 'Follow',
     following: 'Following',
     apply: 'Apply to join',
+    apply_login: 'Sign in to apply',
     closed: 'Roster closed',
     verified: 'Verified',
     manage: 'Manage',

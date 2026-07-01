@@ -95,7 +95,7 @@ async function submit() {
         const org = route.query.org
         setTimeout(() => router.push(org ? `/org/${org}` : '/my-orgs'), 1500)
       } else {
-        setTimeout(() => router.push('/'), 2000)
+        setTimeout(() => router.push({ name: 'events' }), 2000)
       }
     } else {
       serverErrors.value = parseServerErrors(result.response)

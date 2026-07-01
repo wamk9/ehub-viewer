@@ -38,9 +38,26 @@ router.afterEach(() => {
 </template>
 
 <style>
-main.container {
-    margin-top: 50px;
-    margin-bottom: 50px;
-    min-height: calc(100vh - 100px - 75px);
+html {
+  overflow-x: clip;
+}
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: clip;
+}
+#app {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
 }
 </style>

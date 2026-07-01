@@ -2,12 +2,13 @@
   <div class="cc">
     <div class="cc-hd">
       <h3>{{ title }}</h3>
+      <button v-if="showMore" class="cc-link" @click="$emit('view-more')">{{ $t('pages.teams.manage.view_more') }}</button>
     </div>
     <div v-if="loading" class="act-loading">{{ loadingLabel }}</div>
     <div v-else-if="activities.length">
       <div v-for="a in activities" :key="a.id" class="act-item">
         <div class="act-icon">
-          <font-awesome-icon :icon="a.icon || 'circle'" />
+          <font-awesome-icon :icon="['fas', a.icon || 'user-plus']" />
         </div>
         <div class="act-body">
           <div class="act-text">
@@ -27,12 +28,14 @@
 <script>
 export default {
   name: 'EhubActivityLog',
+  emits: ['view-more'],
   props: {
     title: { type: String, required: true },
     activities: { type: Array, default: () => [] },
     loading: Boolean,
     loadingLabel: { type: String, default: '...' },
     emptyLabel: { type: String, default: '—' },
+    showMore: { type: Boolean, default: false },
   },
   methods: {
     formatTime(ts) {
@@ -50,6 +53,8 @@ export default {
 .cc { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); overflow: hidden; }
 .cc-hd { display: flex; align-items: center; gap: 10px; padding: 13px 17px; border-bottom: 1px solid var(--ehub-line); }
 .cc-hd h3 { font-size: .9rem; font-weight: 700; color: var(--ehub-ink); margin: 0; flex: 1; }
+.cc-link { font-size: .78rem; font-weight: 600; color: var(--ehub-primary); cursor: pointer; background: none; border: 0; padding: 0; }
+.cc-link:hover { text-decoration: underline; }
 .act-loading { padding: 32px; text-align: center; color: var(--ehub-muted); font-size: .83rem; }
 .act-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 15px; border-bottom: 1px solid var(--ehub-line); }
 .act-item:last-child { border-bottom: 0; }

@@ -6,6 +6,7 @@ export default {
     follow: 'Seguir',
     following: 'Seguindo',
     apply: 'Candidatar-se',
+    apply_login: 'Entre para candidatar-se',
     closed: 'Elenco fechado',
     verified: 'Verificada',
     manage: 'Gerenciar',

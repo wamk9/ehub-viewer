@@ -9,6 +9,7 @@ import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js'
 import { createSSE } from '@/helpers/communication/useLiveSSE.js'
 import SystemVars from '@/helpers/General/SystemVars'
 import { toast } from '@/helpers/toast.js'
+import EhubEventCard from '@/components/EhubEventCard.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -62,10 +63,6 @@ function contrastColor(hex) {
   const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255
   return lum > 0.55 ? '#111' : '#fff'
 }
-function catIcon(category) {
-  return CAT_CONFIG[category]?.icon || 'trophy'
-}
-
 // ── Loading ─────────────────────────────────────────────────────────
 const loading = ref(true)
 
@@ -126,13 +123,6 @@ function initials(name) {
 function fmtDate(dateStr) {
   if (!dateStr) return ''
   return new Date(dateStr).toLocaleDateString(locale.value === 'pt-BR' ? 'pt-BR' : locale.value, { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
-// ── Fee label ────────────────────────────────────────────────────────
-function feeLabel(event) {
-  if (!event.fee || event.fee == 0) return t('pages.organization.show.events.free')
-  const sym = event.currency === 'usd' ? 'US$' : event.currency === 'eur' ? '€' : 'R$'
-  return `${sym} ${Number(event.fee).toFixed(0)}`
 }
 
 // ── Role label ───────────────────────────────────────────────────────
@@ -357,8 +347,8 @@ onBeforeUnmount(() => {
 
     <!-- EVENTS TAB -->
     <section class="tab-pane" :class="{ active: activeTab === 'events' }">
-      <div v-if="eventsLoading" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status"></div>
+      <div v-if="eventsLoading" class="cards-grid">
+        <div v-for="i in 6" :key="i" class="skel" :style="{ height: '260px', borderRadius: '16px', animationDelay: (i * 0.08) + 's' }"></div>
       </div>
       <div v-else-if="!events.length" class="empty-state">
         <div class="ico"><font-awesome-icon :icon="['fas', 'calendar']" /></div>
@@ -371,37 +361,11 @@ onBeforeUnmount(() => {
           :to="`/org/${$route.params.orgRoute}/event/${event.route}`"
           class="text-decoration-none"
         >
-          <div class="event-card">
-            <div class="event-cover" :style="{ background: org.color ? heroGrad : catGrad(event.category) }">
-              <img v-if="event.cover_image" :src="imgUrl(event.cover_image)" :alt="event.name" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />
-              <font-awesome-icon v-else :icon="['fas', catIcon(event.category)]" class="cover-ico"
-                :style="org.color ? { color: orgTextColor } : {}" />
-              <div class="event-badges">
-                <span class="ev-badge" :class="event.fee == 0 ? 'free' : 'paid'">
-                  {{ feeLabel(event) }}
-                </span>
-                <span class="ev-badge" :class="event.finished ? 'status-finished' : 'status-active'">
-                  {{ event.finished ? $t('pages.organization.show.events.finished') : $t('pages.organization.show.events.active') }}
-                </span>
-              </div>
-              <span class="cover-org" :style="org.color ? { color: orgTextColor } : {}">{{ org.name }}</span>
-            </div>
-            <div class="event-body">
-              <p class="ev-title">{{ event.name }}</p>
-              <div v-if="event.runmode" class="ev-meta">
-                <font-awesome-icon :icon="['fas', event.runmode === 'online' ? 'wifi' : 'location-dot']" />
-                {{ event.runmode === 'online' ? $t('pages.organization.show.events.online') : $t('pages.organization.show.events.irl') }}
-              </div>
-              <div v-if="event.start_at" class="ev-meta">
-                <font-awesome-icon :icon="['fas', 'calendar-days']" />
-                {{ fmtDate(event.start_at) }}
-              </div>
-            </div>
-            <div class="event-foot">
-              <span v-if="event.category" class="cat-chip">{{ $t(`categories.names.${event.category}`) }}</span>
-              <span v-if="event.subcategory" class="cat-chip sub">{{ $t(`categories.subcategories.${event.subcategory}`, event.subcategory) }}</span>
-            </div>
-          </div>
+          <EhubEventCard
+            :event="event"
+            :org-color="org.color"
+            :org-name="org.name"
+          />
         </router-link>
       </div>
     </section>
@@ -538,9 +502,6 @@ onBeforeUnmount(() => {
 
   </div>
 
-  <footer class="home-footer" style="margin-top: 48px;">
-    {{ $t('pages.homepage.entrance.footer') }}
-  </footer>
   </template>
 </template>
 
@@ -555,12 +516,5 @@ onBeforeUnmount(() => {
   font-size: 2.4rem;
   opacity: .4;
   margin-bottom: 12px;
-}
-.home-footer {
-  border-top: 1px solid var(--ehub-line);
-  padding: 28px 20px;
-  text-align: center;
-  color: var(--ehub-muted);
-  font-size: .82rem;
 }
 </style>

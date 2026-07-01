@@ -36,6 +36,7 @@ function toggleTheme() {
 // ── Drawer ─────────────────────────────────────────────────────────
 const drawerOpen = ref(false)
 watch(() => route.path, () => { drawerOpen.value = false })
+watch(drawerOpen, v => { document.body.style.overflow = v ? 'hidden' : '' })
 
 // ── Profile ────────────────────────────────────────────────────────
 const profileName = ref('')
@@ -63,6 +64,11 @@ let notifSSE = null
 function notifText(notif) {
   try {
     const params = notif.description ? JSON.parse(notif.description) : {}
+    if (params.role) {
+      const translated = t('pages.teams.manage.roles.' + params.role)
+      if (translated !== 'pages.teams.manage.roles.' + params.role)
+        params.role = translated
+    }
     const result = t(notif.title, params)
     if (result === notif.title && !notif.title.startsWith('notification.'))
       return t('notification.' + notif.title, params)
@@ -96,7 +102,7 @@ async function handleClearAll() {
 // ── Auth ───────────────────────────────────────────────────────────
 async function handleLogout() {
   await Auth.logout()
-  router.push({ name: 'home' })
+  router.push({ name: 'events' })
 }
 
 // ── Lifecycle ──────────────────────────────────────────────────────
@@ -136,7 +142,7 @@ onBeforeUnmount(() => {
 
     <!-- Desktop nav links -->
     <div class="ehub-nav-links d-none d-md-flex">
-      <router-link to="/" :class="{ active: route.path === '/' }">
+      <router-link to="/events" :class="{ active: route.path === '/events' }">
         {{ $t('navbar.links.events') }}
       </router-link>
       <router-link to="/orgs" :class="{ active: route.path.startsWith('/orgs') }">
@@ -145,11 +151,8 @@ onBeforeUnmount(() => {
       <router-link to="/teams" :class="{ active: route.path.startsWith('/teams') }">
         {{ $t('navbar.links.teams') }}
       </router-link>
-      <router-link v-if="isLogged" to="/my-teams" :class="{ active: route.path.startsWith('/my-teams') }">
-        {{ $t('navbar.links.myteams') }}
-      </router-link>
-      <router-link to="/search" :class="{ active: route.path === '/search' }">
-        {{ $t('navbar.search.title') }}
+      <router-link to="/pricing" :class="{ active: route.path === '/pricing' }">
+        {{ $t('navbar.links.pricing') }}
       </router-link>
     </div>
 
@@ -245,100 +248,109 @@ onBeforeUnmount(() => {
     </button>
   </nav>
 
-  <!-- Drawer backdrop -->
-  <Transition name="backdrop">
-    <div v-if="drawerOpen" class="nav-backdrop" @click="drawerOpen = false"></div>
-  </Transition>
-
-  <!-- Drawer -->
+  <!-- Drawer (full-screen overlay) -->
   <Transition name="drawer">
-    <div v-if="drawerOpen" class="nav-drawer">
-      <!-- Header -->
-      <div class="drawer-header">
-        <button class="nav-icon-btn ms-auto" @click="drawerOpen = false">
+    <div v-if="drawerOpen" class="nav-drawer" role="dialog" aria-modal="true">
+
+      <!-- Header row: logo + close -->
+      <div class="drawer-topbar">
+        <router-link to="/" class="drawer-logo-link" @click="drawerOpen = false">
+          <EhubLogo />
+        </router-link>
+        <button class="drawer-close-btn" @click="drawerOpen = false" aria-label="Fechar menu">
           <font-awesome-icon :icon="['fas', 'xmark']" />
         </button>
       </div>
 
-      <!-- Nav links -->
-      <div class="drawer-nav">
-        <router-link class="drawer-link" to="/">
-          <font-awesome-icon :icon="['fas', 'house']" class="me-3" />
-          {{ $t('navbar.links.events') }}
-        </router-link>
-        <router-link class="drawer-link" to="/orgs">
-          <font-awesome-icon :icon="['fas', 'building-flag']" class="me-3" />
-          {{ $t('navbar.links.orgs') }}
-        </router-link>
-        <router-link class="drawer-link" to="/teams">
-          <font-awesome-icon :icon="['fas', 'shield-halved']" class="me-3" />
-          {{ $t('navbar.links.teams') }}
-        </router-link>
-        <router-link class="drawer-link" to="/search">
-          <font-awesome-icon :icon="['fas', 'magnifying-glass']" class="me-3" />
-          {{ $t('navbar.search.title') }}
-        </router-link>
+      <!-- Scrollable body -->
+      <div class="drawer-body">
+
+        <!-- Profile card (logged) -->
+        <template v-if="isLogged">
+          <router-link class="drawer-profile-card" to="/profile" @click="drawerOpen = false">
+            <img v-if="profileImage" :src="profileImage" class="dpc-avatar" alt="avatar" />
+            <span v-else class="dpc-avatar dpc-avatar-initial">
+              {{ (profileName || '?')[0].toUpperCase() }}
+            </span>
+            <div class="dpc-info">
+              <span class="dpc-name">{{ profileName || '—' }}</span>
+              <span class="dpc-user">@{{ profileUsername }}</span>
+            </div>
+            <font-awesome-icon :icon="['fas', 'chevron-right']" class="dpc-arrow" />
+          </router-link>
+        </template>
+
+        <!-- Main nav -->
+        <nav class="drawer-section">
+          <p class="drawer-section-label">{{ $t('navbar.links.explore') }}</p>
+          <router-link class="drawer-item" to="/events" @click="drawerOpen = false">
+            <span class="di-icon"><font-awesome-icon :icon="['fas', 'flag-checkered']" /></span>
+            {{ $t('navbar.links.events') }}
+          </router-link>
+          <router-link class="drawer-item" to="/orgs" @click="drawerOpen = false">
+            <span class="di-icon"><font-awesome-icon :icon="['fas', 'building-flag']" /></span>
+            {{ $t('navbar.links.orgs') }}
+          </router-link>
+          <router-link class="drawer-item" to="/teams" @click="drawerOpen = false">
+            <span class="di-icon"><font-awesome-icon :icon="['fas', 'shield-halved']" /></span>
+            {{ $t('navbar.links.teams') }}
+          </router-link>
+          <router-link class="drawer-item" to="/pricing" @click="drawerOpen = false">
+            <span class="di-icon"><font-awesome-icon :icon="['fas', 'chart-line']" /></span>
+            {{ $t('navbar.links.pricing') }}
+          </router-link>
+        </nav>
+
+        <!-- Account nav (logged) -->
+        <template v-if="isLogged">
+          <nav class="drawer-section">
+            <p class="drawer-section-label">{{ $t('navbar.links.account') }}</p>
+            <router-link class="drawer-item" to="/my-orgs" @click="drawerOpen = false">
+              <span class="di-icon"><font-awesome-icon :icon="['fas', 'building']" /></span>
+              {{ $t('navbar.user.logged.my-orgs.title') }}
+            </router-link>
+            <router-link class="drawer-item" to="/my-teams" @click="drawerOpen = false">
+              <span class="di-icon"><font-awesome-icon :icon="['fas', 'shield-halved']" /></span>
+              {{ $t('navbar.links.myteams') }}
+            </router-link>
+          </nav>
+
+          <div class="drawer-section">
+            <button class="drawer-item drawer-logout" @click="handleLogout">
+              <span class="di-icon danger"><font-awesome-icon :icon="['fas', 'right-from-bracket']" /></span>
+              {{ $t('navbar.user.logged.logout.title') }}
+            </button>
+          </div>
+        </template>
+
+        <!-- Auth CTAs (guest) -->
+        <template v-else>
+          <div class="drawer-auth-ctas">
+            <router-link to="/login" class="btn btn-primary round w-100" @click="drawerOpen = false">
+              <font-awesome-icon :icon="['fas', 'right-to-bracket']" class="me-2" />
+              {{ $t('navbar.user.unlogged.login.title') }}
+            </router-link>
+            <router-link to="/register" class="btn btn-outline-secondary round w-100" @click="drawerOpen = false">
+              <font-awesome-icon :icon="['fas', 'user-plus']" class="me-2" />
+              {{ $t('navbar.user.unlogged.register.title') }}
+            </router-link>
+          </div>
+        </template>
+
       </div>
 
-      <hr class="drawer-divider" />
-
-      <!-- Auth section -->
-      <template v-if="isLogged">
-        <div class="drawer-profile">
-          <img v-if="profileImage" :src="profileImage" class="drawer-avatar" alt="avatar" />
-          <span v-else class="drawer-avatar drawer-avatar-initial">
-            {{ (profileName || '?')[0].toUpperCase() }}
-          </span>
-          <div class="overflow-hidden">
-            <div class="fw-semibold text-truncate" style="font-size:.9rem">{{ profileName || '—' }}</div>
-            <div class="text-muted text-truncate" style="font-size:.78rem">@{{ profileUsername }}</div>
-          </div>
-        </div>
-        <div class="drawer-nav">
-          <router-link class="drawer-link" to="/profile">
-            <font-awesome-icon :icon="['fas', 'user']" class="me-3" />
-            {{ $t('navbar.user.logged.profile.title') }}
-          </router-link>
-          <router-link class="drawer-link" to="/my-orgs">
-            <font-awesome-icon :icon="['fas', 'building']" class="me-3" />
-            {{ $t('navbar.user.logged.my-orgs.title') }}
-          </router-link>
-          <router-link class="drawer-link" to="/my-teams">
-            <font-awesome-icon :icon="['fas', 'shield-halved']" class="me-3" />
-            {{ $t('navbar.links.myteams') }}
-          </router-link>
-        </div>
-        <hr class="drawer-divider" />
-        <button class="drawer-link drawer-logout w-100" @click="handleLogout">
-          <font-awesome-icon :icon="['fas', 'right-from-bracket']" class="me-3" />
-          {{ $t('navbar.user.logged.logout.title') }}
-        </button>
-      </template>
-
-      <template v-else>
-        <div class="drawer-nav">
-          <router-link class="drawer-link" to="/login">
-            <font-awesome-icon :icon="['fas', 'right-to-bracket']" class="me-3" />
-            {{ $t('navbar.user.unlogged.login.title') }}
-          </router-link>
-          <router-link class="drawer-link" to="/register">
-            <font-awesome-icon :icon="['fas', 'user-plus']" class="me-3" />
-            {{ $t('navbar.user.unlogged.register.title') }}
-          </router-link>
-        </div>
-      </template>
-
-      <!-- Footer -->
-      <div class="drawer-footer">
+      <!-- Footer: lang + theme -->
+      <div class="drawer-foot">
         <div class="lang-seg">
           <button :class="{ active: locale === 'pt-BR' }" @click="setLang('pt-BR')">PT</button>
           <button :class="{ active: locale === 'en' }"    @click="setLang('en')">EN</button>
           <button :class="{ active: locale === 'es' }"    @click="setLang('es')">ES</button>
         </div>
-        <button class="theme-btn" @click="toggleTheme">
+        <button class="theme-btn" @click="toggleTheme" :title="theme === 'dark' ? 'Modo claro' : 'Modo escuro'">
           <font-awesome-icon :icon="['fas', theme === 'dark' ? 'sun' : 'moon']" />
         </button>
       </div>
+
     </div>
   </Transition>
 </template>
@@ -490,86 +502,165 @@ onBeforeUnmount(() => {
 }
 .clear-btn:hover { color: var(--ehub-ink); }
 
-/* ── Drawer ── */
-.nav-backdrop {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.45);
-  z-index: 45;
-}
+/* ── Drawer (full-screen) ── */
 .nav-drawer {
   position: fixed;
-  top: 0; right: 0; bottom: 0;
-  width: 280px;
-  background: var(--ehub-card);
-  border-left: 1px solid var(--ehub-line);
+  inset: 0;
   z-index: 46;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  background: var(--ehub-page);
+  overflow: hidden;
 }
-.drawer-header {
+
+/* Top bar */
+.drawer-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  height: 60px;
+  padding: 0 20px;
+  height: 61px;
   border-bottom: 1px solid var(--ehub-line);
   flex-shrink: 0;
+  background: var(--ehub-card);
 }
-.drawer-nav { display: flex; flex-direction: column; padding: 8px 0; }
-.drawer-link {
-  display: flex;
-  align-items: center;
-  padding: 12px 20px;
-  font-size: .92rem;
-  font-weight: 500;
-  color: var(--ehub-ink);
-  text-decoration: none;
-  background: none;
-  border: none;
+.drawer-logo-link { display: inline-flex; align-items: center; color: var(--ehub-logo); text-decoration: none; }
+.drawer-logo-link svg { height: 24px; width: auto; display: block; }
+.drawer-close-btn {
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--ehub-field-bg);
+  border: 1px solid var(--ehub-line);
+  border-radius: 10px;
+  color: var(--ehub-muted);
+  font-size: 1.1rem;
   cursor: pointer;
   transition: background .15s, color .15s;
-  text-align: left;
 }
-.drawer-link:hover,
-.drawer-link.router-link-active { background: var(--ehub-field-bg); color: var(--ehub-primary); }
-.drawer-logout { color: #e05454; }
-.drawer-logout:hover { background: rgba(224,84,84,.08); }
-.drawer-divider { border-color: var(--ehub-line); margin: 4px 16px; }
-.drawer-profile {
+.drawer-close-btn:hover { background: var(--ehub-line); color: var(--ehub-ink); }
+
+/* Scrollable body */
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Profile card */
+.drawer-profile-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 20px;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--ehub-card);
+  border: 1px solid var(--ehub-line);
+  border-radius: 14px;
+  text-decoration: none;
+  color: var(--ehub-ink);
+  transition: border-color .15s, background .15s;
+  margin-bottom: 8px;
 }
-.drawer-avatar {
-  width: 40px; height: 40px;
+.drawer-profile-card:hover { border-color: var(--ehub-primary); background: var(--ehub-primary-tint); }
+.dpc-avatar {
+  width: 46px; height: 46px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  border: 2px solid var(--ehub-line);
 }
-.drawer-avatar-initial {
+.dpc-avatar-initial {
   background: var(--ehub-primary);
   color: #fff;
-  font-size: .9rem;
+  font-size: 1rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.drawer-footer {
-  margin-top: auto;
-  padding: 12px 8px;
+.dpc-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dpc-name { font-size: .95rem; font-weight: 700; color: var(--ehub-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dpc-user { font-size: .78rem; color: var(--ehub-muted); }
+.dpc-arrow { color: var(--ehub-muted); font-size: .8rem; flex-shrink: 0; }
+
+/* Sections */
+.drawer-section { display: flex; flex-direction: column; gap: 2px; }
+.drawer-section-label {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ehub-muted);
+  padding: 10px 12px 4px;
+  margin: 0;
+}
+
+/* Nav items */
+.drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 14px;
+  font-size: .97rem;
+  font-weight: 600;
+  color: var(--ehub-ink);
+  text-decoration: none;
+  background: none;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  text-align: left;
+  width: 100%;
+}
+.drawer-item:hover { background: var(--ehub-card); }
+.drawer-item.router-link-active {
+  background: var(--ehub-primary-tint);
+  color: var(--ehub-primary);
+}
+.di-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--ehub-field-bg);
+  border: 1px solid var(--ehub-line);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .88rem;
+  color: var(--ehub-muted);
+  flex-shrink: 0;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.drawer-item:hover .di-icon { background: var(--ehub-card); color: var(--ehub-ink); }
+.drawer-item.router-link-active .di-icon {
+  background: var(--ehub-primary-tint);
+  border-color: var(--ehub-primary);
+  color: var(--ehub-primary);
+}
+.di-icon.danger { color: #e05454; }
+.drawer-logout { color: #e05454; }
+.drawer-logout:hover { background: rgba(224,84,84,.06); color: #e05454; }
+
+/* Guest auth CTAs */
+.drawer-auth-ctas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+/* Footer */
+.drawer-foot {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 12px 20px;
   border-top: 1px solid var(--ehub-line);
+  background: var(--ehub-card);
 }
 
 /* ── Transitions ── */
-.backdrop-enter-active, .backdrop-leave-active { transition: opacity .25s ease; }
-.backdrop-enter-from, .backdrop-leave-to { opacity: 0; }
-
-.drawer-enter-active, .drawer-leave-active { transition: transform .25s ease; }
-.drawer-enter-from, .drawer-leave-to { transform: translateX(100%); }
+.drawer-enter-active, .drawer-leave-active { transition: opacity .2s ease, transform .2s ease; }
+.drawer-enter-from, .drawer-leave-to { opacity: 0; transform: translateY(-8px); }
 </style>

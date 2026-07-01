@@ -484,6 +484,39 @@ html[data-bs-theme="dark"] .role-chip.owner { color: color-mix(in srgb, var(--eh
 .orgs-filter-bar { position: sticky; top: 60px; z-index: 30; background: color-mix(in srgb, var(--ehub-page) 90%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--ehub-line); padding: 10px 0; }
 .orgs-filter-bar .fb-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); white-space: nowrap; }
 .orgs-results-count { font-size: .82rem; color: var(--ehub-muted); white-space: nowrap; }
+
+/* ── Unified filter bar ── */
+.ehub-filter-bar { position: sticky; top: 60px; z-index: 30; background: color-mix(in srgb, var(--ehub-page) 90%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--ehub-line); overflow-x: clip; }
+.ehub-filter-wrap { display: flex; align-items: center; gap: 12px; padding: 8px 0; position: relative; }
+.ehub-filter-inner { display: flex; align-items: center; gap: 5px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
+.ehub-filter-inner::-webkit-scrollbar { display: none; }
+
+/* Ghost: invisible, position absolute, measures natural content width */
+.efb-ghost { position: absolute; top: 0; left: 0; display: flex; align-items: center; gap: 5px; overflow: visible; visibility: hidden; pointer-events: none; height: 0; flex-wrap: nowrap; white-space: nowrap; }
+
+/* Chips */
+.fchip { display: inline-flex; align-items: center; padding: 5px 13px; border-radius: 50rem; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); color: var(--ehub-muted); font-size: .78rem; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all .14s; line-height: 1; }
+.fchip:hover { border-color: var(--ehub-primary); color: var(--ehub-ink); }
+.fchip.active { background: var(--ehub-primary); border-color: var(--ehub-primary); color: #fff; }
+.fchip-sep { width: 1px; height: 18px; background: var(--ehub-line); flex-shrink: 0; margin: 0 4px; }
+.fchip-sel { position: relative; display: inline-flex; align-items: center; flex-shrink: 0; }
+.fchip-sel::after { content: ''; pointer-events: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 4px solid var(--ehub-muted); }
+.fchip-select { appearance: none; -webkit-appearance: none; padding: 5px 26px 5px 12px; border-radius: 50rem; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); color: var(--ehub-ink); font-size: .78rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: border-color .14s; line-height: 1; }
+.fchip-select:hover { border-color: var(--ehub-primary); }
+.fchip-select:focus { outline: none; border-color: var(--ehub-primary); }
+.fchip-select:disabled { opacity: .5; cursor: not-allowed; }
+.fchip-select:disabled:hover { border-color: var(--ehub-line); }
+/* Hamburger trigger */
+.efb-burger { display: inline-flex; align-items: center; gap: 7px; padding: 5px 14px; border-radius: 50rem; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); color: var(--ehub-muted); font-size: .78rem; font-weight: 600; cursor: pointer; white-space: nowrap; flex: 1; transition: all .14s; line-height: 1; }
+.efb-burger:hover { border-color: var(--ehub-primary); color: var(--ehub-ink); }
+.efb-burger.active { background: var(--ehub-primary); border-color: var(--ehub-primary); color: #fff; }
+
+/* Panel dropdown */
+.efb-panel { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 0 8px; border-top: 1px solid var(--ehub-line); }
+.efb-panel .fchip-sep { display: block; flex: 0 0 100%; height: 1px; background: var(--ehub-line); margin: 4px 0 2px; }
+.efb-panel .fchip-sel { flex: 0 0 100%; }
+.efb-panel .fchip-select { width: 100%; border-radius: 10px; }
+
 .back-link { display: inline-flex; align-items: center; gap: 7px; font-size: .85rem; font-weight: 600; color: var(--ehub-muted); text-decoration: none; transition: color .18s; }
 .back-link:hover { color: var(--ehub-primary); }
 
