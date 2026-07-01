@@ -514,11 +514,11 @@ export default {
 .ts-btn-follow {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 8px 20px; border-radius: 50rem; font-size: .88rem; font-weight: 600; cursor: pointer;
-  border: 1px solid var(--ehub-primary); background: var(--ehub-primary); color: #fff; transition: all .15s;
+  border: 1px solid var(--ehub-primary); background: transparent; color: var(--ehub-primary); transition: all .15s;
 }
-.ts-btn-follow:hover { background: var(--ehub-primary-dark); border-color: var(--ehub-primary-dark); }
-.ts-btn-follow.following { background: transparent; color: var(--ehub-primary); }
-.ts-btn-follow.following:hover { background: var(--ehub-primary-tint); }
+.ts-btn-follow:hover { background: var(--ehub-primary-tint); }
+.ts-btn-follow.following { background: var(--ehub-primary); color: #fff; }
+.ts-btn-follow.following:hover { background: var(--ehub-primary-dark); border-color: var(--ehub-primary-dark); }
 .ts-btn-apply {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 8px 20px; border-radius: 50rem; font-size: .88rem; font-weight: 700; cursor: pointer;

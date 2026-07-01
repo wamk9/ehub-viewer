@@ -7,6 +7,9 @@ const props = defineProps({
   team: { type: Object, required: true },
   followLoading: { type: Boolean, default: false },
   clickable: { type: Boolean, default: true },
+  stats: { type: Array, default: null },
+  accentColor: { type: String, default: null },
+  bannerIcon: { type: String, default: 'shield-halved' },
 })
 const emit = defineEmits(['click', 'follow'])
 
@@ -55,20 +58,29 @@ const teamInitials = computed(() => {
   return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
 })
 
+const statsCount = computed(() => props.stats ? props.stats.length : 3)
+
+const cardStyle = computed(() => {
+  if (!props.accentColor) return {}
+  return {
+    borderTop: `3px solid ${props.accentColor}`,
+    '--vc-accent': props.accentColor,
+  }
+})
+
 function imgUrl(path) {
   return path ? SystemVars.baseUrl + 'storage/' + path : ''
 }
 </script>
 
 <template>
-  <div class="vc-card" :class="{ 'vc-clickable': clickable }" @click="clickable && $emit('click', team)">
+  <div class="vc-card" :class="{ 'vc-clickable': clickable }" :style="cardStyle" @click="clickable && $emit('click', team)">
 
-    <!-- Banner: gradient bg + optional cover image + badges right -->
+    <!-- Banner: gradient bg + optional cover image + badges top-right -->
     <div class="vc-banner" :style="{ background: grad }">
       <img v-if="team.cover_image" class="vc-cover" :src="imgUrl(team.cover_image)" />
       <div class="vc-banner-stripe"></div>
-      <font-awesome-icon :icon="['fas', 'shield-halved']" class="vc-shield" />
-      <!-- Badges: right side of banner, above cover image -->
+      <font-awesome-icon :icon="['fas', bannerIcon]" class="vc-shield" />
       <div class="vc-badges" @click.stop>
         <slot name="badges">
           <span v-if="team.is_open" class="vc-badge">
@@ -86,8 +98,8 @@ function imgUrl(path) {
     <!-- Head: logo overlapping banner -->
     <div class="vc-head">
       <div class="vc-logo" :style="{ background: grad }">
-        <img v-if="team.logo_image" :src="imgUrl(team.logo_image)" :alt="team.name" />
-        <template v-else>{{ teamInitials }}</template>
+        <img v-if="team.logo_image" :src="imgUrl(team.logo_image)" :alt="team.name" class="vc-logo-img" @error="e => e.target.style.display='none'" />
+        <span>{{ teamInitials }}</span>
       </div>
     </div>
 
@@ -109,20 +121,28 @@ function imgUrl(path) {
       <p class="vc-desc">{{ team.description || '—' }}</p>
     </div>
 
-    <!-- Stats: centered bordered grid cards -->
-    <div class="vc-stats">
-      <div class="vc-stat">
-        <span class="v">{{ team.players_count ?? 0 }}</span>
-        <span class="l">{{ $t('pages.teams.index.card.players') }}</span>
-      </div>
-      <div class="vc-stat">
-        <span class="v">{{ team.wins_count ?? 0 }}</span>
-        <span class="l">{{ $t('pages.teams.index.card.wins') }}</span>
-      </div>
-      <div class="vc-stat">
-        <span class="v">{{ team.events_count ?? 0 }}</span>
-        <span class="l">{{ $t('pages.teams.index.card.events') }}</span>
-      </div>
+    <!-- Stats: bordered grid cards (dynamic columns) -->
+    <div class="vc-stats" :style="{ gridTemplateColumns: `repeat(${statsCount}, 1fr)` }">
+      <template v-if="stats">
+        <div v-for="(s, i) in stats" :key="i" class="vc-stat">
+          <span class="v">{{ s.value }}</span>
+          <span class="l">{{ s.label }}</span>
+        </div>
+      </template>
+      <template v-else>
+        <div class="vc-stat">
+          <span class="v">{{ team.players_count ?? 0 }}</span>
+          <span class="l">{{ $t('pages.teams.index.card.players') }}</span>
+        </div>
+        <div class="vc-stat">
+          <span class="v">{{ team.wins_count ?? 0 }}</span>
+          <span class="l">{{ $t('pages.teams.index.card.wins') }}</span>
+        </div>
+        <div class="vc-stat">
+          <span class="v">{{ team.events_count ?? 0 }}</span>
+          <span class="l">{{ $t('pages.teams.index.card.events') }}</span>
+        </div>
+      </template>
     </div>
 
     <!-- Footer: actions auto-column grid -->
@@ -158,6 +178,7 @@ function imgUrl(path) {
   transform: translateY(-4px);
   box-shadow: var(--ehub-shadow);
   border-color: color-mix(in srgb, var(--ehub-primary) 40%, var(--ehub-line));
+  border-top-color: var(--vc-accent, color-mix(in srgb, var(--ehub-primary) 40%, var(--ehub-line)));
 }
 
 /* Banner: gradient bg, cover image on top, badges top-right */
@@ -167,7 +188,6 @@ function imgUrl(path) {
   overflow: hidden;
   flex-shrink: 0;
 }
-/* Cover image: on top of gradient, behind overlay */
 .vc-cover {
   position: absolute;
   inset: 0;
@@ -176,7 +196,6 @@ function imgUrl(path) {
   object-fit: cover;
   z-index: 1;
 }
-/* Stripe overlay: above image */
 .vc-banner-stripe {
   position: absolute;
   inset: 0;
@@ -192,7 +211,6 @@ function imgUrl(path) {
   color: rgba(255,255,255,.15);
   z-index: 3;
 }
-/* Badges: top-right of banner, above cover image */
 .vc-badges {
   position: absolute;
   top: 8px;
@@ -223,7 +241,7 @@ function imgUrl(path) {
 }
 .vc-badge.verified { background: color-mix(in srgb, var(--ehub-primary) 80%, #000 20%); }
 
-/* Head: logo overlapping banner, above cover image */
+/* Head: logo overlapping banner */
 .vc-head {
   display: flex;
   align-items: flex-end;
@@ -233,7 +251,7 @@ function imgUrl(path) {
   z-index: 5;
 }
 
-/* Logo: always gradient bg for transparent images */
+/* Logo: always gradient bg, initials behind absolute img */
 .vc-logo {
   width: 58px;
   height: 58px;
@@ -249,11 +267,15 @@ function imgUrl(path) {
   text-shadow: 0 1px 4px rgba(0,0,0,.3);
   overflow: hidden;
   flex-shrink: 0;
+  position: relative;
 }
-.vc-logo img {
+.vc-logo-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
+  border-radius: 11px;
 }
 
 /* Body */
@@ -285,10 +307,9 @@ function imgUrl(path) {
   overflow: hidden;
 }
 
-/* Stats: bordered grid cards, centered */
+/* Stats: bordered grid cards */
 .vc-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   border: 1px solid var(--ehub-line);
   border-radius: 10px;
   overflow: hidden;

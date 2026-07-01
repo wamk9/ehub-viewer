@@ -182,6 +182,7 @@ async function handleFollow(org) {
         :team="orgAsCard(org)"
         :follow-loading="!!followLoading[org.id]"
         :stats="orgStats(org)"
+        banner-icon="building-flag"
         @click="router.push('/org/' + org.route)"
         @follow="handleFollow(org)"
       >
