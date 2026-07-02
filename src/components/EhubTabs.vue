@@ -17,12 +17,10 @@ const ghostRef = ref(null)
 const isOverflow = ref(false)
 const panelOpen = ref(false)
 
-let naturalWidth = 0
 let ro = null
 
 onMounted(async () => {
   await nextTick()
-  naturalWidth = ghostRef.value?.scrollWidth ?? 0
   checkOverflow()
   ro = new ResizeObserver(checkOverflow)
   if (wrapRef.value) ro.observe(wrapRef.value)
@@ -32,6 +30,7 @@ onUnmounted(() => ro?.disconnect())
 
 function checkOverflow() {
   if (!wrapRef.value) return
+  const naturalWidth = ghostRef.value?.scrollWidth ?? 0
   const available = wrapRef.value.clientWidth
   const overflows = naturalWidth > available
   isOverflow.value = overflows
