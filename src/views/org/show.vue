@@ -93,9 +93,9 @@ const eventsLoading = ref(false)
 const articles = ref([])
 const articlesLoaded = ref(false)
 const articlesLoading = ref(false)
-const activeTab = computed(() => route.query.tab || 'about')
+const activeTab = computed(() => route.params.tab || 'about')
 function tabTo(key) {
-  return { query: { ...route.query, tab: key } }
+  return { name: 'show-organization-info', params: { orgRoute: route.params.orgRoute, tab: key } }
 }
 let orgSSE = null
 

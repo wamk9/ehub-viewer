@@ -107,7 +107,7 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/org/:orgRoute',
+      path: '/org/:orgRoute/:tab?',
       name: 'show-organization-info',
       component: () => import('@/views/org/show.vue')
     },
