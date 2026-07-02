@@ -271,7 +271,7 @@ onMounted(() => fetchEvents(1))
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 16px;
 }
-.ae-card-wrap { cursor: pointer; }
+.ae-card-wrap { cursor: pointer; height: 360px; }
 
 .ae-empty {
   display: flex;

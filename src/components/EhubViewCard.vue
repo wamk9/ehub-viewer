@@ -171,6 +171,7 @@ function imgUrl(path) {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  height: 100%;
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .vc-card.vc-clickable { cursor: pointer; }

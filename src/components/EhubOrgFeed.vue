@@ -139,6 +139,7 @@ async function handleFollow(org) {
 
 .ef-card-wrap {
   flex: 0 0 300px;
+  height: 360px;
   scroll-snap-align: start;
 }
 

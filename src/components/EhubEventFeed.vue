@@ -117,13 +117,14 @@ function goToEvent(event) {
 
 .ef-card-wrap {
   flex: 0 0 300px;
+  height: 360px;
   scroll-snap-align: start;
   cursor: pointer;
 }
 
 .ef-skel {
   flex: 0 0 300px;
-  height: 340px;
+  height: 360px;
   border-radius: 16px;
 }
 
