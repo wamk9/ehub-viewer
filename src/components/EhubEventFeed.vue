@@ -131,7 +131,7 @@ function goToEvent(event) {
 
 .ef-empty {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 8px 4px;
 }
 .ef-empty-card {

@@ -281,7 +281,7 @@ import EhubOrgFeed from '@/components/EhubOrgFeed.vue'
 .how-step p { font-size: .88rem; color: var(--ehub-muted); margin: 0; line-height: 1.55; }
 .how-arrow-col { flex: 0 0 auto; display: flex; align-items: flex-start; justify-content: center; padding-top: 18px; color: var(--ehub-line); font-size: 1.1rem; }
 @media (max-width: 860px) {
-  .how-grid { flex-direction: column; gap: 32px; }
+  .how-grid { flex-direction: column; align-items: center; gap: 32px; }
   .how-arrow-col { display: none; }
 }
 
