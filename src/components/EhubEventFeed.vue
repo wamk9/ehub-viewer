@@ -116,13 +116,13 @@ function goToEvent(event) {
 .ef-track::-webkit-scrollbar { display: none; }
 
 .ef-card-wrap {
-  flex: 0 0 260px;
+  flex: 0 0 300px;
   scroll-snap-align: start;
   cursor: pointer;
 }
 
 .ef-skel {
-  flex: 0 0 260px;
+  flex: 0 0 300px;
   height: 340px;
   border-radius: 16px;
 }
