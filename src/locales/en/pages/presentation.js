@@ -49,5 +49,8 @@ export default {
     title: 'Ready to connect your organization to eHub?',
     sub: 'Create your account for free and publish your first event in minutes.',
     btn: 'Create my account',
+    title_logged: 'Ready to take the next step?',
+    sub_logged: 'Go to your organizations and publish your next event in minutes.',
+    btn_logged: 'Go to my organizations',
   },
 }

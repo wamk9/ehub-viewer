@@ -84,6 +84,8 @@ export default {
     general_desc: 'Nombre y descripción pública de la organización.',
     name: 'Nombre de la Organización',
     description: 'Descripción',
+    founded_at: 'Fundada en',
+    founded_at_hint: 'Mes y año de fundación de la organización. Se muestra en el perfil público.',
     save: 'Guardar cambios',
     save_error: 'Error al guardar. Inténtalo de nuevo.',
     saved: 'Cambios guardados con éxito.',

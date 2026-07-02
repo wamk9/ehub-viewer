@@ -84,6 +84,8 @@ export default {
     general_desc: 'Public name and description.',
     name: 'Organization Name',
     description: 'Description',
+    founded_at: 'Founded on',
+    founded_at_hint: 'Month and year the organization was founded. Shown on the public profile.',
     save: 'Save changes',
     save_error: 'Failed to save. Please try again.',
     saved: 'Changes saved successfully.',

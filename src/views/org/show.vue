@@ -10,6 +10,8 @@ import { createSSE } from '@/helpers/communication/useLiveSSE.js'
 import SystemVars from '@/helpers/General/SystemVars'
 import { toast } from '@/helpers/toast.js'
 import EhubEventCard from '@/components/EhubEventCard.vue'
+import EhubTabs from '@/components/EhubTabs.vue'
+import EhubRoster from '@/components/EhubRoster.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -112,7 +114,33 @@ const coverImgError = ref(false)
 const logoImgError = ref(false)
 
 // ── Stats ────────────────────────────────────────────────────────────
-const foundedYear = computed(() => org.value.created_at ? new Date(org.value.created_at).getFullYear() : '—')
+const foundedYear = computed(() => org.value.founded_at ? new Date(org.value.founded_at).getUTCFullYear() : '—')
+
+// ── Founded / registered copy ───────────────────────────────────────
+function monthYear(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr.length <= 7 ? dateStr + '-01' : dateStr)
+  return new Intl.DateTimeFormat(locale.value, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(d)
+}
+const foundedText = computed(() => monthYear(org.value.founded_at))
+const registeredText = computed(() => monthYear(org.value.created_at))
+
+// ── Tabs ─────────────────────────────────────────────────────────────
+const tabsList = computed(() => [
+  { key: 'about',   label: t('pages.organization.show.tabs.about'),   icon: ['fas', 'circle-info'] },
+  { key: 'events',  label: t('pages.organization.show.tabs.events'),  icon: ['fas', 'calendar-days'], count: events.value.length },
+  { key: 'news',    label: t('pages.organization.show.tabs.news'),    icon: ['fas', 'newspaper'],     count: articles.value.length },
+  { key: 'members', label: t('pages.organization.show.tabs.members'), icon: ['fas', 'users'],          count: members.value.length },
+])
+
+// ── Roster (normalized for EhubRoster) ──────────────────────────────
+const rosterMembers = computed(() => members.value.map(m => ({
+  id: m.id,
+  name: `${m.user?.name || ''} ${m.user?.surname || ''}`.trim(),
+  username: m.user?.username || '',
+  avatarUrl: m.user?.image ? imgUrl(m.user.image) : '',
+  role: m.role,
+})))
 
 // ── Initials ─────────────────────────────────────────────────────────
 function initials(name) {
@@ -125,21 +153,9 @@ function fmtDate(dateStr) {
   return new Date(dateStr).toLocaleDateString(locale.value === 'pt-BR' ? 'pt-BR' : locale.value, { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-// ── Role label ───────────────────────────────────────────────────────
-function roleLabel(role) {
-  const key = `pages.organization.show.roles.${role}`
-  const val = t(key)
-  return val === key ? role : val
-}
-
 // ── Image url ────────────────────────────────────────────────────────
 function imgUrl(path) {
   return path ? SystemVars.baseUrl + 'storage/' + path : ''
-}
-
-// ── Tab navigation ───────────────────────────────────────────────────
-function setTab(tab) {
-  activeTab.value = tab
 }
 
 // ── Load lazy data ───────────────────────────────────────────────────
@@ -171,9 +187,9 @@ async function loadArticles() {
 }
 
 watch(activeTab, (tab) => {
-  if (tab === 'events'   && !eventsLoaded.value)   loadEvents()
-  if (tab === 'news'     && !articlesLoaded.value)  loadArticles()
-  if (tab === 'about'    && !membersLoaded.value)   loadMembers()
+  if (tab === 'events'  && !eventsLoaded.value)   loadEvents()
+  if (tab === 'news'    && !articlesLoaded.value) loadArticles()
+  if (tab === 'members' && !membersLoaded.value)  loadMembers()
 })
 
 // ── Follow ───────────────────────────────────────────────────────────
@@ -246,10 +262,8 @@ onBeforeUnmount(() => {
   <template v-else>
   <!-- HERO COVER -->
   <header class="org-hero">
-    <div class="cover" :style="!org.route || coverImgError
-      ? { background: heroGrad }
-      : { background: heroGrad, backgroundImage: `url(${orgCoverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }">
-      <img v-if="org.route" :src="orgCoverUrl" style="display:none"
+    <div class="cover" :style="{ background: heroGrad }">
+      <img v-if="org.route && !coverImgError" :src="orgCoverUrl" class="cover-img" alt=""
         @error="coverImgError = true" @load="coverImgError = false" />
     </div>
     <div class="cover-fade"></div>
@@ -272,9 +286,11 @@ onBeforeUnmount(() => {
           </h1>
           <p class="org-tagline">{{ org.description }}</p>
           <div class="org-meta-chips">
-            <span v-if="org.created_at" class="meta-chip">
+            <span v-if="registeredText" class="meta-chip">
               <font-awesome-icon :icon="['fas', 'calendar-check']" />
-              {{ $t('pages.organization.show.stats.founded') }} {{ foundedYear }}
+              {{ foundedText
+                ? $t('pages.organization.show.stats.founded_full', { founded: foundedText, registered: registeredText })
+                : $t('pages.organization.show.stats.since_only', { registered: registeredText }) }}
             </span>
             <span v-if="org.website" class="meta-chip">
               <font-awesome-icon :icon="['fas', 'globe']" />
@@ -294,10 +310,6 @@ onBeforeUnmount(() => {
           >
             <font-awesome-icon :icon="['fas', isFollowing ? 'bell-slash' : 'bell']" />
             {{ isFollowing ? $t('pages.organization.show.unfollow') : $t('pages.organization.show.follow') }}
-          </button>
-          <button class="btn btn-ghost round px-3">
-            <font-awesome-icon :icon="['fas', 'envelope']" />
-            {{ $t('pages.organization.show.send_message') }}
           </button>
           <router-link
             v-if="canManage"
@@ -328,22 +340,78 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- TABS -->
-    <div class="ehub-tabs">
-      <button class="tab-btn" :class="{ active: activeTab === 'events' }" @click="setTab('events')">
-        <font-awesome-icon :icon="['fas', 'calendar-days']" />
-        {{ $t('pages.organization.show.tabs.events') }}
-        <span v-if="events.length" class="pill">{{ events.length }}</span>
-      </button>
-      <button class="tab-btn" :class="{ active: activeTab === 'news' }" @click="setTab('news')">
-        <font-awesome-icon :icon="['fas', 'newspaper']" />
-        {{ $t('pages.organization.show.tabs.news') }}
-        <span v-if="articles.length" class="pill">{{ articles.length }}</span>
-      </button>
-      <button class="tab-btn" :class="{ active: activeTab === 'about' }" @click="setTab('about')">
-        <font-awesome-icon :icon="['fas', 'circle-info']" />
-        {{ $t('pages.organization.show.tabs.about') }}
-      </button>
-    </div>
+    <EhubTabs :tabs="tabsList" v-model="activeTab" />
+
+    <!-- ABOUT TAB -->
+    <section class="tab-pane" :class="{ active: activeTab === 'about' }">
+      <div class="about-grid">
+        <!-- Description -->
+        <div class="about-card">
+          <h3>{{ $t('pages.organization.show.about.title') }}</h3>
+          <p v-if="org.about || org.description" class="body">{{ org.about || org.description }}</p>
+          <p v-else class="body" style="opacity:.5">{{ $t('pages.organization.show.about.empty') }}</p>
+        </div>
+
+        <!-- Info list -->
+        <div class="about-card">
+          <h3>{{ $t('pages.organization.show.about.info') }}</h3>
+          <ul class="info-list">
+            <li v-if="org.founded_at">
+              <span class="ico"><font-awesome-icon :icon="['fas', 'calendar-check']" /></span>
+              <span class="meta">
+                <span class="k">{{ $t('pages.organization.show.about.founded') }}</span>
+                <span class="val">{{ foundedText }}</span>
+              </span>
+            </li>
+            <li>
+              <span class="ico"><font-awesome-icon :icon="['fas', 'calendar-days']" /></span>
+              <span class="meta">
+                <span class="k">{{ $t('pages.organization.show.about.since') }}</span>
+                <span class="val">{{ registeredText }}</span>
+              </span>
+            </li>
+            <li v-if="org.website">
+              <span class="ico"><font-awesome-icon :icon="['fas', 'globe']" /></span>
+              <span class="meta">
+                <span class="k">{{ $t('pages.organization.show.about.website') }}</span>
+                <a :href="org.website.startsWith('http') ? org.website : 'https://' + org.website" target="_blank" rel="noopener" class="val">{{ org.website }}</a>
+              </span>
+            </li>
+            <li v-if="org.contact_email">
+              <span class="ico"><font-awesome-icon :icon="['fas', 'envelope']" /></span>
+              <span class="meta">
+                <span class="k">{{ $t('pages.organization.show.about.email') }}</span>
+                <a :href="`mailto:${org.contact_email}`" class="val">{{ org.contact_email }}</a>
+              </span>
+            </li>
+            <li v-if="org.phone">
+              <span class="ico"><font-awesome-icon :icon="['fas', 'phone']" /></span>
+              <span class="meta">
+                <span class="k">{{ $t('pages.organization.show.about.phone') }}</span>
+                <span class="val">{{ org.phone }}</span>
+              </span>
+            </li>
+            <li v-if="org.instagram || org.facebook || org.x_twitter">
+              <span class="ico"><font-awesome-icon :icon="['fas', 'share-nodes']" /></span>
+              <span class="meta">
+                <span class="k">{{ $t('pages.organization.show.about.social') }}</span>
+                <span class="val d-flex gap-3 mt-1">
+                  <a v-if="org.instagram" :href="`https://instagram.com/${org.instagram.replace('@','')}`" target="_blank" rel="noopener">
+                    <font-awesome-icon :icon="['fab', 'instagram']" />
+                  </a>
+                  <a v-if="org.facebook" :href="`https://facebook.com/${org.facebook}`" target="_blank" rel="noopener">
+                    <font-awesome-icon :icon="['fab', 'facebook']" />
+                  </a>
+                  <a v-if="org.x_twitter" :href="`https://x.com/${org.x_twitter.replace('@','')}`" target="_blank" rel="noopener">
+                    <font-awesome-icon :icon="['fab', 'x-twitter']" />
+                  </a>
+                </span>
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
 
     <!-- EVENTS TAB -->
     <section class="tab-pane" :class="{ active: activeTab === 'events' }">
@@ -407,97 +475,12 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <!-- ABOUT TAB -->
-    <section class="tab-pane" :class="{ active: activeTab === 'about' }">
-      <div class="about-grid">
-        <!-- Description -->
-        <div class="about-card">
-          <h3>{{ $t('pages.organization.show.about.title') }}</h3>
-          <p v-if="org.about || org.description" class="body">{{ org.about || org.description }}</p>
-          <p v-else class="body" style="opacity:.5">{{ $t('pages.organization.show.about.empty') }}</p>
-        </div>
-
-        <!-- Info list -->
-        <div class="about-card">
-          <h3>{{ $t('pages.organization.show.about.info') }}</h3>
-          <ul class="info-list">
-            <li v-if="org.created_at">
-              <span class="ico"><font-awesome-icon :icon="['fas', 'calendar-check']" /></span>
-              <span class="meta">
-                <span class="k">{{ $t('pages.organization.show.about.founded') }}</span>
-                <span class="val">{{ foundedYear }}</span>
-              </span>
-            </li>
-            <li v-if="org.website">
-              <span class="ico"><font-awesome-icon :icon="['fas', 'globe']" /></span>
-              <span class="meta">
-                <span class="k">{{ $t('pages.organization.show.about.website') }}</span>
-                <a :href="org.website.startsWith('http') ? org.website : 'https://' + org.website" target="_blank" rel="noopener" class="val">{{ org.website }}</a>
-              </span>
-            </li>
-            <li v-if="org.contact_email">
-              <span class="ico"><font-awesome-icon :icon="['fas', 'envelope']" /></span>
-              <span class="meta">
-                <span class="k">{{ $t('pages.organization.show.about.email') }}</span>
-                <a :href="`mailto:${org.contact_email}`" class="val">{{ org.contact_email }}</a>
-              </span>
-            </li>
-            <li v-if="org.phone">
-              <span class="ico"><font-awesome-icon :icon="['fas', 'phone']" /></span>
-              <span class="meta">
-                <span class="k">{{ $t('pages.organization.show.about.phone') }}</span>
-                <span class="val">{{ org.phone }}</span>
-              </span>
-            </li>
-            <li v-if="org.instagram || org.facebook || org.x_twitter">
-              <span class="ico"><font-awesome-icon :icon="['fas', 'share-nodes']" /></span>
-              <span class="meta">
-                <span class="k">{{ $t('pages.organization.show.about.social') }}</span>
-                <span class="val d-flex gap-3 mt-1">
-                  <a v-if="org.instagram" :href="`https://instagram.com/${org.instagram.replace('@','')}`" target="_blank" rel="noopener">
-                    <font-awesome-icon :icon="['fab', 'instagram']" />
-                  </a>
-                  <a v-if="org.facebook" :href="`https://facebook.com/${org.facebook}`" target="_blank" rel="noopener">
-                    <font-awesome-icon :icon="['fab', 'facebook']" />
-                  </a>
-                  <a v-if="org.x_twitter" :href="`https://x.com/${org.x_twitter.replace('@','')}`" target="_blank" rel="noopener">
-                    <font-awesome-icon :icon="['fab', 'x-twitter']" />
-                  </a>
-                </span>
-              </span>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Members -->
-      <div class="members-head">
-        <h3>
-          {{ $t('pages.organization.show.about.members') }}
-          <span v-if="members.length" class="count">({{ members.length }})</span>
-        </h3>
-      </div>
+    <!-- MEMBERS TAB -->
+    <section class="tab-pane" :class="{ active: activeTab === 'members' }">
       <div v-if="membersLoading" class="text-center py-4">
         <div class="spinner-border text-primary" role="status"></div>
       </div>
-      <div v-else class="members-grid">
-        <router-link
-          v-for="m in members"
-          :key="m.id"
-          :to="m.user?.username ? `/profile/${m.user.username}` : '#'"
-          class="member-card"
-          style="text-decoration:none;color:inherit;"
-        >
-          <span class="member-av" :style="!m.user?.image ? { background: catGrad(events[0]?.category) } : {}">
-            <img v-if="m.user?.image" :src="imgUrl(m.user.image)" :alt="`${m.user.name} ${m.user.surname}`" />
-            <template v-else>{{ initials(`${m.user?.name || ''} ${m.user?.surname || ''}`) }}</template>
-          </span>
-          <div class="member-info">
-            <div class="member-name">{{ m.user?.name }} {{ m.user?.surname }}</div>
-            <span class="role-chip" :class="m.role">{{ roleLabel(m.role) }}</span>
-          </div>
-        </router-link>
-      </div>
+      <EhubRoster v-else :members="rosterMembers" role-label-prefix="pages.organization.show.roles." />
     </section>
 
   </div>
@@ -507,6 +490,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .org-skel-page { background: var(--ehub-page); min-height: 100vh; }
+.cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .empty-state {
   text-align: center;
   padding: 56px 20px;

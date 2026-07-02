@@ -58,7 +58,7 @@ export default {
       inviteSending: false,
 
       // settings panel
-      settingsForm: { name: '', description: '', instagram: '', facebook: '', x_twitter: '', website: '', color: '' },
+      settingsForm: { name: '', description: '', founded_at: '', instagram: '', facebook: '', x_twitter: '', website: '', color: '' },
       settingsSaving: false,
       visualSaving: false,
       logoFile: null,
@@ -266,6 +266,7 @@ export default {
         this.org = result.data;
         this.settingsForm.name = result.data.name || '';
         this.settingsForm.description = result.data.description || '';
+        this.settingsForm.founded_at = result.data.founded_at ? result.data.founded_at.slice(0, 7) : '';
         this.settingsForm.instagram = result.data.instagram || '';
         this.settingsForm.facebook = result.data.facebook || '';
         this.settingsForm.x_twitter = result.data.x_twitter || '';
@@ -427,7 +428,8 @@ export default {
 
     async saveSettings() {
       this.settingsSaving = true;
-      const result = await Organization.updateProfile(this.orgRoute, this.settingsForm);
+      const payload = { ...this.settingsForm, founded_at: this.settingsForm.founded_at ? this.settingsForm.founded_at + '-01' : null };
+      const result = await Organization.updateProfile(this.orgRoute, payload);
       this.settingsSaving = false;
       if (result.code === 200) {
         toast.success(this.$t('pages.organization.manage.settings.saved'));
@@ -1174,6 +1176,11 @@ export default {
             <div class="col-12">
               <label class="form-label set-label">{{ $t('pages.organization.manage.settings.description') }}</label>
               <textarea class="form-control" rows="3" v-model="settingsForm.description" style="resize:vertical"></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label set-label">{{ $t('pages.organization.manage.settings.founded_at') }}</label>
+              <p class="set-hint">{{ $t('pages.organization.manage.settings.founded_at_hint') }}</p>
+              <input type="month" class="form-control" v-model="settingsForm.founded_at" />
             </div>
             <div class="col-12 d-flex justify-content-end">
               <button class="btn btn-primary round px-4" :disabled="settingsSaving" @click="saveSettings">

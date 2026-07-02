@@ -1,6 +1,11 @@
 <script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 import EhubEventFeed from '@/components/EhubEventFeed.vue'
 import EhubOrgFeed from '@/components/EhubOrgFeed.vue'
+
+const store = useStore()
+const isLogged = computed(() => !!store.getters.getToken)
 </script>
 
 <template>
@@ -18,7 +23,7 @@ import EhubOrgFeed from '@/components/EhubOrgFeed.vue'
       </h1>
       <p class="lead">{{ $t('pages.presentation.hero.subtitle') }}</p>
       <div class="hero-ctas">
-        <router-link to="/register" class="btn btn-primary round px-4 py-2">
+        <router-link v-if="!isLogged" to="/register" class="btn btn-primary round px-4 py-2">
           {{ $t('pages.presentation.hero.cta_primary') }}
         </router-link>
         <router-link to="/pricing" class="btn btn-outline-primary round px-4 py-2">
@@ -214,11 +219,20 @@ import EhubOrgFeed from '@/components/EhubOrgFeed.vue'
     <section class="section-wrap" style="padding-top:0">
       <div class="container-narrow">
         <div class="cta-strip">
-          <h2>{{ $t('pages.presentation.finalcta.title') }}</h2>
-          <p>{{ $t('pages.presentation.finalcta.sub') }}</p>
-          <router-link to="/register" class="btn btn-light-cta round px-4 py-2">
-            {{ $t('pages.presentation.finalcta.btn') }}
-          </router-link>
+          <template v-if="isLogged">
+            <h2>{{ $t('pages.presentation.finalcta.title_logged') }}</h2>
+            <p>{{ $t('pages.presentation.finalcta.sub_logged') }}</p>
+            <router-link to="/my-orgs" class="btn btn-light-cta round px-4 py-2">
+              {{ $t('pages.presentation.finalcta.btn_logged') }}
+            </router-link>
+          </template>
+          <template v-else>
+            <h2>{{ $t('pages.presentation.finalcta.title') }}</h2>
+            <p>{{ $t('pages.presentation.finalcta.sub') }}</p>
+            <router-link to="/register" class="btn btn-light-cta round px-4 py-2">
+              {{ $t('pages.presentation.finalcta.btn') }}
+            </router-link>
+          </template>
         </div>
       </div>
     </section>

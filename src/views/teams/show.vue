@@ -126,31 +126,7 @@
 
       <!-- ROSTER -->
       <section v-if="activeTab === 'roster'" class="ts-pane">
-        <div v-for="group in rosterGroups" :key="group.role" class="ts-role-group">
-          <div class="ts-role-group-hd">
-            <span class="ts-role-group-label" :class="group.role">
-              {{ $t('pages.teams.show.roles.' + group.role) }}
-            </span>
-          </div>
-          <div class="ts-roster-grid">
-            <router-link v-for="member in group.members" :key="member.id"
-              :to="`/profile/${member.username}`" class="ts-player-card">
-              <div class="ts-player-av" :style="memberAvatarStyle(member)">
-                <img
-                  :src="baseUrl + 'storage/users/' + member.username + '/profile.webp'"
-                  class="ts-player-photo"
-                  @error="e => e.target.style.display = 'none'"
-                  alt=""
-                />
-                {{ memberInitials(member) }}
-              </div>
-              <div class="ts-player-info">
-                <div class="ts-player-name">{{ member.name }}</div>
-                <div class="ts-player-handle">@{{ member.username }}</div>
-              </div>
-            </router-link>
-          </div>
-        </div>
+        <EhubRoster :members="rosterMembers" role-label-prefix="pages.teams.show.roles." />
       </section>
 
       <!-- RESULTS -->
@@ -270,14 +246,7 @@
 import Teams from '@/helpers/communication/Teams.js'
 import SystemVars from '@/helpers/General/SystemVars.js'
 import { toast } from '@/helpers/toast.js'
-
-const AVATAR_PALETTE = ['#0098D8', '#e23b3b', '#7C3AED', '#d6336c', '#f08c00', '#1f8a5b', '#495057', '#0f172a']
-
-function strHash(str) {
-  let h = 0
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0
-  return h
-}
+import EhubRoster from '@/components/EhubRoster.vue'
 
 const CATEGORY_MAP = {
   'simracing':        { icon: 'flag-checkered', names: { 'pt-BR': 'SimRacing', en: 'SimRacing', es: 'SimRacing' } },
@@ -293,6 +262,8 @@ const CATEGORY_MAP = {
 export default {
   name: 'TeamShow',
 
+  components: { EhubRoster },
+
   data() {
     return {
       loading: true,
@@ -301,25 +272,20 @@ export default {
       applyForm: { message: '', role: '' },
       applyErrors: { message: false },
       coverVersion: Date.now(),
-      baseUrl: SystemVars.baseUrl,
       activeTab: this.$route.query.tab || 'about',
     }
   },
 
   computed: {
-    rosterGroups() {
+    rosterMembers() {
       if (!this.team?.members?.length) return []
-      const groups = {}
-      for (const m of this.team.members) {
-        const role = m.role || 'member'
-        if (!groups[role]) groups[role] = []
-        groups[role].push(m)
-      }
-      const seen = new Set()
-      const orderedRoles = this.team.members
-        .map(m => m.role || 'member')
-        .filter(r => { if (seen.has(r)) return false; seen.add(r); return true })
-      return orderedRoles.map(role => ({ role, members: groups[role] }))
+      return this.team.members.map(m => ({
+        id: m.id,
+        name: m.name,
+        username: m.username,
+        avatarUrl: SystemVars.baseUrl + 'storage/users/' + m.username + '/profile.webp',
+        role: m.role || 'member',
+      }))
     },
 
     teamInitials() {
@@ -377,15 +343,6 @@ export default {
       const g = Math.min(255, ((num >> 8) & 0xff) + amount)
       const b = Math.min(255, (num & 0xff) + amount)
       return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('')
-    },
-
-    memberInitials(member) {
-      return member.name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-    },
-
-    memberAvatarStyle(member) {
-      const color = AVATAR_PALETTE[strHash(member.id || member.name || '') % AVATAR_PALETTE.length]
-      return { background: color }
     },
 
     async toggleFollow() {
@@ -563,44 +520,6 @@ export default {
 
 /* ── Pane ── */
 .ts-pane { padding-top: 26px; }
-
-/* ── Roster ── */
-.ts-role-group { margin-bottom: 28px; }
-.ts-role-group-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.ts-role-group-label { font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 11px; border-radius: 50rem; }
-.ts-role-group-label.captain { background: color-mix(in srgb, var(--ehub-gold) 20%, transparent); color: color-mix(in srgb, var(--ehub-gold), #000 28%); }
-.ts-role-group-label.vice    { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
-.ts-role-group-label.coach   { background: color-mix(in srgb, #7C3AED 14%, transparent); color: #7C3AED; }
-.ts-role-group-label.starter { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: #1f8a5b; }
-.ts-role-group-label.reserve { background: var(--ehub-field-bg); color: var(--ehub-muted); }
-.ts-role-group-label.member  { background: var(--ehub-field-bg); color: var(--ehub-muted); }
-html[data-bs-theme="dark"] .ts-role-group-label.captain { color: var(--ehub-gold); }
-html[data-bs-theme="dark"] .ts-role-group-label.coach   { color: #c89bff; background: color-mix(in srgb, #b06bff 18%, transparent); }
-html[data-bs-theme="dark"] .ts-role-group-label.starter { color: #51cf66; background: color-mix(in srgb, #51cf66 14%, transparent); }
-.ts-role-group-count { font-size: .75rem; font-weight: 600; color: var(--ehub-muted); }
-.ts-roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
-.ts-player-card {
-  display: flex; align-items: center; gap: 14px; padding: 16px;
-  background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 14px;
-  transition: border-color .15s, transform .15s;
-  text-decoration: none; color: inherit;
-}
-.ts-player-card:hover { border-color: color-mix(in srgb, var(--ehub-primary) 40%, var(--ehub-line)); transform: translateY(-2px); text-decoration: none; color: inherit; }
-.ts-player-av { position: relative; overflow: hidden; width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: .01em; text-shadow: 0 1px 4px rgba(0,0,0,.3); }
-.ts-player-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
-.ts-player-info { min-width: 0; flex: 1; }
-.ts-player-name { font-size: .95rem; font-weight: 700; color: var(--ehub-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ts-player-handle { font-size: .78rem; color: var(--ehub-muted); margin-top: 1px; }
-.ts-role-chip { font-size: .68rem; font-weight: 700; padding: 2px 9px; border-radius: 50rem; display: inline-block; margin-top: 5px; letter-spacing: .02em; }
-.ts-role-chip.captain { background: color-mix(in srgb, var(--ehub-gold) 20%, transparent); color: color-mix(in srgb, var(--ehub-gold), #000 28%); }
-.ts-role-chip.vice    { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
-.ts-role-chip.starter { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: #1f8a5b; }
-.ts-role-chip.reserve { background: var(--ehub-field-bg); color: var(--ehub-muted); }
-.ts-role-chip.coach   { background: color-mix(in srgb, #7C3AED 14%, transparent); color: #7C3AED; }
-.ts-role-chip.member  { background: var(--ehub-field-bg); color: var(--ehub-muted); }
-html[data-bs-theme="dark"] .ts-role-chip.captain { color: var(--ehub-gold); }
-html[data-bs-theme="dark"] .ts-role-chip.starter { color: #51cf66; background: color-mix(in srgb, #51cf66 14%, transparent); }
-html[data-bs-theme="dark"] .ts-role-chip.coach   { color: #c89bff; background: color-mix(in srgb, #b06bff 18%, transparent); }
 
 /* ── Empty ── */
 .ts-empty { text-align: center; padding: 56px 20px; color: var(--ehub-muted); }

@@ -49,5 +49,8 @@ export default {
     title: '¿Listo para conectar tu organización a eHub?',
     sub: 'Crea tu cuenta gratis y publica tu primer evento en minutos.',
     btn: 'Crear mi cuenta',
+    title_logged: '¿Listo para dar el próximo paso?',
+    sub_logged: 'Accede a tus organizaciones y publica tu próximo evento en minutos.',
+    btn_logged: 'Ir a mis organizaciones',
   },
 }
