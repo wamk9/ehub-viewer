@@ -30,7 +30,7 @@ function checkOverflow() {
 
 <template>
   <div class="ehub-filter-bar">
-    <div class="container-fluid" :class="{ 'px-4': !isOverflow }">
+    <div class="container-fluid px-4">
 
       <!-- Ghost: always rendered, invisible, measures natural content width -->
       <div ref="ghostRef" class="efb-ghost" aria-hidden="true">
@@ -42,28 +42,32 @@ function checkOverflow() {
         <div v-if="!isOverflow" class="ehub-filter-inner">
           <slot name="filters" />
         </div>
-
-        <!-- Hamburger trigger (content overflows) -->
-        <button
-          v-if="isOverflow"
-          class="efb-burger"
-          :class="{ active: panelOpen }"
-          @click="panelOpen = !panelOpen"
-        >
-          <font-awesome-icon :icon="['fas', panelOpen ? 'xmark' : 'sliders']" />
-          {{ $t('common.ui.filters') }}
-        </button>
-
       </div>
 
-      <!-- Panel dropdown (overflow mode only) -->
-      <Transition name="efb-slide">
-        <div v-if="isOverflow && panelOpen" class="efb-panel">
+    </div>
+
+    <!-- Hamburger trigger (content overflows) -->
+    <button
+      v-if="isOverflow"
+      class="efb-burger"
+      :class="{ active: panelOpen }"
+      @click="panelOpen = !panelOpen"
+    >
+      <div class="container-fluid px-4 efb-burger-inner">
+        <font-awesome-icon :icon="['fas', panelOpen ? 'xmark' : 'sliders']" />
+        {{ $t('common.ui.filters') }}
+      </div>
+    </button>
+
+    <!-- Panel dropdown (overflow mode only) -->
+    <Transition name="efb-slide">
+      <div v-if="isOverflow && panelOpen" class="efb-panel">
+        <div class="container-fluid px-4">
           <slot name="filters" />
         </div>
-      </Transition>
+      </div>
+    </Transition>
 
-    </div>
   </div>
 </template>
 
@@ -72,4 +76,8 @@ function checkOverflow() {
 .efb-slide-leave-active { transition: opacity .15s ease, transform .15s ease; }
 .efb-slide-enter-from,
 .efb-slide-leave-to { opacity: 0; transform: translateY(-6px); }
+
+.efb-burger { display: flex; width: 100%; padding: 0; }
+.efb-burger-inner { display: flex; align-items: center; gap: 7px; padding-top: 5px; padding-bottom: 5px; }
+.efb-panel .container-fluid { display: flex; flex-wrap: wrap; gap: 6px; }
 </style>
