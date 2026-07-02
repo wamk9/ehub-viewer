@@ -1,12 +1,16 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import EhubFilterBar from '@/components/EhubFilterBar.vue'
 import EhubEventFeed from '@/components/EhubEventFeed.vue'
+import EhubEventCard from '@/components/EhubEventCard.vue'
+import Event from '@/helpers/communication/Event.js'
 
 const { t } = useI18n()
 const store    = useStore()
+const router   = useRouter()
 const isLogged = computed(() => !!store.getters.getToken)
 
 const ALL_CATEGORIES = [
@@ -19,6 +23,7 @@ const ALL_CATEGORIES = [
 const feeFilter      = ref('all')
 const modeFilter     = ref('all')
 const categoryFilter = ref('')
+const statusFilter   = ref('all')
 const searchQuery    = ref('')
 const debouncedName  = ref('')
 
@@ -28,15 +33,46 @@ watch(searchQuery, (val) => {
   debounceTimer = setTimeout(() => { debouncedName.value = val.trim() }, 400)
 })
 
-const feedParams = computed(() => {
+const eventsParams = computed(() => {
   const p = {}
   if (debouncedName.value)          p.name      = debouncedName.value
   if (modeFilter.value !== 'all')   p.runmode   = modeFilter.value
   if (categoryFilter.value)          p.category  = categoryFilter.value
   if (feeFilter.value === 'free')    p.price_max = 0
   if (feeFilter.value === 'paid')    p.price_min = 0.01
+  if (statusFilter.value !== 'all')  p.status    = statusFilter.value
   return p
 })
+
+// ── All events (paginated grid) ─────────────────────────────────────
+const PAGE_SIZE = 12
+const eventsList    = ref([])
+const eventsTotal   = ref(0)
+const eventsPage    = ref(1)
+const eventsLoading = ref(false)
+
+const hasMoreEvents = computed(() => eventsList.value.length < eventsTotal.value)
+
+async function fetchEvents(page = 1, append = false) {
+  eventsLoading.value = true
+  const result = await Event.search({ ...eventsParams.value, page, per_page: PAGE_SIZE })
+  eventsLoading.value = false
+  if (result.code !== 200) return
+  eventsTotal.value = result.data.total
+  eventsPage.value  = result.data.current_page
+  eventsList.value  = append ? [...eventsList.value, ...result.data.data] : result.data.data
+}
+
+function loadMoreEvents() {
+  fetchEvents(eventsPage.value + 1, true)
+}
+
+function goToEvent(event) {
+  router.push(`/org/${event.org_route}/event/${event.route}`)
+}
+
+watch(eventsParams, () => fetchEvents(1), { deep: true })
+onMounted(() => fetchEvents(1))
 </script>
 
 <template>
@@ -94,6 +130,22 @@ const feedParams = computed(() => {
           </option>
         </select>
       </div>
+      <span class="fchip-sep"></span>
+      <button class="fchip" :class="{ active: statusFilter === 'all' }" @click="statusFilter = 'all'">
+        {{ $t('pages.homepage.events.filters.status.all') }}
+      </button>
+      <button class="fchip" :class="{ active: statusFilter === 'open' }" @click="statusFilter = 'open'">
+        {{ $t('pages.homepage.events.filters.status.open') }}
+      </button>
+      <button class="fchip" :class="{ active: statusFilter === 'in_progress' }" @click="statusFilter = 'in_progress'">
+        {{ $t('pages.homepage.events.filters.status.in_progress') }}
+      </button>
+      <button class="fchip" :class="{ active: statusFilter === 'full' }" @click="statusFilter = 'full'">
+        {{ $t('pages.homepage.events.filters.status.full') }}
+      </button>
+      <button class="fchip" :class="{ active: statusFilter === 'closed' }" @click="statusFilter = 'closed'">
+        {{ $t('pages.homepage.events.filters.status.closed') }}
+      </button>
     </template>
   </EhubFilterBar>
 
@@ -106,9 +158,44 @@ const feedParams = computed(() => {
         <EhubEventFeed type="following_teams" />
       </template>
 
-      <!-- Public feeds -->
-      <EhubEventFeed type="upcoming" :params="feedParams" />
-      <EhubEventFeed type="latest"   :params="feedParams" />
+      <div class="feed-divider"></div>
+
+      <!-- All available events -->
+      <section class="all-events-section">
+        <div class="ae-header">
+          <h2 class="ae-title">{{ $t('pages.homepage.events.all') }}</h2>
+          <span v-if="eventsTotal" class="ae-count">{{ $t('pages.homepage.events.results', { n: eventsTotal }) }}</span>
+        </div>
+
+        <!-- Loading -->
+        <div v-if="eventsLoading && !eventsList.length" class="events-grid">
+          <div v-for="i in 8" :key="i" class="skel" :style="{ height: '340px', borderRadius: '16px', animationDelay: (i * 0.06) + 's' }"></div>
+        </div>
+
+        <!-- Empty -->
+        <div v-else-if="!eventsList.length" class="ae-empty">
+          <div class="ae-empty-card">
+            <font-awesome-icon :icon="['fas', 'calendar-days']" />
+            <span>{{ $t('pages.homepage.events.empty') }}</span>
+          </div>
+        </div>
+
+        <!-- Grid -->
+        <template v-else>
+          <div class="events-grid">
+            <div v-for="event in eventsList" :key="event.id" class="ae-card-wrap" @click="goToEvent(event)">
+              <EhubEventCard :event="event" :org-color="event.org_color" :org-name="event.org_name" />
+            </div>
+          </div>
+
+          <div class="ae-loadmore">
+            <button v-if="hasMoreEvents" class="btn btn-outline-primary round px-4" :disabled="eventsLoading" @click="loadMoreEvents">
+              {{ $t('pages.homepage.events.load_more') }}
+            </button>
+            <p v-else class="ae-all-loaded">{{ $t('pages.homepage.events.all_loaded') }}</p>
+          </div>
+        </template>
+      </section>
     </div>
   </main>
 </template>
@@ -161,5 +248,71 @@ const feedParams = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 36px;
+}
+
+.feed-divider {
+  border-top: 1px solid var(--ehub-line);
+}
+
+/* ── All events section ── */
+.ae-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 12px;
+}
+.ae-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ehub-ink);
+  margin: 0;
+}
+.ae-count {
+  font-size: .85rem;
+  color: var(--ehub-muted);
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.ae-card-wrap { cursor: pointer; }
+
+.ae-empty {
+  display: flex;
+  justify-content: flex-start;
+  padding: 8px 4px;
+}
+.ae-empty-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 300px;
+  min-height: 340px;
+  padding: 32px 20px;
+  border: 1px dashed var(--ehub-line);
+  border-radius: 16px;
+  background: var(--ehub-field-bg);
+  color: var(--ehub-muted);
+  font-size: .88rem;
+  text-align: center;
+}
+.ae-empty-card svg {
+  font-size: 1.5rem;
+  opacity: .5;
+}
+
+.ae-loadmore {
+  text-align: center;
+  margin-top: 28px;
+}
+.ae-all-loaded {
+  color: var(--ehub-muted);
+  font-size: .85rem;
+  margin: 0;
 }
 </style>

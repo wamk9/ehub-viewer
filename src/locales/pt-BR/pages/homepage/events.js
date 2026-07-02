@@ -24,7 +24,14 @@ export default {
     online: 'Online',
     irl: 'Presencial',
     category_all: 'Todas as categorias',
-    sub_all: 'Todas as subcategorias'
+    sub_all: 'Todas as subcategorias',
+    status: {
+      all: 'Todos os status',
+      open: 'Inscrições abertas',
+      in_progress: 'Em andamento',
+      full: 'Cheios',
+      closed: 'Encerrados'
+    }
   },
   sections: {
     upcoming: 'Próximos eventos',

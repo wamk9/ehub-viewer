@@ -24,7 +24,14 @@ export default {
     online: 'Online',
     irl: 'In person',
     category_all: 'All categories',
-    sub_all: 'All subcategories'
+    sub_all: 'All subcategories',
+    status: {
+      all: 'All statuses',
+      open: 'Registrations open',
+      in_progress: 'In progress',
+      full: 'Full',
+      closed: 'Closed'
+    }
   },
   sections: {
     upcoming: 'Upcoming events',
