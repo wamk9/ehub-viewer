@@ -1,8 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 
-defineProps({})
-
 const wrapRef  = ref(null)
 const ghostRef = ref(null)
 
@@ -32,7 +30,7 @@ function checkOverflow() {
 
 <template>
   <div class="ehub-filter-bar">
-    <div class="container-fluid px-4">
+    <div class="container-fluid" :class="{ 'px-4': !isOverflow }">
 
       <!-- Ghost: always rendered, invisible, measures natural content width -->
       <div ref="ghostRef" class="efb-ghost" aria-hidden="true">

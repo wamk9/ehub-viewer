@@ -591,14 +591,4 @@ onBeforeUnmount(() => {
   opacity: .4;
   margin-bottom: 12px;
 }
-.tab-pane :deep(.ehub-filter-bar) {
-  position: static;
-  background: transparent;
-  backdrop-filter: none;
-  margin-bottom: 16px;
-}
-.tab-pane :deep(.ehub-filter-bar .container-fluid) {
-  padding-left: 0;
-  padding-right: 0;
-}
 </style>
