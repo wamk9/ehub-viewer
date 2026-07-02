@@ -162,9 +162,8 @@ onMounted(() => fetchEvents(1))
 
       <!-- All available events -->
       <section class="all-events-section">
-        <div class="ae-header">
-          <h2 class="ae-title">{{ $t('pages.homepage.events.all') }}</h2>
-          <span v-if="eventsTotal" class="ae-count">{{ $t('pages.homepage.events.results', { n: eventsTotal }) }}</span>
+        <div v-if="eventsTotal" class="ae-header">
+          <span class="ae-count">{{ $t('pages.homepage.events.results', { n: eventsTotal }) }}</span>
         </div>
 
         <!-- Loading -->
@@ -260,12 +259,6 @@ onMounted(() => fetchEvents(1))
   align-items: center;
   justify-content: space-between;
   padding: 0 4px 12px;
-}
-.ae-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--ehub-ink);
-  margin: 0;
 }
 .ae-count {
   font-size: .85rem;
