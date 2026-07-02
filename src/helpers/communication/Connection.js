@@ -48,8 +48,8 @@ const Api = {
 
   async getAsync(route, params) {
     return await axios.get(route, {
-      ...params,
-      headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache', 'Pragma': 'no-cache', ...(params?.headers ?? {}) }
+      params,
+      headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
     })
     .then(response => {
       return { code: response.status, response: response.data };
