@@ -85,7 +85,10 @@ const eventsLoading = ref(false)
 const articles = ref([])
 const articlesLoaded = ref(false)
 const articlesLoading = ref(false)
-const activeTab = ref('events')
+const activeTab = computed(() => route.query.tab || 'about')
+function tabTo(key) {
+  return { query: { ...route.query, tab: key } }
+}
 let orgSSE = null
 
 // ── Auth ────────────────────────────────────────────────────────────
@@ -127,10 +130,10 @@ const registeredText = computed(() => monthYear(org.value.created_at))
 
 // ── Tabs ─────────────────────────────────────────────────────────────
 const tabsList = computed(() => [
-  { key: 'about',   label: t('pages.organization.show.tabs.about'),   icon: ['fas', 'circle-info'] },
-  { key: 'events',  label: t('pages.organization.show.tabs.events'),  icon: ['fas', 'calendar-days'], count: events.value.length },
-  { key: 'news',    label: t('pages.organization.show.tabs.news'),    icon: ['fas', 'newspaper'],     count: articles.value.length },
-  { key: 'members', label: t('pages.organization.show.tabs.members'), icon: ['fas', 'users'],          count: members.value.length },
+  { key: 'about',   label: t('pages.organization.show.tabs.about'),   icon: ['fas', 'circle-info'],    to: tabTo('about') },
+  { key: 'events',  label: t('pages.organization.show.tabs.events'),  icon: ['fas', 'calendar-days'],  count: events.value.length,   to: tabTo('events') },
+  { key: 'news',    label: t('pages.organization.show.tabs.news'),    icon: ['fas', 'newspaper'],      count: articles.value.length, to: tabTo('news') },
+  { key: 'members', label: t('pages.organization.show.tabs.members'), icon: ['fas', 'users'],          count: members.value.length,  to: tabTo('members') },
 ])
 
 // ── Roster (normalized for EhubRoster) ──────────────────────────────
@@ -186,11 +189,13 @@ async function loadArticles() {
   if (result.code === 200) articles.value = result.data ?? []
 }
 
-watch(activeTab, (tab) => {
+function loadTabData(tab) {
   if (tab === 'events'  && !eventsLoaded.value)   loadEvents()
   if (tab === 'news'    && !articlesLoaded.value) loadArticles()
   if (tab === 'members' && !membersLoaded.value)  loadMembers()
-})
+}
+
+watch(activeTab, loadTabData)
 
 // ── Follow ───────────────────────────────────────────────────────────
 async function toggleFollow() {
@@ -227,6 +232,7 @@ onMounted(async () => {
   orgSSE.connect()
 
   loadEvents()
+  loadTabData(activeTab.value)
 })
 
 onBeforeUnmount(() => {
@@ -340,7 +346,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- TABS -->
-    <EhubTabs :tabs="tabsList" v-model="activeTab" />
+    <EhubTabs :tabs="tabsList" :model-value="activeTab" />
 
     <!-- ABOUT TAB -->
     <section class="tab-pane" :class="{ active: activeTab === 'about' }">

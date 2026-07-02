@@ -2,10 +2,14 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 
 const props = defineProps({
-  tabs: { type: Array, required: true }, // [{ key, label, icon, count }]
+  tabs: { type: Array, required: true }, // [{ key, label, icon, count, to }]
   modelValue: { type: String, required: true },
 })
 const emit = defineEmits(['update:modelValue'])
+
+function tag(tab) {
+  return tab.to ? 'router-link' : 'button'
+}
 
 const wrapRef = ref(null)
 const ghostRef = ref(null)
@@ -56,15 +60,17 @@ function select(key) {
 
     <!-- Inline tabs (fits on screen) -->
     <div v-if="!isOverflow" class="ehub-tabs">
-      <button
+      <component
+        :is="tag(tab)"
         v-for="tab in tabs" :key="tab.key"
+        :to="tab.to" :replace="!!tab.to"
         class="tab-btn" :class="{ active: tab.key === modelValue }"
-        @click="select(tab.key)"
+        @click="!tab.to && select(tab.key)"
       >
         <font-awesome-icon v-if="tab.icon" :icon="tab.icon" />
         {{ tab.label }}
         <span v-if="tab.count" class="pill">{{ tab.count }}</span>
-      </button>
+      </component>
     </div>
 
     <!-- Hamburger trigger (content overflows) -->
@@ -83,15 +89,17 @@ function select(key) {
     <!-- Panel dropdown (overflow mode only) -->
     <Transition name="et-slide">
       <div v-if="isOverflow && panelOpen" class="et-panel">
-        <button
+        <component
+          :is="tag(tab)"
           v-for="tab in tabs" :key="'p-' + tab.key"
+          :to="tab.to" :replace="!!tab.to"
           class="et-panel-item" :class="{ active: tab.key === modelValue }"
-          @click="select(tab.key)"
+          @click="!tab.to && select(tab.key); panelOpen = false"
         >
           <font-awesome-icon v-if="tab.icon" :icon="tab.icon" />
           {{ tab.label }}
           <span v-if="tab.count" class="pill">{{ tab.count }}</span>
-        </button>
+        </component>
       </div>
     </Transition>
 
