@@ -17,12 +17,16 @@ const Event = {
         const result = await Api.getAsync('/events/latest', params);
         return { code: result.code, data: result.response?.message ?? [] };
     },
-    async feedFollowingOrgs() {
-        const result = await Api.getAsync('/events/following-orgs');
+    async feedParticipating(params = {}) {
+        const result = await Api.getAsync('/events/participating', params);
         return { code: result.code, data: result.response?.message ?? [] };
     },
-    async feedFollowingTeams() {
-        const result = await Api.getAsync('/events/following-teams');
+    async feedFollowingOrgs(params = {}) {
+        const result = await Api.getAsync('/events/following-orgs', params);
+        return { code: result.code, data: result.response?.message ?? [] };
+    },
+    async feedFollowingTeams(params = {}) {
+        const result = await Api.getAsync('/events/following-teams', params);
         return { code: result.code, data: result.response?.message ?? [] };
     },
 };

@@ -154,8 +154,9 @@ onMounted(() => fetchEvents(1))
     <div class="home-feeds">
       <!-- Auth feeds: only when logged in -->
       <template v-if="isLogged">
-        <EhubEventFeed type="following_orgs"  />
-        <EhubEventFeed type="following_teams" />
+        <EhubEventFeed type="participating"   :params="eventsParams" />
+        <EhubEventFeed type="following_orgs"  :params="eventsParams" />
+        <EhubEventFeed type="following_teams" :params="eventsParams" />
       </template>
 
       <div class="feed-divider"></div>

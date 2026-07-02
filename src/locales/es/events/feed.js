@@ -1,6 +1,7 @@
 export default {
   upcoming:          { title: 'Próximos eventos' },
   latest:            { title: 'Últimos eventos registrados' },
+  participating:     { title: 'Eventos en los que participo' },
   following_orgs:    { title: 'Eventos de organizaciones que sigo' },
   following_teams:   { title: 'Eventos donde participarán equipos que sigo' },
   empty:             'No se encontraron eventos',

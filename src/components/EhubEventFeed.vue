@@ -9,6 +9,7 @@ import EhubEventCard from '@/components/EhubEventCard.vue'
 const TYPE_METHOD = {
   upcoming:       'feedUpcoming',
   latest:         'feedLatest',
+  participating:  'feedParticipating',
   following_orgs: 'feedFollowingOrgs',
   following_teams:'feedFollowingTeams',
 }
@@ -29,20 +30,17 @@ const loading = ref(true)
 const sectionTitle = computed(() => props.title || t(`events.feed.${props.type}.title`))
 
 const resolvedMethod = computed(() => props.authMethod || TYPE_METHOD[props.type] || 'feedUpcoming')
-const isAuthFeed     = computed(() => ['feedFollowingOrgs', 'feedFollowingTeams'].includes(resolvedMethod.value))
 
 async function load() {
   loading.value = true
   const method = resolvedMethod.value
-  const result = isAuthFeed.value
-    ? await Event[method]()
-    : await Event[method](props.params)
+  const result = await Event[method](props.params)
   loading.value = false
   if (result.code === 200) events.value = result.data ?? []
 }
 
 onMounted(load)
-watch(() => props.params, () => { if (!isAuthFeed.value) load() }, { deep: true })
+watch(() => props.params, load, { deep: true })
 
 function goToEvent(event) {
   router.push(`/org/${event.org_route}/event/${event.route}`)
