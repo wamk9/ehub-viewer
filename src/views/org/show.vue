@@ -12,11 +12,19 @@ import { toast } from '@/helpers/toast.js'
 import EhubEventCard from '@/components/EhubEventCard.vue'
 import EhubTabs from '@/components/EhubTabs.vue'
 import EhubRoster from '@/components/EhubRoster.vue'
+import EhubFilterBar from '@/components/EhubFilterBar.vue'
 
 const route = useRoute()
 const router = useRouter()
 const { t, locale } = useI18n()
 const store = useStore()
+
+const ALL_CATEGORIES = [
+  'simracing', 'esports-fps', 'esports-moba', 'esports-fighting',
+  'esports-strategy', 'esports-sports', 'motorsport', 'motorbike',
+  'cycling', 'running', 'swimming', 'triathlon', 'hiking', 'crossfit',
+  'rowing', 'archery', 'chess', 'drone-racing',
+]
 
 const CAT_CONFIG = {
   simracing:          { grad: ['#0098D8', '#00d4ff'], icon: 'flag-checkered' },
@@ -135,6 +143,29 @@ const tabsList = computed(() => [
   { key: 'news',    label: t('pages.organization.show.tabs.news'),    icon: ['fas', 'newspaper'],      count: articles.value.length, to: tabTo('news') },
   { key: 'members', label: t('pages.organization.show.tabs.members'), icon: ['fas', 'users'],          count: members.value.length,  to: tabTo('members') },
 ])
+
+// ── Events filter bar ────────────────────────────────────────────────
+const feeFilter      = ref('all')
+const modeFilter     = ref('all')
+const categoryFilter = ref('')
+const statusFilter   = ref('all')
+
+function eventStatus(e) {
+  if (e.finished) return 'closed'
+  if (e.max_registrations && e.registrations_count >= e.max_registrations) return 'full'
+  if (e.initialized) return 'in_progress'
+  return 'open'
+}
+
+const filteredEvents = computed(() => {
+  return events.value
+    .filter(e => feeFilter.value === 'all'  || (feeFilter.value === 'free' ? !e.fee : e.fee > 0))
+    .filter(e => modeFilter.value === 'all' || e.runmode === modeFilter.value)
+    .filter(e => !categoryFilter.value      || e.category === categoryFilter.value)
+    .filter(e => statusFilter.value === 'all' || eventStatus(e) === statusFilter.value)
+    .slice()
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+})
 
 // ── Roster (normalized for EhubRoster) ──────────────────────────────
 const rosterMembers = computed(() => members.value.map(m => ({
@@ -421,6 +452,55 @@ onBeforeUnmount(() => {
 
     <!-- EVENTS TAB -->
     <section class="tab-pane" :class="{ active: activeTab === 'events' }">
+      <EhubFilterBar v-if="events.length">
+        <template #filters>
+          <button class="fchip" :class="{ active: feeFilter === 'all' }"  @click="feeFilter = 'all'">
+            {{ $t('pages.homepage.events.filters.all') }}
+          </button>
+          <button class="fchip" :class="{ active: feeFilter === 'free' }" @click="feeFilter = 'free'">
+            {{ $t('pages.homepage.events.filters.free') }}
+          </button>
+          <button class="fchip" :class="{ active: feeFilter === 'paid' }" @click="feeFilter = 'paid'">
+            {{ $t('pages.homepage.events.filters.paid') }}
+          </button>
+          <span class="fchip-sep"></span>
+          <button class="fchip" :class="{ active: modeFilter === 'all' }"    @click="modeFilter = 'all'">
+            {{ $t('pages.homepage.events.filters.all') }}
+          </button>
+          <button class="fchip" :class="{ active: modeFilter === 'online' }" @click="modeFilter = 'online'">
+            {{ $t('pages.homepage.events.filters.online') }}
+          </button>
+          <button class="fchip" :class="{ active: modeFilter === 'irl' }"    @click="modeFilter = 'irl'">
+            {{ $t('pages.homepage.events.filters.irl') }}
+          </button>
+          <span class="fchip-sep"></span>
+          <div class="fchip-sel">
+            <select v-model="categoryFilter" class="fchip-select">
+              <option value="">{{ $t('pages.homepage.events.filters.category_all') }}</option>
+              <option v-for="cat in ALL_CATEGORIES" :key="cat" :value="cat">
+                {{ $t(`categories.names.${cat}`) }}
+              </option>
+            </select>
+          </div>
+          <span class="fchip-sep"></span>
+          <button class="fchip" :class="{ active: statusFilter === 'all' }" @click="statusFilter = 'all'">
+            {{ $t('pages.homepage.events.filters.status.all') }}
+          </button>
+          <button class="fchip" :class="{ active: statusFilter === 'open' }" @click="statusFilter = 'open'">
+            {{ $t('pages.homepage.events.filters.status.open') }}
+          </button>
+          <button class="fchip" :class="{ active: statusFilter === 'in_progress' }" @click="statusFilter = 'in_progress'">
+            {{ $t('pages.homepage.events.filters.status.in_progress') }}
+          </button>
+          <button class="fchip" :class="{ active: statusFilter === 'full' }" @click="statusFilter = 'full'">
+            {{ $t('pages.homepage.events.filters.status.full') }}
+          </button>
+          <button class="fchip" :class="{ active: statusFilter === 'closed' }" @click="statusFilter = 'closed'">
+            {{ $t('pages.homepage.events.filters.status.closed') }}
+          </button>
+        </template>
+      </EhubFilterBar>
+
       <div v-if="eventsLoading" class="cards-grid">
         <div v-for="i in 6" :key="i" class="skel" :style="{ height: '260px', borderRadius: '16px', animationDelay: (i * 0.08) + 's' }"></div>
       </div>
@@ -428,9 +508,13 @@ onBeforeUnmount(() => {
         <div class="ico"><font-awesome-icon :icon="['fas', 'calendar']" /></div>
         <p class="mb-0">{{ $t('pages.organization.show.events.empty') }}</p>
       </div>
+      <div v-else-if="!filteredEvents.length" class="empty-state">
+        <div class="ico"><font-awesome-icon :icon="['fas', 'sliders']" /></div>
+        <p class="mb-0">{{ $t('pages.search.results.empty') }}</p>
+      </div>
       <div v-else class="cards-grid">
         <router-link
-          v-for="event in events"
+          v-for="event in filteredEvents"
           :key="event.id"
           :to="`/org/${$route.params.orgRoute}/event/${event.route}`"
           class="text-decoration-none"
@@ -506,5 +590,15 @@ onBeforeUnmount(() => {
   font-size: 2.4rem;
   opacity: .4;
   margin-bottom: 12px;
+}
+.tab-pane :deep(.ehub-filter-bar) {
+  position: static;
+  background: transparent;
+  backdrop-filter: none;
+  margin-bottom: 16px;
+}
+.tab-pane :deep(.ehub-filter-bar .container-fluid) {
+  padding-left: 0;
+  padding-right: 0;
 }
 </style>
