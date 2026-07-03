@@ -5,6 +5,7 @@ import OrganizationBilling from '@/helpers/communication/OrganizationBilling.js'
 import SystemVars from '@/helpers/General/SystemVars';
 import { toast } from '@/helpers/toast.js';
 import EhubStatCard from '@/components/EhubStatCard.vue';
+import EventCreateWizard from '@/components/modules/org/manage/events/create.vue';
 
 const ORG_GRADS = [
   ['#0098D8', '#00d4ff'],
@@ -26,7 +27,7 @@ const ROLE_CLASS = {
 };
 
 export default {
-  components: { EhubStatCard },
+  components: { EhubStatCard, EventCreateWizard },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -538,7 +539,9 @@ export default {
 </script>
 
 <template>
-  <div class="mgmt-wrap">
+  <EventCreateWizard v-if="$route.name === 'manage-organization-events-create'" :show="true" :force-option="forceOption" />
+
+  <div v-else class="mgmt-wrap">
 
     <!-- ── SIDEBAR ── -->
     <aside class="mgmt-sidebar">
