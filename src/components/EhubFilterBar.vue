@@ -78,6 +78,6 @@ function checkOverflow() {
 .efb-slide-leave-to { opacity: 0; transform: translateY(-6px); }
 
 .efb-burger { display: flex; width: 100%; padding: 0; }
-.efb-burger-inner { display: flex; align-items: center; gap: 7px; padding-top: 5px; padding-bottom: 5px; }
+.efb-burger-inner { display: flex; align-items: center; gap: 7px; padding-top: 8px; padding-bottom: 8px; }
 .efb-panel .container-fluid { display: flex; flex-wrap: wrap; gap: 6px; }
 </style>
