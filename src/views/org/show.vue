@@ -13,6 +13,7 @@ import EhubEventCard from '@/components/EhubEventCard.vue'
 import EhubTabs from '@/components/EhubTabs.vue'
 import EhubRoster from '@/components/EhubRoster.vue'
 import EhubFilterBar from '@/components/EhubFilterBar.vue'
+import { categoryGradient } from '@/helpers/General/CategoryConfig.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -26,32 +27,8 @@ const ALL_CATEGORIES = [
   'rowing', 'archery', 'chess', 'drone-racing',
 ]
 
-const CAT_CONFIG = {
-  simracing:          { grad: ['#0098D8', '#00d4ff'], icon: 'flag-checkered' },
-  racingcars:         { grad: ['#0098D8', '#00d4ff'], icon: 'flag-checkered' },
-  rally:              { grad: ['#f08c00', '#ffc93c'], icon: 'car-side' },
-  'esports-fps':      { grad: ['#e23b3b', '#ff8a3b'], icon: 'crosshairs' },
-  'esports-moba':     { grad: ['#7C3AED', '#b06bff'], icon: 'dragon' },
-  'esports-fighting': { grad: ['#d6336c', '#ff6b9d'], icon: 'hand-fist' },
-  'esports-strategy': { grad: ['#1a6e4f', '#51cf66'], icon: 'chess-pawn' },
-  'esports-sports':   { grad: ['#2563eb', '#60a5fa'], icon: 'futbol' },
-  motorsport:         { grad: ['#f08c00', '#ffc93c'], icon: 'car-side' },
-  motorbike:          { grad: ['#dc4f00', '#ff8a3b'], icon: 'motorcycle' },
-  cycling:            { grad: ['#1971c2', '#4dabf7'], icon: 'bicycle' },
-  running:            { grad: ['#1f8a5b', '#51cf66'], icon: 'person-running' },
-  swimming:           { grad: ['#0284c7', '#38bdf8'], icon: 'person-swimming' },
-  triathlon:          { grad: ['#7C3AED', '#c084fc'], icon: 'trophy' },
-  hiking:             { grad: ['#4d7c0f', '#a3e635'], icon: 'mountain-sun' },
-  crossfit:           { grad: ['#9a3412', '#fb923c'], icon: 'dumbbell' },
-  rowing:             { grad: ['#1d4ed8', '#93c5fd'], icon: 'water' },
-  archery:            { grad: ['#92400e', '#fbbf24'], icon: 'bullseye' },
-  chess:              { grad: ['#495057', '#868e96'], icon: 'chess-knight' },
-  'drone-racing':     { grad: ['#0e7490', '#22d3ee'], icon: 'helicopter' },
-}
-
 function catGrad(category) {
-  const c = CAT_CONFIG[category]
-  return c ? `linear-gradient(135deg, ${c.grad[0]}, ${c.grad[1]})` : 'linear-gradient(135deg, #0098D8, #00d4ff)'
+  return categoryGradient(category)
 }
 
 function hexGrad(hex) {
