@@ -501,7 +501,7 @@ onBeforeUnmount(() => {
         </template>
       </EhubFilterBar>
 
-      <div v-if="eventsLoading" class="cards-grid px-2">
+      <div v-if="eventsLoading" class="cards-grid py-2">
         <div v-for="i in 6" :key="i" class="skel" :style="{ height: '260px', borderRadius: '16px', animationDelay: (i * 0.08) + 's' }"></div>
       </div>
       <div v-else-if="!events.length" class="empty-state">
@@ -512,7 +512,7 @@ onBeforeUnmount(() => {
         <div class="ico"><font-awesome-icon :icon="['fas', 'sliders']" /></div>
         <p class="mb-0">{{ $t('pages.search.results.empty') }}</p>
       </div>
-      <div v-else class="cards-grid px-2">
+      <div v-else class="cards-grid py-2">
         <router-link
           v-for="event in filteredEvents"
           :key="event.id"
