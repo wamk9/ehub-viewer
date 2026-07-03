@@ -1,5 +1,6 @@
 <script setup>
 import EhubMediaUpload from '@/components/EhubMediaUpload.vue'
+import ehubColorPicker from '@/components/inputs/ehub-color-picker.vue'
 
 defineProps({
   form: { type: Object, required: true },
@@ -31,6 +32,11 @@ defineProps({
     <div class="form-section">
       <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s1.logo') }}</label>
       <EhubMediaUpload v-model="form.logo_image" variant="logo" />
+    </div>
+
+    <div class="form-section">
+      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s1.color') }}</label>
+      <ehubColorPicker v-model="form.color" />
     </div>
   </div>
 </template>

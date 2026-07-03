@@ -15,7 +15,7 @@ export default {
     title: 'Basic Info', sub: 'Name, description and event cover.',
     name: 'Event name', namePh: 'e.g. GT3 Championship #3',
     desc: 'Description', descPh: 'Describe the event: goals, audience, highlights…',
-    cover: 'Event cover', logo: 'Event logo',
+    cover: 'Event cover', logo: 'Event logo', color: 'Accent color',
   },
   s2: {
     title: 'Category & Format', sub: 'Choose the category, mode and competition format.',

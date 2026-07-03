@@ -15,7 +15,7 @@ export default {
     title: 'Información Básica', sub: 'Nombre, descripción y portada del evento.',
     name: 'Nombre del evento', namePh: 'ej: GT3 Championship #3',
     desc: 'Descripción', descPh: 'Describe el evento: objetivos, público, aspectos destacados…',
-    cover: 'Portada del evento', logo: 'Logo del evento',
+    cover: 'Portada del evento', logo: 'Logo del evento', color: 'Color de acento',
   },
   s2: {
     title: 'Categoría & Formato', sub: 'Elige la categoría, modalidad y formato de la competición.',
