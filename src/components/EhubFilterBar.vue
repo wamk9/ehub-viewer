@@ -29,7 +29,7 @@ function checkOverflow() {
 </script>
 
 <template>
-  <div class="ehub-filter-bar">
+  <div class="ehub-filter-bar" :class="{ 'efb-responsive': isOverflow }">
     <div class="container-fluid px-4">
 
       <!-- Ghost: always rendered, invisible, measures natural content width -->
@@ -77,7 +77,8 @@ function checkOverflow() {
 .efb-slide-enter-from,
 .efb-slide-leave-to { opacity: 0; transform: translateY(-6px); }
 
+.efb-responsive { padding: 8px 0; }
 .efb-burger { display: flex; width: 100%; padding: 0; }
-.efb-burger-inner { display: flex; align-items: center; gap: 7px; padding-top: 8px; padding-bottom: 8px; }
+.efb-burger-inner { display: flex; align-items: center; gap: 7px; }
 .efb-panel .container-fluid { display: flex; flex-wrap: wrap; gap: 6px; }
 </style>
