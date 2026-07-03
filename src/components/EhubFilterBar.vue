@@ -37,7 +37,7 @@ function checkOverflow() {
         <slot name="filters" />
       </div>
 
-      <div ref="wrapRef" class="ehub-filter-wrap">
+      <div ref="wrapRef" class="ehub-filter-wrap" :class="{ 'efb-wrap-collapsed': isOverflow }">
         <!-- Inline scrollable row (fits on screen) -->
         <div v-if="!isOverflow" class="ehub-filter-inner">
           <slot name="filters" />
@@ -78,7 +78,8 @@ function checkOverflow() {
 .efb-slide-leave-to { opacity: 0; transform: translateY(-6px); }
 
 .efb-responsive { padding: 8px 0; }
+.efb-wrap-collapsed { padding: 0; }
 .efb-burger { display: flex; width: 100%; padding: 0; }
-.efb-burger-inner { display: flex; align-items: center; gap: 7px; }
+.efb-burger-inner { display: flex; align-items: center; gap: 7px; min-height: 25px; }
 .efb-panel .container-fluid { display: flex; flex-wrap: wrap; gap: 6px; }
 </style>
