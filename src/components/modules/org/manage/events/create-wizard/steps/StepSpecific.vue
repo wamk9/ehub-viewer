@@ -64,7 +64,14 @@ async function loadForm() {
   props.form.form_schema_id = schema_id ?? null
   schemaDate.value = schema_updated_at ?? null
   const hydrated = hydrateRegex(advanced)
-  advancedForm.value = { ...hydrated, data: [...(hydrated.form ?? [])] }
+  const data = [...(hydrated.form ?? [])]
+
+  const saved = props.form.event_data || {}
+  data.forEach(page => (page ?? []).forEach(container => (container.inputs ?? []).forEach(input => {
+    if (input.name && saved[input.name] !== undefined) input.eventValue = saved[input.name]
+  })))
+
+  advancedForm.value = { ...hydrated, data }
 }
 
 onMounted(loadForm)

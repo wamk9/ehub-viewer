@@ -39,6 +39,7 @@ export default {
       active: 'Active',
       finished: 'Finished',
       upcoming: 'Upcoming',
+      draft: 'Draft',
     },
     tbl: {
       event: 'Event',

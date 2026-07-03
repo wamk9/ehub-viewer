@@ -21,6 +21,8 @@ export function createWizardForm() {
     cover_type: 'gradient',
     cover_gradient_index: 0,
     color: '#0098D8',
+    _existing_logo_url: '',
+    _existing_cover_url: '',
 
     // Step 2 — Categoria & Formato
     category: '',
@@ -73,6 +75,31 @@ export function createWizardForm() {
     // Step 9 — Revisão
     publication: 'published',
   })
+}
+
+export function populateFormFromEvent(form, event, baseUrl) {
+  const fields = [
+    'name', 'description', 'cover_type', 'cover_gradient_index', 'color',
+    'category', 'subcategory', 'runmode', 'format', 'location',
+    'form_schema_id', 'event_data', 'event_fields', 'stage_fields', 'registration_form_template',
+    'entry_type', 'team_size', 'max_registrations', 'min_registrations',
+    'fee', 'currency', 'prize_pool_amount', 'prize_pool_currency', 'requirements',
+    'registration_deadline', 'start_at', 'end_at', 'timezone',
+    'rules', 'tech_requirements', 'streaming_twitch', 'streaming_youtube',
+    'route', 'meta_title', 'meta_description', 'publication',
+  ]
+  for (const key of fields) {
+    if (event[key] !== undefined && event[key] !== null) form[key] = event[key]
+  }
+  form.route_manually_edited = true
+  if (event.logo_image) form._existing_logo_url = baseUrl + 'storage/' + event.logo_image
+  if (event.cover_image) form._existing_cover_url = baseUrl + 'storage/' + event.cover_image
+  if (Array.isArray(event.stages)) {
+    form.stages = event.stages.map(s => ({
+      id: s.id, name: s.name, route: s.route, stage_type: s.stage_type,
+      start_at: s.start_at, config: s.config || {}, _persisted: true,
+    }))
+  }
 }
 
 export function buildEventPayload(form) {

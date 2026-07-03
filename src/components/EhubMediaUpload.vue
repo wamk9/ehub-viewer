@@ -1,44 +1,54 @@
 <script setup>
-import { useI18n } from 'vue-i18n'
-import ehubProfileImage from '@/components/inputs/ehub-profile-image.vue'
-import { GRADIENT_SWATCHES } from '@/helpers/General/CategoryConfig.js'
+import { computed } from 'vue'
+import EhubProfileImageUpload from '@/components/inputs/EhubProfileImageUpload.vue'
+import { GRADIENT_SWATCHES, gradientByIndex } from '@/helpers/General/CategoryConfig.js'
 
 const props = defineProps({
-  modelValue: { type: String, default: '' },
+  modelValue: { type: String, default: '' }, // new base64 selection, empty if unchanged/none
+  existingUrl: { type: String, default: '' }, // already-persisted image URL (edit mode)
   gradientIndex: { type: Number, default: 0 },
   variant: { type: String, default: 'logo' }, // 'logo' | 'cover'
 })
-const emit = defineEmits(['update:modelValue', 'update:gradientIndex'])
+const emit = defineEmits(['update:modelValue', 'update:existingUrl', 'update:gradientIndex'])
 
-const { t } = useI18n()
+function onChange(file) {
+  if (!file) { emit('update:modelValue', ''); return }
+  const reader = new FileReader()
+  reader.onload = e => emit('update:modelValue', e.target.result)
+  reader.readAsDataURL(file)
+}
 
-function remove() {
+function onRemove() {
   emit('update:modelValue', '')
+  emit('update:existingUrl', '')
 }
 
 function selectGradient(i) {
   emit('update:gradientIndex', i)
 }
+
+const fallbackStyle = computed(() => props.variant === 'cover'
+  ? { background: gradientByIndex(props.gradientIndex) }
+  : {})
+
+const currentUrl = computed(() => props.modelValue || props.existingUrl)
 </script>
 
 <template>
   <div class="emu-wrap">
-    <ehubProfileImage
-      :model-value="modelValue"
-      @update:model-value="v => emit('update:modelValue', v)"
-      :ratio="variant === 'cover' ? '21x9' : '1x1'"
-      :round-image="false"
-      :button-label="t(`common.mediaUpload.${variant === 'cover' ? 'coverDrop' : 'logoDrop'}`)"
-      :drop-label="t(`common.mediaUpload.${variant === 'cover' ? 'coverDrop' : 'logoDrop'}`)"
-    />
+    <EhubProfileImageUpload
+      :type="variant"
+      :current-url="currentUrl"
+      :fallback-style="fallbackStyle"
+      @change="onChange"
+      @remove="onRemove"
+    >
+      <template v-if="variant === 'cover'" #fallback>
+        <font-awesome-icon :icon="['fas', 'cloud-arrow-up']" style="color:#fff" />
+      </template>
+    </EhubProfileImageUpload>
 
-    <button v-if="modelValue" type="button" class="emu-remove-btn" @click="remove">
-      <font-awesome-icon :icon="['fas', 'xmark']" class="me-1" />{{ t('common.mediaUpload.remove') }}
-    </button>
-
-    <p class="emu-hint">{{ t(`common.mediaUpload.${variant === 'cover' ? 'coverHint' : 'logoHint'}`) }}</p>
-
-    <div v-if="variant === 'cover' && !modelValue" class="emu-swatch-row">
+    <div v-if="variant === 'cover' && !currentUrl" class="emu-swatch-row">
       <button
         v-for="(g, i) in GRADIENT_SWATCHES" :key="i"
         type="button" class="emu-grad-sw" :class="{ sel: i === gradientIndex }"
@@ -51,10 +61,7 @@ function selectGradient(i) {
 
 <style scoped>
 .emu-wrap { width: 100%; }
-.emu-remove-btn { display: inline-flex; align-items: center; margin-top: 6px; padding: 5px 13px; border-radius: 50rem; border: 1px solid color-mix(in srgb, #e23b3b 30%, transparent); background: transparent; color: #e23b3b; font-size: .78rem; font-weight: 600; cursor: pointer; }
-.emu-remove-btn:hover { background: color-mix(in srgb, #e23b3b 10%, transparent); }
-.emu-hint { font-size: .78rem; color: var(--ehub-muted); margin: 6px 0 8px; }
-.emu-swatch-row { display: flex; gap: 7px; flex-wrap: wrap; }
+.emu-swatch-row { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 8px; }
 .emu-grad-sw { width: 32px; height: 32px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: transform .12s, box-shadow .12s; flex-shrink: 0; }
 .emu-grad-sw:hover { transform: scale(1.1); }
 .emu-grad-sw.sel { border-color: var(--ehub-ink); box-shadow: 0 0 0 2px var(--ehub-card), 0 0 0 4px var(--ehub-ink); transform: scale(1.06); }

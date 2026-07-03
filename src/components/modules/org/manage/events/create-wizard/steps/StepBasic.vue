@@ -26,12 +26,17 @@ defineProps({
 
     <div class="form-section">
       <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s1.cover') }}</label>
-      <EhubMediaUpload v-model="form.cover_image" v-model:gradient-index="form.cover_gradient_index" variant="cover" />
+      <EhubMediaUpload
+        v-model="form.cover_image"
+        v-model:existing-url="form._existing_cover_url"
+        v-model:gradient-index="form.cover_gradient_index"
+        variant="cover"
+      />
     </div>
 
     <div class="form-section">
       <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s1.logo') }}</label>
-      <EhubMediaUpload v-model="form.logo_image" variant="logo" />
+      <EhubMediaUpload v-model="form.logo_image" v-model:existing-url="form._existing_logo_url" variant="logo" />
     </div>
 
     <div class="form-section">

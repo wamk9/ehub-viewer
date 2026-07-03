@@ -175,7 +175,7 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/org/:orgRoute/manage/create-event',
+      path: '/org/:orgRoute/manage/create-event/:eventRoute?',
       name: 'manage-organization-events-create',
       component: () => import('@/views/org/manage.vue'),
       props: route => ({ forceOption: ['events'] }),

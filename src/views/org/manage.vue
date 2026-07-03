@@ -316,6 +316,7 @@ export default {
     },
 
     eventStatus(ev) {
+      if (ev.publication === 'draft') return 'draft';
       if (ev.finished) return 'finished';
       if (ev.start_at && new Date(ev.start_at) > new Date()) return 'upcoming';
       return 'active';
@@ -452,6 +453,10 @@ export default {
     },
 
     goToEvent(ev) {
+      if (ev.publication === 'draft') {
+        this.$router.push({ name: 'manage-organization-events-create', params: { orgRoute: this.orgRoute, eventRoute: ev.route } });
+        return;
+      }
       this.$router.push(`/org/${this.orgRoute}/event/${ev.route}/manage`);
     },
 
@@ -1398,6 +1403,7 @@ export default {
 .s-badge.active   { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: #1f8a5b; }
 .s-badge.finished { background: var(--ehub-field-bg); color: var(--ehub-muted); }
 .s-badge.upcoming { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.s-badge.draft    { background: color-mix(in srgb, #f08c00 16%, transparent); color: #f08c00; }
 
 /* ── Row actions ── */
 .act-row { display: flex; gap: 4px; }

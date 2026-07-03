@@ -7,7 +7,8 @@ import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js'
 import OrganizationEventStage from '@/helpers/communication/OrganizationEventStage.js'
 import { toast } from '@/helpers/toast.js'
 import { categoryGradient } from '@/helpers/General/CategoryConfig.js'
-import { createWizardForm, buildEventPayload, slugify } from './create-wizard/wizardState.js'
+import SystemVars from '@/helpers/General/SystemVars'
+import { createWizardForm, buildEventPayload, populateFormFromEvent, slugify } from './create-wizard/wizardState.js'
 import WizardSidebar from './create-wizard/WizardSidebar.vue'
 import StepBasic from './create-wizard/steps/StepBasic.vue'
 import StepCategoryFormat from './create-wizard/steps/StepCategoryFormat.vue'
@@ -31,6 +32,8 @@ const { t, tm } = useI18n()
 const form = createWizardForm()
 const currentStep = ref(1)
 const publishing = ref(false)
+const loadingEvent = ref(false)
+const isEditMode = computed(() => !!route.params.eventRoute)
 
 const STEP_COMPONENTS = [
   StepBasic, StepCategoryFormat, StepSpecific, StepFormBuilder, StepParticipants,
@@ -49,6 +52,18 @@ const orgGrad = computed(() => org.value.color
 onMounted(async () => {
   const result = await Organization.show(route.params.orgRoute)
   if (result.code === 200) org.value = result.data
+
+  if (isEditMode.value) {
+    loadingEvent.value = true
+    const eventResult = await OrganizationEvent.show(route.params.orgRoute, route.params.eventRoute)
+    loadingEvent.value = false
+    if (eventResult.code === 200) {
+      populateFormFromEvent(form, eventResult.data, SystemVars.baseUrl)
+    } else {
+      toast.error(t('pages.organization.manage.eventWizard.err.slug'))
+      goToEventsList()
+    }
+  }
 })
 
 watch(() => form.name, (val) => {
@@ -92,28 +107,53 @@ function goToEventsList() {
   router.push({ name: 'manage-organization-events', params: { orgRoute: route.params.orgRoute } })
 }
 
+async function saveCreate(payload) {
+  const result = await OrganizationEvent.store(route.params.orgRoute, payload)
+  if (!result.created) {
+    toast.error(result.message ?? t('pages.organization.manage.eventWizard.err.slug'))
+    return false
+  }
+  return true
+}
+
+async function saveEdit(payload) {
+  const result = await OrganizationEvent.update(route.params.orgRoute, route.params.eventRoute, payload)
+  if (result.code !== 200) {
+    toast.error(result.data?.message ?? t('pages.organization.manage.eventWizard.err.slug'))
+    return false
+  }
+  return true
+}
+
 async function submit(publication) {
   form.publication = publication
   if (!validateStep(8)) { currentStep.value = 8; return }
 
   publishing.value = true
   const payload = buildEventPayload(form)
-  const result = await OrganizationEvent.store(route.params.orgRoute, payload)
 
-  if (!result.created) {
-    publishing.value = false
-    toast.error(result.message ?? t('pages.organization.manage.eventWizard.err.slug'))
-    return
-  }
+  const ok = isEditMode.value
+    ? await saveEdit(payload)
+    : await saveCreate(payload)
+
+  if (!ok) { publishing.value = false; return }
 
   for (const stage of form.stages) {
-    await OrganizationEventStage.create(route.params.orgRoute, form.route, {
-      name: stage.name,
-      route: stage.route,
-      stage_type: stage.stage_type,
-      start_at: stage.start_at || null,
-      config: stage.config,
-    })
+    if (stage._persisted) {
+      await OrganizationEventStage.update(route.params.orgRoute, form.route, stage.route, {
+        name: stage.name,
+        start_at: stage.start_at || null,
+        config: stage.config,
+      })
+    } else {
+      await OrganizationEventStage.create(route.params.orgRoute, form.route, {
+        name: stage.name,
+        route: stage.route,
+        stage_type: stage.stage_type,
+        start_at: stage.start_at || null,
+        config: stage.config,
+      })
+    }
   }
 
   publishing.value = false
@@ -123,7 +163,11 @@ async function submit(publication) {
 </script>
 
 <template>
-  <div v-if="show" class="wiz-wrap">
+  <div v-if="show && loadingEvent" class="wiz-loading">
+    <div class="spinner-border text-primary" role="status"></div>
+  </div>
+
+  <div v-else-if="show" class="wiz-wrap">
 
     <WizardSidebar
       :steps="steps"
@@ -167,6 +211,7 @@ async function submit(publication) {
 </template>
 
 <style scoped>
+.wiz-loading { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 60px); }
 .wiz-wrap { display: grid; grid-template-columns: 256px 1fr; min-height: calc(100vh - 60px); }
 .wiz-main { display: flex; flex-direction: column; min-height: calc(100vh - 60px); }
 .wiz-content { flex: 1; padding: 36px 44px; }
