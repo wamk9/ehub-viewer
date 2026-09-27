@@ -31,8 +31,8 @@ const Organization = {
         const result = await Api.getAsync('/org/' + orgRoute + '/members');
         return { code: result.code, data: result.response?.message };
     },
-    async addMember(orgRoute, email, role) {
-        const result = await Api.postAsync('/org/' + orgRoute + '/member', { email, role });
+    async addMember(orgRoute, identifier, role) {
+        const result = await Api.postAsync('/org/' + orgRoute + '/member', { identifier, role });
         return { code: result.code, data: result.response?.message };
     },
     async transferOwnership(orgRoute, email) {

@@ -130,6 +130,13 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/org/:orgRoute/manage/roles',
+      name: 'manage-organization-roles',
+      component: () => import('@/views/org/manage.vue'),
+      props: () => ({ forceOption: ['roles'] }),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/org/:orgRoute/manage/finances',
       name: 'manage-organization-finances',
       component: () => import('@/views/org/manage.vue'),

@@ -5,6 +5,8 @@ import OrganizationBilling from '@/helpers/communication/OrganizationBilling.js'
 import SystemVars from '@/helpers/General/SystemVars';
 import { toast } from '@/helpers/toast.js';
 import EhubStatCard from '@/components/EhubStatCard.vue';
+import EhubRolePermissionsTable from '@/components/EhubRolePermissionsTable.vue';
+import EhubDialog from '@/components/modals/EhubDialog.vue';
 import EventCreateWizard from '@/components/modules/org/manage/events/create.vue';
 
 const ORG_GRADS = [
@@ -24,6 +26,20 @@ const ROLE_LEVEL = { owner: 3, admin: 2 };
 const roleLevel = (role) => (role ? ROLE_LEVEL[role] ?? 1 : 0);
 const ASSIGNABLE_ROLES = ['owner', 'admin', 'event_manager', 'financial', 'marketing'];
 
+// Org permission matrix shown in the Roles panel (keep in sync with the API:
+// OrganizationController canManage/roleLevel and EventPermissions).
+const ORG_PERM_KEYS = [
+  'manage_members', 'manage_org', 'billing', 'manage_events', 'delete_events',
+  'event_registrations', 'event_form_data', 'event_payments', 'event_results', 'event_news',
+];
+const ORG_ROLE_PERMS = {
+  owner: ORG_PERM_KEYS,
+  admin: ORG_PERM_KEYS,
+  event_manager: ['manage_events', 'event_registrations', 'event_form_data', 'event_payments', 'event_results', 'event_news'],
+  financial: ['billing', 'event_registrations', 'event_payments'],
+  marketing: ['event_results', 'event_news'],
+};
+
 const ROLE_CLASS = {
   owner: 'owner',
   admin: 'admin',
@@ -33,7 +49,7 @@ const ROLE_CLASS = {
 };
 
 export default {
-  components: { EhubStatCard, EventCreateWizard },
+  components: { EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -59,7 +75,8 @@ export default {
       membersLoading: false,
       mbSearch: '',
       mbRoleFilter: 'all',
-      showInvite: false,
+      removeTarget: null,
+      leaveOpen: false,
       inviteEmail: '',
       inviteRole: 'event_manager',
       inviteSending: false,
@@ -143,6 +160,19 @@ export default {
     myRole() {
       return this.org?.role || null;
     },
+    isOnlyOwner() {
+      return this.myRole === 'owner' && this.members.filter((m) => m.role === 'owner').length <= 1;
+    },
+    orgPermKeys() {
+      return ORG_PERM_KEYS;
+    },
+    /** Static matrix of what each org role can do (mirrors the API rules). */
+    orgRolesMatrix() {
+      return Object.entries(ORG_ROLE_PERMS).map(([name, perms], i) => {
+        const own = Object.fromEntries(ORG_PERM_KEYS.map((k) => [k, perms.includes(k)]));
+        return { id: name, name, parent_id: i === 0 ? null : 'owner', own, effective: own };
+      });
+    },
     /** Roles I may give: below my own level; owners may also appoint co-owners. */
     assignableRoles() {
       return ASSIGNABLE_ROLES.filter((r) => roleLevel(r) < roleLevel(this.myRole) || (r === 'owner' && this.myRole === 'owner'));
@@ -160,6 +190,7 @@ export default {
         overview: this.$t('pages.organization.manage.nav.overview'),
         events: this.$t('pages.organization.manage.nav.events'),
         members: this.$t('pages.organization.manage.nav.members'),
+        roles: this.$t('pages.organization.manage.nav.roles'),
         financeiro: this.$t('pages.organization.manage.nav.financeiro'),
         reports: this.$t('pages.organization.manage.nav.reports'),
         settings: this.$t('pages.organization.manage.nav.settings'),
@@ -167,14 +198,14 @@ export default {
       return map[this.activePanel] || this.activePanel;
     },
     activeNavIcon() {
-      const map = { overview: 'chart-line', events: 'calendar-days', members: 'users', financeiro: 'file-invoice-dollar', reports: 'chart-bar', settings: 'gear' };
+      const map = { overview: 'chart-line', events: 'calendar-days', members: 'users', roles: 'shield-halved', financeiro: 'file-invoice-dollar', reports: 'chart-bar', settings: 'gear' };
       return map[this.activePanel] || 'bars';
     },
   },
 
   watch: {
     forceOption(val) {
-      const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
+      const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', roles: 'roles', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
       const panel = panelMap[val?.[0]] ?? 'overview';
       this.activePanel = panel;
       if (panel === 'financeiro' && !this.finLoaded) this.loadFinances();
@@ -296,6 +327,7 @@ export default {
         overview: 'manage-organization',
         events: 'manage-organization-events',
         members: 'manage-organization-members',
+        roles: 'manage-organization-roles',
         financeiro: 'manage-organization-finances',
         reports: 'manage-organization-reports',
         settings: 'manage-organization-settings',
@@ -375,6 +407,17 @@ export default {
       return this.$te(key) ? this.$t(key) : this.$t('pages.organization.manage.members.' + fallbackKey);
     },
 
+    async leaveOrg() {
+      this.leaveOpen = false;
+      const result = await Organization.leaveOrganization(this.orgRoute);
+      if (result.code === 200) {
+        toast.success(this.$t('pages.organization.manage.members.left'));
+        this.$router.push('/my-orgs');
+      } else {
+        toast.error(this.memberError(result, 'leave_error'));
+      }
+    },
+
     async sendInvite() {
       if (!this.inviteEmail.trim()) return;
       this.inviteSending = true;
@@ -383,7 +426,6 @@ export default {
       if (result.code === 200 || result.code === 201) {
         toast.success(this.$t('pages.organization.manage.members.invited'));
         this.inviteEmail = '';
-        this.showInvite = false;
         await this.loadMembers();
       } else {
         toast.error(this.memberError(result, 'invite_error'));
@@ -391,7 +433,7 @@ export default {
     },
 
     async removeMember(member) {
-      if (!confirm(this.$t('pages.organization.manage.members.confirm_remove'))) return;
+      this.removeTarget = null;
       const result = await Organization.removeMember(this.orgRoute, member.user.id);
       if (result.code === 200) {
         toast.success(this.$t('pages.organization.manage.members.removed'));
@@ -615,6 +657,10 @@ export default {
           <font-awesome-icon :icon="['fas', 'users']" />
           <span>{{ $t('pages.organization.manage.nav.members') }}</span>
         </button>
+        <button class="nav-item" :class="{ active: activePanel === 'roles' }" @click="switchPanel('roles')">
+          <font-awesome-icon :icon="['fas', 'shield-halved']" />
+          <span>{{ $t('pages.organization.manage.nav.roles') }}</span>
+        </button>
         <button class="nav-item" :class="{ active: activePanel === 'financeiro' }" @click="switchPanel('financeiro')">
           <font-awesome-icon :icon="['fas', 'file-invoice-dollar']" />
           <span>{{ $t('pages.organization.manage.nav.financeiro') }}</span>
@@ -804,14 +850,13 @@ export default {
         </div>
       </section>
 
-      <!-- ═══ MEMBERS ═══ -->
+      <!-- ═══ MEMBERS (same structure as team roster) ═══ -->
       <section v-show="activePanel === 'members'" class="mgmt-pane">
         <div class="pnl-hd">
           <div>
             <h1>{{ $t('pages.organization.manage.nav.members') }}</h1>
             <p>{{ $t('pages.organization.manage.members.sub', { n: members.length }) }}</p>
           </div>
-          <div class="spacer"></div>
         </div>
 
         <div class="sec-bar">
@@ -825,52 +870,23 @@ export default {
               {{ r === 'all' ? $t('pages.organization.manage.members.all') : $t('pages.organization.manage.roles.' + r) }}
             </button>
           </div>
-          <div class="sb-sp"></div>
-          <button v-if="assignableRoles.length" class="btn btn-sm btn-primary round px-3" @click="showInvite = !showInvite">
-            <font-awesome-icon :icon="['fas', 'user-plus']" class="me-2" />{{ $t('pages.organization.manage.members.invite') }}
-          </button>
         </div>
 
-        <!-- Invite row -->
-        <div v-if="showInvite" class="invite-box cc mb-3">
-          <div class="row g-2 align-items-end" style="padding:16px 18px">
-            <div class="col-md-5">
-              <label class="form-label" style="font-size:.78rem;font-weight:600;color:var(--ehub-muted)">{{ $t('pages.organization.manage.members.invite_email_label') }}</label>
-              <div class="input-group input-group-sm">
-                <span class="input-group-text"><font-awesome-icon :icon="['fas', 'envelope']" /></span>
-                <input type="email" class="form-control" v-model="inviteEmail" :placeholder="$t('pages.organization.manage.members.invite_email_ph')" />
-              </div>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label" style="font-size:.78rem;font-weight:600;color:var(--ehub-muted)">{{ $t('pages.organization.manage.members.invite_role_label') }}</label>
-              <select class="form-select form-select-sm" v-model="inviteRole">
-                <option v-for="r in assignableRoles" :key="r" :value="r">{{ $t('pages.organization.manage.roles.' + r) }}</option>
-              </select>
-            </div>
-            <div class="col-auto d-flex gap-2">
-              <button class="btn btn-sm btn-primary" :disabled="inviteSending" @click="sendInvite">
-                <span v-if="inviteSending" class="spinner-border spinner-border-sm me-1"></span>
-                {{ $t('pages.organization.manage.members.invite_send') }}
-              </button>
-              <button class="btn btn-sm btn-outline-secondary" @click="showInvite = false">{{ $t('pages.organization.manage.members.cancel') }}</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="cc">
+        <div class="cc" style="margin-bottom:16px">
           <div v-if="membersLoading" class="text-center py-4"><div class="spinner-border text-primary"></div></div>
           <table v-else class="mgmt-tbl">
             <thead>
               <tr>
                 <th>{{ $t('pages.organization.manage.members.tbl.member') }}</th>
+                <th>{{ $t('pages.organization.manage.members.tbl.handle') }}</th>
                 <th>{{ $t('pages.organization.manage.members.tbl.role') }}</th>
                 <th>{{ $t('pages.organization.manage.members.tbl.since') }}</th>
-                <th></th>
+                <th>{{ $t('pages.organization.manage.members.tbl.actions') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="filteredMembers.length === 0">
-                <td colspan="4" class="text-center td-muted py-4">{{ $t('pages.organization.manage.members.empty') }}</td>
+                <td colspan="5" class="text-center td-muted py-4">{{ $t('pages.organization.manage.members.empty') }}</td>
               </tr>
               <tr v-for="m in filteredMembers" :key="m.id">
                 <td>
@@ -879,14 +895,12 @@ export default {
                       <img v-if="memberAvatarUrl(m)" :src="memberAvatarUrl(m)" class="m-av-img" :alt="memberName(m)" @error="$event.target.style.display='none'" />
                       <span v-else>{{ memberInitials(m) }}</span>
                     </div>
-                    <div>
-                      <div class="td-name" style="font-size:.87rem">{{ memberName(m) }}</div>
-                      <div class="td-muted" style="font-size:.75rem">@{{ m.user?.username }}</div>
-                    </div>
+                    <span class="td-name" style="font-size:.87rem">{{ memberName(m) }}</span>
                   </div>
                 </td>
+                <td class="td-muted">@{{ m.user?.username }}</td>
                 <td>
-                  <select v-if="canTouch(m)" class="form-select form-select-sm" style="max-width:160px;font-size:.8rem" :value="m.role" @change="updateRole(m, $event.target.value)">
+                  <select v-if="canTouch(m)" class="form-select form-select-sm" style="max-width:170px;font-size:.8rem" :value="m.role" @change="updateRole(m, $event.target.value)">
                     <option v-for="r in assignableRoles" :key="r" :value="r">{{ $t('pages.organization.manage.roles.' + r) }}</option>
                   </select>
                   <span v-else class="role-chip" :class="roleClass(m.role)">{{ $t('pages.organization.manage.roles.' + m.role) }}</span>
@@ -894,8 +908,8 @@ export default {
                 <td class="td-muted">{{ m.created_at ? new Date(m.created_at).getFullYear() : '—' }}</td>
                 <td>
                   <div class="act-row">
-                    <button v-if="canTouch(m)" class="act-btn del" @click="removeMember(m)" :title="$t('pages.organization.manage.members.remove')">
-                      <font-awesome-icon :icon="['fas', 'trash']" />
+                    <button v-if="canTouch(m)" class="act-btn del" @click="removeTarget = m" :title="$t('pages.organization.manage.members.remove')">
+                      <font-awesome-icon :icon="['fas', 'xmark']" />
                     </button>
                   </div>
                 </td>
@@ -903,6 +917,71 @@ export default {
             </tbody>
           </table>
         </div>
+
+        <!-- Invite (e-mail or username) -->
+        <div v-if="assignableRoles.length" class="set-card">
+          <h3>{{ $t('pages.organization.manage.members.invite_title') }}</h3>
+          <p class="set-desc">{{ $t('pages.organization.manage.members.invite_sub') }}</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input v-model="inviteEmail" type="text" class="form-control" style="flex:1;min-width:180px"
+              :placeholder="$t('pages.organization.manage.members.invite_ph')" :disabled="inviteSending" @keyup.enter="sendInvite" />
+            <select v-model="inviteRole" class="form-select" style="flex:0 0 190px" :disabled="inviteSending">
+              <option v-for="r in assignableRoles" :key="r" :value="r">{{ $t('pages.organization.manage.roles.' + r) }}</option>
+            </select>
+          </div>
+          <button class="btn btn-primary round px-4 w-100 mt-2" :disabled="!inviteEmail.trim() || inviteSending" @click="sendInvite">
+            <span v-if="inviteSending" class="spinner-border spinner-border-sm me-2"></span>
+            {{ $t('pages.organization.manage.members.invite_send') }}
+          </button>
+        </div>
+
+        <!-- Danger zone -->
+        <div class="set-card danger">
+          <h3>{{ $t('pages.organization.manage.members.danger') }}</h3>
+          <p class="set-desc">{{ $t('pages.organization.manage.members.leave_desc') }}</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-outline-secondary round px-4" :disabled="isOnlyOwner" @click="leaveOpen = true">
+              <font-awesome-icon :icon="['fas', 'right-from-bracket']" class="me-2" />{{ $t('pages.organization.manage.members.leave') }}
+            </button>
+            <p v-if="isOnlyOwner" class="set-desc m-0">{{ $t('pages.organization.manage.members.leave_only_owner') }}</p>
+          </div>
+        </div>
+      </section>
+
+      <EhubDialog :model-value="!!removeTarget" :title="$t('pages.organization.manage.members.remove_title')" size="sm" @close="removeTarget = null">
+        <p class="m-0" style="font-size:.9rem">{{ $t('pages.organization.manage.members.remove_q', { name: removeTarget ? memberName(removeTarget) : '' }) }}</p>
+        <template #footer>
+          <button class="btn btn-outline-secondary round px-3" @click="removeTarget = null">{{ $t('pages.organization.manage.members.cancel') }}</button>
+          <button class="btn btn-danger round px-3" @click="removeMember(removeTarget)">{{ $t('pages.organization.manage.members.remove') }}</button>
+        </template>
+      </EhubDialog>
+
+      <EhubDialog v-model="leaveOpen" :title="$t('pages.organization.manage.members.leave')" size="sm">
+        <p class="m-0" style="font-size:.9rem">{{ $t('pages.organization.manage.members.leave_q') }}</p>
+        <template #footer>
+          <button class="btn btn-outline-secondary round px-3" @click="leaveOpen = false">{{ $t('pages.organization.manage.members.cancel') }}</button>
+          <button class="btn btn-danger round px-3" @click="leaveOrg">{{ $t('pages.organization.manage.members.leave') }}</button>
+        </template>
+      </EhubDialog>
+
+      <!-- ═══ ROLES (permission matrix, same component as teams) ═══ -->
+      <section v-show="activePanel === 'roles'" class="mgmt-pane">
+        <div class="pnl-hd">
+          <div>
+            <h1>{{ $t('pages.organization.manage.roles_panel.title') }}</h1>
+            <p>{{ $t('pages.organization.manage.roles_panel.sub') }}</p>
+          </div>
+        </div>
+        <EhubRolePermissionsTable
+          :roles="orgRolesMatrix"
+          :perm-keys="orgPermKeys"
+          role-prefix="pages.organization.manage.roles"
+          perm-prefix="pages.organization.manage.roles_panel.permissions"
+          :col-label="$t('pages.organization.manage.members.tbl.role')"
+          :granted-label="$t('pages.organization.manage.roles_panel.granted')"
+          :inherited-label="$t('pages.organization.manage.roles_panel.granted')"
+          :denied-label="$t('pages.organization.manage.roles_panel.denied')"
+        />
       </section>
 
       <!-- ═══ FINANCEIRO ═══ -->
@@ -1484,8 +1563,6 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .cover-up-prev { height: 90px; border-radius: 11px; overflow: hidden; position: relative; }
 .cover-up-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
-/* ── Invite box ── */
-.invite-box { margin-bottom: 0; }
 
 /* ── Financial panel ── */
 .fin-sec-title { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--ehub-muted); }
