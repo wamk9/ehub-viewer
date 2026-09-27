@@ -12,6 +12,11 @@ export default {
     team_invited:                  'You were invited to {team} as {role}.',
     team_role_changed:             'Your role in {team} was changed to {role}.',
     team_removed:                  'You were removed from {team}.',
+    event_stage_started: 'Stage "{stage}" of {event} has started!',
+    event_results_published: 'Results for "{stage}" published in {event}',
+    event_registration_confirmed: 'Your registration in {event} was confirmed',
+    event_registration_removed: 'Your registration in {event} was removed by the organization',
+    event_notice: '{event}: {subject}',
     empty:              'No notifications',
     clear_all:          'Clear all',
     time: {

@@ -18,6 +18,14 @@ const OrganizationEvent = {
         const result = await Api.patchAsync(`/org/${orgRoute}/event/${eventRoute}`, data);
         return { code: result.code, data: result.response?.message };
     },
+    async control(orgRoute, eventRoute, action) {
+        const result = await Api.patchAsync(`/org/${orgRoute}/event/${eventRoute}/control`, { action });
+        return { code: result.code, data: result.response?.message };
+    },
+    async duplicate(orgRoute, eventRoute) {
+        const result = await Api.postAsync(`/org/${orgRoute}/event/${eventRoute}/duplicate`, {});
+        return { code: result.code, data: result.response?.message };
+    },
     async destroy(orgRoute, eventRoute) {
         const result = await Api.deleteAsync(`/org/${orgRoute}/event/${eventRoute}`);
         return { code: result.code, data: result.response?.message };

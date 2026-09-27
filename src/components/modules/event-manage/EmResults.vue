@@ -1,0 +1,265 @@
+<script>
+import InitialsAvatar from '@/components/general/InitialsAvatar.vue';
+import OrganizationEventStage from '@/helpers/communication/OrganizationEventStage.js';
+import { toast } from '@/helpers/toast.js';
+import { POINTS, stageState, userName, apiError } from './store.js';
+
+export default {
+  name: 'EmResults',
+  components: { InitialsAvatar },
+  inject: ['em'],
+  data() {
+    return { stageId: null, rows: [], auto: true, dirty: false, saving: false, addId: '' };
+  },
+  computed: {
+    ev() { return this.em.event; },
+    stages() { return [...(this.ev.stages || [])].sort((a, b) => a.stage_order - b.stage_order); },
+    stage() { return this.stages.find((s) => s.id === this.stageId) || null; },
+    eligible() { return this.em.regs.filter((r) => r.payment_status !== 'pending'); },
+    addable() {
+      const used = new Set(this.rows.map((r) => r.registration_id));
+      return this.eligible.filter((r) => !used.has(r.id));
+    },
+    sortedRows() { return [...this.rows].sort((a, b) => (a.position || 999) - (b.position || 999)); },
+    dupPositions() {
+      const seen = new Set();
+      return this.rows.some((r) => { if (seen.has(r.position)) return true; seen.add(r.position); return false; });
+    },
+    standings() {
+      const pts = {};
+      this.stages.filter((s) => s.results_published).forEach((s) => {
+        (s.results || []).forEach((x) => {
+          pts[x.registration_id] = (pts[x.registration_id] || 0) + (Number(x.score) || 0);
+        });
+      });
+      return Object.entries(pts)
+        .map(([id, p]) => ({ id, pts: p, name: this.nameOf(id), avatar: this.em.regById(id)?.user?.avatar || '' }))
+        .sort((a, b) => b.pts - a.pts)
+        .slice(0, 15);
+    },
+  },
+  watch: {
+    stageId() { this.load(); },
+  },
+  created() {
+    const q = this.$route.query.stage;
+    const byQuery = q && this.stages.find((s) => s.route === q);
+    const live = this.stages.find((s) => stageState(s) === 'live');
+    const started = [...this.stages].reverse().find((s) => s.initialized);
+    this.stageId = (byQuery || live || started || this.stages[0])?.id ?? null;
+  },
+  methods: {
+    stageState,
+    nameOf(regId) {
+      const reg = this.em.regById(regId);
+      if (reg) return userName(reg);
+      for (const s of this.stages) {
+        const r = (s.results || []).find((x) => x.registration_id === regId);
+        if (r?.user) return r.user.name || r.user.username;
+      }
+      return '—';
+    },
+    avatarOf(regId) { return this.em.regById(regId)?.user?.avatar || ''; },
+    load() {
+      this.rows = (this.stage?.results || []).map((r) => ({
+        registration_id: r.registration_id,
+        position: r.position,
+        score: r.score,
+        qualified: !!r.qualified,
+        best: r.result_data?.best ?? '',
+        laps: r.result_data?.laps ?? '',
+        pen: r.result_data?.pen ?? '',
+      }));
+      this.dirty = false;
+      this.addId = '';
+    },
+    fill() {
+      this.rows = this.eligible.map((r, i) => ({ registration_id: r.id, position: i + 1, score: POINTS[i] ?? 0, qualified: false, best: '', laps: '', pen: '' }));
+      this.dirty = true;
+    },
+    addRow() {
+      if (!this.addId) return;
+      const pos = this.rows.reduce((m, r) => Math.max(m, r.position || 0), 0) + 1;
+      this.rows.push({ registration_id: this.addId, position: pos, score: this.auto ? (POINTS[pos - 1] ?? 0) : 0, qualified: false, best: '', laps: '', pen: '' });
+      this.addId = '';
+      this.dirty = true;
+    },
+    removeRow(row) {
+      this.rows = this.rows.filter((r) => r !== row);
+      this.dirty = true;
+    },
+    onPos(row) {
+      if (this.auto) row.score = POINTS[(row.position || 0) - 1] ?? 0;
+      this.dirty = true;
+    },
+    payload() {
+      return this.rows.map((r) => {
+        const data = {};
+        if (r.best !== '' && r.best !== null) data.best = String(r.best);
+        if (r.laps !== '' && r.laps !== null) data.laps = Number(r.laps);
+        if (r.pen !== '' && r.pen !== null) data.pen = String(r.pen);
+        return {
+          registration_id: r.registration_id,
+          position: Number(r.position),
+          score: r.score === '' || r.score === null ? null : Number(r.score),
+          qualified: !!r.qualified,
+          result_data: Object.keys(data).length ? data : null,
+        };
+      });
+    },
+    async save(publish) {
+      if (!this.stage || this.saving) return;
+      if (this.rows.some((r) => !r.position || r.position < 1)) return;
+      this.saving = true;
+      const res = await OrganizationEventStage.setResults(this.em.orgRoute, this.em.eventRoute, this.stage.route, this.payload(), publish);
+      this.saving = false;
+      if (res.code === 200) {
+        const was = this.stage.results_published;
+        this.em.putStage(res.data);
+        this.load();
+        const key = publish && !was ? 'published' : (!publish && was ? 'unpublished' : (publish ? 'saved' : 'draft_saved'));
+        toast.success(this.$t('pages.event.manage.toast.' + key));
+      } else toast.error(apiError(this, res.data));
+    },
+  },
+};
+</script>
+
+<template>
+  <section>
+    <div class="pnl-hd">
+      <div>
+        <h1>{{ $t('pages.event.manage.res.title') }}</h1>
+        <p>{{ $t('pages.event.manage.res.sub') }}</p>
+      </div>
+      <div class="spacer"></div>
+      <div v-if="stage?.initialized && !ev.finished && rows.length" class="hd-acts">
+        <template v-if="stage.results_published">
+          <button class="btn btn-outline-secondary round px-3" :disabled="saving" @click="save(false)">
+            <font-awesome-icon :icon="['fas', 'eye-slash']" class="me-2" />{{ $t('pages.event.manage.res.unpublish') }}
+          </button>
+          <button class="btn btn-primary round px-3" :disabled="saving || !dirty || dupPositions" @click="save(true)">
+            {{ $t('pages.event.manage.c.save') }}
+          </button>
+        </template>
+        <template v-else>
+          <button class="btn btn-outline-secondary round px-3" :disabled="saving || dupPositions" @click="save(false)">{{ $t('pages.event.manage.res.save_draft') }}</button>
+          <button class="btn btn-primary round px-3" :disabled="saving || dupPositions" @click="save(true)">
+            <font-awesome-icon :icon="['fas', 'upload']" class="me-2" />{{ $t('pages.event.manage.res.publish') }}
+          </button>
+        </template>
+      </div>
+    </div>
+
+    <div v-if="!stages.length" class="cc">
+      <div class="cc-empty"><font-awesome-icon :icon="['fas', 'ranking-star']" class="ico" />{{ $t('pages.event.manage.res.no_stages') }}</div>
+    </div>
+
+    <template v-else>
+      <div class="sec-bar">
+        <label class="form-label m-0" style="font-weight:600">{{ $t('pages.event.manage.res.stage') }}</label>
+        <select v-model="stageId" class="form-select form-select-sm" style="max-width:320px">
+          <option v-for="(s, i) in stages" :key="s.id" :value="s.id">{{ i + 1 }}. {{ s.name }} — {{ $t('pages.event.manage.stg.state.' + stageState(s)) }}</option>
+        </select>
+        <span v-if="stage?.results_published" class="s-badge ok"><font-awesome-icon :icon="['fas', 'check']" />{{ $t('pages.event.manage.res.published') }}</span>
+        <span v-else-if="stage?.initialized" class="s-badge warn"><font-awesome-icon :icon="['fas', 'eye-slash']" />{{ $t('pages.event.manage.res.not_published') }}</span>
+        <span v-if="dirty" class="s-badge pri">{{ $t('pages.event.manage.res.unsaved') }}</span>
+      </div>
+
+      <div class="res-grid">
+        <div>
+          <div class="cc">
+            <div v-if="!stage?.initialized" class="cc-empty">
+              <font-awesome-icon :icon="['fas', 'clock']" class="ico" />{{ $t('pages.event.manage.res.not_started') }}
+            </div>
+            <div v-else-if="!rows.length" class="cc-empty">
+              <font-awesome-icon :icon="['fas', 'ranking-star']" class="ico" />
+              <p class="mb-3">{{ $t('pages.event.manage.res.empty') }}</p>
+              <button v-if="!ev.finished" class="btn btn-primary round px-3" :disabled="!eligible.length" @click="fill">
+                <font-awesome-icon :icon="['fas', 'list-ol']" class="me-2" />{{ $t('pages.event.manage.res.fill') }}
+              </button>
+            </div>
+            <div v-else class="tbl-wrap">
+              <table class="mgmt-tbl">
+                <thead>
+                  <tr>
+                    <th>{{ $t('pages.event.manage.res.pos') }}</th>
+                    <th>{{ $t('pages.event.manage.res.part') }}</th>
+                    <th>{{ $t('pages.event.manage.res.score') }}</th>
+                    <th>{{ $t('pages.event.manage.res.best') }}</th>
+                    <th>{{ $t('pages.event.manage.res.laps') }}</th>
+                    <th>{{ $t('pages.event.manage.res.pen') }}</th>
+                    <th>{{ $t('pages.event.manage.res.qual') }}</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="row in sortedRows" :key="row.registration_id">
+                    <td class="pos-cell"><input :value="row.position" type="number" min="1" class="form-control res-in sm" :disabled="ev.finished" @change="row.position = Number($event.target.value); onPos(row)" /></td>
+                    <td>
+                      <div class="who">
+                        <InitialsAvatar :name="nameOf(row.registration_id)" :image="avatarOf(row.registration_id)" :size="26" />
+                        <b>{{ nameOf(row.registration_id) }}</b>
+                      </div>
+                    </td>
+                    <td><input v-model.number="row.score" type="number" step="any" class="form-control res-in sm" :disabled="ev.finished" @input="dirty = true" /></td>
+                    <td><input v-model="row.best" class="form-control res-in" placeholder="0:00.000" maxlength="20" :disabled="ev.finished" @input="dirty = true" /></td>
+                    <td><input v-model.number="row.laps" type="number" min="0" class="form-control res-in sm" :disabled="ev.finished" @input="dirty = true" /></td>
+                    <td><input v-model="row.pen" class="form-control res-in sm" placeholder="—" maxlength="20" :disabled="ev.finished" @input="dirty = true" /></td>
+                    <td><div class="form-check form-switch m-0"><input v-model="row.qualified" class="form-check-input" type="checkbox" :disabled="ev.finished" @change="dirty = true" /></div></td>
+                    <td><button v-if="!ev.finished" class="act-btn del" :title="$t('pages.event.manage.res.remove_row')" @click="removeRow(row)"><font-awesome-icon :icon="['fas', 'xmark']" /></button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-if="stage?.initialized && rows.length && !ev.finished && addable.length" class="add-row">
+              <select v-model="addId" class="form-select form-select-sm" style="max-width:260px">
+                <option value="" disabled>{{ $t('pages.event.manage.res.add_row') }}</option>
+                <option v-for="r in addable" :key="r.id" :value="r.id">{{ userName(r) }}</option>
+              </select>
+              <button class="btn btn-sm btn-outline-secondary round px-3" :disabled="!addId" @click="addRow">
+                <font-awesome-icon :icon="['fas', 'plus']" />
+              </button>
+            </div>
+          </div>
+          <div v-if="stage?.initialized && rows.length" class="hint" style="margin-top:10px">
+            <div class="form-check form-switch m-0">
+              <input id="resAuto" v-model="auto" class="form-check-input" type="checkbox" />
+              <label class="form-check-label" for="resAuto">{{ $t('pages.event.manage.res.auto_pts') }}</label>
+            </div>
+          </div>
+          <div v-if="dupPositions" class="hint" style="margin-top:6px;color:#e23b3b">
+            <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />{{ $t('pages.event.manage.res.dup_pos') }}
+          </div>
+        </div>
+
+        <div class="cc">
+          <div class="cc-hd">
+            <h3><font-awesome-icon :icon="['fas', 'trophy']" style="color:var(--ehub-gold)" />{{ $t('pages.event.manage.res.standings') }}</h3>
+          </div>
+          <div v-if="!standings.length" class="cc-empty">{{ $t('pages.event.manage.res.standings_empty') }}</div>
+          <div v-for="(x, i) in standings" :key="x.id" class="std-row">
+            <span class="std-pos">{{ i + 1 }}</span>
+            <InitialsAvatar :name="x.name" :image="x.avatar" :size="24" />
+            <span class="std-name">{{ x.name }}</span>
+            <span class="std-pts">{{ x.pts }} <span class="td-muted">{{ $t('pages.event.manage.res.pts') }}</span></span>
+          </div>
+        </div>
+      </div>
+    </template>
+  </section>
+</template>
+
+<style scoped>
+.res-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+.res-in { width: 84px; padding: 4px 8px; font-size: .82rem; border-radius: 7px; }
+.res-in.sm { width: 62px; }
+.pos-cell { width: 70px; }
+.add-row { display: flex; gap: 8px; padding: 10px 15px; border-top: 1px solid var(--ehub-line); }
+.std-row { display: flex; align-items: center; gap: 10px; padding: 8px 17px; border-bottom: 1px solid var(--ehub-line); font-size: .83rem; }
+.std-row:last-child { border-bottom: 0; }
+.std-pos { width: 20px; font-weight: 800; color: var(--ehub-muted); font-variant-numeric: tabular-nums; }
+.std-name { flex: 1; font-weight: 600; color: var(--ehub-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.std-pts { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ehub-ink); }
+@media (max-width: 1100px) { .res-grid { grid-template-columns: minmax(0, 1fr); } }
+</style>

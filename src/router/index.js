@@ -168,17 +168,22 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      // Legacy per-event manage URLs now live in the dedicated event manage screen.
       path: '/org/:orgRoute/manage/events/:eventRoute/:eventRouteMenu?',
       name: 'manage-organization-events-stages',
-      component: () => import('@/views/org/manage.vue'),
-      props: route => ({ forceOption: ['events'] }),
-      meta: { requiresAuth: true }
+      redirect: to => ({ name: 'manage-event', params: { orgRoute: to.params.orgRoute, eventRoute: to.params.eventRoute } }),
     },
     {
       path: '/org/:orgRoute/manage/create-event/:eventRoute?',
       name: 'manage-organization-events-create',
       component: () => import('@/views/org/manage.vue'),
       props: route => ({ forceOption: ['events'] }),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/org/:orgRoute/event/:eventRoute/manage/:panel?',
+      name: 'manage-event',
+      component: () => import('@/views/event/manage.vue'),
       meta: { requiresAuth: true }
     },
     {
@@ -194,9 +199,7 @@ const router = createRouter({
 ...eventManageRoutes.map(menu => ({
     path: `/org/:orgRoute/manage/events/:eventRoute/${menu}`,
     name: `manage-organization-events-${menu}`,
-    component: () => import("@/views/org/manage.vue"),
-    props: route => ({ forceOption: ['events'] }),
-    meta: { requiresAuth: true }
+    redirect: to => ({ name: 'manage-event', params: { orgRoute: to.params.orgRoute, eventRoute: to.params.eventRoute } })
   })),
   {
     path: '/error',

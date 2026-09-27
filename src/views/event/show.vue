@@ -368,6 +368,10 @@ export default {
         <div class="cover-fade"></div>
         <font-awesome-icon :icon="['fas', catIcon]" class="cover-ico" />
         <div class="breadcrumb-bar">
+          <router-link v-if="event.can_manage" :to="{ name: 'manage-event', params: { orgRoute, eventRoute } }">
+            <font-awesome-icon :icon="['fas', 'sliders']" />
+            {{ $t('events.show.manage') }}
+          </router-link>
           <router-link :to="`/org/${orgRoute}`">
             <font-awesome-icon :icon="['fas', 'building-flag']" />
             {{ event.organization?.name || orgRoute }}

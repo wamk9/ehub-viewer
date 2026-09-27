@@ -1,4 +1,5 @@
 export default {
+    manage: 'Gerenciar',
   in_progress: 'Em andamento',
   tabs: {
     info: 'Informações',

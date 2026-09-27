@@ -138,6 +138,22 @@ import {
   faBullhorn,
   faLanguage,
   faSwatchbook,
+  faRankingStar,
+  faTowerBroadcast,
+  faWallet,
+  faPlay,
+  faStopwatch,
+  faListCheck,
+  faExclamation,
+  faFileArrowDown,
+  faGift,
+  faCircle,
+  faRoad,
+  faCirclePlay,
+  faEyeSlash,
+  faUpload,
+  faReceipt,
+  faCopy,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -147,11 +163,29 @@ import {
   faXTwitter,
   faYoutube,
   faDiscord,
+  faTwitch,
 } from "@fortawesome/free-brands-svg-icons";
 
 //import { faBell } from "@fortawesome/free-regular-svg-icons";
 
 library.add(
+  faTwitch,
+  faRankingStar,
+  faTowerBroadcast,
+  faWallet,
+  faPlay,
+  faStopwatch,
+  faListCheck,
+  faExclamation,
+  faFileArrowDown,
+  faGift,
+  faCircle,
+  faRoad,
+  faCirclePlay,
+  faEyeSlash,
+  faUpload,
+  faReceipt,
+  faCopy,
   faTrophy,
   faRightToBracket,
   faPeopleGroup,
