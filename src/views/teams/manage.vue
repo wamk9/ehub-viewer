@@ -1,84 +1,28 @@
 <template>
-  <div class="mgmt-wrap">
-
-    <!-- SIDEBAR -->
-    <aside class="mgmt-sidebar">
-      <div class="sb-team">
-        <template v-if="team">
-          <div class="sb-logo" :style="sbLogoStyle">
-            <img v-if="team.logo_image" :src="logoUrl" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:9px" />
-            <span v-else>{{ initials }}</span>
-          </div>
-          <div style="min-width:0">
-            <div class="sb-name">{{ team.name }}</div>
-            <div class="sb-cat">{{ categoryName }}</div>
-          </div>
-        </template>
-        <template v-else>
-          <div class="sb-logo sb-skel"></div>
-          <div style="flex:1;min-width:0">
-            <div class="sb-skel" style="height:12px;border-radius:4px;width:75%;margin-bottom:6px"></div>
-            <div class="sb-skel" style="height:10px;border-radius:4px;width:45%"></div>
-          </div>
-        </template>
-      </div>
-      <button class="mob-menu-toggle" @click="mobileMenuOpen = !mobileMenuOpen">
-        <font-awesome-icon :icon="activeNavIcon" style="width:15px;flex-shrink:0" />
-        <span>{{ activeNavLabel }}</span>
-        <font-awesome-icon icon="chevron-down" class="mob-chevron" :class="{ 'mob-chevron-open': mobileMenuOpen }" />
-      </button>
-
-      <nav class="sb-nav" :class="{ 'mob-open': mobileMenuOpen }">
-        <button class="nav-item" :class="{ active: activePanel === 'overview' }" @click="setPanel('overview')">
-          <font-awesome-icon icon="chart-line" />
-          <span>{{ $t('pages.teams.manage.nav.overview') }}</span>
-        </button>
-        <button class="nav-item" :class="{ active: activePanel === 'roster' }" @click="setPanel('roster')">
-          <font-awesome-icon icon="users" />
-          <span>{{ $t('pages.teams.manage.nav.roster') }}</span>
-        </button>
-        <button v-if="can('manage_applications')" class="nav-item" :class="{ active: activePanel === 'applications' }" @click="setPanel('applications')">
-          <font-awesome-icon icon="inbox" />
-          <span>{{ $t('pages.teams.manage.nav.applications') }}</span>
-        </button>
-        <button class="nav-item" :class="{ active: activePanel === 'activity' }" @click="setPanel('activity')">
-          <font-awesome-icon icon="calendar-days" />
-          <span>{{ $t('pages.teams.manage.nav.activity') }}</span>
-        </button>
-        <button class="nav-item" :class="{ active: activePanel === 'roles' }" @click="setPanel('roles')">
-          <font-awesome-icon icon="shield-halved" />
-          <span>{{ $t('pages.teams.manage.nav.roles') }}</span>
-        </button>
-        <div class="nav-div"></div>
-        <button v-if="can('manage_settings') || can('manage_visual')" class="nav-item" :class="{ active: activePanel === 'settings' }" @click="setPanel('settings')">
-          <font-awesome-icon icon="gear" />
-          <span>{{ $t('pages.teams.manage.nav.settings') }}</span>
-        </button>
-        <div class="nav-div"></div>
-        <router-link class="nav-item sb-util" :to="`/team/${teamRoute}`">
-          <font-awesome-icon icon="arrow-up-right-from-square" />
-          <span>{{ $t('pages.teams.manage.nav.public') }}</span>
-        </router-link>
-        <router-link class="nav-item sb-util" to="/my-teams">
-          <font-awesome-icon icon="arrow-left" />
-          <span>{{ $t('pages.teams.manage.nav.back') }}</span>
-        </router-link>
-      </nav>
-    </aside>
-    <div v-if="mobileMenuOpen" class="mob-nav-backdrop" @click="mobileMenuOpen = false"></div>
-
+  <EhubMgmtLayout
+    :name="team?.name || ''"
+    :subtitle="categoryName"
+    :logo-url="team?.logo_image ? logoUrl : ''"
+    :initials="initials"
+    :logo-bg="activeColor"
+    :loading="!team"
+    :items="navItems"
+    :active="activePanel"
+    :links="navLinks"
+    @select="setPanel"
+  >
     <!-- LOADING -->
-    <main class="mgmt-main mgmt-state" v-if="loading">
+    <div v-if="loading" class="mgmt-state">
       <font-awesome-icon icon="spinner" spin style="font-size:1.5rem;color:var(--ehub-muted)" />
-    </main>
+    </div>
 
     <!-- ERROR -->
-    <main class="mgmt-main mgmt-state" v-else-if="!team">
+    <div v-else-if="!team" class="mgmt-state">
       <p style="color:var(--ehub-muted)">{{ $t('pages.teams.manage.error') }}</p>
-    </main>
+    </div>
 
     <!-- CONTENT -->
-    <main class="mgmt-main" v-else>
+    <template v-else>
 
       <!-- OVERVIEW -->
       <section v-show="activePanel === 'overview'">
@@ -528,7 +472,7 @@
         </div>
       </section>
 
-    </main>
+    </template>
 
     <!-- CONFIRM MODAL -->
     <teleport to="body">
@@ -615,7 +559,7 @@
         </div>
       </transition>
     </teleport>
-  </div>
+  </EhubMgmtLayout>
 </template>
 
 <script>
@@ -627,6 +571,7 @@ import EhubProfileImageUpload from '@/components/inputs/EhubProfileImageUpload.v
 import EhubStatCard from '@/components/EhubStatCard.vue'
 import EhubActivityLog from '@/components/EhubActivityLog.vue'
 import EhubRolePermissionsTable from '@/components/EhubRolePermissionsTable.vue'
+import EhubMgmtLayout from '@/components/general/EhubMgmtLayout.vue'
 
 const AVATAR_PALETTE = ['#0098D8', '#e23b3b', '#7C3AED', '#d6336c', '#f08c00', '#1f8a5b', '#495057', '#0f172a']
 
@@ -638,7 +583,7 @@ function strHash(s) {
 
 export default {
   name: 'TeamManage',
-  components: { EhubColorPicker, EhubProfileImageUpload, EhubStatCard, EhubActivityLog, EhubRolePermissionsTable },
+  components: { EhubMgmtLayout, EhubColorPicker, EhubProfileImageUpload, EhubStatCard, EhubActivityLog, EhubRolePermissionsTable },
 
   data() {
     return {
@@ -670,7 +615,6 @@ export default {
       applicationsLoading: false,
       rolesData: [],
       rolePermKeys: ['invite_members', 'manage_applications', 'manage_roster', 'manage_settings', 'manage_visual'],
-      mobileMenuOpen: false,
       mobileMemberModal: null,
       mobileMemberRole: '',
     }
@@ -776,20 +720,25 @@ export default {
     sbLogoStyle() {
       return { background: this.activeColor }
     },
-    activeNavLabel() {
-      const map = {
-        overview: this.$t('pages.teams.manage.nav.overview'),
-        roster: this.$t('pages.teams.manage.nav.roster'),
-        applications: this.$t('pages.teams.manage.nav.applications'),
-        activity: this.$t('pages.teams.manage.nav.activity'),
-        roles: this.$t('pages.teams.manage.nav.roles'),
-        settings: this.$t('pages.teams.manage.nav.settings'),
+    navItems() {
+      const t = (k) => this.$t('pages.teams.manage.nav.' + k)
+      const items = [
+        { key: 'overview', icon: 'chart-line', label: t('overview') },
+        { key: 'roster', icon: 'users', label: t('roster') },
+      ]
+      if (this.can('manage_applications')) items.push({ key: 'applications', icon: 'inbox', label: t('applications') })
+      items.push({ key: 'activity', icon: 'calendar-days', label: t('activity') })
+      items.push({ key: 'roles', icon: 'shield-halved', label: t('roles') })
+      if (this.can('manage_settings') || this.can('manage_visual')) {
+        items.push({ divider: true }, { key: 'settings', icon: 'gear', label: t('settings') })
       }
-      return map[this.activePanel] || this.activePanel
+      return items
     },
-    activeNavIcon() {
-      const map = { overview: 'chart-line', roster: 'users', applications: 'inbox', activity: 'calendar-days', roles: 'shield-halved', settings: 'gear' }
-      return map[this.activePanel] || 'bars'
+    navLinks() {
+      return [
+        { to: `/team/${this.teamRoute}`, icon: 'arrow-up-right-from-square', label: this.$t('pages.teams.manage.nav.public') },
+        { to: '/my-teams', icon: 'arrow-left', label: this.$t('pages.teams.manage.nav.back') },
+      ]
     },
   },
 
@@ -815,7 +764,6 @@ export default {
 
     setPanel(panel) {
       this.activePanel = panel
-      this.mobileMenuOpen = false
       this.$router.replace({ name: 'team-manage', params: { teamRoute: this.teamRoute, tab: panel } })
       if (panel === 'applications' && this.team) this.loadApplications()
       if (panel === 'roles' && !this.rolesData.length) this.loadRoles()
@@ -1155,67 +1103,11 @@ export default {
 </script>
 
 <style scoped>
-.mgmt-wrap { display: flex; min-height: calc(100vh - 60px); }
-
-.mgmt-sidebar {
-  width: 236px; flex-shrink: 0;
-  background: var(--ehub-card); border-right: 1px solid var(--ehub-line);
-  position: sticky; top: 60px; height: calc(100vh - 60px);
-  overflow-y: auto; display: flex; flex-direction: column;
-}
-
-.sb-team {
-  padding: 15px 14px; border-bottom: 1px solid var(--ehub-line);
-  display: flex; align-items: center; gap: 10px;
-}
-.sb-skel { background: var(--ehub-field-bg); animation: skel-pulse 1.4s ease-in-out infinite; }
-@keyframes skel-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
-.sb-logo {
-  width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .92rem; font-weight: 800; color: #fff; overflow: hidden;
-}
-.sb-name { font-size: .84rem; font-weight: 700; color: var(--ehub-ink); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sb-cat  { font-size: .7rem; color: var(--ehub-muted); }
-
-.sb-nav  { padding: 9px 7px; flex: 1; }
-.nav-item {
-  display: flex; align-items: center; gap: 9px; padding: 8px 11px; border-radius: 9px;
-  cursor: pointer; color: var(--ehub-muted); font-size: .875rem; font-weight: 600;
-  transition: all .15s; text-decoration: none; border: 0; background: transparent;
-  width: 100%; text-align: left; margin-bottom: 2px;
-}
-.nav-item svg { width: 15px; text-align: center; font-size: .8rem; flex-shrink: 0; }
-.nav-item:hover { background: var(--ehub-field-bg); color: var(--ehub-ink); text-decoration: none; }
-.nav-item.active { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
-.nav-div { height: 1px; background: var(--ehub-line); margin: 6px 3px; }
-
-.mgmt-main { flex: 1; padding: 28px 32px; min-width: 0; }
-.mgmt-state { display: flex; align-items: center; justify-content: center; }
-
-.pnl-hd { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
-.pnl-hd h1 { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 2px; letter-spacing: -.02em; }
-.pnl-hd p { color: var(--ehub-muted); font-size: .84rem; margin: 0; }
-
-.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 13px; margin-bottom: 22px; }
-
-.dash-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; }
-
-.cc { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); overflow: hidden; }
-.cc-hd { display: flex; align-items: center; gap: 10px; padding: 13px 17px; border-bottom: 1px solid var(--ehub-line); }
-.cc-hd h3 { font-size: .9rem; font-weight: 700; color: var(--ehub-ink); margin: 0; flex: 1; }
+.mgmt-state { display: flex; align-items: center; justify-content: center; min-height: 40vh; }
 .cc-link { font-size: .78rem; font-weight: 600; color: var(--ehub-primary); cursor: pointer; background: none; border: 0; padding: 0; }
 .cc-link:hover { text-decoration: underline; }
-
-.mgmt-tbl { width: 100%; border-collapse: collapse; }
-.mgmt-tbl th { font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 9px 15px; text-align: left; border-bottom: 1px solid var(--ehub-line); white-space: nowrap; }
-.mgmt-tbl td { padding: 11px 15px; border-bottom: 1px solid var(--ehub-line); font-size: .875rem; color: var(--ehub-ink); vertical-align: middle; }
-.mgmt-tbl tbody tr:last-child td { border-bottom: 0; }
-.mgmt-tbl tbody tr:hover td { background: color-mix(in srgb, var(--ehub-field-bg) 55%, transparent); }
-.td-muted { color: var(--ehub-muted) !important; font-size: .82rem !important; }
 .td-name  { font-weight: 600; }
-
-.act-row { display: flex; gap: 4px; }
+.set-desc { margin-bottom: 18px; }
 .act-pag-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
 .act-pag-info { font-size: .78rem; color: var(--ehub-muted); }
 .act-pag-nav { display: flex; gap: 4px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
@@ -1232,14 +1124,11 @@ export default {
 .act-text { font-size: .82rem; color: var(--ehub-ink); line-height: 1.4; }
 .act-text :deep(strong) { font-weight: 700; }
 .act-time { font-size: .72rem; color: var(--ehub-muted); margin-top: 2px; }
-.act-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--ehub-line); background: transparent; color: var(--ehub-muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: .75rem; transition: all .15s; }
-.act-btn:hover     { background: var(--ehub-field-bg); color: var(--ehub-ink); }
-.act-btn.del:hover { background: color-mix(in srgb,#e23b3b 12%,transparent); color: #e23b3b; border-color: color-mix(in srgb,#e23b3b 35%,transparent); }
 .act-btn.up:hover  { background: var(--ehub-primary-tint); color: var(--ehub-primary); border-color: var(--ehub-primary-border); }
 
-.m-av { width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: .64rem; font-weight: 700; color: #fff; flex-shrink: 0; overflow: hidden; position: relative; }
-.m-av-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
-
+/* Team avatars are rounded squares (org/event use circles). */
+section .m-av { border-radius: 8px; }
+section .m-av-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 
 .role-chip { font-size: .7rem; font-weight: 700; padding: 3px 9px; border-radius: 50rem; display: inline-block; }
 .role-select { font-size: .7rem; font-weight: 700; padding: 3px 8px; border-radius: 50rem; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); color: var(--ehub-ink); cursor: pointer; }
@@ -1255,12 +1144,6 @@ export default {
 .ev-mini-body { flex: 1; min-width: 0; }
 .ev-mini-name { font-size: .87rem; font-weight: 600; color: var(--ehub-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ev-mini-meta { font-size: .73rem; color: var(--ehub-muted); }
-
-.set-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); padding: 22px 24px; margin-bottom: 16px; }
-.set-card h3 { font-size: .97rem; font-weight: 700; color: var(--ehub-ink); margin: 0 0 3px; }
-.set-desc { font-size: .83rem; color: var(--ehub-muted); margin: 0 0 18px; }
-.set-card.danger { border-color: color-mix(in srgb,#e23b3b 30%,var(--ehub-line)); }
-.set-card.danger h3 { color: #e23b3b; }
 
 /* Confirm modal */
 .cm-overlay {
@@ -1288,9 +1171,7 @@ export default {
 .modal-fade-enter-active, .modal-fade-leave-active { transition: opacity .18s ease; }
 .modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
 
-.mob-menu-toggle { display: none; }
 .mob-role { display: none !important; }
-.mob-nav-backdrop { display: none; }
 
 /* Member action modal (mobile) — always defined so teleport + transition work */
 .mob-mm-overlay {
@@ -1341,60 +1222,7 @@ html[data-bs-theme="dark"] .role-chip.captain { color: var(--ehub-gold); }
 html[data-bs-theme="dark"] .role-chip.starter { color: #51cf66; background: color-mix(in srgb,#51cf66 14%,transparent); }
 html[data-bs-theme="dark"] .role-chip.coach   { color: #c89bff; background: color-mix(in srgb,#b06bff 18%,transparent); }
 
-@media (max-width: 1100px) {
-  .stat-grid { grid-template-columns: repeat(2,1fr); }
-  .dash-grid { grid-template-columns: 1fr; }
-}
 @media (max-width: 768px) {
-  .mgmt-wrap { flex-direction: column; }
-  .mgmt-sidebar {
-    width: 100%; height: auto; overflow-y: visible; overflow-x: visible;
-    position: sticky; top: 60px; z-index: 20;
-    flex-direction: column;
-    border-right: 0; border-bottom: 1px solid var(--ehub-line);
-  }
-  .sb-team { border-right: 0; border-bottom: 1px solid var(--ehub-line); flex-shrink: 0; padding: 8px 14px; }
-  .sb-logo { width: 32px; height: 32px; border-radius: 8px; font-size: .72rem; }
-  .sb-name { font-size: .78rem; }
-  .sb-cat  { font-size: .65rem; }
-
-  .mob-menu-toggle {
-    display: flex; align-items: center; gap: 9px; width: 100%;
-    padding: 11px 14px; border: 0; background: transparent;
-    color: var(--ehub-ink); font-size: .875rem; font-weight: 600;
-    cursor: pointer; text-align: left;
-  }
-  .mob-menu-toggle:hover { background: var(--ehub-field-bg); }
-  .mob-chevron { margin-left: auto; font-size: .75rem; transition: transform .2s; }
-  .mob-chevron-open { transform: rotate(180deg); }
-
-  /* Dropdown: absolute so it floats over content, not pushing it */
-  .sb-nav {
-    display: none;
-    position: absolute; left: 0; right: 0; top: 100%;
-    flex-direction: column; padding: 6px; gap: 2px;
-    background: var(--ehub-card);
-    border-bottom: 1px solid var(--ehub-line);
-    box-shadow: 0 8px 24px rgba(0,0,0,.15);
-    z-index: 21;
-  }
-  .sb-nav.mob-open { display: flex; }
-  .mob-nav-backdrop { display: block; position: fixed; inset: 0; z-index: 19; }
-
-  .nav-item {
-    flex: unset; flex-direction: row; justify-content: flex-start; align-items: center;
-    padding: 10px 12px; border-radius: 9px; gap: 9px;
-    font-size: .875rem; white-space: nowrap; text-align: left;
-    margin-bottom: 0; border-bottom: 0; width: 100%;
-  }
-  .nav-item svg { font-size: .875rem; width: 15px; }
-  .nav-item:hover { background: var(--ehub-field-bg); color: var(--ehub-ink); }
-  .nav-item.active { background: var(--ehub-primary-tint); color: var(--ehub-primary); border-bottom: 0; }
-  .nav-div { display: block; }
-  .sb-util { display: flex !important; }
-
-  .mgmt-main { padding: 16px 14px; }
-  .stat-grid { grid-template-columns: repeat(2,1fr); }
   .app-row { flex-direction: column; align-items: flex-start; gap: 10px; }
   .app-actions { flex-direction: row; gap: 8px; }
   .app-actions .btn { margin-top: 0 !important; }

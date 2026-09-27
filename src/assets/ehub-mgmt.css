@@ -147,3 +147,6 @@
   .ehub-mgmt .mob-nav-backdrop { display: block; position: fixed; inset: 0; z-index: 19; }
   .ehub-mgmt .mgmt-main { padding: 18px 14px; }
 }
+
+/* Centered loading / error state inside the main area. */
+.ehub-mgmt .mgmt-state { display: flex; align-items: center; justify-content: center; min-height: 40vh; }

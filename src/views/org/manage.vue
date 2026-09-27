@@ -5,6 +5,7 @@ import OrganizationBilling from '@/helpers/communication/OrganizationBilling.js'
 import SystemVars from '@/helpers/General/SystemVars';
 import { toast } from '@/helpers/toast.js';
 import EhubStatCard from '@/components/EhubStatCard.vue';
+import EhubMgmtLayout from '@/components/general/EhubMgmtLayout.vue';
 import EhubRolePermissionsTable from '@/components/EhubRolePermissionsTable.vue';
 import EhubDialog from '@/components/modals/EhubDialog.vue';
 import EventCreateWizard from '@/components/modules/org/manage/events/create.vue';
@@ -49,7 +50,7 @@ const ROLE_CLASS = {
 };
 
 export default {
-  components: { EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog },
+  components: { EhubMgmtLayout, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -113,7 +114,6 @@ export default {
       repNewName: '',
       repNewType: 'registrations',
       repNewPeriod: '30d',
-      mobileMenuOpen: false,
     };
   },
 
@@ -185,21 +185,23 @@ export default {
         { key: 'events', icon: 'calendar-days', bg: 'color-mix(in srgb, #7C3AED 14%, transparent)', color: '#7C3AED' },
       ];
     },
-    activeNavLabel() {
-      const map = {
-        overview: this.$t('pages.organization.manage.nav.overview'),
-        events: this.$t('pages.organization.manage.nav.events'),
-        members: this.$t('pages.organization.manage.nav.members'),
-        roles: this.$t('pages.organization.manage.nav.roles'),
-        financeiro: this.$t('pages.organization.manage.nav.financeiro'),
-        reports: this.$t('pages.organization.manage.nav.reports'),
-        settings: this.$t('pages.organization.manage.nav.settings'),
-      };
-      return map[this.activePanel] || this.activePanel;
+    navItems() {
+      const t = (k) => this.$t('pages.organization.manage.nav.' + k);
+      return [
+        { key: 'overview', icon: 'chart-line', label: t('overview') },
+        { key: 'events', icon: 'calendar-days', label: t('events'), badge: this.activeEvents || null },
+        { key: 'members', icon: 'users', label: t('members') },
+        { key: 'roles', icon: 'shield-halved', label: t('roles') },
+        { key: 'financeiro', icon: 'file-invoice-dollar', label: t('financeiro') },
+        { key: 'reports', icon: 'chart-bar', label: t('reports') },
+        { key: 'settings', icon: 'gear', label: t('settings') },
+      ];
     },
-    activeNavIcon() {
-      const map = { overview: 'chart-line', events: 'calendar-days', members: 'users', roles: 'shield-halved', financeiro: 'file-invoice-dollar', reports: 'chart-bar', settings: 'gear' };
-      return map[this.activePanel] || 'bars';
+    navLinks() {
+      return [
+        { to: `/org/${this.orgRoute}`, icon: 'arrow-up-right-from-square', label: this.$t('pages.organization.manage.nav.public') },
+        { to: '/my-orgs', icon: 'arrow-left', label: this.$t('pages.organization.manage.nav.back') },
+      ];
     },
   },
 
@@ -322,7 +324,6 @@ export default {
 
     async switchPanel(panel) {
       this.activePanel = panel;
-      this.mobileMenuOpen = false;
       const routeMap = {
         overview: 'manage-organization',
         events: 'manage-organization-events',
@@ -618,81 +619,19 @@ export default {
 <template>
   <EventCreateWizard v-if="$route.name === 'manage-organization-events-create'" :show="true" :force-option="forceOption" />
 
-  <div v-else class="mgmt-wrap">
-
-    <!-- ── SIDEBAR ── -->
-    <aside class="mgmt-sidebar">
-      <div class="sb-org">
-        <div v-if="loading" class="sb-logo sb-skel"></div>
-        <div v-else class="sb-logo" :style="{ background: orgGrad }">
-          <img v-if="org?.route" :src="baseUrl + 'storage/org/' + org.route + '/logo.webp'" class="sb-logo-img" :alt="org?.name" @error="$event.target.style.display='none'" />
-          <span>{{ orgInitials }}</span>
-        </div>
-        <template v-if="org">
-          <div>
-            <div class="sb-name">{{ org.name }}</div>
-            <div class="sb-cat">{{ org.category }}</div>
-          </div>
-        </template>
-        <template v-else>
-          <div style="flex:1;min-width:0">
-            <div class="sb-skel" style="height:12px;border-radius:4px;width:75%;margin-bottom:6px"></div>
-            <div class="sb-skel" style="height:10px;border-radius:4px;width:45%"></div>
-          </div>
-        </template>
-      </div>
-
-      <button class="mob-menu-toggle" @click="mobileMenuOpen = !mobileMenuOpen">
-        <font-awesome-icon :icon="['fas', activeNavIcon]" style="width:15px;flex-shrink:0" />
-        <span>{{ activeNavLabel }}</span>
-        <font-awesome-icon :icon="['fas', 'chevron-down']" class="mob-chevron" :class="{ 'mob-chevron-open': mobileMenuOpen }" />
-      </button>
-
-      <nav class="sb-nav" :class="{ 'mob-open': mobileMenuOpen }">
-        <button class="nav-item" :class="{ active: activePanel === 'overview' }" @click="switchPanel('overview')">
-          <font-awesome-icon :icon="['fas', 'chart-line']" />
-          <span>{{ $t('pages.organization.manage.nav.overview') }}</span>
-        </button>
-        <button class="nav-item" :class="{ active: activePanel === 'events' }" @click="switchPanel('events')">
-          <font-awesome-icon :icon="['fas', 'calendar-days']" />
-          <span>{{ $t('pages.organization.manage.nav.events') }}</span>
-          <span v-if="activeEvents > 0" class="nav-badge">{{ activeEvents }}</span>
-        </button>
-        <button class="nav-item" :class="{ active: activePanel === 'members' }" @click="switchPanel('members')">
-          <font-awesome-icon :icon="['fas', 'users']" />
-          <span>{{ $t('pages.organization.manage.nav.members') }}</span>
-        </button>
-        <button class="nav-item" :class="{ active: activePanel === 'roles' }" @click="switchPanel('roles')">
-          <font-awesome-icon :icon="['fas', 'shield-halved']" />
-          <span>{{ $t('pages.organization.manage.nav.roles') }}</span>
-        </button>
-        <button class="nav-item" :class="{ active: activePanel === 'financeiro' }" @click="switchPanel('financeiro')">
-          <font-awesome-icon :icon="['fas', 'file-invoice-dollar']" />
-          <span>{{ $t('pages.organization.manage.nav.financeiro') }}</span>
-        </button>
-        <button class="nav-item" :class="{ active: activePanel === 'reports' }" @click="switchPanel('reports')">
-          <font-awesome-icon :icon="['fas', 'chart-bar']" />
-          <span>{{ $t('pages.organization.manage.nav.reports') }}</span>
-        </button>
-        <button class="nav-item" :class="{ active: activePanel === 'settings' }" @click="switchPanel('settings')">
-          <font-awesome-icon :icon="['fas', 'gear']" />
-          <span>{{ $t('pages.organization.manage.nav.settings') }}</span>
-        </button>
-        <div class="nav-div"></div>
-        <router-link :to="`/org/${orgRoute}`" class="nav-item sb-util">
-          <font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" />
-          <span>{{ $t('pages.organization.manage.nav.public') }}</span>
-        </router-link>
-        <router-link to="/my-orgs" class="nav-item sb-util">
-          <font-awesome-icon :icon="['fas', 'arrow-left']" />
-          <span>{{ $t('pages.organization.manage.nav.back') }}</span>
-        </router-link>
-      </nav>
-    </aside>
-    <div v-if="mobileMenuOpen" class="mob-nav-backdrop" @click="mobileMenuOpen = false"></div>
-
-    <!-- ── MAIN ── -->
-    <main class="mgmt-main">
+  <EhubMgmtLayout
+    v-else
+    :name="org?.name || ''"
+    :subtitle="org?.category || ''"
+    :logo-url="org?.route ? orgLogoUrl : ''"
+    :initials="orgInitials"
+    :logo-bg="orgGrad"
+    :loading="loading"
+    :items="navItems"
+    :active="activePanel"
+    :links="navLinks"
+    @select="switchPanel"
+  >
 
       <!-- ═══ OVERVIEW ═══ -->
       <section v-show="activePanel === 'overview'" class="mgmt-pane">
@@ -1430,95 +1369,22 @@ export default {
         </div>
       </section>
 
-    </main>
-  </div>
+  </EhubMgmtLayout>
 </template>
 
 <style scoped>
-/* ── Layout ── */
-.mgmt-wrap { display: flex; min-height: calc(100vh - 60px); }
-
-/* ── Sidebar ── */
-.mgmt-sidebar {
-  width: 236px; flex-shrink: 0;
-  background: var(--ehub-card); border-right: 1px solid var(--ehub-line);
-  position: sticky; top: 60px; height: calc(100vh - 60px);
-  overflow-y: auto; display: flex; flex-direction: column;
-}
-.sb-org { padding: 15px 14px; border-bottom: 1px solid var(--ehub-line); display: flex; align-items: center; gap: 10px; }
-.sb-skel { background: var(--ehub-field-bg); animation: skel-pulse 1.4s ease-in-out infinite; }
-.mob-menu-toggle { display: none; }
-.mob-nav-backdrop { display: none; }
-@keyframes skel-pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
-.sb-logo {
-  width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .9rem; font-weight: 800; color: #fff; overflow: hidden; position: relative;
-}
-.sb-logo-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.sb-name { font-size: .84rem; font-weight: 700; color: var(--ehub-ink); line-height: 1.2; }
-.sb-cat { font-size: .7rem; color: var(--ehub-muted); }
-.sb-nav { padding: 9px 7px; flex: 1; }
-.nav-item {
-  display: flex; align-items: center; gap: 9px; padding: 8px 11px; border-radius: 9px;
-  cursor: pointer; color: var(--ehub-muted); font-size: .875rem; font-weight: 600;
-  transition: all .15s; text-decoration: none; border: 0; background: transparent;
-  width: 100%; text-align: left; margin-bottom: 2px;
-}
-.nav-item svg { width: 15px; text-align: center; font-size: .8rem; flex-shrink: 0; }
-.nav-item:hover { background: var(--ehub-field-bg); color: var(--ehub-ink); text-decoration: none; }
-.nav-item.active { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
-.nav-badge { margin-left: auto; background: var(--ehub-primary); color: #fff; font-size: .63rem; font-weight: 700; padding: 1px 6px; border-radius: 50rem; }
-.nav-div { height: 1px; background: var(--ehub-line); margin: 6px 3px; }
-
-/* ── Main ── */
-.mgmt-main { flex: 1; padding: 28px 32px; min-width: 0; }
-.mgmt-pane { display: block; }
-
-/* ── Panel header ── */
-.pnl-hd { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
-.pnl-hd h1 { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 2px; letter-spacing: -.02em; }
-.pnl-hd p { color: var(--ehub-muted); font-size: .84rem; margin: 0; }
-.spacer { flex: 1; min-width: 16px; }
-
-/* ── Stat cards ── */
-.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin-bottom: 22px; }
-
-/* ── Dashboard 2-col ── */
-.dash-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; }
-
-/* ── Content card ── */
-.cc { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); overflow: hidden; }
-.cc-hd { display: flex; align-items: center; gap: 10px; padding: 13px 17px; border-bottom: 1px solid var(--ehub-line); }
-.cc-hd h3 { font-size: .9rem; font-weight: 700; color: var(--ehub-ink); margin: 0; flex: 1; }
 .cc-link { font-size: .78rem; font-weight: 600; color: var(--ehub-primary); cursor: pointer; background: none; border: 0; padding: 0; }
 .cc-link:hover { text-decoration: underline; }
-
-/* ── Table ── */
-.mgmt-tbl { width: 100%; border-collapse: collapse; }
-.mgmt-tbl th { font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 9px 15px; text-align: left; border-bottom: 1px solid var(--ehub-line); white-space: nowrap; }
-.mgmt-tbl td { padding: 11px 15px; border-bottom: 1px solid var(--ehub-line); font-size: .875rem; color: var(--ehub-ink); vertical-align: middle; }
-.mgmt-tbl tbody tr:last-child td { border-bottom: 0; }
-.mgmt-tbl tbody tr:hover td { background: color-mix(in srgb, var(--ehub-field-bg) 55%, transparent); }
-.td-muted { color: var(--ehub-muted) !important; font-size: .82rem !important; }
 .td-name { font-weight: 600; }
+.set-desc { margin-bottom: 18px; }
+.set-label { font-size: .82rem; font-weight: 600; color: var(--ehub-ink); margin-bottom: 5px; }
 
 /* ── Status badges ── */
-.s-badge { display: inline-flex; align-items: center; gap: 4px; font-size: .7rem; font-weight: 700; padding: 3px 9px; border-radius: 50rem; }
 .s-badge.active   { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: #1f8a5b; }
 .s-badge.finished { background: var(--ehub-field-bg); color: var(--ehub-muted); }
 .s-badge.upcoming { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
 .s-badge.draft    { background: color-mix(in srgb, #f08c00 16%, transparent); color: #f08c00; }
 
-/* ── Row actions ── */
-.act-row { display: flex; gap: 4px; }
-.act-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--ehub-line); background: transparent; color: var(--ehub-muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: .75rem; transition: all .15s; }
-.act-btn:hover { background: var(--ehub-field-bg); color: var(--ehub-ink); }
-.act-btn.del:hover { background: color-mix(in srgb, #e23b3b 12%, transparent); color: #e23b3b; border-color: color-mix(in srgb, #e23b3b 35%, transparent); }
-
-/* ── Section bar ── */
-.sec-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
-.sb-sp { flex: 1; }
 .role-seg { display: flex; gap: 4px; flex-wrap: wrap; }
 .role-seg button { background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); color: var(--ehub-muted); font-size: .78rem; font-weight: 600; padding: 5px 13px; border-radius: 50rem; cursor: pointer; transition: all .14s; }
 .role-seg button:hover { border-color: var(--ehub-primary); color: var(--ehub-ink); }
@@ -1534,7 +1400,6 @@ export default {
 .ev-mini-meta { font-size: .73rem; color: var(--ehub-muted); }
 
 /* ── Member avatar ── */
-.m-av { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .64rem; font-weight: 700; color: #fff; flex-shrink: 0; position: relative; overflow: hidden; }
 .m-av-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .role-chip { font-size: .7rem; font-weight: 600; padding: 3px 9px; border-radius: 50rem; display: inline-block; white-space: nowrap; }
 .role-chip.owner   { background: color-mix(in srgb, var(--ehub-gold) 20%, transparent); color: color-mix(in srgb, var(--ehub-gold), #000 28%); }
@@ -1545,12 +1410,6 @@ export default {
 html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 
 /* ── Settings cards ── */
-.set-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); padding: 22px 24px; margin-bottom: 16px; }
-.set-card h3 { font-size: .97rem; font-weight: 700; color: var(--ehub-ink); margin: 0 0 3px; }
-.set-desc { font-size: .83rem; color: var(--ehub-muted); margin: 0 0 18px; }
-.set-label { font-size: .82rem; font-weight: 600; color: var(--ehub-ink); margin-bottom: 5px; }
-.set-card.danger { border-color: color-mix(in srgb, #e23b3b 30%, var(--ehub-line)); }
-.set-card.danger h3 { color: #e23b3b; }
 
 /* Visual identity */
 .set-hint { font-size: .78rem; color: var(--ehub-muted); margin: 0 0 10px; }
@@ -1616,59 +1475,4 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .rep-card-foot { display: flex; align-items: center; gap: 7px; margin-top: auto; }
 .rep-last { font-size: .72rem; color: var(--ehub-muted); flex: 1; }
 
-/* ── Responsive ── */
-@media (max-width: 1100px) {
-  .stat-grid { grid-template-columns: repeat(2, 1fr); }
-  .dash-grid { grid-template-columns: 1fr; }
-}
-@media (max-width: 768px) {
-  .mgmt-wrap { flex-direction: column; }
-  .mgmt-sidebar {
-    width: 100%; height: auto; overflow-y: visible; overflow-x: visible;
-    position: sticky; top: 60px; z-index: 20;
-    flex-direction: column;
-    border-right: 0; border-bottom: 1px solid var(--ehub-line);
-  }
-  .sb-org { border-right: 0; border-bottom: 1px solid var(--ehub-line); flex-shrink: 0; padding: 8px 14px; }
-  .sb-logo { width: 32px; height: 32px; border-radius: 8px; font-size: .72rem; }
-  .sb-name { font-size: .78rem; }
-  .sb-cat  { font-size: .65rem; }
-
-  .mob-menu-toggle {
-    display: flex; align-items: center; gap: 9px; width: 100%;
-    padding: 11px 14px; border: 0; background: transparent;
-    color: var(--ehub-ink); font-size: .875rem; font-weight: 600;
-    cursor: pointer; text-align: left;
-  }
-  .mob-menu-toggle:hover { background: var(--ehub-field-bg); }
-  .mob-chevron { margin-left: auto; font-size: .75rem; transition: transform .2s; }
-  .mob-chevron-open { transform: rotate(180deg); }
-
-  .sb-nav {
-    display: none;
-    position: absolute; left: 0; right: 0; top: 100%;
-    flex-direction: column; padding: 6px; gap: 2px;
-    background: var(--ehub-card);
-    border-bottom: 1px solid var(--ehub-line);
-    box-shadow: 0 8px 24px rgba(0,0,0,.15);
-    z-index: 21;
-  }
-  .sb-nav.mob-open { display: flex; }
-  .mob-nav-backdrop { display: block; position: fixed; inset: 0; z-index: 19; }
-
-  .nav-item {
-    flex: unset; flex-direction: row; justify-content: flex-start; align-items: center;
-    padding: 10px 12px; border-radius: 9px; gap: 9px;
-    font-size: .875rem; white-space: nowrap; text-align: left;
-    margin-bottom: 0; border-bottom: 0; width: 100%;
-  }
-  .nav-item svg { font-size: .875rem; width: 15px; }
-  .nav-item:hover { background: var(--ehub-field-bg); color: var(--ehub-ink); }
-  .nav-item.active { background: var(--ehub-primary-tint); color: var(--ehub-primary); border-bottom: 0; }
-  .nav-div { display: block; }
-  .sb-util { display: flex !important; }
-
-  .mgmt-main { padding: 18px 14px; }
-  .stat-grid { grid-template-columns: repeat(2, 1fr); }
-}
 </style>

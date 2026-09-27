@@ -1,5 +1,5 @@
 <script>
-import '@/assets/ehub-mgmt.css';
+import EhubMgmtLayout from '@/components/general/EhubMgmtLayout.vue';
 import SystemVars from '@/helpers/General/SystemVars';
 import EhubDialog from '@/components/modals/EhubDialog.vue';
 import { createEventManageStore, stageState } from '@/components/modules/event-manage/store.js';
@@ -25,14 +25,13 @@ const PANELS = [
 
 export default {
   name: 'EventManage',
-  components: { EhubDialog, EmOverview, EmRegistrations, EmStages, EmResults, EmNews, EmLive, EmFinance, EmAdvanced },
+  components: { EhubMgmtLayout, EhubDialog, EmOverview, EmRegistrations, EmStages, EmResults, EmNews, EmLive, EmFinance, EmAdvanced },
   provide() {
     return { em: this.em };
   },
   data() {
     return {
       em: createEventManageStore(this.$route.params.orgRoute, this.$route.params.eventRoute),
-      mobileMenuOpen: false,
       baseUrl: SystemVars.baseUrl,
     };
   },
@@ -65,6 +64,25 @@ export default {
     initials() {
       return (this.event?.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
     },
+    navItems() {
+      return this.visiblePanels.map((p) => ({
+        key: p.key,
+        icon: p.icon,
+        label: this.$t('pages.event.manage.nav.' + p.key),
+        badge: p.key === 'regs' && this.pendingCount ? this.pendingCount : null,
+        badgeClass: 'warn',
+        live: p.key === 'stages' && this.hasLiveStage,
+      }));
+    },
+    navLinks() {
+      const links = [];
+      if (this.event && !this.event.initialized && this.em.can('event.manage')) {
+        links.push({ to: { name: 'manage-organization-events-create', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute }, query: { return: 'manage' } }, icon: 'pen', label: this.$t('pages.event.manage.nav.edit') });
+      }
+      links.push({ to: `/org/${this.em.orgRoute}/event/${this.em.eventRoute}`, icon: 'arrow-up-right-from-square', label: this.$t('pages.event.manage.nav.public') });
+      links.push({ to: `/org/${this.em.orgRoute}/manage`, icon: 'arrow-left', label: this.$t('pages.event.manage.nav.back') });
+      return links;
+    },
     accent() {
       const c = this.event?.color || this.event?.organization?.color || '#0098D8';
       return `linear-gradient(135deg, ${c}, color-mix(in srgb, ${c}, #fff 35%))`;
@@ -72,7 +90,6 @@ export default {
   },
   watch: {
     '$route.params.panel'() {
-      this.mobileMenuOpen = false;
       window.scrollTo(0, 0);
     },
   },
@@ -89,70 +106,28 @@ export default {
 </script>
 
 <template>
-  <div class="mgmt-wrap ehub-mgmt">
-    <!-- ── SIDEBAR ── -->
-    <aside class="mgmt-sidebar">
-      <div class="sb-org">
-        <div v-if="!event" class="sb-logo sb-skel"></div>
-        <div v-else class="sb-logo" :style="{ background: accent }">
-          <img v-if="logoUrl" :src="logoUrl" :alt="event.name" @error="$event.target.style.display = 'none'" />
-          <span>{{ initials }}</span>
-        </div>
-        <div v-if="event" style="min-width:0">
-          <div class="sb-name">{{ event.name }}</div>
-          <div class="sb-cat">{{ event.organization?.name }}</div>
-        </div>
-        <div v-else style="flex:1;min-width:0">
-          <div class="sb-skel" style="height:12px;border-radius:4px;width:75%;margin-bottom:6px"></div>
-          <div class="sb-skel" style="height:10px;border-radius:4px;width:45%"></div>
-        </div>
+  <EhubMgmtLayout
+    :name="event?.name || ''"
+    :subtitle="event?.organization?.name || ''"
+    :logo-url="logoUrl || ''"
+    :initials="initials"
+    :logo-bg="accent"
+    :loading="!event"
+    :items="navItems"
+    :active="panel"
+    :links="navLinks"
+    @select="go"
+  >
+    <div v-if="em.loading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+    <div v-else-if="em.notFound" class="cc">
+      <div class="cc-empty">
+        <font-awesome-icon :icon="['fas', 'lock']" class="ico" />
+        {{ $t('pages.event.manage.c.not_found') }}
       </div>
-
-      <button class="mob-menu-toggle" @click="mobileMenuOpen = !mobileMenuOpen">
-        <font-awesome-icon :icon="['fas', current.icon]" style="width:15px" />
-        <span>{{ $t('pages.event.manage.nav.' + panel) }}</span>
-        <font-awesome-icon :icon="['fas', 'chevron-down']" class="mob-chevron" :class="{ open: mobileMenuOpen }" />
-      </button>
-
-      <nav class="sb-nav" :class="{ 'mob-open': mobileMenuOpen }">
-        <button v-for="p in visiblePanels" :key="p.key" class="nav-item" :class="{ active: panel === p.key }" @click="go(p.key)">
-          <font-awesome-icon :icon="['fas', p.icon]" />
-          <span>{{ $t('pages.event.manage.nav.' + p.key) }}</span>
-          <span v-if="p.key === 'regs' && pendingCount" class="nav-badge warn">{{ pendingCount }}</span>
-          <span v-if="p.key === 'stages' && hasLiveStage" class="nav-live"></span>
-        </button>
-        <div class="nav-div"></div>
-        <router-link v-if="event && !event.initialized && em.can('event.manage')"
-          :to="{ name: 'manage-organization-events-create', params: { orgRoute: em.orgRoute, eventRoute: em.eventRoute }, query: { return: 'manage' } }"
-          class="nav-item">
-          <font-awesome-icon :icon="['fas', 'pen']" />
-          <span>{{ $t('pages.event.manage.nav.edit') }}</span>
-        </router-link>
-        <router-link :to="`/org/${em.orgRoute}/event/${em.eventRoute}`" class="nav-item">
-          <font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" />
-          <span>{{ $t('pages.event.manage.nav.public') }}</span>
-        </router-link>
-        <router-link :to="`/org/${em.orgRoute}/manage`" class="nav-item">
-          <font-awesome-icon :icon="['fas', 'arrow-left']" />
-          <span>{{ $t('pages.event.manage.nav.back') }}</span>
-        </router-link>
-      </nav>
-    </aside>
-    <div v-if="mobileMenuOpen" class="mob-nav-backdrop" @click="mobileMenuOpen = false"></div>
-
-    <!-- ── MAIN ── -->
-    <main class="mgmt-main">
-      <div v-if="em.loading" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status"></div>
-      </div>
-      <div v-else-if="em.notFound" class="cc">
-        <div class="cc-empty">
-          <font-awesome-icon :icon="['fas', 'lock']" class="ico" />
-          {{ $t('pages.event.manage.c.not_found') }}
-        </div>
-      </div>
-      <component :is="current.comp" v-else :key="panel" />
-    </main>
+    </div>
+    <component :is="current.comp" v-else :key="panel" />
 
     <!-- Shared confirm -->
     <EhubDialog :model-value="em.confirm.open" :title="$t('pages.event.manage.c.confirm')" size="sm" @close="em.answer(false)">
@@ -162,5 +137,5 @@ export default {
         <button class="btn round px-4" :class="em.confirm.danger ? 'btn-danger' : 'btn-primary'" @click="em.answer(true)">{{ em.confirm.label }}</button>
       </template>
     </EhubDialog>
-  </div>
+  </EhubMgmtLayout>
 </template>
