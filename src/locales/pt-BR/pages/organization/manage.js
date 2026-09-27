@@ -1,6 +1,7 @@
 export default {
   subtitle: 'Gerenciamento da Organização',
   nav: {
+    activity: "Atividades",
     overview: 'Visão Geral',
     events: 'Eventos',
     members: 'Membros',
@@ -101,6 +102,24 @@ export default {
     financial: 'Financeiro',
     event_manager: 'Gerente de Eventos',
     marketing: 'Marketing',
+  },
+  activity: {
+    title: "Atividade recente",
+    history: "Histórico",
+    sub: "{n} registros",
+    empty: "Nenhuma atividade ainda.",
+    load_more: "Carregar mais",
+    member_added: "{actor} adicionou {target} como {role}",
+    member_joined_invite: "{target} entrou como {role} por convite",
+    invite_sent: "{actor} convidou {target} como {role}",
+    role_changed: "{actor} alterou o cargo de {target}: {old_role} → {new_role}",
+    member_removed: "{actor} removeu {target} ({role})",
+    member_left: "{target} saiu da organização ({role})",
+    event_created: "{actor} criou o evento {name}",
+    event_published: "{actor} publicou o evento {name}",
+    event_started: "{actor} iniciou o evento {name}",
+    event_finished: "{actor} encerrou o evento {name}",
+    event_deleted: "{actor} excluiu o evento {name}",
   },
   roles_panel: {
     title: "Cargos",

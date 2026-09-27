@@ -5,6 +5,7 @@ import OrganizationBilling from '@/helpers/communication/OrganizationBilling.js'
 import SystemVars from '@/helpers/General/SystemVars';
 import { toast } from '@/helpers/toast.js';
 import EhubStatCard from '@/components/EhubStatCard.vue';
+import EhubActivityLog from '@/components/EhubActivityLog.vue';
 import EhubMgmtLayout from '@/components/general/EhubMgmtLayout.vue';
 import EhubRolePermissionsTable from '@/components/EhubRolePermissionsTable.vue';
 import EhubDialog from '@/components/modals/EhubDialog.vue';
@@ -45,6 +46,13 @@ const ORG_ROLE_PERMS = {
   marketing: ['event_results', 'event_news'],
 };
 
+const ORG_ACTIVITY_ICONS = {
+  member_added: 'user-plus', member_joined_invite: 'user-plus', invite_sent: 'paper-plane',
+  role_changed: 'id-badge', member_removed: 'user-minus', member_left: 'right-from-bracket',
+  event_created: 'calendar-plus', event_published: 'bullhorn', event_started: 'play',
+  event_finished: 'flag-checkered', event_deleted: 'trash',
+};
+
 const ROLE_CLASS = {
   owner: 'owner',
   admin: 'admin',
@@ -54,7 +62,7 @@ const ROLE_CLASS = {
 };
 
 export default {
-  components: { EhubMgmtLayout, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubInviteCard, EhubLeaveCard, EhubColorPicker, EhubProfileImageUpload },
+  components: { EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubInviteCard, EhubLeaveCard, EhubColorPicker, EhubProfileImageUpload },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -62,7 +70,7 @@ export default {
 
   data() {
     const forced = this.forceOption?.[0] ?? null;
-    const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', roles: 'roles', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
+    const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', roles: 'roles', activity: 'activity', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
     return {
       activePanel: panelMap[forced] ?? 'overview',
       org: null,
@@ -81,6 +89,10 @@ export default {
       mbSearch: '',
       mbRoleFilter: 'all',
       removeTarget: null,
+      activities: [],
+      activitiesTotal: 0,
+      activitiesPage: 1,
+      activitiesLoading: false,
       leaveOpen: false,
       inviteSending: false,
 
@@ -158,6 +170,9 @@ export default {
     myRole() {
       return this.org?.role || null;
     },
+    activitiesWithIcons() {
+      return this.activities.map((a) => ({ ...a, icon: ORG_ACTIVITY_ICONS[a.type] || 'clock-rotate-left' }));
+    },
     isOnlyOwner() {
       return this.myRole === 'owner' && this.members.filter((m) => m.role === 'owner').length <= 1;
     },
@@ -190,6 +205,7 @@ export default {
         { key: 'events', icon: 'calendar-days', label: t('events'), badge: this.activeEvents || null },
         { key: 'members', icon: 'users', label: t('members') },
         { key: 'roles', icon: 'shield-halved', label: t('roles') },
+        { key: 'activity', icon: 'clock-rotate-left', label: t('activity') },
         { key: 'financeiro', icon: 'file-invoice-dollar', label: t('financeiro') },
         { key: 'reports', icon: 'chart-bar', label: t('reports') },
         { key: 'settings', icon: 'gear', label: t('settings') },
@@ -205,7 +221,7 @@ export default {
 
   watch: {
     forceOption(val) {
-      const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', roles: 'roles', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
+      const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', roles: 'roles', activity: 'activity', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
       const panel = panelMap[val?.[0]] ?? 'overview';
       this.activePanel = panel;
       if (panel === 'financeiro' && !this.finLoaded) this.loadFinances();
@@ -216,6 +232,7 @@ export default {
     await this.loadOrg();
     await this.loadEvents();
     await this.loadMembers();
+    this.loadActivities();
   },
 
   methods: {
@@ -283,6 +300,7 @@ export default {
         events: 'manage-organization-events',
         members: 'manage-organization-members',
         roles: 'manage-organization-roles',
+        activity: 'manage-organization-activity',
         financeiro: 'manage-organization-finances',
         reports: 'manage-organization-reports',
         settings: 'manage-organization-settings',
@@ -293,7 +311,21 @@ export default {
       }
       if (panel === 'events' && !this.events.length) await this.loadEvents();
       if (panel === 'members' && !this.members.length) await this.loadMembers();
+      if (panel === 'activity' && !this.activities.length) await this.loadActivities();
       if (panel === 'financeiro' && !this.finLoaded) await this.loadFinances();
+    },
+
+    async loadActivities(page = 1) {
+      this.activitiesLoading = true;
+      const res = await Organization.getActivities(this.orgRoute, page, 20);
+      this.activitiesLoading = false;
+      if (res.code !== 200) return;
+      this.activities = page === 1 ? (res.data || []) : [...this.activities, ...(res.data || [])];
+      this.activitiesTotal = res.total;
+      this.activitiesPage = page;
+    },
+    roleLabel(role) {
+      return role ? this.$t('pages.organization.manage.roles.' + role) : '';
     },
 
     async loadEvents() {
@@ -680,6 +712,28 @@ export default {
             </div>
           </div>
         </div>
+        <div style="margin-top:16px">
+          <EhubActivityLog
+            :title="$t('pages.organization.manage.activity.title')"
+            :activities="activitiesWithIcons.slice(0, 8)"
+            :loading="activitiesLoading && !activities.length"
+            :empty-label="$t('pages.organization.manage.activity.empty')"
+            :show-more="activitiesTotal > 8"
+            :view-more-label="$t('pages.organization.manage.overview.see_all')"
+            @view-more="switchPanel('activity')"
+          >
+            <template #text="{ activity: a }">
+              <i18n-t :keypath="'pages.organization.manage.activity.' + a.type" tag="span" scope="global">
+                <template #actor><strong>{{ a.params?.actor }}</strong></template>
+                <template #target><strong>{{ a.params?.target }}</strong></template>
+                <template #name><strong>{{ a.params?.name }}</strong></template>
+                <template #role>{{ roleLabel(a.params?.role) }}</template>
+                <template #old_role>{{ roleLabel(a.params?.old_role) }}</template>
+                <template #new_role>{{ roleLabel(a.params?.new_role) }}</template>
+              </i18n-t>
+            </template>
+          </EhubActivityLog>
+        </div>
       </section>
 
       <!-- ═══ EVENTS ═══ -->
@@ -853,6 +907,39 @@ export default {
           <button class="btn btn-danger round px-3" @click="leaveOrg">{{ $t('pages.organization.manage.members.leave') }}</button>
         </template>
       </EhubDialog>
+
+      <!-- ═══ ACTIVITY (same component as teams) ═══ -->
+      <section v-show="activePanel === 'activity'" class="mgmt-pane">
+        <div class="pnl-hd">
+          <div>
+            <h1>{{ $t('pages.organization.manage.activity.title') }}</h1>
+            <p>{{ $t('pages.organization.manage.activity.sub', { n: activitiesTotal }) }}</p>
+          </div>
+        </div>
+        <EhubActivityLog
+          :title="$t('pages.organization.manage.activity.history')"
+          :activities="activitiesWithIcons"
+          :loading="activitiesLoading && !activities.length"
+          :empty-label="$t('pages.organization.manage.activity.empty')"
+        >
+            <template #text="{ activity: a }">
+              <i18n-t :keypath="'pages.organization.manage.activity.' + a.type" tag="span" scope="global">
+                <template #actor><strong>{{ a.params?.actor }}</strong></template>
+                <template #target><strong>{{ a.params?.target }}</strong></template>
+                <template #name><strong>{{ a.params?.name }}</strong></template>
+                <template #role>{{ roleLabel(a.params?.role) }}</template>
+                <template #old_role>{{ roleLabel(a.params?.old_role) }}</template>
+                <template #new_role>{{ roleLabel(a.params?.new_role) }}</template>
+              </i18n-t>
+            </template>
+        </EhubActivityLog>
+        <div v-if="activities.length < activitiesTotal" class="text-center mt-3">
+          <button class="btn btn-outline-secondary round px-4" :disabled="activitiesLoading" @click="loadActivities(activitiesPage + 1)">
+            <span v-if="activitiesLoading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ $t('pages.organization.manage.activity.load_more') }}
+          </button>
+        </div>
+      </section>
 
       <!-- ═══ ROLES (permission matrix, same component as teams) ═══ -->
       <section v-show="activePanel === 'roles'" class="mgmt-pane">

@@ -27,6 +27,10 @@ const Organization = {
         const result = await Api.deleteAsync('/org/' + orgRoute);
         return { code: result.code, data: result.response?.message };
     },
+    async getActivities(orgRoute, page = 1, perPage = 20) {
+        const result = await Api.getAsync('/org/' + orgRoute + '/activities', { page, per_page: perPage });
+        return { code: result.code, data: result.response?.message, total: result.response?.total ?? 0 };
+    },
     async getMembers(orgRoute) {
         const result = await Api.getAsync('/org/' + orgRoute + '/members');
         return { code: result.code, data: result.response?.message };

@@ -2,7 +2,7 @@
   <div class="cc">
     <div class="cc-hd">
       <h3>{{ title }}</h3>
-      <button v-if="showMore" class="cc-link" @click="$emit('view-more')">{{ $t('pages.teams.manage.view_more') }}</button>
+      <button v-if="showMore" class="cc-link" @click="$emit('view-more')">{{ viewMoreLabel || $t('pages.teams.manage.view_more') }}</button>
     </div>
     <div v-if="loading" class="act-loading">{{ loadingLabel }}</div>
     <div v-else-if="activities.length">
@@ -36,6 +36,7 @@ export default {
     loadingLabel: { type: String, default: '...' },
     emptyLabel: { type: String, default: '—' },
     showMore: { type: Boolean, default: false },
+    viewMoreLabel: { type: String, default: '' },
   },
   methods: {
     formatTime(ts) {

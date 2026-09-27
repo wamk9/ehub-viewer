@@ -1,6 +1,7 @@
 export default {
   subtitle: 'Organization Management',
   nav: {
+    activity: "Activity",
     overview: 'Overview',
     events: 'Events',
     members: 'Members',
@@ -101,6 +102,24 @@ export default {
     financial: 'Financial',
     event_manager: 'Event Manager',
     marketing: 'Marketing',
+  },
+  activity: {
+    title: "Recent activity",
+    history: "History",
+    sub: "{n} entries",
+    empty: "No activity yet.",
+    load_more: "Load more",
+    member_added: "{actor} added {target} as {role}",
+    member_joined_invite: "{target} joined as {role} by invite",
+    invite_sent: "{actor} invited {target} as {role}",
+    role_changed: "{actor} changed {target}'s role: {old_role} → {new_role}",
+    member_removed: "{actor} removed {target} ({role})",
+    member_left: "{target} left the organization ({role})",
+    event_created: "{actor} created the event {name}",
+    event_published: "{actor} published the event {name}",
+    event_started: "{actor} started the event {name}",
+    event_finished: "{actor} finished the event {name}",
+    event_deleted: "{actor} deleted the event {name}",
   },
   roles_panel: {
     title: "Roles",

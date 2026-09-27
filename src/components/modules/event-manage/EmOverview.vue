@@ -1,5 +1,6 @@
 <script>
 import EhubStatCard from '@/components/EhubStatCard.vue';
+import EhubActivityLog from '@/components/EhubActivityLog.vue';
 import { stageState, roundState, userName } from './store.js';
 
 // Wizard step that holds the rules (Regulamento).
@@ -7,7 +8,7 @@ const RULES_STEP = 7;
 
 export default {
   name: 'EmOverview',
-  components: { EhubStatCard },
+  components: { EhubStatCard, EhubActivityLog },
   inject: ['em'],
   computed: {
     ev() { return this.em.event; },
@@ -68,19 +69,15 @@ export default {
       this.em.notices.forEach((n) => {
         items.push({ at: n.created_at, icon: 'bullhorn', color: 'color-mix(in srgb,var(--ehub-gold),#000 30%)', text: this.$t('pages.event.manage.ov.feed.notice', { t: n.subject, n: n.recipients_count }) });
       });
-      return items.filter((x) => x.at).sort((a, b) => new Date(b.at) - new Date(a.at)).slice(0, 8);
+      return items.filter((x) => x.at)
+        .sort((a, b) => new Date(b.at) - new Date(a.at))
+        .slice(0, 8)
+        .map((x, i) => ({ id: i, icon: x.icon, text: x.text, created_at: x.at }));
     },
   },
   methods: {
     money(v) {
       return new Intl.NumberFormat(this.$i18n.locale, { style: 'currency', currency: (this.ev.currency || 'brl').toUpperCase() }).format(v || 0);
-    },
-    ago(date) {
-      const diff = (Date.now() - new Date(date)) / 1000;
-      const rtf = new Intl.RelativeTimeFormat(this.$i18n.locale, { numeric: 'auto' });
-      if (diff < 3600) return rtf.format(-Math.max(1, Math.round(diff / 60)), 'minute');
-      if (diff < 86400) return rtf.format(-Math.round(diff / 3600), 'hour');
-      return rtf.format(-Math.round(diff / 86400), 'day');
     },
     go(panel) {
       if (!this.em.canPanel(panel)) return;
@@ -134,20 +131,13 @@ export default {
         </div>
       </div>
 
-      <div class="cc">
-        <div class="cc-hd">
-          <h3><font-awesome-icon :icon="['fas', 'bolt']" style="color:var(--ehub-gold)" />{{ $t('pages.event.manage.ov.activity') }}</h3>
-        </div>
-        <div v-if="!feed.length" class="cc-empty">{{ $t('pages.event.manage.ov.activity_empty') }}</div>
-        <div v-for="(a, i) in feed" :key="i" class="act-item">
-          <div class="act-dot" :style="{ background: `color-mix(in srgb, ${a.color} 14%, transparent)`, color: a.color }">
-            <font-awesome-icon :icon="['fas', a.icon]" />
-          </div>
-          <div>
-            <p class="act-text">{{ a.text }}</p>
-            <div class="act-when">{{ ago(a.at) }}</div>
-          </div>
-        </div>
+      <EhubActivityLog
+        :title="$t('pages.event.manage.ov.activity')"
+        :activities="feed"
+        :empty-label="$t('pages.event.manage.ov.activity_empty')"
+      >
+        <template #text="{ activity }">{{ activity.text }}</template>
+      </EhubActivityLog>
       </div>
     </div>
   </section>
