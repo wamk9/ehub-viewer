@@ -89,6 +89,10 @@ function validateStep(n) {
     toast.error(t('pages.organization.manage.eventWizard.err.' + (!form.category ? 'cat' : 'fmt')))
     return false
   }
+  if (n === 7 && !(form.rules || '').trim()) {
+    toast.error(t('pages.organization.manage.eventWizard.err.rules'))
+    return false
+  }
   if (n === 6 && !form.start_at) {
     toast.error(t('pages.organization.manage.eventWizard.err.start'))
     return false
@@ -144,7 +148,11 @@ async function saveEdit(payload) {
 
 async function submit(publication) {
   form.publication = publication
-  if (!validateStep(8)) { currentStep.value = 8; return }
+  // Jumping between steps (deep links, sidebar) can skip checks: validate every step
+  // and send the user to the first one with a problem.
+  for (let n = 1; n <= TOTAL_STEPS; n++) {
+    if (!validateStep(n)) { currentStep.value = n; return }
+  }
 
   publishing.value = true
   const payload = buildEventPayload(form)
@@ -193,6 +201,7 @@ async function submit(publication) {
       :model-value="currentStep"
       :org-name="org.name"
       :org-grad="orgGrad"
+      :edit-mode="isEditMode"
       @update:model-value="goToStep"
     />
 
@@ -224,7 +233,7 @@ async function submit(publication) {
         </button>
         <button v-else class="btn btn-primary round px-4" :disabled="publishing" @click="submit(form.publication)">
           <span v-if="publishing" class="spinner-border spinner-border-sm me-2"></span>
-          {{ $t('pages.organization.manage.eventWizard.btn.create') }}
+          {{ $t('pages.organization.manage.eventWizard.btn.' + (isEditMode ? 'saveChanges' : 'create')) }}
         </button>
       </div>
     </div>

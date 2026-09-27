@@ -4,6 +4,7 @@ const props = defineProps({
   modelValue: { type: Number, required: true }, // 1-indexed current step
   orgName: { type: String, default: '' },
   orgGrad: { type: String, default: '' },
+  editMode: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue'])
 
@@ -28,7 +29,7 @@ function goTo(n) {
       <div class="sb-org-logo" :style="{ background: orgGrad }">{{ initials(orgName) }}</div>
       <div>
         <div class="sb-org-name">{{ orgName }}</div>
-        <div class="sb-org-tag">{{ $t('pages.organization.manage.eventWizard.newEvent') }}</div>
+        <div class="sb-org-tag">{{ $t('pages.organization.manage.eventWizard.' + (editMode ? 'editEvent' : 'newEvent')) }}</div>
       </div>
     </div>
 

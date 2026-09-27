@@ -34,6 +34,11 @@ function onStageNameInput(stage) {
 function removeStage(i) {
   props.form.stages.splice(i, 1)
 }
+
+// Stage dates are YYYY-MM-DD strings, so a string compare is enough.
+function beforeStart(stage) {
+  return !!(stage.start_at && props.form.start_at && String(stage.start_at).slice(0, 10) < String(props.form.start_at).slice(0, 10))
+}
 </script>
 
 <template>
@@ -71,8 +76,11 @@ function removeStage(i) {
             :placeholder="$t('pages.organization.manage.eventWizard.stagePh')"
             @input="onStageNameInput(stage)"
           />
-          <input type="date" class="stage-date-inp" v-model="stage.start_at" />
+          <input type="date" class="stage-date-inp" :class="{ warn: beforeStart(stage) }" v-model="stage.start_at" />
           <button type="button" class="stage-del" @click="removeStage(i)"><font-awesome-icon :icon="['fas', 'trash']" /></button>
+          <div v-if="beforeStart(stage)" class="stage-warn">
+            <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />{{ $t('pages.organization.manage.eventWizard.s3.beforeStart') }}
+          </div>
         </div>
       </div>
       <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="addStage">
@@ -96,7 +104,7 @@ function removeStage(i) {
               <template v-else>{{ i + 1 }}</template>
             </div>
             <span class="stage-name-inp">{{ stage.name }}</span>
-            <span class="stage-slots-count">{{ stage.config.slots?.length || 0 }} vagas</span>
+            <span class="stage-slots-count">{{ $t('pages.organization.manage.eventWizard.s3.slotsCount', { n: stage.config.slots?.length || 0 }) }}</span>
             <input type="date" class="stage-date-inp" v-model="stage.start_at" />
           </div>
         </div>
@@ -124,6 +132,10 @@ function removeStage(i) {
 </template>
 
 <style scoped>
+.stage-row { flex-wrap: wrap; }
+.stage-date-inp.warn { border-color: color-mix(in srgb, var(--ehub-gold), #000 10%); }
+.stage-warn { flex-basis: 100%; font-size: .74rem; color: color-mix(in srgb, var(--ehub-gold), #000 30%); padding-left: 38px; }
+[data-bs-theme="dark"] .stage-warn { color: var(--ehub-gold); }
 .step-title { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 4px; letter-spacing: -.02em; }
 .step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 28px; }
 .form-section { margin-bottom: 26px; }

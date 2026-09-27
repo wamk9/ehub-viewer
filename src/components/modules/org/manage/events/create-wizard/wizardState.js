@@ -77,6 +77,15 @@ export function createWizardForm() {
   })
 }
 
+export function htmlToText(v) {
+  if (!v || !/<[a-z][\s\S]*>/i.test(v)) return v || ''
+  const withBreaks = String(v)
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|h[1-6]|li|div)>/gi, '\n')
+  const doc = new DOMParser().parseFromString(withBreaks, 'text/html')
+  return (doc.body.textContent || '').replace(/\n{3,}/g, '\n\n').trim()
+}
+
 function toDateInput(v) {
   if (!v) return ''
   if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v
@@ -114,6 +123,11 @@ export function populateFormFromEvent(form, event, baseUrl) {
   for (const key of fields) {
     if (event[key] !== undefined && event[key] !== null) form[key] = event[key]
   }
+  // Currency selects use upper-case codes; the API stores lower-case ("brl").
+  if (form.currency) form.currency = String(form.currency).toUpperCase()
+  if (form.prize_pool_currency) form.prize_pool_currency = String(form.prize_pool_currency).toUpperCase()
+  // Old events were written with a rich-text editor; the wizard edits plain text.
+  form.description = htmlToText(form.description)
   // The wizard uses <input type="date">: API timestamps must become YYYY-MM-DD.
   for (const key of ['start_at', 'end_at', 'registration_deadline']) {
     form[key] = toDateInput(form[key])

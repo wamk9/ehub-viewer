@@ -1,11 +1,15 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Category from '@/helpers/communication/Category.js'
 import { categoryIcon, categoryGradient } from '@/helpers/General/CategoryConfig.js'
 
 const props = defineProps({
   form: { type: Object, required: true },
 })
+
+const { t, te } = useI18n()
+const catName = (route) => (te(`categories.names.${route}`) ? t(`categories.names.${route}`) : route)
 
 const categories = ref([])
 const subcategories = ref([])
@@ -96,7 +100,7 @@ watch(() => props.form.runmode, (val) => {
             <font-awesome-icon :icon="['fas', categoryIcon(form.category)]" />
           </div>
           <div class="cat-sel-txt">
-            <div class="cat-sel-name">{{ selectedCategoryObj?.name || form.category }}</div>
+            <div class="cat-sel-name">{{ catName(form.category) }}</div>
             <div class="cat-sel-hint">{{ $t('pages.organization.manage.eventWizard.s2.catSelected') }}</div>
           </div>
           <font-awesome-icon :icon="['fas', 'circle-check']" style="color:var(--ehub-primary);font-size:1.1rem" />

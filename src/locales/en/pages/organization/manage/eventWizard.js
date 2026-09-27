@@ -1,5 +1,6 @@
 export default {
   newEvent: 'New Event',
+  editEvent: 'Edit Event',
   steps: [
     { name: 'Basic', hint: 'Name, description, cover' },
     { name: 'Category', hint: 'Cat., mode and format' },
@@ -26,7 +27,7 @@ export default {
     modeLabel: 'Mode', fmtLabel: 'Competition format',
     location: 'Event location', locationPh: 'City, State or full address',
   },
-  s3x: { title: 'Specific Settings', sub: 'Technical details for the chosen modality.', lastUpd: 'Last updated:' },
+  s3x: { yes: 'Yes', no: 'No', title: 'Specific Settings', sub: 'Technical details for the chosen modality.', lastUpd: 'Last updated:' },
   s4x: {
     title: 'Form Fields', sub: 'Configure the fields visible on the event, stages and registration form.',
     evtLabel: 'Event Fields', evtHint: 'Fill in the data you want shown on the public event page. Blank fields are not displayed.',
@@ -40,7 +41,7 @@ export default {
     colorsLabel: 'Preset colors', colorsPh: '#FF0000, #00FF00, blue, red…', colorsHint: 'Leave empty to allow any free color.',
     chooseIcon: 'Choose icon', required: 'Required', optional: 'Optional',
   },
-  s3: {
+  s3: { beforeStart: 'This stage starts before the event start date.', slotsCount: '{n} slots',
     title: 'Schedule', sub: 'Event dates and competition stages.',
     datesLabel: 'Dates', regDeadline: 'Registration deadline', start: 'Event start', end: 'Expected end',
     stagesLabel: 'Stages / Phases', stagesHint: 'Add the competition phases. Fields enabled in Stage Fields will appear on each entry.',
@@ -52,7 +53,7 @@ export default {
     entryType: 'Participation type', teamSize: 'Team size', players: 'players',
     slotsLabel: 'Slots', maxSlots: 'Maximum entries', slotsHint: 'Leave empty for unlimited.',
     slotsHintGroups: 'Required for the groups format. Set by the Groups Configurator in Schedule.',
-    minSlots: 'Minimum to hold event', minSlotsHint: 'Event auto-cancelled if not reached.',
+    minSlots: 'Minimum to hold event', minSlotsHint: 'Minimum registrations expected for the event to happen (informational).',
     feeLabel: 'Entry fee', prize: 'Total prize pool', prizeHint: 'Optional. Leave empty if there is no cash prize.',
     requirements: 'Participation requirements', requirementsPh: 'e.g. Category B license; minimum iRating 2000; must reside in Brazil…',
   },
@@ -77,7 +78,7 @@ export default {
   et: { individual: 'Individual', individualSub: 'Each player/driver registers alone', team: 'Team', teamSub: 'Teams register as a group' },
   fee: { free: 'Free', freeSub: 'Anyone can register at no cost', paid: 'Paid', paidSub: 'Registration requires payment' },
   pub: { publish: 'Publish now', publishSub: 'Event visible with registration open immediately', draft: 'Save as draft', draftSub: 'Event hidden until you decide to publish' },
-  btn: { back: 'Back', cancel: 'Cancel', saveDraft: 'Save draft', save: 'Save', next: 'Next', create: 'Create Event' },
+  btn: { back: 'Back', cancel: 'Cancel', saveDraft: 'Save draft', save: 'Save', next: 'Next', create: 'Create Event', saveChanges: 'Save changes' },
   pts: { pos: 'Position', pts: 'Points' },
   fmt: {
     points: 'Points', pointsD: 'Accumulation of points across stages',
@@ -88,7 +89,7 @@ export default {
   rev: { name: 'Name', category: 'Category', mode: 'Mode', format: 'Format', start: 'Start', slots: 'Slots', fee: 'Entry fee', free: 'Free', unlimited: 'Unlimited', url: 'Event URL' },
   stagePh: 'Stage name (e.g. Qualifier, Final…)',
   toast: { draft: 'Draft saved', updated: 'Event updated!', created: 'Event created successfully!' },
-  err: { name: 'Enter the event name.', start: 'Enter the start date.', cat: 'Select a category.', fmt: 'Select a competition format.', slug: 'Set the event URL.' },
+  err: { rules: 'Fill in the general rules.', name: 'Enter the event name.', start: 'Enter the start date.', cat: 'Select a category.', fmt: 'Select a competition format.', slug: 'Set the event URL.' },
   gw: {
     alertTitle: 'Payment gateway not configured',
     alertDesc: 'To charge entry fees, connect Stripe (BRL, USD, EUR) or MercadoPago (BRL). An administrator must authorize the gateway.',

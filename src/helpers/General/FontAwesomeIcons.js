@@ -154,6 +154,20 @@ import {
   faUpload,
   faReceipt,
   faCopy,
+  faArrowsRotate,
+  faCircleDot,
+  faFilePen,
+  faLayerGroup,
+  faPlug,
+  faSitemap,
+  faTicket,
+  faBookmark,
+  faFire,
+  faHeart,
+  faList,
+  faMusic,
+  faTag,
+  faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -169,6 +183,20 @@ import {
 //import { faBell } from "@fortawesome/free-regular-svg-icons";
 
 library.add(
+  faArrowsRotate,
+  faCircleDot,
+  faFilePen,
+  faLayerGroup,
+  faPlug,
+  faSitemap,
+  faTicket,
+  faBookmark,
+  faFire,
+  faHeart,
+  faList,
+  faMusic,
+  faTag,
+  faVideo,
   faTwitch,
   faRankingStar,
   faTowerBroadcast,

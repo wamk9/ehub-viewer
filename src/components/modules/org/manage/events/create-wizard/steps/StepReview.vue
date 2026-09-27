@@ -2,13 +2,30 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { categoryGradient, categoryIcon } from '@/helpers/General/CategoryConfig.js'
-import { buildEventPayload } from '../wizardState.js'
 
 const props = defineProps({
   form: { type: Object, required: true },
 })
 
-const { t } = useI18n()
+const { t, te, locale } = useI18n()
+
+const categoryLabel = computed(() => {
+  const key = `categories.names.${props.form.category}`
+  return props.form.category ? (te(key) ? t(key) : props.form.category) : '—'
+})
+const runmodeLabel = computed(() => {
+  const key = `categories.runmode.${props.form.runmode}`
+  return props.form.runmode ? (te(key) ? t(key) : props.form.runmode) : '—'
+})
+function fmtDate(v) {
+  if (!v) return '—'
+  const [y, m, d] = String(v).slice(0, 10).split('-').map(Number)
+  return new Intl.DateTimeFormat(locale.value, { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(y, m - 1, d))
+}
+function money(v, cur) {
+  try { return new Intl.NumberFormat(locale.value, { style: 'currency', currency: (cur || 'BRL').toUpperCase() }).format(+v || 0) }
+  catch { return `${cur} ${v}` }
+}
 
 const coverStyle = computed(() => props.form.cover_image
   ? { backgroundImage: `url(${props.form.cover_image})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -18,17 +35,16 @@ const summary = computed(() => {
   const wz = 'pages.organization.manage.eventWizard.rev.'
   return [
     { k: t(wz + 'name'), v: props.form.name || '—' },
-    { k: t(wz + 'category'), v: props.form.category || '—' },
-    { k: t(wz + 'mode'), v: props.form.runmode || '—' },
+    { k: t(wz + 'category'), v: categoryLabel.value },
+    { k: t(wz + 'mode'), v: runmodeLabel.value },
     { k: t(wz + 'format'), v: props.form.format ? t(`pages.organization.manage.eventWizard.fmt.${props.form.format}`) : '—' },
-    { k: t(wz + 'start'), v: props.form.start_at || '—' },
+    { k: t(wz + 'start'), v: fmtDate(props.form.start_at) },
     { k: t(wz + 'slots'), v: props.form.max_registrations || t(wz + 'unlimited') },
-    { k: t(wz + 'fee'), v: (+props.form.fee > 0) ? `${props.form.currency} ${props.form.fee}` : t(wz + 'free') },
+    { k: t(wz + 'fee'), v: (+props.form.fee > 0) ? money(props.form.fee, props.form.currency) : t(wz + 'free') },
     { k: t(wz + 'url'), v: props.form.route || '—' },
   ]
 })
 
-const jsonPreview = computed(() => JSON.stringify({ event: buildEventPayload(props.form), stages: props.form.stages }, null, 2))
 </script>
 
 <template>
@@ -46,9 +62,9 @@ const jsonPreview = computed(() => JSON.stringify({ event: buildEventPayload(pro
           <div class="rev-body">
             <div class="rev-title">{{ form.name || '—' }}</div>
             <div class="rev-chips">
-              <span v-if="form.category" class="rev-chip primary">{{ form.category }}</span>
+              <span v-if="form.category" class="rev-chip primary">{{ categoryLabel }}</span>
               <span v-if="form.format" class="rev-chip">{{ $t(`pages.organization.manage.eventWizard.fmt.${form.format}`) }}</span>
-              <span v-if="form.runmode" class="rev-chip">{{ form.runmode }}</span>
+              <span v-if="form.runmode" class="rev-chip">{{ runmodeLabel }}</span>
             </div>
           </div>
         </div>
@@ -80,10 +96,6 @@ const jsonPreview = computed(() => JSON.stringify({ event: buildEventPayload(pro
       </div>
     </div>
 
-    <details class="json-details mt-4">
-      <summary class="json-summary"><font-awesome-icon :icon="['fas', 'code']" class="me-2" />Payload JSON</summary>
-      <pre class="json-preview-code">{{ jsonPreview }}</pre>
-    </details>
   </div>
 </template>
 
@@ -116,9 +128,6 @@ const jsonPreview = computed(() => JSON.stringify({ event: buildEventPayload(pro
 .pub-card .pn { font-size: .88rem; font-weight: 700; color: var(--ehub-ink); margin-bottom: 2px; }
 .pub-card .pd { font-size: .76rem; color: var(--ehub-muted); line-height: 1.4; }
 
-.json-details { border: 1px solid var(--ehub-line); border-radius: 9px; overflow: hidden; }
-.json-summary { padding: 9px 14px; background: var(--ehub-field-bg); font-size: .78rem; font-weight: 600; color: var(--ehub-ink); cursor: pointer; }
-.json-preview-code { background: var(--ehub-field-bg); padding: 14px 16px; font-size: .72rem; max-height: 280px; overflow-y: auto; color: var(--ehub-ink); margin: 0; white-space: pre; font-family: 'SFMono-Regular', Consolas, monospace; line-height: 1.6; }
 
 @media (max-width: 640px) { .pub-cards { grid-template-columns: 1fr; } }
 </style>

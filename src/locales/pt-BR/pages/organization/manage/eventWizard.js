@@ -1,5 +1,6 @@
 export default {
   newEvent: 'Novo Evento',
+  editEvent: 'Editar Evento',
   steps: [
     { name: 'Básico', hint: 'Nome, descrição, capa' },
     { name: 'Categoria', hint: 'Cat., modo e formato' },
@@ -26,7 +27,7 @@ export default {
     modeLabel: 'Modalidade', fmtLabel: 'Formato de competição',
     location: 'Local do evento', locationPh: 'Cidade, Estado ou endereço completo',
   },
-  s3x: { title: 'Configurações Específicas', sub: 'Detalhes técnicos da modalidade escolhida.', lastUpd: 'Última atualização:' },
+  s3x: { yes: 'Sim', no: 'Não', title: 'Configurações Específicas', sub: 'Detalhes técnicos da modalidade escolhida.', lastUpd: 'Última atualização:' },
   s4x: {
     title: 'Campos do Formulário', sub: 'Configure os campos visíveis no evento, nas etapas e no formulário de inscrição.',
     evtLabel: 'Campos do Evento', evtHint: 'Preencha os dados que deseja exibir na página pública do evento. Campos em branco não são exibidos.',
@@ -40,7 +41,7 @@ export default {
     colorsLabel: 'Cores predefinidas', colorsPh: '#FF0000, #00FF00, azul, vermelho…', colorsHint: 'Deixe vazio para permitir qualquer cor livre.',
     chooseIcon: 'Escolher ícone', required: 'Obrigatório', optional: 'Opcional',
   },
-  s3: {
+  s3: { beforeStart: 'Esta etapa começa antes do início do evento.', slotsCount: '{n} vagas',
     title: 'Cronograma', sub: 'Datas do evento e etapas da competição.',
     datesLabel: 'Datas', regDeadline: 'Prazo de inscrição', start: 'Início do evento', end: 'Término previsto',
     stagesLabel: 'Etapas / Fases', stagesHint: 'Adicione as fases da competição. Os campos ativos em Campos das Etapas aparecerão em cada entrada.',
@@ -52,7 +53,7 @@ export default {
     entryType: 'Tipo de participação', teamSize: 'Tamanho da equipe', players: 'jogadores',
     slotsLabel: 'Vagas', maxSlots: 'Máximo de inscritos', slotsHint: 'Deixe vazio para ilimitado.',
     slotsHintGroups: 'Obrigatório para o formato de grupos. Definido pelo Configurador de Grupos no Cronograma.',
-    minSlots: 'Mínimo para realizar', minSlotsHint: 'Evento cancelado automaticamente se não atingido.',
+    minSlots: 'Mínimo para realizar', minSlotsHint: 'Mínimo de inscritos esperado para o evento acontecer (informativo).',
     feeLabel: 'Inscrição', prize: 'Premiação total', prizeHint: 'Opcional. Deixe vazio se não houver premiação em dinheiro.',
     requirements: 'Requisitos de participação', requirementsPh: 'ex: Licença categoria B; iRating mínimo 2000; residir no Brasil…',
   },
@@ -77,7 +78,7 @@ export default {
   et: { individual: 'Individual', individualSub: 'Cada piloto/jogador inscreve-se sozinho', team: 'Por equipe', teamSub: 'Equipes se inscrevem como grupo' },
   fee: { free: 'Gratuita', freeSub: 'Qualquer pessoa pode se inscrever', paid: 'Paga', paidSub: 'Inscrição mediante pagamento' },
   pub: { publish: 'Publicar agora', publishSub: 'Evento visível e com inscrições abertas imediatamente', draft: 'Salvar como rascunho', draftSub: 'Evento oculto até você decidir publicar' },
-  btn: { back: 'Voltar', cancel: 'Cancelar', saveDraft: 'Salvar rascunho', save: 'Salvar', next: 'Próximo', create: 'Criar Evento' },
+  btn: { back: 'Voltar', cancel: 'Cancelar', saveDraft: 'Salvar rascunho', save: 'Salvar', next: 'Próximo', create: 'Criar Evento', saveChanges: 'Salvar alterações' },
   pts: { pos: 'Posição', pts: 'Pontos' },
   fmt: {
     points: 'Pontuação', pointsD: 'Acumulação de pontos ao longo das etapas',
@@ -88,7 +89,7 @@ export default {
   rev: { name: 'Nome', category: 'Categoria', mode: 'Modalidade', format: 'Formato', start: 'Início', slots: 'Vagas', fee: 'Inscrição', free: 'Gratuita', unlimited: 'Ilimitado', url: 'URL do Evento' },
   stagePh: 'Nome da etapa (ex: Classificatória, Final…)',
   toast: { draft: 'Rascunho salvo', updated: 'Evento atualizado!', created: 'Evento criado com sucesso!' },
-  err: { name: 'Informe o nome do evento.', start: 'Informe a data de início.', cat: 'Selecione uma categoria.', fmt: 'Selecione um formato de competição.', slug: 'Defina a URL do evento.' },
+  err: { rules: 'Preencha o regulamento geral.', name: 'Informe o nome do evento.', start: 'Informe a data de início.', cat: 'Selecione uma categoria.', fmt: 'Selecione um formato de competição.', slug: 'Defina a URL do evento.' },
   gw: {
     alertTitle: 'Gateway de pagamento não configurado',
     alertDesc: 'Para cobrar inscrições, conecte o Stripe (BRL, USD, EUR) ou MercadoPago (BRL). Um administrador deve autorizar o gateway.',

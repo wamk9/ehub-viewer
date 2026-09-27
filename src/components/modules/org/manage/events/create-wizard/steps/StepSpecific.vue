@@ -78,6 +78,12 @@ onMounted(loadForm)
 watch(() => [props.form.category, props.form.subcategory, props.form.runmode], loadForm)
 watch(advancedForm, () => { props.form.event_data = extractValues() }, { deep: true })
 
+// Fallback when a category form has no translation: "consume-percent" → "Consume percent".
+function humanize(name) {
+  const s = String(name || '').replace(/[-_]+/g, ' ').trim()
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
 const i18nPath = computed(() => `categories.${props.form.category}.${props.form.runmode}.form`)
 </script>
 
@@ -106,17 +112,17 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
           <div class="w-100 mb-3" v-if="container.independentRow"></div>
           <div :class="containerClass(container.sizes, container.offsets)">
             <template v-for="(input, ii) in container.inputs" :key="ii">
-              <h2 class="display-6" v-if="input.type === 'title'">
-                {{ te(`${i18nPath}.${input.name}.title`) ? $t(`${i18nPath}.${input.name}.title`) : input.name }}
-              </h2>
-              <p class="text-muted" v-else-if="input.type === 'description'">
+              <h3 class="spec-title" v-if="input.type === 'title'">
+                {{ te(`${i18nPath}.${input.name}.title`) ? $t(`${i18nPath}.${input.name}.title`) : humanize(input.name) }}
+              </h3>
+              <p class="spec-desc" v-else-if="input.type === 'description'">
                 {{ te(`${i18nPath}.${input.name}.description`) ? $t(`${i18nPath}.${input.name}.description`) : '' }}
               </p>
               <hr class="mt-0 mb-3" v-else-if="input.type === 'separator'" />
 
               <template v-else>
                 <label class="field-label">
-                  {{ te(`${i18nPath}.${input.name}.label`) ? $t(`${i18nPath}.${input.name}.label`) : input.name }}
+                  {{ te(`${i18nPath}.${input.name}.label`) ? $t(`${i18nPath}.${input.name}.label`) : humanize(input.name) }}
                 </label>
 
                 <ehubInput v-if="input.type === 'list'" class="w-100 mb-3"
@@ -133,8 +139,8 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
 
                 <ehubInput v-else-if="input.type === 'switch'" class="w-100 mb-3"
                   :name="input.name" type="switch"
-                  :checkedLabel="te(`${i18nPath}.${input.name}.checked`) ? $t(`${i18nPath}.${input.name}.checked`) : 'Sim'"
-                  :uncheckedLabel="te(`${i18nPath}.${input.name}.unchecked`) ? $t(`${i18nPath}.${input.name}.unchecked`) : 'Não'"
+                  :checkedLabel="te(`${i18nPath}.${input.name}.checked`) ? $t(`${i18nPath}.${input.name}.checked`) : $t('pages.organization.manage.eventWizard.s3x.yes')"
+                  :uncheckedLabel="te(`${i18nPath}.${input.name}.unchecked`) ? $t(`${i18nPath}.${input.name}.unchecked`) : $t('pages.organization.manage.eventWizard.s3x.no')"
                   v-model="input.eventValue" ref="advancedRef" />
 
                 <ehubInput v-else-if="input.type === 'checkbox'" class="w-100 mb-3"
@@ -151,6 +157,8 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
 </template>
 
 <style scoped>
+.spec-title { font-size: .95rem; font-weight: 700; color: var(--ehub-ink); margin: 8px 0 2px; }
+.spec-desc { font-size: .8rem; color: var(--ehub-muted); margin: 0 0 8px; }
 .step-title { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 4px; letter-spacing: -.02em; }
 .step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 28px; }
 .last-upd-bar { display: flex; align-items: center; gap: 8px; padding: 9px 14px; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 9px; margin-bottom: 22px; font-size: .82rem; color: var(--ehub-muted); }
