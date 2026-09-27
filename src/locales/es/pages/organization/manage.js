@@ -39,6 +39,7 @@ export default {
     action_error: "No se pudo completar la acción.",
     filter: {
       all: 'Todos',
+      draft: 'Borradores',
       upcoming: 'Próximos',
       active: 'En curso',
       finished: 'Finalizados',

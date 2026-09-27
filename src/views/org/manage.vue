@@ -150,9 +150,8 @@ export default {
     },
     filteredEvents() {
       let list = this.events;
-      if (this.evFilter === 'upcoming') list = list.filter(e => !e.finished && this.isUpcoming(e));
-      else if (this.evFilter === 'active') list = list.filter(e => !e.finished && !this.isUpcoming(e));
-      else if (this.evFilter === 'finished') list = list.filter(e => e.finished);
+      // Filters match the status badge, so each event falls in exactly one of them.
+      if (this.evFilter !== 'all') list = list.filter(e => this.eventStatus(e) === this.evFilter);
       const q = this.evSearch.trim().toLowerCase();
       if (q) list = list.filter(e => (e.name || '').toLowerCase().includes(q) || (e.category || '').toLowerCase().includes(q));
       return list;
@@ -795,7 +794,7 @@ export default {
 
         <div class="sec-bar">
           <div class="role-seg">
-            <button v-for="f in ['all','upcoming','active','finished']" :key="f"
+            <button v-for="f in ['all','draft','upcoming','active','finished']" :key="f"
               :class="{ active: evFilter === f }" @click="evFilter = f">
               {{ $t('pages.organization.manage.events.filter.' + f) }}
             </button>

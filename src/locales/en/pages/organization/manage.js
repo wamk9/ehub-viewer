@@ -39,6 +39,7 @@ export default {
     action_error: "The action could not be completed.",
     filter: {
       all: 'All',
+      draft: 'Drafts',
       upcoming: 'Upcoming',
       active: 'Active',
       finished: 'Finished',

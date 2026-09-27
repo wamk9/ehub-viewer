@@ -39,6 +39,7 @@ export default {
     action_error: "Não foi possível concluir a ação.",
     filter: {
       all: 'Todos',
+      draft: 'Rascunhos',
       upcoming: 'Em breve',
       active: 'Em andamento',
       finished: 'Encerrados',
