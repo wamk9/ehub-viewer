@@ -127,6 +127,9 @@ export function populateFormFromEvent(form, event, baseUrl) {
   form.route_manually_edited = true
   if (event.logo_image) form._existing_logo_url = baseUrl + 'storage/' + event.logo_image
   if (event.cover_image) form._existing_cover_url = baseUrl + 'storage/' + event.cover_image
+  // Remember what the event had, so clearing an image in the wizard deletes it on save.
+  form._had_logo = !!event.logo_image
+  form._had_cover = !!event.cover_image
   if (Array.isArray(event.stages)) {
     form.stages = event.stages.map(s => ({
       id: s.id, name: s.name, route: s.route, stage_type: s.stage_type,
@@ -144,10 +147,12 @@ export function buildEventPayload(form) {
     meta_title: form.meta_title.trim() || null,
     meta_description: form.meta_description.trim() || null,
     color: form.color || null,
-    cover_type: form.cover_image ? 'image' : 'gradient',
-    cover_gradient_index: form.cover_image ? null : form.cover_gradient_index,
+    cover_type: form.cover_image || form._existing_cover_url ? 'image' : 'gradient',
+    cover_gradient_index: form.cover_image || form._existing_cover_url ? null : form.cover_gradient_index,
     logo_image: form.logo_image || undefined,
     cover_image: form.cover_image || undefined,
+    remove_logo: form._had_logo && !form.logo_image && !form._existing_logo_url ? true : undefined,
+    remove_cover: form._had_cover && !form.cover_image && !form._existing_cover_url ? true : undefined,
     category: form.category,
     subcategory: form.subcategory || null,
     runmode: form.runmode,

@@ -5,6 +5,10 @@ const props = defineProps({
   orgName: { type: String, default: '' },
   orgGrad: { type: String, default: '' },
   editMode: { type: Boolean, default: false },
+  // Live identity of the event being edited (falls back to the organization).
+  eventName: { type: String, default: '' },
+  eventLogo: { type: String, default: '' },
+  eventColor: { type: String, default: '' },
 })
 const emit = defineEmits(['update:modelValue'])
 
@@ -26,10 +30,13 @@ function goTo(n) {
 <template>
   <div class="wiz-sidebar">
     <div v-if="orgName" class="sb-org-row">
-      <div class="sb-org-logo" :style="{ background: orgGrad }">{{ initials(orgName) }}</div>
-      <div>
-        <div class="sb-org-name">{{ orgName }}</div>
-        <div class="sb-org-tag">{{ $t('pages.organization.manage.eventWizard.' + (editMode ? 'editEvent' : 'newEvent')) }}</div>
+      <div class="sb-org-logo" :style="{ background: eventColor ? `linear-gradient(135deg, ${eventColor}, color-mix(in srgb, ${eventColor}, #000 30%))` : orgGrad }">
+        <img v-if="eventLogo" :src="eventLogo" alt="" class="sb-org-img" />
+        <span v-else>{{ initials(eventName || orgName) }}</span>
+      </div>
+      <div style="min-width:0">
+        <div class="sb-org-name">{{ eventName || $t('pages.organization.manage.eventWizard.' + (editMode ? 'editEvent' : 'newEvent')) }}</div>
+        <div class="sb-org-tag">{{ orgName }} · {{ $t('pages.organization.manage.eventWizard.' + (editMode ? 'editEvent' : 'newEvent')) }}</div>
       </div>
     </div>
 
@@ -55,8 +62,9 @@ function goTo(n) {
 <style scoped>
 .wiz-sidebar { background: var(--ehub-card); border-right: 1px solid var(--ehub-line); padding: 28px 20px; position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; display: flex; flex-direction: column; }
 .sb-org-row { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--ehub-line); }
-.sb-org-logo { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: .82rem; font-weight: 800; color: #fff; flex-shrink: 0; }
-.sb-org-name { font-size: .82rem; font-weight: 700; color: var(--ehub-ink); line-height: 1.2; }
+.sb-org-logo { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: .82rem; font-weight: 800; color: #fff; flex-shrink: 0; overflow: hidden; transition: background .2s; }
+.sb-org-img { width: 100%; height: 100%; object-fit: cover; }
+.sb-org-name { font-size: .82rem; font-weight: 700; color: var(--ehub-ink); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sb-org-tag { font-size: .7rem; color: var(--ehub-muted); }
 
 .v-steps { display: flex; flex-direction: column; gap: 0; flex: 1; }

@@ -207,6 +207,9 @@ async function submit(publication) {
       :org-name="org.name"
       :org-grad="orgGrad"
       :edit-mode="isEditMode"
+      :event-name="form.name"
+      :event-logo="form.logo_image || form._existing_logo_url"
+      :event-color="form.color"
       @update:model-value="goToStep"
     />
 

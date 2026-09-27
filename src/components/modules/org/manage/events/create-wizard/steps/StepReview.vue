@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { categoryGradient, categoryIcon } from '@/helpers/General/CategoryConfig.js'
+import { categoryIcon, gradientByIndex } from '@/helpers/General/CategoryConfig.js'
 
 const props = defineProps({
   form: { type: Object, required: true },
@@ -27,9 +27,13 @@ function money(v, cur) {
   catch { return `${cur} ${v}` }
 }
 
-const coverStyle = computed(() => props.form.cover_image
-  ? { backgroundImage: `url(${props.form.cover_image})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-  : { background: categoryGradient(props.form.category) })
+const coverUrl = computed(() => props.form.cover_image || props.form._existing_cover_url || '')
+const logoUrl = computed(() => props.form.logo_image || props.form._existing_logo_url || '')
+const coverStyle = computed(() => coverUrl.value
+  ? { backgroundImage: `url(${coverUrl.value})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+  : { background: gradientByIndex(props.form.cover_gradient_index) })
+const accent = computed(() => props.form.color || 'var(--ehub-primary)')
+const initials = computed(() => (props.form.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase())
 
 const summary = computed(() => {
   const wz = 'pages.organization.manage.eventWizard.rev.'
@@ -57,12 +61,16 @@ const summary = computed(() => {
         <div class="form-section-label">{{ $t('pages.organization.manage.eventWizard.s7.preview') }}</div>
         <div class="review-event-card">
           <div class="rev-cover" :style="coverStyle">
-            <font-awesome-icon v-if="!form.cover_image" :icon="['fas', categoryIcon(form.category)]" />
+            <font-awesome-icon v-if="!coverUrl" :icon="['fas', categoryIcon(form.category)]" />
           </div>
           <div class="rev-body">
+            <div class="rev-logo" :style="{ background: accent }">
+              <img v-if="logoUrl" :src="logoUrl" alt="" />
+              <span v-else>{{ initials }}</span>
+            </div>
             <div class="rev-title">{{ form.name || '—' }}</div>
             <div class="rev-chips">
-              <span v-if="form.category" class="rev-chip primary">{{ categoryLabel }}</span>
+              <span v-if="form.category" class="rev-chip primary" :style="{ color: accent, borderColor: accent, background: `color-mix(in srgb, ${accent} 14%, transparent)` }">{{ categoryLabel }}</span>
               <span v-if="form.format" class="rev-chip">{{ $t(`pages.organization.manage.eventWizard.fmt.${form.format}`) }}</span>
               <span v-if="form.runmode" class="rev-chip">{{ runmodeLabel }}</span>
             </div>
@@ -107,7 +115,9 @@ const summary = computed(() => {
 
 .review-event-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); overflow: hidden; max-width: 360px; }
 .rev-cover { height: 90px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: rgba(255,255,255,.9); }
-.rev-body { padding: 14px 16px; }
+.rev-body { padding: 0 16px 14px; }
+.rev-logo { width: 52px; height: 52px; border-radius: 13px; margin-top: -26px; margin-bottom: 8px; border: 3px solid var(--ehub-card); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; overflow: hidden; position: relative; }
+.rev-logo img { width: 100%; height: 100%; object-fit: cover; }
 .rev-title { font-size: 1rem; font-weight: 700; color: var(--ehub-ink); margin: 0 0 6px; }
 .rev-chips { display: flex; flex-wrap: wrap; gap: 5px; }
 .rev-chip { font-size: .7rem; font-weight: 600; padding: 3px 9px; border-radius: 50rem; background: var(--ehub-field-bg); color: var(--ehub-muted); border: 1px solid var(--ehub-line); }
