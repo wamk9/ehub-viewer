@@ -15,7 +15,6 @@ export default {
   },
   ov: {
     title: 'Resumen', sub: 'Sigue y conduce tu evento',
-    published: 'Publicado', draft: 'Borrador', pub_hint: 'Visible al público en eHub', draft_hint: 'Solo la organización lo ve',
     k_regs: 'Inscritos', k_pending: 'Pagos pendientes', k_revenue: 'Ingresos confirmados',
     k_next: 'Próxima sesión', live_now: 'En vivo',
     todo: 'Pendientes', all_done: 'Todo en orden por aquí.',
@@ -104,9 +103,6 @@ export default {
     split: 'Distribución', place: '{n}º lugar', split_sum: 'Suma: {n}%', add_place: 'Agregar puesto', save_split: 'Guardar distribución',
   },
   adv: {
-    pub: 'Visibilidad',
-    pub_hint: 'Controla si el evento es visible al público en eHub.',
-    pub_locked: 'La visibilidad no puede cambiar después de que el evento comenzó.',
     finish: 'Finalizar evento',
     finish_hint: 'Congela la clasificación final. No se podrán iniciar nuevas etapas ni cambiar resultados.',
     finish_btn: 'Finalizar evento',
@@ -126,6 +122,7 @@ export default {
     ev_deleted: 'Evento eliminado', round_started: 'Sesión iniciada', round_finished: 'Sesión finalizada',
   },
   err: {
+    event_already_published: 'Un evento publicado no puede volver a borrador.',
     stage_already_started: 'Esta etapa ya comenzó.',
     previous_stage_not_finished: 'Finaliza la etapa anterior antes de iniciar esta.',
     previous_round_not_finished: 'Finaliza la sesión anterior antes de iniciar esta.',

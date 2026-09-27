@@ -15,7 +15,6 @@ export default {
   },
   ov: {
     title: 'Visão Geral', sub: 'Acompanhe e conduza o evento',
-    published: 'Publicado', draft: 'Rascunho', pub_hint: 'Visível para o público no eHub', draft_hint: 'Só a organização vê',
     k_regs: 'Inscritos', k_pending: 'Pagamentos pendentes', k_revenue: 'Receita confirmada',
     k_next: 'Próxima sessão', live_now: 'Ao vivo',
     todo: 'Pendências', all_done: 'Tudo em ordem por aqui.',
@@ -104,9 +103,6 @@ export default {
     split: 'Distribuição', place: '{n}º lugar', split_sum: 'Soma: {n}%', add_place: 'Adicionar colocação', save_split: 'Salvar distribuição',
   },
   adv: {
-    pub: 'Visibilidade',
-    pub_hint: 'Controla se o evento aparece para o público no eHub.',
-    pub_locked: 'A visibilidade não pode mudar depois que o evento começou.',
     finish: 'Encerrar evento',
     finish_hint: 'Congela a classificação final. Não será possível iniciar novas etapas nem alterar resultados.',
     finish_btn: 'Encerrar evento',
@@ -126,6 +122,7 @@ export default {
     ev_deleted: 'Evento excluído', round_started: 'Sessão iniciada', round_finished: 'Sessão finalizada',
   },
   err: {
+    event_already_published: 'Evento publicado não pode voltar para rascunho.',
     stage_already_started: 'Essa etapa já começou.',
     previous_stage_not_finished: 'Finalize a etapa anterior antes de iniciar esta.',
     previous_round_not_finished: 'Finalize a sessão anterior antes de iniciar esta.',

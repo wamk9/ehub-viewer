@@ -13,20 +13,8 @@ export default {
   },
   computed: {
     ev() { return this.em.event; },
-    published() { return this.ev.publication !== 'draft'; },
   },
   methods: {
-    async togglePublication() {
-      if (this.busy || this.ev.initialized) return;
-      const next = this.published ? 'draft' : 'published';
-      this.busy = true;
-      const res = await OrganizationEvent.update(this.em.orgRoute, this.em.eventRoute, { publication: next });
-      this.busy = false;
-      if (res.code === 200) {
-        this.ev.publication = next;
-        toast.success(this.$t('pages.event.manage.toast.' + (next === 'published' ? 'pub' : 'unpub')));
-      } else toast.error(apiError(this, res.data));
-    },
     async finish() {
       const ok = await this.em.ask(this.$t('pages.event.manage.adv.finish_q'), this.$t('pages.event.manage.adv.finish_btn'), true);
       if (!ok) return;
@@ -78,21 +66,6 @@ export default {
     </div>
 
     <div class="set-card">
-      <h3>{{ $t('pages.event.manage.adv.pub') }}</h3>
-      <p class="set-desc">{{ $t('pages.event.manage.adv.pub_hint') }}</p>
-      <label class="pub-sw" :class="{ locked: ev.initialized }">
-        <div class="form-check form-switch m-0">
-          <input class="form-check-input" type="checkbox" :checked="published" :disabled="busy || ev.initialized" @change="togglePublication" />
-        </div>
-        <div>
-          <b>{{ $t('pages.event.manage.ov.' + (published ? 'published' : 'draft')) }}</b>
-          <span>{{ $t('pages.event.manage.ov.' + (published ? 'pub_hint' : 'draft_hint')) }}</span>
-        </div>
-      </label>
-      <p v-if="ev.initialized" class="hint mt-2 mb-0"><font-awesome-icon :icon="['fas', 'circle-info']" />{{ $t('pages.event.manage.adv.pub_locked') }}</p>
-    </div>
-
-    <div class="set-card">
       <h3>{{ $t('pages.event.manage.adv.finish') }}</h3>
       <p class="set-desc">{{ $t('pages.event.manage.adv.finish_hint') }}</p>
       <p v-if="ev.finished" class="hint m-0"><font-awesome-icon :icon="['fas', 'flag-checkered']" />{{ $t('pages.event.manage.adv.finish_done') }}</p>
@@ -137,9 +110,5 @@ export default {
 </template>
 
 <style scoped>
-.pub-sw { display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; border: 1px solid var(--ehub-line); border-radius: 10px; background: var(--ehub-field-bg); cursor: pointer; margin: 0; }
-.pub-sw.locked { cursor: not-allowed; opacity: .8; }
-.pub-sw b { font-size: .82rem; color: var(--ehub-ink); display: block; line-height: 1.2; }
-.pub-sw span { font-size: .7rem; color: var(--ehub-muted); }
 .del-warn { font-size: .85rem; color: #e23b3b; background: color-mix(in srgb, #e23b3b 7%, transparent); border: 1px solid color-mix(in srgb, #e23b3b 25%, var(--ehub-line)); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; text-wrap: pretty; }
 </style>

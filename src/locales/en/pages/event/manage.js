@@ -15,7 +15,6 @@ export default {
   },
   ov: {
     title: 'Overview', sub: 'Track and run your event',
-    published: 'Published', draft: 'Draft', pub_hint: 'Visible to the public on eHub', draft_hint: 'Only the organization can see it',
     k_regs: 'Registered', k_pending: 'Pending payments', k_revenue: 'Confirmed revenue',
     k_next: 'Next session', live_now: 'Live',
     todo: 'To do', all_done: 'All good here.',
@@ -104,9 +103,6 @@ export default {
     split: 'Distribution', place: '{n} place', split_sum: 'Total: {n}%', add_place: 'Add place', save_split: 'Save distribution',
   },
   adv: {
-    pub: 'Visibility',
-    pub_hint: 'Controls whether the event is visible to the public on eHub.',
-    pub_locked: 'Visibility cannot change after the event has started.',
     finish: 'Finish event',
     finish_hint: 'Freezes the final standings. New stages cannot be started and results cannot change.',
     finish_btn: 'Finish event',
@@ -126,6 +122,7 @@ export default {
     ev_deleted: 'Event deleted', round_started: 'Session started', round_finished: 'Session finished',
   },
   err: {
+    event_already_published: 'A published event cannot go back to draft.',
     stage_already_started: 'This stage has already started.',
     previous_stage_not_finished: 'Finish the previous stage before starting this one.',
     previous_round_not_finished: 'Finish the previous session before starting this one.',
