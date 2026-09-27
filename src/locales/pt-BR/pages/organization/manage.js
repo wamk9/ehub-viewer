@@ -49,6 +49,10 @@ export default {
     },
   },
   members: {
+    err: {
+      cannot_change_own_role: "Você não pode alterar o seu próprio cargo.",
+      role_above_actor: "Você só pode gerenciar cargos abaixo do seu. Apenas o proprietário gerencia administradores.",
+    },
     sub: '{n} membros',
     all: 'Todos',
     search: 'Buscar membro...',

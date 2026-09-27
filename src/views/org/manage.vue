@@ -19,6 +19,11 @@ const ORG_GRADS = [
   ['#c04a00', '#ff8c5a'],
 ];
 
+// owner > admin > everyone else (mirrors OrganizationController::roleLevel).
+const ROLE_LEVEL = { owner: 3, admin: 2 };
+const roleLevel = (role) => (role ? ROLE_LEVEL[role] ?? 1 : 0);
+const ASSIGNABLE_ROLES = ['admin', 'event_manager', 'financial', 'marketing'];
+
 const ROLE_CLASS = {
   owner: 'owner',
   admin: 'admin',
@@ -133,7 +138,14 @@ export default {
       return list;
     },
     myUserId() {
-      return this.$store?.getters?.getUser?.id;
+      return this.org?.my_user_id || null;
+    },
+    myRole() {
+      return this.org?.role || null;
+    },
+    /** Roles I may give: strictly below my own level (only the owner creates admins). */
+    assignableRoles() {
+      return ASSIGNABLE_ROLES.filter((r) => roleLevel(r) < roleLevel(this.myRole));
     },
     standardReports() {
       return [
@@ -352,6 +364,17 @@ export default {
 
     roleClass(role) { return ROLE_CLASS[role] || 'staff'; },
 
+    /** I can change/remove a member only if they are below me and not myself. */
+    canTouch(m) {
+      return !!this.myUserId && m.user?.id !== this.myUserId && roleLevel(m.role) < roleLevel(this.myRole);
+    },
+
+    memberError(result, fallbackKey) {
+      const msg = typeof result.data === 'string' ? result.data : result.data?.message;
+      const key = 'pages.organization.manage.members.err.' + msg;
+      return this.$te(key) ? this.$t(key) : this.$t('pages.organization.manage.members.' + fallbackKey);
+    },
+
     async sendInvite() {
       if (!this.inviteEmail.trim()) return;
       this.inviteSending = true;
@@ -363,7 +386,7 @@ export default {
         this.showInvite = false;
         await this.loadMembers();
       } else {
-        toast.error(result.data?.message || this.$t('pages.organization.manage.members.invite_error'));
+        toast.error(this.memberError(result, 'invite_error'));
       }
     },
 
@@ -374,7 +397,7 @@ export default {
         toast.success(this.$t('pages.organization.manage.members.removed'));
         await this.loadMembers();
       } else {
-        toast.error(this.$t('pages.organization.manage.members.remove_error'));
+        toast.error(this.memberError(result, 'remove_error'));
       }
     },
 
@@ -384,7 +407,8 @@ export default {
         toast.success(this.$t('pages.organization.manage.members.role_updated'));
         member.role = role;
       } else {
-        toast.error(this.$t('pages.organization.manage.members.role_error'));
+        toast.error(this.memberError(result, 'role_error'));
+        await this.loadMembers(); // reset the select to the stored role
       }
     },
 
@@ -802,7 +826,7 @@ export default {
             </button>
           </div>
           <div class="sb-sp"></div>
-          <button class="btn btn-sm btn-primary round px-3" @click="showInvite = !showInvite">
+          <button v-if="assignableRoles.length" class="btn btn-sm btn-primary round px-3" @click="showInvite = !showInvite">
             <font-awesome-icon :icon="['fas', 'user-plus']" class="me-2" />{{ $t('pages.organization.manage.members.invite') }}
           </button>
         </div>
@@ -820,10 +844,7 @@ export default {
             <div class="col-md-3">
               <label class="form-label" style="font-size:.78rem;font-weight:600;color:var(--ehub-muted)">{{ $t('pages.organization.manage.members.invite_role_label') }}</label>
               <select class="form-select form-select-sm" v-model="inviteRole">
-                <option value="event_manager">{{ $t('pages.organization.manage.roles.event_manager') }}</option>
-                <option value="financial">{{ $t('pages.organization.manage.roles.financial') }}</option>
-                <option value="marketing">{{ $t('pages.organization.manage.roles.marketing') }}</option>
-                <option value="admin">{{ $t('pages.organization.manage.roles.admin') }}</option>
+                <option v-for="r in assignableRoles" :key="r" :value="r">{{ $t('pages.organization.manage.roles.' + r) }}</option>
               </select>
             </div>
             <div class="col-auto d-flex gap-2">
@@ -865,18 +886,15 @@ export default {
                   </div>
                 </td>
                 <td>
-                  <span v-if="m.role === 'owner' || m.user?.id === myUserId" class="role-chip" :class="roleClass(m.role)">{{ $t('pages.organization.manage.roles.' + m.role) }}</span>
-                  <select v-else class="form-select form-select-sm" style="max-width:160px;font-size:.8rem" :value="m.role" @change="updateRole(m, $event.target.value)">
-                    <option value="admin">{{ $t('pages.organization.manage.roles.admin') }}</option>
-                    <option value="event_manager">{{ $t('pages.organization.manage.roles.event_manager') }}</option>
-                    <option value="financial">{{ $t('pages.organization.manage.roles.financial') }}</option>
-                    <option value="marketing">{{ $t('pages.organization.manage.roles.marketing') }}</option>
+                  <select v-if="canTouch(m)" class="form-select form-select-sm" style="max-width:160px;font-size:.8rem" :value="m.role" @change="updateRole(m, $event.target.value)">
+                    <option v-for="r in assignableRoles" :key="r" :value="r">{{ $t('pages.organization.manage.roles.' + r) }}</option>
                   </select>
+                  <span v-else class="role-chip" :class="roleClass(m.role)">{{ $t('pages.organization.manage.roles.' + m.role) }}</span>
                 </td>
                 <td class="td-muted">{{ m.created_at ? new Date(m.created_at).getFullYear() : '—' }}</td>
                 <td>
                   <div class="act-row">
-                    <button v-if="m.role !== 'owner' && m.user?.id !== myUserId" class="act-btn del" @click="removeMember(m)" :title="$t('pages.organization.manage.members.remove')">
+                    <button v-if="canTouch(m)" class="act-btn del" @click="removeMember(m)" :title="$t('pages.organization.manage.members.remove')">
                       <font-awesome-icon :icon="['fas', 'trash']" />
                     </button>
                   </div>

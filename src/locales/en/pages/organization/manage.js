@@ -49,6 +49,10 @@ export default {
     },
   },
   members: {
+    err: {
+      cannot_change_own_role: "You can't change your own role.",
+      role_above_actor: "You can only manage roles below yours. Only the owner manages admins.",
+    },
     sub: '{n} members',
     all: 'All',
     search: 'Search member...',
