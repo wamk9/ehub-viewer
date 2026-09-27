@@ -27,7 +27,7 @@ export default {
     modeLabel: 'Mode', fmtLabel: 'Competition format',
     location: 'Event location', locationPh: 'City, State or full address',
   },
-  s3x: { notice: { title: 'Fields maintained by the eHub team', text: 'The fields for this mode are reviewed often and may change. Missing something? Send a suggestion.' }, suggest: { btn: 'Suggest a field', title: 'Suggest fields', text: 'Tell us what you need to configure for this mode. The eHub team reviews every suggestion.', ph: 'E.g. Balance of Performance, tyre sets, safety car...', send: 'Send suggestion', sent: 'Suggestion sent. Thank you!', error: 'Could not send the suggestion. Please try again.' }, yes: 'Yes', no: 'No', title: 'Specific Settings', sub: 'Technical details for the chosen modality.', lastUpd: 'Last updated:' },
+  s3x: { notice: { title: 'Fields maintained by the eHub team', text: 'The fields for this mode are reviewed often and may change. Missing something? Send a suggestion.' }, suggest: { btn: 'Suggest a field', title: 'Suggest fields', text: 'Tell us what you need to configure for this mode. The eHub team reviews every suggestion.', ph: 'Describe the missing field, what it is for and which options or values it should have.', send: 'Send suggestion', sent: 'Suggestion sent. Thank you!', error: 'Could not send the suggestion. Please try again.' }, yes: 'Yes', no: 'No', title: 'Specific Settings', sub: 'Technical details for the chosen modality.', lastUpd: 'Last updated:' },
   s4x: {
     title: 'Form Fields', sub: 'Configure the fields visible on the event, stages and registration form.',
     evtLabel: 'Event Fields', evtHint: 'Fill in the data you want shown on the public event page. Blank fields are not displayed.',
