@@ -944,7 +944,7 @@ export default {
         />
       </section>
 
-      <EhubDialog :model-value="!!removeTarget" :title="$t('pages.organization.manage.members.remove_title')" icon="user-minus" size="sm" @close="removeTarget = null">
+      <EhubDialog :model-value="!!removeTarget" :title="$t('pages.organization.manage.members.remove_title')" icon="user-minus" centered size="sm" @close="removeTarget = null">
         <p class="m-0" style="font-size:.9rem">{{ $t('pages.organization.manage.members.remove_q', { name: removeTarget ? memberName(removeTarget) : '' }) }}</p>
         <template #footer>
           <button class="btn btn-outline-secondary round px-3" @click="removeTarget = null">{{ $t('pages.organization.manage.members.cancel') }}</button>
@@ -952,7 +952,7 @@ export default {
         </template>
       </EhubDialog>
 
-      <EhubDialog v-model="leaveOpen" :title="$t('pages.organization.manage.members.leave')" icon="right-from-bracket" tone="muted" size="sm">
+      <EhubDialog v-model="leaveOpen" :title="$t('pages.organization.manage.members.leave')" icon="right-from-bracket" tone="muted" centered size="sm">
         <p class="m-0" style="font-size:.9rem">{{ $t('pages.organization.manage.members.leave_q') }}</p>
         <template #footer>
           <button class="btn btn-outline-secondary round px-3" @click="leaveOpen = false">{{ $t('pages.organization.manage.members.cancel') }}</button>
@@ -963,9 +963,9 @@ export default {
       <EhubConfirmNameDialog
         :model-value="!!evDelete"
         :title="$t('pages.organization.manage.events.delete_btn')"
-        :message="$t('pages.event.manage.adv.del_hint')"
+        :message="$t('pages.event.manage.adv.del_confirm_msg')"
         :name="evDelete?.name || ''"
-        :type-label="$t('pages.event.manage.adv.type_name', { n: evDelete?.name || '' })"
+        :type-label="$t('pages.event.manage.adv.type_name_hint')"
         :confirm-label="$t('pages.event.manage.adv.del_btn')"
         :cancel-label="$t('pages.organization.manage.members.cancel')"
         :loading="!!evBusy"

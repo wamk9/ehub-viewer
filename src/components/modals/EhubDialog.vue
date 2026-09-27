@@ -1,15 +1,17 @@
 <template>
   <Teleport to="body">
     <div v-if="modelValue" class="ehub-dialog-overlay" @click.self="close">
-      <div class="ehub-dialog ehub-mgmt-modal" :class="'ehub-dialog--' + size" role="dialog" aria-modal="true">
-        <div class="ehub-dialog__hd">
+      <div class="ehub-dialog ehub-mgmt-modal" :class="['ehub-dialog--' + size, { 'ehub-dialog--centered': centered }]" role="dialog" aria-modal="true">
+        <div v-if="!centered" class="ehub-dialog__hd">
           <h5>{{ title }}</h5>
           <button type="button" class="btn-close" :aria-label="$t('common.ui.close')" @click="close"></button>
         </div>
+        <button v-else type="button" class="btn-close ehub-dialog__x" :aria-label="$t('common.ui.close')" @click="close"></button>
         <div class="ehub-dialog__bd">
           <div v-if="icon" class="ehub-dialog__ico" :class="'ehub-dialog__ico--' + tone">
             <font-awesome-icon :icon="Array.isArray(icon) ? icon : ['fas', icon]" />
           </div>
+          <h5 v-if="centered" class="ehub-dialog__title">{{ title }}</h5>
           <slot />
         </div>
         <div v-if="$slots.footer" class="ehub-dialog__ft">
@@ -36,6 +38,8 @@ export default {
     tone: { type: String, default: 'danger' },
     // While true the dialog can't be dismissed (e.g. request in flight).
     persistent: { type: Boolean, default: false },
+    // Confirmation style: no header bar, centered icon/title/text, equal-width footer buttons.
+    centered: { type: Boolean, default: false },
   },
   emits: ['update:modelValue', 'close'],
   watch: {
@@ -74,5 +78,17 @@ export default {
 .ehub-dialog__ico--muted { background: var(--ehub-field-bg); color: var(--ehub-muted); }
 .ehub-dialog__ico--primary { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
 .ehub-dialog__ft { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 22px; border-top: 1px solid var(--ehub-line); flex-wrap: wrap; }
+/* ── Centered (confirmation) variant ── */
+.ehub-dialog--centered { position: relative; text-align: center; }
+.ehub-dialog--centered .ehub-dialog__x { position: absolute; top: 16px; right: 16px; font-size: .75rem; opacity: .5; }
+.ehub-dialog--centered .ehub-dialog__x:hover { opacity: .9; }
+.ehub-dialog--centered .ehub-dialog__bd { padding: 32px 28px 8px; }
+.ehub-dialog--centered .ehub-dialog__ico { width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 16px; font-size: 1.35rem; }
+.ehub-dialog--centered .ehub-dialog__ico--danger { box-shadow: 0 0 0 8px color-mix(in srgb, #e23b3b 6%, transparent); }
+.ehub-dialog--centered .ehub-dialog__ico--muted { box-shadow: 0 0 0 8px color-mix(in srgb, var(--ehub-muted) 6%, transparent); }
+.ehub-dialog--centered .ehub-dialog__ico--primary { box-shadow: 0 0 0 8px color-mix(in srgb, var(--ehub-primary) 6%, transparent); }
+.ehub-dialog__title { font-size: 1.12rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 8px; letter-spacing: -.01em; }
+.ehub-dialog--centered .ehub-dialog__ft { display: grid; grid-auto-columns: 1fr; grid-auto-flow: column; gap: 10px; border-top: 0; padding: 18px 28px 26px; }
+.ehub-dialog--centered .ehub-dialog__ft > .btn { width: 100%; }
 [data-bs-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
 </style>

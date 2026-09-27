@@ -1,13 +1,25 @@
 <template>
-  <EhubDialog :model-value="modelValue" :title="title" icon="triangle-exclamation" size="sm" :persistent="loading" @close="close">
-    <p class="cnd-warn">{{ message }}</p>
-    <label class="form-label mb-1" style="font-size:.84rem">{{ typeLabel }}</label>
-    <input v-model="typed" class="form-control" autocomplete="off" @keyup.enter="confirm" />
+  <EhubDialog :model-value="modelValue" :title="title" icon="trash" centered size="sm" :persistent="loading" @close="close">
+    <p class="cnd-msg">{{ message }}</p>
+
+    <div class="cnd-name">
+      <font-awesome-icon :icon="['fas', 'calendar-days']" />
+      <span>{{ name }}</span>
+    </div>
+
+    <div class="cnd-field">
+      <label class="cnd-label" :for="inputId">{{ typeLabel }}</label>
+      <div class="cnd-input" :class="{ ok: matches }">
+        <input :id="inputId" v-model="typed" class="form-control" :placeholder="name" autocomplete="off" spellcheck="false" @keyup.enter="confirm" />
+        <font-awesome-icon v-if="matches" :icon="['fas', 'circle-check']" class="cnd-check" />
+      </div>
+    </div>
+
     <template #footer>
-      <button class="btn btn-outline-secondary round px-3" :disabled="loading" @click="close">{{ cancelLabel }}</button>
-      <button class="btn btn-danger round px-3" :disabled="loading || !matches" @click="confirm">
+      <button class="btn btn-outline-secondary round" :disabled="loading" @click="close">{{ cancelLabel }}</button>
+      <button class="btn btn-danger round" :disabled="loading || !matches" @click="confirm">
         <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-        <font-awesome-icon v-else :icon="['fas', 'trash']" class="me-2" />{{ confirmLabel }}
+        {{ confirmLabel }}
       </button>
     </template>
   </EhubDialog>
@@ -15,6 +27,8 @@
 
 <script>
 import EhubDialog from '@/components/modals/EhubDialog.vue';
+
+let uid = 0;
 
 /**
  * Destructive confirmation that requires typing the item's name
@@ -35,7 +49,7 @@ export default {
   },
   emits: ['update:modelValue', 'confirm'],
   data() {
-    return { typed: '' };
+    return { typed: '', inputId: 'cnd-' + ++uid };
   },
   computed: {
     matches() {
@@ -59,5 +73,14 @@ export default {
 </script>
 
 <style scoped>
-.cnd-warn { font-size: .85rem; color: #e23b3b; background: color-mix(in srgb, #e23b3b 7%, transparent); border: 1px solid color-mix(in srgb, #e23b3b 25%, var(--ehub-line)); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; text-wrap: pretty; }
+.cnd-msg { font-size: .88rem; color: var(--ehub-muted); line-height: 1.5; margin: 0 auto 16px; max-width: 320px; text-wrap: pretty; }
+.cnd-name { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; padding: 7px 14px; border-radius: 50rem; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); color: var(--ehub-ink); font-weight: 700; font-size: .88rem; margin-bottom: 22px; }
+.cnd-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cnd-name svg { color: var(--ehub-muted); font-size: .8rem; flex-shrink: 0; }
+.cnd-field { text-align: left; }
+.cnd-label { display: block; font-size: .78rem; font-weight: 600; color: var(--ehub-muted); margin-bottom: 6px; }
+.cnd-input { position: relative; }
+.cnd-input .form-control { padding-right: 38px; transition: border-color .15s, box-shadow .15s; }
+.cnd-input.ok .form-control { border-color: #1f8a5b; box-shadow: 0 0 0 3px color-mix(in srgb, #1f8a5b 15%, transparent); }
+.cnd-check { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #1f8a5b; }
 </style>

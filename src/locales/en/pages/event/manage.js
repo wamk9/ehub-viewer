@@ -103,6 +103,8 @@ export default {
     split: 'Distribution', place: '{n} place', split_sum: 'Total: {n}%', add_place: 'Add place', save_split: 'Save distribution',
   },
   adv: {
+    type_name_hint: "Type the event name to confirm",
+    del_confirm_msg: "This permanently removes the event with its registrations, stages, results and news. This cannot be undone.",
     finish: 'Finish event',
     finish_hint: 'Freezes the final standings. New stages cannot be started and results cannot change.',
     finish_btn: 'Finish event',

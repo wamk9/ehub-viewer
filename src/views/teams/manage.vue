@@ -467,6 +467,7 @@
       :icon="modal ? { remove_member: 'user-minus', leave: 'right-from-bracket', delete: 'trash' }[modal.type] : null"
       :tone="modal?.type === 'leave' ? 'muted' : 'danger'"
       :persistent="!!modal?.loading"
+      centered
       size="sm"
       @close="closeModal"
     >

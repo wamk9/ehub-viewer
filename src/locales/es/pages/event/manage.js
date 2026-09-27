@@ -103,6 +103,8 @@ export default {
     split: 'Distribución', place: '{n}º lugar', split_sum: 'Suma: {n}%', add_place: 'Agregar puesto', save_split: 'Guardar distribución',
   },
   adv: {
+    type_name_hint: "Escribe el nombre del evento para confirmar",
+    del_confirm_msg: "Esto elimina permanentemente el evento con inscripciones, etapas, resultados y noticias. No se puede deshacer.",
     finish: 'Finalizar evento',
     finish_hint: 'Congela la clasificación final. No se podrán iniciar nuevas etapas ni cambiar resultados.',
     finish_btn: 'Finalizar evento',

@@ -130,11 +130,11 @@ export default {
     <component :is="current.comp" v-else :key="panel" />
 
     <!-- Shared confirm -->
-    <EhubDialog :model-value="em.confirm.open" :title="$t('pages.event.manage.c.confirm')" size="sm" @close="em.answer(false)">
-      <p style="margin:0;font-size:.9rem;text-wrap:pretty">{{ em.confirm.message }}</p>
+    <EhubDialog :model-value="em.confirm.open" :title="$t('pages.event.manage.c.confirm')" :icon="em.confirm.danger ? 'triangle-exclamation' : 'circle-info'" :tone="em.confirm.danger ? 'danger' : 'primary'" centered size="sm" @close="em.answer(false)">
+      <p style="margin:0 auto;max-width:340px;font-size:.88rem;color:var(--ehub-muted);line-height:1.5;text-wrap:pretty">{{ em.confirm.message }}</p>
       <template #footer>
-        <button class="btn btn-outline-secondary round px-3" @click="em.answer(false)">{{ $t('pages.event.manage.c.cancel') }}</button>
-        <button class="btn round px-4" :class="em.confirm.danger ? 'btn-danger' : 'btn-primary'" @click="em.answer(true)">{{ em.confirm.label }}</button>
+        <button class="btn btn-outline-secondary round" @click="em.answer(false)">{{ $t('pages.event.manage.c.cancel') }}</button>
+        <button class="btn round" :class="em.confirm.danger ? 'btn-danger' : 'btn-primary'" @click="em.answer(true)">{{ em.confirm.label }}</button>
       </template>
     </EhubDialog>
   </EhubMgmtLayout>

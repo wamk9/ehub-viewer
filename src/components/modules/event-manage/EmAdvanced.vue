@@ -94,9 +94,9 @@ export default {
     <EhubConfirmNameDialog
       v-model="delOpen"
       :title="$t('pages.event.manage.adv.del')"
-      :message="$t('pages.event.manage.adv.del_hint')"
+      :message="$t('pages.event.manage.adv.del_confirm_msg')"
       :name="ev.name"
-      :type-label="$t('pages.event.manage.adv.type_name', { n: ev.name })"
+      :type-label="$t('pages.event.manage.adv.type_name_hint')"
       :confirm-label="$t('pages.event.manage.adv.del_btn')"
       :cancel-label="$t('pages.event.manage.c.cancel')"
       :loading="busy"
