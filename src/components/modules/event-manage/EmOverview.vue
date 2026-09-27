@@ -138,7 +138,6 @@ export default {
       >
         <template #text="{ activity }">{{ activity.text }}</template>
       </EhubActivityLog>
-      </div>
     </div>
   </section>
 </template>
