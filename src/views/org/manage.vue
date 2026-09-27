@@ -396,6 +396,11 @@ export default {
 
     roleClass(role) { return ROLE_CLASS[role] || 'staff'; },
 
+    memberSince(m) {
+      const d = m.joined_at || m.created_at;
+      return d ? new Intl.DateTimeFormat(this.$i18n.locale, { month: 'short', year: 'numeric' }).format(new Date(d)) : '—';
+    },
+
     /** I can change/remove a member only if they are below me and not myself. */
     canTouch(m) {
       return !!this.myUserId && m.user?.id !== this.myUserId && roleLevel(m.role) < roleLevel(this.myRole);
@@ -905,7 +910,7 @@ export default {
                   </select>
                   <span v-else class="role-chip" :class="roleClass(m.role)">{{ $t('pages.organization.manage.roles.' + m.role) }}</span>
                 </td>
-                <td class="td-muted">{{ m.created_at ? new Date(m.created_at).getFullYear() : '—' }}</td>
+                <td class="td-muted">{{ memberSince(m) }}</td>
                 <td>
                   <div class="act-row">
                     <button v-if="canTouch(m)" class="act-btn del" @click="removeTarget = m" :title="$t('pages.organization.manage.members.remove')">
