@@ -16,13 +16,8 @@ export default {
   ov: {
     title: 'Overview', sub: 'Track and run your event',
     published: 'Published', draft: 'Draft', pub_hint: 'Visible to the public on eHub', draft_hint: 'Only the organization can see it',
-    lc: ['Draft', 'Registration', 'In progress', 'Finished'],
-    start_ev: 'Start event', finish_ev: 'Finish event',
-    start_ev_q: 'Start the event? Registration will close and general information can no longer be edited.',
-    finish_ev_q: 'Finish the event? Final standings will be frozen and no new stages can be started.',
     k_regs: 'Registered', k_pending: 'Pending payments', k_revenue: 'Confirmed revenue',
     k_next: 'Next session', live_now: 'Live',
-    progress: '{a} of {b} stages completed',
     todo: 'To do', all_done: 'All good here.',
     activity: 'Recent activity', activity_empty: 'No activity yet.',
     chk: {

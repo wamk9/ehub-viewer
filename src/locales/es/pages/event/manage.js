@@ -16,13 +16,8 @@ export default {
   ov: {
     title: 'Resumen', sub: 'Sigue y conduce tu evento',
     published: 'Publicado', draft: 'Borrador', pub_hint: 'Visible al público en eHub', draft_hint: 'Solo la organización lo ve',
-    lc: ['Borrador', 'Inscripciones', 'En curso', 'Finalizado'],
-    start_ev: 'Iniciar evento', finish_ev: 'Finalizar evento',
-    start_ev_q: '¿Iniciar el evento? Las inscripciones se cerrarán y la información general ya no podrá editarse.',
-    finish_ev_q: '¿Finalizar el evento? La clasificación final se congelará y no se podrán iniciar nuevas etapas.',
     k_regs: 'Inscritos', k_pending: 'Pagos pendientes', k_revenue: 'Ingresos confirmados',
     k_next: 'Próxima sesión', live_now: 'En vivo',
-    progress: '{a} de {b} etapas completadas',
     todo: 'Pendientes', all_done: 'Todo en orden por aquí.',
     activity: 'Actividad reciente', activity_empty: 'Aún no hay actividad.',
     chk: {

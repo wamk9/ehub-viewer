@@ -2,7 +2,7 @@
 import EhubStatCard from '@/components/EhubStatCard.vue';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import { toast } from '@/helpers/toast.js';
-import { eventStatus, lifecycleIndex, stageState, roundState, userName, apiError } from './store.js';
+import { stageState, roundState, userName, apiError } from './store.js';
 
 // Wizard step that holds the rules (Regulamento).
 const RULES_STEP = 7;
@@ -18,10 +18,7 @@ export default {
     ev() { return this.em.event; },
     confirmedRegs() { return this.em.regs.filter((r) => r.payment_status !== 'pending'); },
     pending() { return this.em.regs.filter((r) => r.payment_status === 'pending').length; },
-    status() { return eventStatus(this.ev, this.confirmedRegs.length); },
-    lc() { return lifecycleIndex(this.status); },
     stages() { return this.ev.stages || []; },
-    stagesDone() { return this.stages.filter((s) => stageState(s) === 'done').length; },
     revenue() {
       const paid = this.em.regs.filter((r) => r.payment_status === 'confirmed').length;
       return this.money(paid * (this.ev.fee || 0));
@@ -105,15 +102,6 @@ export default {
         toast.success(this.$t('pages.event.manage.toast.' + (next === 'published' ? 'pub' : 'unpub')));
       } else toast.error(apiError(this, res.data));
     },
-    async control(action) {
-      const ok = await this.em.ask(this.$t(`pages.event.manage.ov.${action}_ev_q`), this.$t(`pages.event.manage.ov.${action}_ev`), action === 'finish');
-      if (!ok) return;
-      const res = await OrganizationEvent.control(this.em.orgRoute, this.em.eventRoute, action);
-      if (res.code === 200) {
-        Object.assign(this.ev, res.data);
-        toast.success(this.$t('pages.event.manage.toast.ev_' + (action === 'start' ? 'started' : 'finished')));
-      } else toast.error(apiError(this, res.data));
-    },
   },
 };
 </script>
@@ -135,31 +123,6 @@ export default {
           <span>{{ $t('pages.event.manage.ov.' + (ev.publication === 'draft' ? 'draft_hint' : 'pub_hint')) }}</span>
         </div>
       </label>
-    </div>
-
-    <!-- Lifecycle -->
-    <div class="cc lc-card">
-      <div class="lc">
-        <div class="lc-steps">
-          <template v-for="(label, i) in [0, 1, 2, 3]" :key="i">
-            <div v-if="i" class="lc-line" :class="{ done: i <= lc }"></div>
-            <div class="lc-step" :class="{ done: i < lc, cur: i === lc }">
-              <span class="lc-dot">
-                <font-awesome-icon v-if="i < lc" :icon="['fas', 'check']" />
-                <template v-else>{{ i + 1 }}</template>
-              </span>
-              <span class="lc-lbl">{{ $t('pages.event.manage.ov.lc.' + i) }}</span>
-            </div>
-          </template>
-        </div>
-        <span v-if="stages.length" class="td-muted">{{ $t('pages.event.manage.ov.progress', { a: stagesDone, b: stages.length }) }}</span>
-        <button v-if="lc === 1" class="btn btn-primary round px-3" @click="control('start')">
-          <font-awesome-icon :icon="['fas', 'play']" class="me-2" />{{ $t('pages.event.manage.ov.start_ev') }}
-        </button>
-        <button v-else-if="lc === 2" class="btn btn-outline-secondary round px-3" @click="control('finish')">
-          <font-awesome-icon :icon="['fas', 'flag-checkered']" class="me-2" />{{ $t('pages.event.manage.ov.finish_ev') }}
-        </button>
-      </div>
     </div>
 
     <div class="stat-grid">
@@ -215,17 +178,6 @@ export default {
 .pub-sw { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--ehub-line); border-radius: 10px; background: var(--ehub-field-bg); cursor: pointer; margin: 0; }
 .pub-sw b { font-size: .82rem; color: var(--ehub-ink); display: block; line-height: 1.2; }
 .pub-sw span { font-size: .7rem; color: var(--ehub-muted); }
-.lc-card { margin-bottom: 16px; }
-.lc { display: flex; align-items: center; gap: 18px; padding: 16px 22px; flex-wrap: wrap; }
-.lc-steps { display: flex; align-items: center; flex: 1 1 420px; min-width: 0; row-gap: 8px; }
-.lc-step { display: flex; align-items: center; gap: 8px; font-size: .78rem; font-weight: 600; color: var(--ehub-muted); white-space: nowrap; }
-.lc-dot { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ehub-line); display: flex; align-items: center; justify-content: center; font-size: .64rem; font-weight: 800; background: var(--ehub-card); }
-.lc-step.done .lc-dot { background: var(--ehub-primary); border-color: var(--ehub-primary); color: #fff; }
-.lc-step.cur { color: var(--ehub-ink); }
-.lc-step.cur .lc-dot { border-color: var(--ehub-primary); color: var(--ehub-primary); box-shadow: 0 0 0 4px var(--ehub-primary-focus); }
-.lc-line { flex: 1; height: 2px; background: var(--ehub-line); margin: 0 8px; min-width: 8px; }
-.lc-line.done { background: var(--ehub-primary); }
-@media (max-width: 1280px) { .lc-step:not(.cur) .lc-lbl { display: none; } }
 .chk { display: flex; align-items: center; gap: 11px; padding: 11px 17px; border-bottom: 1px solid var(--ehub-line); cursor: pointer; transition: background .12s; }
 .chk:last-child { border-bottom: 0; }
 .chk:hover { background: color-mix(in srgb, var(--ehub-field-bg) 55%, transparent); }
