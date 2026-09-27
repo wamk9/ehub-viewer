@@ -89,7 +89,7 @@ export default {
   rev: { name: 'Name', category: 'Category', mode: 'Mode', format: 'Format', start: 'Start', slots: 'Slots', fee: 'Entry fee', free: 'Free', unlimited: 'Unlimited', url: 'Event URL' },
   stagePh: 'Stage name (e.g. Qualifier, Final…)',
   toast: { draft: 'Draft saved', updated: 'Event updated!', created: 'Event created successfully!' },
-  err: { rules: 'Fill in the general rules.', name: 'Enter the event name.', start: 'Enter the start date.', cat: 'Select a category.', fmt: 'Select a competition format.', slug: 'Set the event URL.' },
+  err: { descLong: 'The description is longer than {n} characters.', rules: 'Fill in the general rules.', name: 'Enter the event name.', start: 'Enter the start date.', cat: 'Select a category.', fmt: 'Select a competition format.', slug: 'Set the event URL.' },
   gw: {
     alertTitle: 'Payment gateway not configured',
     alertDesc: 'To charge entry fees, connect Stripe (BRL, USD, EUR) or MercadoPago (BRL). An administrator must authorize the gateway.',

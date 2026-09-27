@@ -47,7 +47,7 @@
                     <hr style="border-color:rgba(255,255,255,0.08)" />
 
                     <!-- Content -->
-                    <div class="article-content mt-4" v-html="item.content"></div>
+                    <div class="article-content mt-4" v-html="sanitizeHtml(item.content)"></div>
 
                     <hr style="border-color:rgba(255,255,255,0.08);margin-top:3rem" />
 
@@ -69,6 +69,7 @@
 </template>
 
 <script>
+import { sanitizeHtml } from '@/helpers/General/sanitizeHtml.js';
 import OrganizationEventArticle from '@/helpers/communication/OrganizationEventArticle.js';
 import SystemVars from '@/helpers/General/SystemVars';
 
@@ -95,6 +96,7 @@ export default {
         }
     },
     methods: {
+        sanitizeHtml,
         formatDate(dateStr) {
             if (!dateStr) return '';
             return new Date(dateStr).toLocaleDateString(undefined, {

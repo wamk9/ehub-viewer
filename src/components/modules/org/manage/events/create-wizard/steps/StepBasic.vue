@@ -1,6 +1,8 @@
 <script setup>
 import EhubMediaUpload from '@/components/EhubMediaUpload.vue'
 import ehubColorPicker from '@/components/inputs/ehub-color-picker.vue'
+import EhubRichTextEditor from '@/components/inputs/EhubRichTextEditor.vue'
+import { DESCRIPTION_MAX } from '../wizardState.js'
 
 defineProps({
   form: { type: Object, required: true },
@@ -20,8 +22,8 @@ defineProps({
 
     <div class="form-section">
       <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s1.desc') }}</label>
-      <textarea class="form-control" rows="4" maxlength="400" style="resize:vertical" v-model="form.description" :placeholder="$t('pages.organization.manage.eventWizard.s1.descPh')"></textarea>
-      <div class="char-count">{{ form.description.length }}/400</div>
+      <EhubRichTextEditor v-model="form.description" :max-chars="DESCRIPTION_MAX" :min-height="140"
+        :placeholder="$t('pages.organization.manage.eventWizard.s1.descPh')" />
     </div>
 
     <div class="form-section">

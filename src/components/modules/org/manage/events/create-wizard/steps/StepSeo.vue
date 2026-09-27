@@ -1,4 +1,5 @@
 <script setup>
+import { htmlToText } from '@/helpers/General/sanitizeHtml.js'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { categoryGradient } from '@/helpers/General/CategoryConfig.js'
@@ -19,7 +20,7 @@ function onSlugInput() {
 const urlFull = computed(() => `https://ehubapp.com/org/${route.params.orgRoute}/event/${props.form.route || '…'}`)
 
 const previewTitle = computed(() => props.form.meta_title.trim() || props.form.name || '—')
-const previewDesc = computed(() => props.form.meta_description.trim() || props.form.description || '—')
+const previewDesc = computed(() => props.form.meta_description.trim() || htmlToText(props.form.description).slice(0, 160) || '—')
 const previewCoverStyle = computed(() => props.form.cover_image
   ? { backgroundImage: `url(${props.form.cover_image})`, backgroundSize: 'cover', backgroundPosition: 'center' }
   : { background: categoryGradient(props.form.category) })

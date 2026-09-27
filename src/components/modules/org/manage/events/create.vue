@@ -8,7 +8,8 @@ import OrganizationEventStage from '@/helpers/communication/OrganizationEventSta
 import { toast } from '@/helpers/toast.js'
 import { categoryGradient } from '@/helpers/General/CategoryConfig.js'
 import SystemVars from '@/helpers/General/SystemVars'
-import { createWizardForm, buildEventPayload, populateFormFromEvent, diffPayload, slugify } from './create-wizard/wizardState.js'
+import { createWizardForm, buildEventPayload, populateFormFromEvent, diffPayload, slugify, DESCRIPTION_MAX } from './create-wizard/wizardState.js'
+import { htmlToText } from '@/helpers/General/sanitizeHtml.js'
 import WizardSidebar from './create-wizard/WizardSidebar.vue'
 import StepBasic from './create-wizard/steps/StepBasic.vue'
 import StepCategoryFormat from './create-wizard/steps/StepCategoryFormat.vue'
@@ -87,6 +88,10 @@ function validateStep(n) {
   }
   if (n === 2 && (!form.category || !form.format)) {
     toast.error(t('pages.organization.manage.eventWizard.err.' + (!form.category ? 'cat' : 'fmt')))
+    return false
+  }
+  if (n === 1 && htmlToText(form.description).length > DESCRIPTION_MAX) {
+    toast.error(t('pages.organization.manage.eventWizard.err.descLong', { n: DESCRIPTION_MAX }))
     return false
   }
   if (n === 7 && !(form.rules || '').trim()) {

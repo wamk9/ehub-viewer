@@ -1,4 +1,5 @@
 <script>
+import { sanitizeHtml } from '@/helpers/General/sanitizeHtml.js';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import OrganizationEventRegistration from '@/helpers/communication/OrganizationEventRegistration.js';
 import OrganizationEventArticle from '@/helpers/communication/OrganizationEventArticle.js';
@@ -185,6 +186,7 @@ export default {
   },
 
   methods: {
+    sanitizeHtml,
     formatDate(dateStr) {
       if (!dateStr) return '';
       return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
@@ -543,7 +545,7 @@ export default {
         <!-- ═══ TAB: INFO ═══ -->
         <section v-if="activeTab === 'info'" class="tab-pane active">
           <div v-if="event.description" class="ev-reg-card mb-4">
-            <div class="ev-description" v-html="event.description"></div>
+            <div class="ev-description" v-html="sanitizeHtml(event.description)"></div>
           </div>
           <div class="ev-empty" v-if="!event.description && !effectiveStartAt && !event.max_registrations">
             <font-awesome-icon :icon="['fas', 'circle-info']" />

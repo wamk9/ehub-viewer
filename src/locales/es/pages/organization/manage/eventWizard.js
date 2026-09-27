@@ -89,7 +89,7 @@ export default {
   rev: { name: 'Nombre', category: 'Categoría', mode: 'Modalidad', format: 'Formato', start: 'Inicio', slots: 'Plazas', fee: 'Inscripción', free: 'Gratuita', unlimited: 'Ilimitado', url: 'URL del Evento' },
   stagePh: 'Nombre de la etapa (ej: Clasificatoria, Final…)',
   toast: { draft: 'Borrador guardado', updated: '¡Evento actualizado!', created: '¡Evento creado con éxito!' },
-  err: { rules: 'Completa el reglamento general.', name: 'Ingresa el nombre del evento.', start: 'Ingresa la fecha de inicio.', cat: 'Selecciona una categoría.', fmt: 'Selecciona un formato de competición.', slug: 'Define la URL del evento.' },
+  err: { descLong: 'La descripción supera los {n} caracteres.', rules: 'Completa el reglamento general.', name: 'Ingresa el nombre del evento.', start: 'Ingresa la fecha de inicio.', cat: 'Selecciona una categoría.', fmt: 'Selecciona un formato de competición.', slug: 'Define la URL del evento.' },
   gw: {
     alertTitle: 'Gateway de pago no configurado',
     alertDesc: 'Para cobrar inscripciones, conecta Stripe (BRL, USD, EUR) o MercadoPago (BRL). Un administrador debe autorizar el gateway.',

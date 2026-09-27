@@ -168,6 +168,11 @@ import {
   faMusic,
   faTag,
   faVideo,
+  faBold,
+  faItalic,
+  faUnderline,
+  faStrikethrough,
+  faEraser,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -183,6 +188,11 @@ import {
 //import { faBell } from "@fortawesome/free-regular-svg-icons";
 
 library.add(
+  faBold,
+  faItalic,
+  faUnderline,
+  faStrikethrough,
+  faEraser,
   faArrowsRotate,
   faCircleDot,
   faFilePen,

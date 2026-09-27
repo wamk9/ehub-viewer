@@ -1,4 +1,5 @@
 <script setup>
+import { htmlToText } from '@/helpers/General/sanitizeHtml.js'
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -535,7 +536,7 @@ const showMobileFilters = ref(false)
                     <div class="card-body px-3 py-2">
                       <h6 class="fw-bold mb-0 text-truncate" :title="event.name">{{ event.name }}</h6>
                       <small class="text-muted d-block mb-2">{{ event.org_name }}</small>
-                      <p class="small text-muted mb-2 event-desc">{{ event.description }}</p>
+                      <p class="small text-muted mb-2 event-desc">{{ htmlToText(event.description) }}</p>
                       <div class="d-flex align-items-center gap-2 mb-2">
                         <div class="progress flex-grow-1" style="height: 5px;">
                           <div class="progress-bar" :class="slotsBarClass(event)"
