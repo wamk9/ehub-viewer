@@ -31,6 +31,12 @@ export default {
     search: 'Buscar evento...',
     empty: 'Nenhum evento encontrado.',
     manage_btn: 'Gerenciar',
+    edit_btn: "Editar",
+    duplicate_btn: "Duplicar",
+    delete_btn: "Excluir evento",
+    duplicated: "Rascunho criado a partir do evento.",
+    deleted: "Evento excluído.",
+    action_error: "Não foi possível concluir a ação.",
     filter: {
       all: 'Todos',
       upcoming: 'Em breve',

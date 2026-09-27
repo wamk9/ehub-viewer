@@ -9,6 +9,7 @@ import EhubActivityLog from '@/components/EhubActivityLog.vue';
 import EhubMgmtLayout from '@/components/general/EhubMgmtLayout.vue';
 import EhubRolePermissionsTable from '@/components/EhubRolePermissionsTable.vue';
 import EhubDialog from '@/components/modals/EhubDialog.vue';
+import EhubConfirmNameDialog from '@/components/modals/EhubConfirmNameDialog.vue';
 import EhubInviteCard from '@/components/modules/members/EhubInviteCard.vue';
 import EhubLeaveCard from '@/components/modules/members/EhubLeaveCard.vue';
 import EhubColorPicker from '@/components/inputs/ehub-color-picker.vue';
@@ -62,7 +63,7 @@ const ROLE_CLASS = {
 };
 
 export default {
-  components: { EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubInviteCard, EhubLeaveCard, EhubColorPicker, EhubProfileImageUpload },
+  components: { EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubColorPicker, EhubProfileImageUpload },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -89,6 +90,8 @@ export default {
       mbSearch: '',
       mbRoleFilter: 'all',
       removeTarget: null,
+      evBusy: null,
+      evDelete: null,
       activities: [],
       activitiesTotal: 0,
       activitiesPage: 1,
@@ -170,6 +173,10 @@ export default {
     myRole() {
       return this.org?.role || null;
     },
+    /** Event abilities for this user (EventPermissions on the API). */
+    evPerms() {
+      return this.org?.event_permissions || { panels: [], abilities: [] };
+    },
     activitiesWithIcons() {
       return this.activities.map((a) => ({ ...a, icon: ORG_ACTIVITY_ICONS[a.type] || 'clock-rotate-left' }));
     },
@@ -202,7 +209,7 @@ export default {
       const t = (k) => this.$t('pages.organization.manage.nav.' + k);
       return [
         { key: 'overview', icon: 'chart-line', label: t('overview') },
-        { key: 'events', icon: 'calendar-days', label: t('events'), badge: this.activeEvents || null },
+        { key: 'events', icon: 'calendar-days', label: t('events') },
         { key: 'members', icon: 'users', label: t('members') },
         { key: 'roles', icon: 'shield-halved', label: t('roles') },
         { key: 'activity', icon: 'clock-rotate-left', label: t('activity') },
@@ -383,6 +390,10 @@ export default {
 
     roleClass(role) { return ROLE_CLASS[role] || 'staff'; },
 
+    canEv(ability) { return this.evPerms.abilities.includes(ability); },
+    canOpenEvent() { return this.evPerms.panels.length > 0; },
+    canEditEvent(ev) { return this.canEv('event.manage') && !ev.initialized; },
+
     memberSince(m) {
       const d = m.joined_at || m.created_at;
       return d ? new Intl.DateTimeFormat(this.$i18n.locale, { month: 'short', year: 'numeric' }).format(new Date(d)) : '—';
@@ -511,11 +522,43 @@ export default {
     },
 
     goToEvent(ev) {
-      if (ev.publication === 'draft') {
+      if (ev.publication === 'draft' && this.canEditEvent(ev)) {
         this.$router.push({ name: 'manage-organization-events-create', params: { orgRoute: this.orgRoute, eventRoute: ev.route } });
         return;
       }
+      if (this.canOpenEvent()) this.$router.push(`/org/${this.orgRoute}/event/${ev.route}/manage`);
+    },
+    manageEvent(ev) {
       this.$router.push(`/org/${this.orgRoute}/event/${ev.route}/manage`);
+    },
+    editEvent(ev) {
+      this.$router.push({ name: 'manage-organization-events-create', params: { orgRoute: this.orgRoute, eventRoute: ev.route } });
+    },
+    async duplicateEvent(ev) {
+      if (this.evBusy) return;
+      this.evBusy = ev.route;
+      const res = await OrganizationEvent.duplicate(this.orgRoute, ev.route);
+      this.evBusy = null;
+      if (res.code === 201) {
+        toast.success(this.$t('pages.organization.manage.events.duplicated'));
+        this.$router.push({ name: 'manage-organization-events-create', params: { orgRoute: this.orgRoute, eventRoute: res.data.route } });
+      } else {
+        toast.error(this.$t('pages.organization.manage.events.action_error'));
+      }
+    },
+    async deleteEvent() {
+      const ev = this.evDelete;
+      if (!ev) return;
+      this.evBusy = ev.route;
+      const res = await OrganizationEvent.destroy(this.orgRoute, ev.route);
+      this.evBusy = null;
+      if (res.code === 200) {
+        this.evDelete = null;
+        this.events = this.events.filter((e) => e.route !== ev.route);
+        toast.success(this.$t('pages.organization.manage.events.deleted'));
+      } else {
+        toast.error(this.$t('pages.organization.manage.events.action_error'));
+      }
     },
 
     goCreateEvent() {
@@ -626,7 +669,7 @@ export default {
             <p>{{ $t('pages.organization.manage.overview.sub') }}</p>
           </div>
           <div class="spacer"></div>
-          <button class="btn btn-primary round px-3" @click="goCreateEvent">
+          <button v-if="canEv('event.manage')" class="btn btn-primary round px-3" @click="goCreateEvent">
             <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />
             {{ $t('pages.organization.manage.overview.new_event') }}
           </button>
@@ -744,7 +787,7 @@ export default {
             <p>{{ $t('pages.organization.manage.events.sub', { n: events.length }) }}</p>
           </div>
           <div class="spacer"></div>
-          <button class="btn btn-primary round px-3" @click="goCreateEvent">
+          <button v-if="canEv('event.manage')" class="btn btn-primary round px-3" @click="goCreateEvent">
             <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />
             {{ $t('pages.organization.manage.overview.new_event') }}
           </button>
@@ -780,7 +823,7 @@ export default {
               <tr v-if="filteredEvents.length === 0">
                 <td colspan="5" class="text-center td-muted py-4">{{ $t('pages.organization.manage.events.empty') }}</td>
               </tr>
-              <tr v-for="ev in filteredEvents" :key="ev.route" style="cursor:pointer" @click="goToEvent(ev)">
+              <tr v-for="ev in filteredEvents" :key="ev.route" :style="{ cursor: canOpenEvent() ? 'pointer' : 'default' }" @click="goToEvent(ev)">
                 <td class="td-name">{{ ev.name }}</td>
                 <td class="td-muted">{{ fmtDate(ev.start_at) }}</td>
                 <td class="td-muted">
@@ -790,8 +833,17 @@ export default {
                 <td><span class="s-badge" :class="eventStatus(ev)">{{ $t('pages.organization.manage.events.status.' + eventStatus(ev)) }}</span></td>
                 <td @click.stop>
                   <div class="act-row">
-                    <button class="act-btn" @click="goToEvent(ev)" :title="$t('pages.organization.manage.events.manage_btn')">
+                    <button v-if="canOpenEvent()" class="act-btn" :title="$t('pages.organization.manage.events.manage_btn')" @click="manageEvent(ev)">
                       <font-awesome-icon :icon="['fas', 'sliders']" />
+                    </button>
+                    <button v-if="canEditEvent(ev)" class="act-btn" :title="$t('pages.organization.manage.events.edit_btn')" @click="editEvent(ev)">
+                      <font-awesome-icon :icon="['fas', 'pen']" />
+                    </button>
+                    <button v-if="canEv('event.manage')" class="act-btn" :title="$t('pages.organization.manage.events.duplicate_btn')" :disabled="evBusy === ev.route" @click="duplicateEvent(ev)">
+                      <font-awesome-icon :icon="['fas', 'copy']" />
+                    </button>
+                    <button v-if="canEv('event.delete')" class="act-btn del" :title="$t('pages.organization.manage.events.delete_btn')" @click="evDelete = ev">
+                      <font-awesome-icon :icon="['fas', 'trash']" />
                     </button>
                   </div>
                 </td>
@@ -907,6 +959,19 @@ export default {
           <button class="btn btn-danger round px-3" @click="leaveOrg">{{ $t('pages.organization.manage.members.leave') }}</button>
         </template>
       </EhubDialog>
+
+      <EhubConfirmNameDialog
+        :model-value="!!evDelete"
+        :title="$t('pages.organization.manage.events.delete_btn')"
+        :message="$t('pages.event.manage.adv.del_hint')"
+        :name="evDelete?.name || ''"
+        :type-label="$t('pages.event.manage.adv.type_name', { n: evDelete?.name || '' })"
+        :confirm-label="$t('pages.event.manage.adv.del_btn')"
+        :cancel-label="$t('pages.organization.manage.members.cancel')"
+        :loading="!!evBusy"
+        @update:model-value="(v) => { if (!v) evDelete = null; }"
+        @confirm="deleteEvent"
+      />
 
       <!-- ═══ ACTIVITY (same component as teams) ═══ -->
       <section v-show="activePanel === 'activity'" class="mgmt-pane">

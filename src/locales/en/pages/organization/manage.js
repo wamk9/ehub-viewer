@@ -31,6 +31,12 @@ export default {
     search: 'Search events...',
     empty: 'No events found.',
     manage_btn: 'Manage',
+    edit_btn: "Edit",
+    duplicate_btn: "Duplicate",
+    delete_btn: "Delete event",
+    duplicated: "Draft created from the event.",
+    deleted: "Event deleted.",
+    action_error: "The action could not be completed.",
     filter: {
       all: 'All',
       upcoming: 'Upcoming',

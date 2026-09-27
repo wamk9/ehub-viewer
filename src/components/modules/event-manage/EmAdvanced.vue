@@ -1,15 +1,15 @@
 <script>
-import EhubDialog from '@/components/modals/EhubDialog.vue';
+import EhubConfirmNameDialog from '@/components/modals/EhubConfirmNameDialog.vue';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import { toast } from '@/helpers/toast.js';
 import { apiError } from './store.js';
 
 export default {
   name: 'EmAdvanced',
-  components: { EhubDialog },
+  components: { EhubConfirmNameDialog },
   inject: ['em'],
   data() {
-    return { delOpen: false, confirmName: '', busy: false };
+    return { delOpen: false, busy: false };
   },
   computed: {
     ev() { return this.em.event; },
@@ -36,11 +36,9 @@ export default {
       } else toast.error(apiError(this, res.data));
     },
     openDelete() {
-      this.confirmName = '';
       this.delOpen = true;
     },
     async remove() {
-      if (this.confirmName.trim() !== this.ev.name) return;
       this.busy = true;
       const res = await OrganizationEvent.destroy(this.em.orgRoute, this.em.eventRoute);
       this.busy = false;
@@ -93,22 +91,19 @@ export default {
       </button>
     </div>
 
-    <EhubDialog v-model="delOpen" :title="$t('pages.event.manage.adv.del')" size="sm">
-      <p class="del-warn">
-        <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-2" />{{ $t('pages.event.manage.adv.del_hint') }}
-      </p>
-      <label class="form-label mb-1" style="font-size:.84rem">{{ $t('pages.event.manage.adv.type_name', { n: ev.name }) }}</label>
-      <input v-model="confirmName" class="form-control" autocomplete="off" @keyup.enter="remove" />
-      <template #footer>
-        <button class="btn btn-outline-secondary round px-3" @click="delOpen = false">{{ $t('pages.event.manage.c.cancel') }}</button>
-        <button class="btn btn-danger round px-3" :disabled="busy || confirmName.trim() !== ev.name" @click="remove">
-          <font-awesome-icon :icon="['fas', 'trash']" class="me-2" />{{ $t('pages.event.manage.adv.del_btn') }}
-        </button>
-      </template>
-    </EhubDialog>
+    <EhubConfirmNameDialog
+      v-model="delOpen"
+      :title="$t('pages.event.manage.adv.del')"
+      :message="$t('pages.event.manage.adv.del_hint')"
+      :name="ev.name"
+      :type-label="$t('pages.event.manage.adv.type_name', { n: ev.name })"
+      :confirm-label="$t('pages.event.manage.adv.del_btn')"
+      :cancel-label="$t('pages.event.manage.c.cancel')"
+      :loading="busy"
+      @confirm="remove"
+    />
   </section>
 </template>
 
 <style scoped>
-.del-warn { font-size: .85rem; color: #e23b3b; background: color-mix(in srgb, #e23b3b 7%, transparent); border: 1px solid color-mix(in srgb, #e23b3b 25%, var(--ehub-line)); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; text-wrap: pretty; }
 </style>
