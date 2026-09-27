@@ -1,12 +1,22 @@
 <script setup>
-import EhubMediaUpload from '@/components/EhubMediaUpload.vue'
-import ehubColorPicker from '@/components/inputs/ehub-color-picker.vue'
+import { computed } from 'vue'
+import EhubVisualFields from '@/components/inputs/EhubVisualFields.vue'
 import EhubRichTextEditor from '@/components/inputs/EhubRichTextEditor.vue'
 import { DESCRIPTION_MAX } from '../wizardState.js'
 
-defineProps({
+const props = defineProps({
   form: { type: Object, required: true },
 })
+
+const initials = computed(() => (props.form.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase())
+
+// The API receives images as data URLs; an empty selection keeps the stored image.
+function readFile(file, key) {
+  if (!file) { props.form[key] = ''; return }
+  const reader = new FileReader()
+  reader.onload = (e) => { props.form[key] = e.target.result }
+  reader.readAsDataURL(file)
+}
 </script>
 
 <template>
@@ -27,23 +37,16 @@ defineProps({
     </div>
 
     <div class="form-section">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s1.cover') }}</label>
-      <EhubMediaUpload
-        v-model="form.cover_image"
-        v-model:existing-url="form._existing_cover_url"
-        v-model:gradient-index="form.cover_gradient_index"
-        variant="cover"
+      <EhubVisualFields
+        v-model:color="form.color"
+        :logo-url="form.logo_image || form._existing_logo_url"
+        :cover-url="form.cover_image || form._existing_cover_url"
+        :initials="initials"
+        @logo-change="(f) => readFile(f, 'logo_image')"
+        @cover-change="(f) => readFile(f, 'cover_image')"
+        @remove-logo="form.logo_image = ''; form._existing_logo_url = ''"
+        @remove-cover="form.cover_image = ''; form._existing_cover_url = ''"
       />
-    </div>
-
-    <div class="form-section">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s1.logo') }}</label>
-      <EhubMediaUpload v-model="form.logo_image" v-model:existing-url="form._existing_logo_url" variant="logo" />
-    </div>
-
-    <div class="form-section">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s1.color') }}</label>
-      <ehubColorPicker v-model="form.color" />
     </div>
   </div>
 </template>

@@ -406,33 +406,18 @@
           <h3>{{ $t('pages.teams.manage.settings.visual') }}</h3>
           <p class="set-desc">{{ $t('pages.teams.manage.settings.visual_desc') }}</p>
 
-          <!-- LOGO -->
-          <div class="mb-4">
-            <label class="form-label">{{ $t('pages.teams.manage.settings.logo') }}</label>
-            <EhubProfileImageUpload
-              ref="logoUpload"
-              type="logo"
-              :current-url="logoUrl"
-              :fallback-style="sbLogoStyle"
-              @change="logoFile = $event"
-              @remove="onRemoveLogo"
-            >
-              <template #fallback><span>{{ initials }}</span></template>
-            </EhubProfileImageUpload>
-          </div>
-
-          <!-- COVER -->
-          <div class="mb-4">
-            <label class="form-label">{{ $t('pages.teams.manage.settings.cover') }}</label>
-            <EhubProfileImageUpload
-              ref="coverUpload"
-              type="cover"
-              :current-url="coverUrl"
-              :fallback-style="sbLogoStyle"
-              @change="coverFile = $event"
-              @remove="onRemoveCover"
-            />
-          </div>
+          <EhubVisualFields
+            ref="visual"
+            :show-color="false"
+            :color="activeColor"
+            :logo-url="logoUrl || ''"
+            :cover-url="coverUrl || ''"
+            :initials="initials"
+            @logo-change="logoFile = $event"
+            @cover-change="coverFile = $event"
+            @remove-logo="onRemoveLogo"
+            @remove-cover="onRemoveCover"
+          />
 
           <button
             class="btn btn-primary round px-4"
@@ -534,7 +519,7 @@ import Teams from '@/helpers/communication/Teams.js'
 import SystemVars from '@/helpers/General/SystemVars.js'
 import { toast } from '@/helpers/toast.js'
 import EhubColorPicker from '@/components/inputs/ehub-color-picker.vue'
-import EhubProfileImageUpload from '@/components/inputs/EhubProfileImageUpload.vue'
+import EhubVisualFields from '@/components/inputs/EhubVisualFields.vue'
 import EhubStatCard from '@/components/EhubStatCard.vue'
 import EhubActivityLog from '@/components/EhubActivityLog.vue'
 import EhubRolePermissionsTable from '@/components/EhubRolePermissionsTable.vue'
@@ -553,7 +538,7 @@ function strHash(s) {
 
 export default {
   name: 'TeamManage',
-  components: { EhubMgmtLayout, EhubDialog, EhubInviteCard, EhubLeaveCard, EhubColorPicker, EhubProfileImageUpload, EhubStatCard, EhubActivityLog, EhubRolePermissionsTable },
+  components: { EhubMgmtLayout, EhubDialog, EhubInviteCard, EhubLeaveCard, EhubColorPicker, EhubVisualFields, EhubStatCard, EhubActivityLog, EhubRolePermissionsTable },
 
   data() {
     return {
@@ -1026,7 +1011,7 @@ export default {
         this.logoVersion = Date.now()
         this.team.logo_image = res.data?.logo_image || this.team.logo_image || `teams/${this.team.route}/logo.webp`
         this.logoFile = null
-        this.$refs.logoUpload?.reset()
+        this.$refs.visual?.reset()
         toast.success(this.$t('pages.teams.manage.settings.logo_uploaded'))
       } else {
         toast.error(this.$t('pages.teams.manage.settings.logo_upload_error'))
@@ -1047,7 +1032,7 @@ export default {
         this.coverVersion = Date.now()
         this.team.cover_image = res.data?.cover_image || this.team.cover_image || `teams/${this.team.route}/cover.webp`
         this.coverFile = null
-        this.$refs.coverUpload?.reset()
+        this.$refs.visual?.reset()
         toast.success(this.$t('pages.teams.manage.settings.cover_uploaded'))
       } else {
         toast.error(this.$t('pages.teams.manage.settings.cover_upload_error'))

@@ -12,8 +12,7 @@ import EhubDialog from '@/components/modals/EhubDialog.vue';
 import EhubConfirmNameDialog from '@/components/modals/EhubConfirmNameDialog.vue';
 import EhubInviteCard from '@/components/modules/members/EhubInviteCard.vue';
 import EhubLeaveCard from '@/components/modules/members/EhubLeaveCard.vue';
-import EhubColorPicker from '@/components/inputs/ehub-color-picker.vue';
-import EhubProfileImageUpload from '@/components/inputs/EhubProfileImageUpload.vue';
+import EhubVisualFields from '@/components/inputs/EhubVisualFields.vue';
 import EventCreateWizard from '@/components/modules/org/manage/events/create.vue';
 
 const ORG_GRADS = [
@@ -63,7 +62,7 @@ const ROLE_CLASS = {
 };
 
 export default {
-  components: { EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubColorPicker, EhubProfileImageUpload },
+  components: { EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubVisualFields },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -264,7 +263,7 @@ export default {
         this.org.logo_image = null;
         this.logoVersion = Date.now();
         this.logoFile = null;
-        this.$refs.logoUpload?.reset();
+        this.$refs.visual?.reset();
       } else {
         toast.error(this.$t('pages.organization.manage.settings.remove_error'));
       }
@@ -276,7 +275,7 @@ export default {
         this.org.cover_image = null;
         this.coverVersion = Date.now();
         this.coverFile = null;
-        this.$refs.coverUpload?.reset();
+        this.$refs.visual?.reset();
       } else {
         toast.error(this.$t('pages.organization.manage.settings.remove_error'));
       }
@@ -469,7 +468,7 @@ export default {
               this.logoVersion = Date.now();
               this.logoFile = null;
               this.org.logo_image = 'org/' + this.orgRoute + '/logo.webp';
-              this.$refs.logoUpload?.reset();
+              this.$refs.visual?.reset();
             } else {
               toast.error(this.$t('pages.organization.manage.settings.logo_upload_error'));
             }
@@ -483,7 +482,7 @@ export default {
               this.coverVersion = Date.now();
               this.coverFile = null;
               this.org.cover_image = 'org/' + this.orgRoute + '/cover.webp';
-              this.$refs.coverUpload?.reset();
+              this.$refs.visual?.reset();
             } else {
               toast.error(this.$t('pages.organization.manage.settings.cover_upload_error'));
             }
@@ -1346,38 +1345,19 @@ export default {
           <p class="set-desc">{{ $t('pages.organization.manage.settings.visual_desc') }}</p>
           <div class="row g-4">
 
-            <!-- Color (same components as team settings) -->
+            <!-- Color + logo + cover (shared with teams and events) -->
             <div class="col-12">
-              <label class="form-label set-label">{{ $t('pages.organization.manage.settings.color') }}</label>
-              <p class="set-hint">{{ $t('pages.organization.manage.settings.color_desc') }}</p>
-              <EhubColorPicker v-model="settingsForm.color" />
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label set-label">{{ $t('pages.organization.manage.settings.logo_upload') }}</label>
-              <p class="set-hint">{{ $t('pages.organization.manage.settings.logo_hint') }}</p>
-              <EhubProfileImageUpload
-                ref="logoUpload"
-                type="logo"
-                :current-url="org?.logo_image ? orgLogoUrl : null"
-                :fallback-style="{ background: orgGrad }"
-                @change="logoFile = $event"
-                @remove="removeLogoImage"
-              >
-                <template #fallback><span>{{ orgInitials }}</span></template>
-              </EhubProfileImageUpload>
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label set-label">{{ $t('pages.organization.manage.settings.cover_upload') }}</label>
-              <p class="set-hint">{{ $t('pages.organization.manage.settings.cover_hint') }}</p>
-              <EhubProfileImageUpload
-                ref="coverUpload"
-                type="cover"
-                :current-url="org?.cover_image ? orgCoverUrl : null"
-                :fallback-style="{ background: orgGrad }"
-                @change="coverFile = $event"
-                @remove="removeCoverImage"
+              <EhubVisualFields
+                ref="visual"
+                v-model:color="settingsForm.color"
+                :color-hint="$t('pages.organization.manage.settings.color_desc')"
+                :logo-url="org?.logo_image ? orgLogoUrl : ''"
+                :cover-url="org?.cover_image ? orgCoverUrl : ''"
+                :initials="orgInitials"
+                @logo-change="logoFile = $event"
+                @cover-change="coverFile = $event"
+                @remove-logo="removeLogoImage"
+                @remove-cover="removeCoverImage"
               />
             </div>
 

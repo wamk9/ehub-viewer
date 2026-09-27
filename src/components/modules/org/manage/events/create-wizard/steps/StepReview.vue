@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { categoryIcon, gradientByIndex } from '@/helpers/General/CategoryConfig.js'
+import { categoryIcon } from '@/helpers/General/CategoryConfig.js'
 
 const props = defineProps({
   form: { type: Object, required: true },
@@ -29,10 +29,10 @@ function money(v, cur) {
 
 const coverUrl = computed(() => props.form.cover_image || props.form._existing_cover_url || '')
 const logoUrl = computed(() => props.form.logo_image || props.form._existing_logo_url || '')
+const accent = computed(() => props.form.color || '#0098D8')
 const coverStyle = computed(() => coverUrl.value
   ? { backgroundImage: `url(${coverUrl.value})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-  : { background: gradientByIndex(props.form.cover_gradient_index) })
-const accent = computed(() => props.form.color || 'var(--ehub-primary)')
+  : { background: `linear-gradient(135deg, ${accent.value}, color-mix(in srgb, ${accent.value}, #000 30%))` })
 const initials = computed(() => (props.form.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase())
 
 const summary = computed(() => {
