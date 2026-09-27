@@ -8,6 +8,8 @@ import EhubStatCard from '@/components/EhubStatCard.vue';
 import EhubMgmtLayout from '@/components/general/EhubMgmtLayout.vue';
 import EhubRolePermissionsTable from '@/components/EhubRolePermissionsTable.vue';
 import EhubDialog from '@/components/modals/EhubDialog.vue';
+import EhubColorPicker from '@/components/inputs/ehub-color-picker.vue';
+import EhubProfileImageUpload from '@/components/inputs/EhubProfileImageUpload.vue';
 import EventCreateWizard from '@/components/modules/org/manage/events/create.vue';
 
 const ORG_GRADS = [
@@ -50,7 +52,7 @@ const ROLE_CLASS = {
 };
 
 export default {
-  components: { EhubMgmtLayout, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog },
+  components: { EhubMgmtLayout, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubColorPicker, EhubProfileImageUpload },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -87,13 +89,9 @@ export default {
       settingsSaving: false,
       visualSaving: false,
       logoFile: null,
-      logoLocalPreview: null,
       logoVersion: Date.now(),
-      hasLogo: true,
       coverFile: null,
-      coverLocalPreview: null,
       coverVersion: Date.now(),
-      hasCover: true,
 
       // financeiro
       finBilling: null,
@@ -235,58 +233,15 @@ export default {
       const dark = '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('');
       return `linear-gradient(135deg, ${hex}, ${dark})`;
     },
-    onLogoFileChange(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      this.logoFile = file;
-      this.logoLocalPreview = URL.createObjectURL(file);
-    },
-    onCoverFileChange(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      this.coverFile = file;
-      this.coverLocalPreview = URL.createObjectURL(file);
-    },
-    async uploadLogo() {
-      if (!this.logoFile) return;
-      this.logoUploading = true;
-      const result = await Organization.uploadLogo(this.orgRoute, this.logoFile);
-      this.logoUploading = false;
-      if (result.code === 200) {
-        toast.success(this.$t('pages.organization.manage.settings.logo_uploaded'));
-        this.logoVersion = Date.now();
-        this.logoFile = null;
-        this.logoLocalPreview = null;
-        if (this.$refs.logoInput) this.$refs.logoInput.value = '';
-      } else {
-        toast.error(this.$t('pages.organization.manage.settings.logo_upload_error'));
-      }
-    },
-    async uploadCover() {
-      if (!this.coverFile) return;
-      this.coverUploading = true;
-      const result = await Organization.uploadCover(this.orgRoute, this.coverFile);
-      this.coverUploading = false;
-      if (result.code === 200) {
-        toast.success(this.$t('pages.organization.manage.settings.cover_uploaded'));
-        this.coverVersion = Date.now();
-        this.coverFile = null;
-        this.coverLocalPreview = null;
-        if (this.$refs.coverInput) this.$refs.coverInput.value = '';
-      } else {
-        toast.error(this.$t('pages.organization.manage.settings.cover_upload_error'));
-      }
-    },
 
     async removeLogoImage() {
       const result = await Organization.removeLogo(this.orgRoute);
       if (result.code === 200) {
         toast.success(this.$t('pages.organization.manage.settings.logo_removed'));
-        this.hasLogo = false;
+        this.org.logo_image = null;
         this.logoVersion = Date.now();
-        this.logoLocalPreview = null;
         this.logoFile = null;
-        if (this.$refs.logoInput) this.$refs.logoInput.value = '';
+        this.$refs.logoUpload?.reset();
       } else {
         toast.error(this.$t('pages.organization.manage.settings.remove_error'));
       }
@@ -295,11 +250,10 @@ export default {
       const result = await Organization.removeCover(this.orgRoute);
       if (result.code === 200) {
         toast.success(this.$t('pages.organization.manage.settings.cover_removed'));
-        this.hasCover = false;
+        this.org.cover_image = null;
         this.coverVersion = Date.now();
-        this.coverLocalPreview = null;
         this.coverFile = null;
-        if (this.$refs.coverInput) this.$refs.coverInput.value = '';
+        this.$refs.coverUpload?.reset();
       } else {
         toast.error(this.$t('pages.organization.manage.settings.remove_error'));
       }
@@ -473,8 +427,8 @@ export default {
             if (r.code === 200) {
               this.logoVersion = Date.now();
               this.logoFile = null;
-              this.logoLocalPreview = null;
-              if (this.$refs.logoInput) this.$refs.logoInput.value = '';
+              this.org.logo_image = 'org/' + this.orgRoute + '/logo.webp';
+              this.$refs.logoUpload?.reset();
             } else {
               toast.error(this.$t('pages.organization.manage.settings.logo_upload_error'));
             }
@@ -487,8 +441,8 @@ export default {
             if (r.code === 200) {
               this.coverVersion = Date.now();
               this.coverFile = null;
-              this.coverLocalPreview = null;
-              if (this.$refs.coverInput) this.$refs.coverInput.value = '';
+              this.org.cover_image = 'org/' + this.orgRoute + '/cover.webp';
+              this.$refs.coverUpload?.reset();
             } else {
               toast.error(this.$t('pages.organization.manage.settings.cover_upload_error'));
             }
@@ -623,7 +577,7 @@ export default {
     v-else
     :name="org?.name || ''"
     :subtitle="org?.category || ''"
-    :logo-url="org?.route ? orgLogoUrl : ''"
+    :logo-url="org?.logo_image ? orgLogoUrl : ''"
     :initials="orgInitials"
     :logo-bg="orgGrad"
     :loading="loading"
@@ -1249,71 +1203,39 @@ export default {
           <p class="set-desc">{{ $t('pages.organization.manage.settings.visual_desc') }}</p>
           <div class="row g-4">
 
-            <!-- Color -->
+            <!-- Color (same components as team settings) -->
             <div class="col-12">
               <label class="form-label set-label">{{ $t('pages.organization.manage.settings.color') }}</label>
               <p class="set-hint">{{ $t('pages.organization.manage.settings.color_desc') }}</p>
-              <div class="color-pick-row">
-                <div class="color-swatch-preview" :style="{ background: orgGrad }">{{ orgInitials }}</div>
-                <div class="color-pick-inputs">
-                  <input type="color" v-model="settingsForm.color" class="color-native" />
-                  <input type="text" v-model="settingsForm.color" class="form-control form-control-sm color-hex-input" maxlength="7" placeholder="#000000" />
-                </div>
-              </div>
+              <EhubColorPicker v-model="settingsForm.color" />
             </div>
 
-            <!-- Logo upload -->
             <div class="col-md-6">
               <label class="form-label set-label">{{ $t('pages.organization.manage.settings.logo_upload') }}</label>
               <p class="set-hint">{{ $t('pages.organization.manage.settings.logo_hint') }}</p>
-              <div class="upload-area">
-                <div class="logo-prev-box" :style="{ background: orgGrad }">
-                  <img v-if="logoLocalPreview" :src="logoLocalPreview" class="logo-up-img" />
-                  <img v-else :src="orgLogoUrl" class="logo-up-img"
-                    @load="hasLogo = true"
-                    @error="hasLogo = false; $event.target.style.display='none'" />
-                  <span class="upload-initials">{{ orgInitials }}</span>
-                </div>
-                <div class="upload-actions">
-                  <input ref="logoInput" type="file" accept="image/*" style="display:none" @change="onLogoFileChange" />
-                  <div class="d-flex gap-2 flex-wrap">
-                    <button class="btn btn-sm btn-outline-secondary round px-3" @click="$refs.logoInput.click()">
-                      <font-awesome-icon :icon="['fas', 'image']" class="me-2" />
-                      {{ $t('pages.organization.manage.settings.choose_file') }}
-                    </button>
-                    <button v-if="hasLogo && !logoFile" class="btn btn-sm btn-outline-danger round px-3" @click="removeLogoImage">
-                      <font-awesome-icon :icon="['fas', 'trash']" class="me-2" />
-                      {{ $t('pages.organization.manage.settings.remove_logo') }}
-                    </button>
-                  </div>
-                  <span v-if="logoFile" class="upload-filename">{{ logoFile.name }}</span>
-                </div>
-              </div>
+              <EhubProfileImageUpload
+                ref="logoUpload"
+                type="logo"
+                :current-url="org?.logo_image ? orgLogoUrl : null"
+                :fallback-style="{ background: orgGrad }"
+                @change="logoFile = $event"
+                @remove="removeLogoImage"
+              >
+                <template #fallback><span>{{ orgInitials }}</span></template>
+              </EhubProfileImageUpload>
             </div>
 
-            <!-- Cover upload -->
             <div class="col-md-6">
               <label class="form-label set-label">{{ $t('pages.organization.manage.settings.cover_upload') }}</label>
               <p class="set-hint">{{ $t('pages.organization.manage.settings.cover_hint') }}</p>
-              <div class="cover-up-prev" :style="coverLocalPreview
-                ? { backgroundImage: `url(${coverLocalPreview})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                : { background: orgGrad }">
-                <img v-if="!coverLocalPreview" :src="orgCoverUrl" class="cover-up-img"
-                  @load="hasCover = true"
-                  @error="hasCover = false; $event.target.style.display='none'" />
-              </div>
-              <input ref="coverInput" type="file" accept="image/*" style="display:none" @change="onCoverFileChange" />
-              <div class="mt-2 d-flex gap-2 flex-wrap align-items-center">
-                <button class="btn btn-sm btn-outline-secondary round px-3" @click="$refs.coverInput.click()">
-                  <font-awesome-icon :icon="['fas', 'image']" class="me-2" />
-                  {{ $t('pages.organization.manage.settings.choose_file') }}
-                </button>
-                <button v-if="hasCover && !coverFile" class="btn btn-sm btn-outline-danger round px-3" @click="removeCoverImage">
-                  <font-awesome-icon :icon="['fas', 'trash']" class="me-2" />
-                  {{ $t('pages.organization.manage.settings.remove_cover') }}
-                </button>
-                <span v-if="coverFile" class="upload-filename">{{ coverFile.name }}</span>
-              </div>
+              <EhubProfileImageUpload
+                ref="coverUpload"
+                type="cover"
+                :current-url="org?.cover_image ? orgCoverUrl : null"
+                :fallback-style="{ background: orgGrad }"
+                @change="coverFile = $event"
+                @remove="removeCoverImage"
+              />
             </div>
 
             <!-- Save -->
@@ -1411,21 +1333,7 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 
 /* ── Settings cards ── */
 
-/* Visual identity */
 .set-hint { font-size: .78rem; color: var(--ehub-muted); margin: 0 0 10px; }
-.color-pick-row { display: flex; align-items: center; gap: 12px; }
-.color-swatch-preview { width: 64px; height: 64px; border-radius: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.3); }
-.color-pick-inputs { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.color-native { width: 44px; height: 38px; padding: 2px; border-radius: 8px; border: 1px solid var(--ehub-line); cursor: pointer; background: none; }
-.color-hex-input { max-width: 110px; font-family: monospace; font-size: .85rem; }
-.upload-area { display: flex; gap: 14px; align-items: flex-start; }
-.logo-prev-box { width: 80px; height: 80px; border-radius: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; color: #fff; overflow: hidden; position: relative; }
-.logo-up-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.upload-initials { position: relative; z-index: 0; pointer-events: none; }
-.upload-actions { flex: 1; min-width: 0; }
-.upload-filename { font-size: .73rem; color: var(--ehub-muted); margin-top: 5px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
-.cover-up-prev { height: 90px; border-radius: 11px; overflow: hidden; position: relative; }
-.cover-up-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
 
 /* ── Financial panel ── */
