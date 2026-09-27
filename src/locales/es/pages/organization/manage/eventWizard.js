@@ -77,7 +77,7 @@ export default {
   et: { individual: 'Individual', individualSub: 'Cada jugador se inscribe solo', team: 'Por equipo', teamSub: 'Los equipos se inscriben como grupo' },
   fee: { free: 'Gratuita', freeSub: 'Cualquiera puede inscribirse', paid: 'De pago', paidSub: 'Inscripción mediante pago' },
   pub: { publish: 'Publicar ahora', publishSub: 'Evento visible con inscripciones abiertas inmediatamente', draft: 'Guardar borrador', draftSub: 'Evento oculto hasta que decidas publicar' },
-  btn: { back: 'Volver', cancel: 'Cancelar', saveDraft: 'Guardar borrador', next: 'Siguiente', create: 'Crear Evento' },
+  btn: { back: 'Volver', cancel: 'Cancelar', saveDraft: 'Guardar borrador', save: 'Guardar', next: 'Siguiente', create: 'Crear Evento' },
   pts: { pos: 'Posición', pts: 'Puntos' },
   fmt: {
     points: 'Puntuación', pointsD: 'Acumulación de puntos a lo largo de las etapas',
@@ -87,7 +87,7 @@ export default {
   },
   rev: { name: 'Nombre', category: 'Categoría', mode: 'Modalidad', format: 'Formato', start: 'Inicio', slots: 'Plazas', fee: 'Inscripción', free: 'Gratuita', unlimited: 'Ilimitado', url: 'URL del Evento' },
   stagePh: 'Nombre de la etapa (ej: Clasificatoria, Final…)',
-  toast: { draft: 'Borrador guardado', created: '¡Evento creado con éxito!' },
+  toast: { draft: 'Borrador guardado', updated: '¡Evento actualizado!', created: '¡Evento creado con éxito!' },
   err: { name: 'Ingresa el nombre del evento.', start: 'Ingresa la fecha de inicio.', cat: 'Selecciona una categoría.', fmt: 'Selecciona un formato de competición.', slug: 'Define la URL del evento.' },
   gw: {
     alertTitle: 'Gateway de pago no configurado',

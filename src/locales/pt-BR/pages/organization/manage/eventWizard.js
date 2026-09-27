@@ -77,7 +77,7 @@ export default {
   et: { individual: 'Individual', individualSub: 'Cada piloto/jogador inscreve-se sozinho', team: 'Por equipe', teamSub: 'Equipes se inscrevem como grupo' },
   fee: { free: 'Gratuita', freeSub: 'Qualquer pessoa pode se inscrever', paid: 'Paga', paidSub: 'Inscrição mediante pagamento' },
   pub: { publish: 'Publicar agora', publishSub: 'Evento visível e com inscrições abertas imediatamente', draft: 'Salvar como rascunho', draftSub: 'Evento oculto até você decidir publicar' },
-  btn: { back: 'Voltar', cancel: 'Cancelar', saveDraft: 'Salvar rascunho', next: 'Próximo', create: 'Criar Evento' },
+  btn: { back: 'Voltar', cancel: 'Cancelar', saveDraft: 'Salvar rascunho', save: 'Salvar', next: 'Próximo', create: 'Criar Evento' },
   pts: { pos: 'Posição', pts: 'Pontos' },
   fmt: {
     points: 'Pontuação', pointsD: 'Acumulação de pontos ao longo das etapas',
@@ -87,7 +87,7 @@ export default {
   },
   rev: { name: 'Nome', category: 'Categoria', mode: 'Modalidade', format: 'Formato', start: 'Início', slots: 'Vagas', fee: 'Inscrição', free: 'Gratuita', unlimited: 'Ilimitado', url: 'URL do Evento' },
   stagePh: 'Nome da etapa (ex: Classificatória, Final…)',
-  toast: { draft: 'Rascunho salvo', created: 'Evento criado com sucesso!' },
+  toast: { draft: 'Rascunho salvo', updated: 'Evento atualizado!', created: 'Evento criado com sucesso!' },
   err: { name: 'Informe o nome do evento.', start: 'Informe a data de início.', cat: 'Selecione uma categoria.', fmt: 'Selecione um formato de competição.', slug: 'Defina a URL do evento.' },
   gw: {
     alertTitle: 'Gateway de pagamento não configurado',

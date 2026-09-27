@@ -36,6 +36,8 @@ const loadingEvent = ref(false)
 const isEditMode = computed(() => !!route.params.eventRoute)
 // Snapshot of the payload right after loading, used to send only changed fields.
 let initialPayload = null
+// Publication state when the event was loaded; "Save" in edit mode keeps it.
+const loadedPublication = ref(null)
 
 const STEP_COMPONENTS = [
   StepBasic, StepCategoryFormat, StepSpecific, StepFormBuilder, StepParticipants,
@@ -62,6 +64,7 @@ onMounted(async () => {
     if (eventResult.code === 200) {
       populateFormFromEvent(form, eventResult.data, SystemVars.baseUrl)
       initialPayload = buildEventPayload(form)
+      loadedPublication.value = form.publication
       // Deep link to a step, e.g. ?step=7 opens "Regulamento".
       const step = parseInt(route.query.step, 10)
       if (step >= 1 && step <= TOTAL_STEPS) currentStep.value = step
@@ -173,7 +176,7 @@ async function submit(publication) {
   }
 
   publishing.value = false
-  toast.success(t('pages.organization.manage.eventWizard.toast.created'))
+  toast.success(t('pages.organization.manage.eventWizard.toast.' + (isEditMode.value ? 'updated' : 'created')))
   goToEventsList(form.route)
 }
 </script>
@@ -210,7 +213,10 @@ async function submit(publication) {
           <font-awesome-icon :icon="['fas', 'arrow-left']" class="me-2" />{{ $t('pages.organization.manage.eventWizard.btn.back') }}
         </button>
         <div class="flex-grow-1"></div>
-        <button v-if="currentStep < 9" class="btn btn-outline-secondary round px-4" @click="submit('draft')" :disabled="publishing">
+        <button v-if="currentStep < 9 && isEditMode && loadedPublication === 'published'" class="btn btn-outline-secondary round px-4" @click="submit('published')" :disabled="publishing">
+          {{ $t('pages.organization.manage.eventWizard.btn.save') }}
+        </button>
+        <button v-else-if="currentStep < 9" class="btn btn-outline-secondary round px-4" @click="submit('draft')" :disabled="publishing">
           {{ $t('pages.organization.manage.eventWizard.btn.saveDraft') }}
         </button>
         <button v-if="currentStep < 9" class="btn btn-primary round px-4" @click="goNext">

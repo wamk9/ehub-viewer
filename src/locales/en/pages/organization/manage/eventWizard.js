@@ -77,7 +77,7 @@ export default {
   et: { individual: 'Individual', individualSub: 'Each player/driver registers alone', team: 'Team', teamSub: 'Teams register as a group' },
   fee: { free: 'Free', freeSub: 'Anyone can register at no cost', paid: 'Paid', paidSub: 'Registration requires payment' },
   pub: { publish: 'Publish now', publishSub: 'Event visible with registration open immediately', draft: 'Save as draft', draftSub: 'Event hidden until you decide to publish' },
-  btn: { back: 'Back', cancel: 'Cancel', saveDraft: 'Save draft', next: 'Next', create: 'Create Event' },
+  btn: { back: 'Back', cancel: 'Cancel', saveDraft: 'Save draft', save: 'Save', next: 'Next', create: 'Create Event' },
   pts: { pos: 'Position', pts: 'Points' },
   fmt: {
     points: 'Points', pointsD: 'Accumulation of points across stages',
@@ -87,7 +87,7 @@ export default {
   },
   rev: { name: 'Name', category: 'Category', mode: 'Mode', format: 'Format', start: 'Start', slots: 'Slots', fee: 'Entry fee', free: 'Free', unlimited: 'Unlimited', url: 'Event URL' },
   stagePh: 'Stage name (e.g. Qualifier, Final…)',
-  toast: { draft: 'Draft saved', created: 'Event created successfully!' },
+  toast: { draft: 'Draft saved', updated: 'Event updated!', created: 'Event created successfully!' },
   err: { name: 'Enter the event name.', start: 'Enter the start date.', cat: 'Select a category.', fmt: 'Select a competition format.', slug: 'Set the event URL.' },
   gw: {
     alertTitle: 'Payment gateway not configured',
