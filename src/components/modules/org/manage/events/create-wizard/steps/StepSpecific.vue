@@ -3,6 +3,8 @@ import { ref, computed, watch, onMounted, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Api from '@/helpers/communication/Connection.js'
 import ehubInput from '@/components/inputs/ehub-input.vue'
+import EhubDialog from '@/components/modals/EhubDialog.vue'
+import { toast } from '@/helpers/toast.js'
 
 const props = defineProps({
   form: { type: Object, required: true },
@@ -84,6 +86,32 @@ function humanize(name) {
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
+// ── Suggestions for missing fields (sent to the eHub team) ──
+const suggestOpen = ref(false)
+const suggestText = ref('')
+const suggestSending = ref(false)
+async function sendSuggestion() {
+  const message = suggestText.value.trim()
+  if (message.length < 5 || suggestSending.value) return
+  suggestSending.value = true
+  const res = await Api.postAsync('/suggestions', {
+    type: 'event_form',
+    message,
+    context: { category: props.form.category, runmode: props.form.runmode, subcategory: props.form.subcategory || null },
+  })
+  suggestSending.value = false
+  if (res.code === 201) {
+    toast.success(t('pages.organization.manage.eventWizard.s3x.suggest.sent'))
+    suggestText.value = ''
+    suggestOpen.value = false
+  } else {
+    toast.error(t('pages.organization.manage.eventWizard.s3x.suggest.error'))
+  }
+}
+
+// Sections made only of inputs render as a 2-column grid (titles stay full width).
+const isFieldGroup = (container) => (container.inputs ?? []).every((i) => !['title', 'description', 'separator'].includes(i.type)) && (container.inputs ?? []).length > 1
+
 const i18nPath = computed(() => `categories.${props.form.category}.${props.form.runmode}.form`)
 </script>
 
@@ -91,6 +119,29 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
   <div>
     <h2 class="step-title">{{ $t('pages.organization.manage.eventWizard.s3x.title') }}</h2>
     <p class="step-sub">{{ $t('pages.organization.manage.eventWizard.s3x.sub') }}</p>
+
+    <div class="spec-notice">
+      <font-awesome-icon :icon="['fas', 'circle-info']" class="spec-notice-ico" />
+      <div class="spec-notice-body">
+        <b>{{ $t('pages.organization.manage.eventWizard.s3x.notice.title') }}</b>
+        <span>{{ $t('pages.organization.manage.eventWizard.s3x.notice.text') }}</span>
+      </div>
+      <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="suggestOpen = true">
+        <font-awesome-icon :icon="['fas', 'lightbulb']" class="me-2" />{{ $t('pages.organization.manage.eventWizard.s3x.suggest.btn') }}
+      </button>
+    </div>
+
+    <EhubDialog v-model="suggestOpen" :title="$t('pages.organization.manage.eventWizard.s3x.suggest.title')" icon="lightbulb" tone="primary" centered size="sm">
+      <p class="spec-sug-text">{{ $t('pages.organization.manage.eventWizard.s3x.suggest.text') }}</p>
+      <textarea v-model="suggestText" class="form-control" rows="4" maxlength="2000" style="resize:vertical;text-align:left"
+        :placeholder="$t('pages.organization.manage.eventWizard.s3x.suggest.ph')"></textarea>
+      <template #footer>
+        <button class="btn btn-outline-secondary round" @click="suggestOpen = false">{{ $t('pages.organization.manage.eventWizard.btn.cancel') }}</button>
+        <button class="btn btn-primary round" :disabled="suggestText.trim().length < 5 || suggestSending" @click="sendSuggestion">
+          <span v-if="suggestSending" class="spinner-border spinner-border-sm me-2"></span>{{ $t('pages.organization.manage.eventWizard.s3x.suggest.send') }}
+        </button>
+      </template>
+    </EhubDialog>
 
     <div v-if="schemaDate" class="last-upd-bar">
       <font-awesome-icon :icon="['far', 'clock']" />
@@ -110,7 +161,7 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
       <div v-for="(page, pi) in advancedForm.data" :key="pi" class="row text-start mb-4">
         <template v-for="(container, ci) in page" :key="ci">
           <div class="w-100 mb-3" v-if="container.independentRow"></div>
-          <div :class="containerClass(container.sizes, container.offsets)">
+          <div :class="[containerClass(container.sizes, container.offsets), { 'spec-grid': isFieldGroup(container) }]">
             <template v-for="(input, ii) in container.inputs" :key="ii">
               <h3 class="spec-title" v-if="input.type === 'title'">
                 {{ te(`${i18nPath}.${input.name}.title`) ? $t(`${i18nPath}.${input.name}.title`) : humanize(input.name) }}
@@ -120,7 +171,7 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
               </p>
               <hr class="mt-0 mb-3" v-else-if="input.type === 'separator'" />
 
-              <template v-else>
+              <div v-else class="spec-field">
                 <label class="field-label">
                   {{ te(`${i18nPath}.${input.name}.label`) ? $t(`${i18nPath}.${input.name}.label`) : humanize(input.name) }}
                 </label>
@@ -147,7 +198,7 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
                   :name="input.name" type="checkbox"
                   :label="te(`${i18nPath}.${input.name}.label`) ? $t(`${i18nPath}.${input.name}.label`) : input.name"
                   v-model="input.eventValue" ref="advancedRef" />
-              </template>
+              </div>
             </template>
           </div>
         </template>
@@ -157,6 +208,14 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
 </template>
 
 <style scoped>
+.spec-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; flex: 0 0 100%; max-width: 100%; }
+@media (max-width: 700px) { .spec-grid { grid-template-columns: minmax(0, 1fr); } }
+.spec-notice { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 18px; border: 1px solid var(--ehub-primary-border, var(--ehub-line)); border-radius: 12px; background: var(--ehub-primary-tint); flex-wrap: wrap; }
+.spec-notice-ico { color: var(--ehub-primary); flex-shrink: 0; }
+.spec-notice-body { flex: 1; min-width: 220px; font-size: .82rem; color: var(--ehub-ink); line-height: 1.45; }
+.spec-notice-body b { display: block; }
+.spec-notice-body span { color: var(--ehub-muted); }
+.spec-sug-text { font-size: .86rem; color: var(--ehub-muted); margin: 0 auto 14px; max-width: 340px; }
 .spec-title { font-size: .95rem; font-weight: 700; color: var(--ehub-ink); margin: 8px 0 2px; }
 .spec-desc { font-size: .8rem; color: var(--ehub-muted); margin: 0 0 8px; }
 .step-title { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 4px; letter-spacing: -.02em; }

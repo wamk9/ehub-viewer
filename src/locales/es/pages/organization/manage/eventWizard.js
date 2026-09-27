@@ -27,7 +27,7 @@ export default {
     modeLabel: 'Modalidad', fmtLabel: 'Formato de competición',
     location: 'Lugar del evento', locationPh: 'Ciudad, Estado o dirección completa',
   },
-  s3x: { yes: 'Sí', no: 'No', title: 'Configuraciones Específicas', sub: 'Detalles técnicos de la modalidad elegida.', lastUpd: 'Última actualización:' },
+  s3x: { notice: { title: 'Campos mantenidos por el equipo de eHub', text: 'Los campos de esta modalidad se revisan con frecuencia y pueden cambiar. ¿Te falta algo? Envía una sugerencia.' }, suggest: { btn: 'Sugerir campo', title: 'Sugerir campos', text: 'Cuéntanos qué necesitas configurar para esta modalidad. El equipo de eHub revisa todas las sugerencias.', ph: 'Ej.: Balance of Performance, juegos de neumáticos, safety car...', send: 'Enviar sugerencia', sent: 'Sugerencia enviada. ¡Gracias!', error: 'No se pudo enviar la sugerencia. Inténtalo de nuevo.' }, yes: 'Sí', no: 'No', title: 'Configuraciones Específicas', sub: 'Detalles técnicos de la modalidad elegida.', lastUpd: 'Última actualización:' },
   s4x: {
     title: 'Campos del Formulario', sub: 'Configura los campos visibles en el evento, las etapas y el formulario de inscripción.',
     evtLabel: 'Campos del Evento', evtHint: 'Completa los datos que quieras mostrar en la página pública del evento. Los campos vacíos no se muestran.',

@@ -254,11 +254,12 @@ async function submit(publication) {
 .wiz-wrap { display: grid; grid-template-columns: 256px 1fr; min-height: calc(100vh - 60px); }
 .wiz-main { display: flex; flex-direction: column; min-height: calc(100vh - 60px); }
 .wiz-content { flex: 1; padding: 36px 44px; }
-.wiz-actions { position: sticky; bottom: 0; background: color-mix(in srgb, var(--ehub-card) 92%, transparent); backdrop-filter: blur(14px); border-top: 1px solid var(--ehub-line); padding: 14px 44px; display: flex; align-items: center; gap: 10px; }
+/* Actions sit at the end of the content (not stuck to the viewport). */
+.wiz-actions { border-top: 1px solid var(--ehub-line); margin: 0 44px; padding: 18px 0 32px; display: flex; align-items: center; gap: 10px; }
 
 @media (max-width: 860px) {
   .wiz-wrap { grid-template-columns: 1fr; }
   .wiz-content { padding: 20px 16px; }
-  .wiz-actions { padding: 12px 16px; flex-wrap: wrap; }
+  .wiz-actions { margin: 0 16px; padding: 14px 0 24px; flex-wrap: wrap; }
 }
 </style>
