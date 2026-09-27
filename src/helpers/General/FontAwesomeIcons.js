@@ -173,6 +173,11 @@ import {
   faUnderline,
   faStrikethrough,
   faEraser,
+  faLightbulb,
+  faChevronLeft,
+  faEnvelopeOpenText,
+  faFileInvoice,
+  faShareNodes,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -188,6 +193,11 @@ import {
 //import { faBell } from "@fortawesome/free-regular-svg-icons";
 
 library.add(
+  faChevronLeft,
+  faEnvelopeOpenText,
+  faFileInvoice,
+  faShareNodes,
+  faLightbulb,
   faBold,
   faItalic,
   faUnderline,
