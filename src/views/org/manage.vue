@@ -671,7 +671,7 @@ export default {
               <h3><font-awesome-icon :icon="['fas', 'calendar-days']" class="me-2" style="color:var(--ehub-primary)" />{{ $t('pages.organization.manage.overview.recent') }}</h3>
               <button class="cc-link" @click="switchPanel('events')">{{ $t('pages.organization.manage.overview.see_all') }}</button>
             </div>
-            <div v-if="!events.length && !eventsLoading" class="px-4 py-3 text-center" style="color:var(--ehub-muted);font-size:.85rem">
+            <div v-if="!events.length && !eventsLoading" class="cc-empty">
               {{ $t('pages.organization.manage.events.empty') }}
             </div>
             <div v-if="eventsLoading" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>
@@ -695,7 +695,7 @@ export default {
               <h3><font-awesome-icon :icon="['fas', 'users']" class="me-2" style="color:var(--ehub-gold)" />{{ $t('pages.organization.manage.overview.members_title') }}</h3>
               <button class="cc-link" @click="switchPanel('members')">{{ $t('pages.organization.manage.overview.see_all') }}</button>
             </div>
-            <div v-if="!members.length && !membersLoading" class="px-4 py-3 text-center" style="color:var(--ehub-muted);font-size:.85rem">
+            <div v-if="!members.length && !membersLoading" class="cc-empty">
               {{ $t('pages.organization.manage.members.empty') }}
             </div>
             <div v-if="membersLoading" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>
