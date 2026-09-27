@@ -45,6 +45,7 @@ export default {
     owner:         'Owner',
     admin:         'Administrator',
     event_manager: 'Event Manager',
+    marketing: 'Marketing',
     financial:     'Financial',
     member:        'Member',
   },

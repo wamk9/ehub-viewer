@@ -24,6 +24,7 @@ const ROLE_CLASS = {
   admin: 'admin',
   event_manager: 'manager',
   financial: 'staff',
+  marketing: 'marketing',
 };
 
 export default {
@@ -795,7 +796,7 @@ export default {
             <input type="text" class="form-control" v-model="mbSearch" :placeholder="$t('pages.organization.manage.members.search')" />
           </div>
           <div class="role-seg">
-            <button v-for="r in ['all','owner','admin','event_manager','financial']" :key="r"
+            <button v-for="r in ['all','owner','admin','event_manager','financial','marketing']" :key="r"
               :class="{ active: mbRoleFilter === r }" @click="mbRoleFilter = r">
               {{ r === 'all' ? $t('pages.organization.manage.members.all') : $t('pages.organization.manage.roles.' + r) }}
             </button>
@@ -821,6 +822,7 @@ export default {
               <select class="form-select form-select-sm" v-model="inviteRole">
                 <option value="event_manager">{{ $t('pages.organization.manage.roles.event_manager') }}</option>
                 <option value="financial">{{ $t('pages.organization.manage.roles.financial') }}</option>
+                <option value="marketing">{{ $t('pages.organization.manage.roles.marketing') }}</option>
                 <option value="admin">{{ $t('pages.organization.manage.roles.admin') }}</option>
               </select>
             </div>
@@ -868,6 +870,7 @@ export default {
                     <option value="admin">{{ $t('pages.organization.manage.roles.admin') }}</option>
                     <option value="event_manager">{{ $t('pages.organization.manage.roles.event_manager') }}</option>
                     <option value="financial">{{ $t('pages.organization.manage.roles.financial') }}</option>
+                    <option value="marketing">{{ $t('pages.organization.manage.roles.marketing') }}</option>
                   </select>
                 </td>
                 <td class="td-muted">{{ m.created_at ? new Date(m.created_at).getFullYear() : '—' }}</td>
@@ -1436,6 +1439,7 @@ export default {
 .role-chip.admin   { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
 .role-chip.manager { background: color-mix(in srgb, #7C3AED 14%, transparent); color: #7C3AED; }
 .role-chip.staff   { background: var(--ehub-field-bg); color: var(--ehub-muted); }
+.role-chip.marketing { background: color-mix(in srgb, #d6336c 14%, transparent); color: #d6336c; }
 html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 
 /* ── Settings cards ── */

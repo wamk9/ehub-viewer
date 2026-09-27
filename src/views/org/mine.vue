@@ -9,6 +9,7 @@ const ROLE_ICON = {
   admin: 'shield-halved',
   event_manager: 'user-tie',
   financial: 'id-badge',
+  marketing: 'bullhorn',
 };
 
 const ROLE_CLASS = {
@@ -16,6 +17,7 @@ const ROLE_CLASS = {
   admin: 'admin',
   event_manager: 'manager',
   financial: 'staff',
+  marketing: 'staff',
 };
 
 const ROLE_COLOR = {
@@ -23,6 +25,7 @@ const ROLE_COLOR = {
   admin: 'var(--ehub-primary)',
   event_manager: '#7C3AED',
   financial: 'var(--ehub-muted)',
+  marketing: '#d6336c',
 };
 
 export default {

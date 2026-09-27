@@ -78,6 +78,7 @@ export default {
     admin: 'Administrador',
     financial: 'Financiero',
     event_manager: 'Gestor de Eventos',
+    marketing: 'Marketing',
   },
   settings: {
     sub: 'Personaliza el perfil y los datos de la organización',

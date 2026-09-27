@@ -50,5 +50,6 @@ export default {
     admin: 'Administrador',
     financial: 'Financeiro',
     event_manager: 'Gerente de Eventos',
+    marketing: 'Marketing',
   },
 }
