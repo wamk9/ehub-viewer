@@ -86,7 +86,8 @@ export default {
     <div v-if="em.can('event.delete')" class="set-card danger">
       <h3>{{ $t('pages.event.manage.adv.del') }}</h3>
       <p class="set-desc">{{ $t('pages.event.manage.adv.del_hint') }}</p>
-      <button class="btn btn-outline-danger round px-3" :disabled="busy" @click="openDelete">
+      <p v-if="ev.initialized && !ev.finished" class="hint m-0"><font-awesome-icon :icon="['fas', 'circle-info']" />{{ $t('pages.event.manage.adv.del_running') }}</p>
+      <button v-else class="btn btn-outline-danger round px-3" :disabled="busy" @click="openDelete">
         <font-awesome-icon :icon="['fas', 'trash']" class="me-2" />{{ $t('pages.event.manage.adv.del') }}
       </button>
     </div>
@@ -96,7 +97,7 @@ export default {
       :title="$t('pages.event.manage.adv.del')"
       :message="$t('pages.event.manage.adv.del_confirm_msg')"
       :name="ev.name"
-      :type-label="$t('pages.event.manage.adv.type_name_hint')"
+      :type-label="$t('pages.event.manage.adv.type_name_hint', { n: ev.name })"
       :confirm-label="$t('pages.event.manage.adv.del_btn')"
       :cancel-label="$t('pages.event.manage.c.cancel')"
       :loading="busy"

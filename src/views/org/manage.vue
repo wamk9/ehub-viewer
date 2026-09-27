@@ -842,7 +842,7 @@ export default {
                     <button v-if="canEv('event.manage')" class="act-btn" :title="$t('pages.organization.manage.events.duplicate_btn')" :disabled="evBusy === ev.route" @click="duplicateEvent(ev)">
                       <font-awesome-icon :icon="['fas', 'copy']" />
                     </button>
-                    <button v-if="canEv('event.delete')" class="act-btn del" :title="$t('pages.organization.manage.events.delete_btn')" @click="evDelete = ev">
+                    <button v-if="canEv('event.delete') && !(ev.initialized && !ev.finished)" class="act-btn del" :title="$t('pages.organization.manage.events.delete_btn')" @click="evDelete = ev">
                       <font-awesome-icon :icon="['fas', 'trash']" />
                     </button>
                   </div>
@@ -965,7 +965,7 @@ export default {
         :title="$t('pages.organization.manage.events.delete_btn')"
         :message="$t('pages.event.manage.adv.del_confirm_msg')"
         :name="evDelete?.name || ''"
-        :type-label="$t('pages.event.manage.adv.type_name_hint')"
+        :type-label="$t('pages.event.manage.adv.type_name_hint', { n: evDelete?.name || '' })"
         :confirm-label="$t('pages.event.manage.adv.del_btn')"
         :cancel-label="$t('pages.organization.manage.members.cancel')"
         :loading="!!evBusy"

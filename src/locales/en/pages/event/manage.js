@@ -103,7 +103,8 @@ export default {
     split: 'Distribution', place: '{n} place', split_sum: 'Total: {n}%', add_place: 'Add place', save_split: 'Save distribution',
   },
   adv: {
-    type_name_hint: "Type the event name to confirm",
+    del_running: 'Events in progress cannot be deleted. Finish the event first.',
+    type_name_hint: 'Type "{n}" to confirm the deletion',
     del_confirm_msg: "This permanently removes the event with its registrations, stages, results and news. This cannot be undone.",
     finish: 'Finish event',
     finish_hint: 'Freezes the final standings. New stages cannot be started and results cannot change.',
@@ -124,6 +125,7 @@ export default {
     ev_deleted: 'Event deleted', round_started: 'Session started', round_finished: 'Session finished',
   },
   err: {
+    event_in_progress: 'Events in progress cannot be deleted.',
     event_already_published: 'A published event cannot go back to draft.',
     stage_already_started: 'This stage has already started.',
     previous_stage_not_finished: 'Finish the previous stage before starting this one.',

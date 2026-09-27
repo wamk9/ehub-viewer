@@ -2,10 +2,6 @@
   <EhubDialog :model-value="modelValue" :title="title" icon="trash" centered size="sm" :persistent="loading" @close="close">
     <p class="cnd-msg">{{ message }}</p>
 
-    <div class="cnd-name">
-      <font-awesome-icon :icon="['fas', 'calendar-days']" />
-      <span>{{ name }}</span>
-    </div>
 
     <div class="cnd-field">
       <label class="cnd-label" :for="inputId">{{ typeLabel }}</label>
@@ -75,10 +71,7 @@ export default {
 </script>
 
 <style scoped>
-.cnd-msg { font-size: .88rem; color: var(--ehub-muted); line-height: 1.5; margin: 0 auto 16px; max-width: 320px; text-wrap: pretty; }
-.cnd-name { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; padding: 7px 14px; border-radius: 50rem; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); color: var(--ehub-ink); font-weight: 700; font-size: .88rem; margin-bottom: 22px; }
-.cnd-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cnd-name svg { color: var(--ehub-muted); font-size: .8rem; flex-shrink: 0; }
+.cnd-msg { font-size: .88rem; color: var(--ehub-muted); line-height: 1.5; margin: 0 auto 22px; max-width: 320px; text-wrap: pretty; }
 .cnd-field { text-align: left; }
 .cnd-label { display: block; font-size: .78rem; font-weight: 600; color: var(--ehub-muted); margin-bottom: 6px; }
 .cnd-input { position: relative; }

@@ -103,7 +103,8 @@ export default {
     split: 'Distribuição', place: '{n}º lugar', split_sum: 'Soma: {n}%', add_place: 'Adicionar colocação', save_split: 'Salvar distribuição',
   },
   adv: {
-    type_name_hint: "Digite o nome do evento para confirmar",
+    del_running: 'Eventos em andamento não podem ser excluídos. Encerre o evento antes.',
+    type_name_hint: 'Digite "{n}" para confirmar sua exclusão',
     del_confirm_msg: "Isso remove permanentemente o evento com inscrições, etapas, resultados e notícias. Não é possível desfazer.",
     finish: 'Encerrar evento',
     finish_hint: 'Congela a classificação final. Não será possível iniciar novas etapas nem alterar resultados.',
@@ -124,6 +125,7 @@ export default {
     ev_deleted: 'Evento excluído', round_started: 'Sessão iniciada', round_finished: 'Sessão finalizada',
   },
   err: {
+    event_in_progress: 'Eventos em andamento não podem ser excluídos.',
     event_already_published: 'Evento publicado não pode voltar para rascunho.',
     stage_already_started: 'Essa etapa já começou.',
     previous_stage_not_finished: 'Finalize a etapa anterior antes de iniciar esta.',
