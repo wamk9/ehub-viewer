@@ -8,6 +8,8 @@ import EhubStatCard from '@/components/EhubStatCard.vue';
 import EhubMgmtLayout from '@/components/general/EhubMgmtLayout.vue';
 import EhubRolePermissionsTable from '@/components/EhubRolePermissionsTable.vue';
 import EhubDialog from '@/components/modals/EhubDialog.vue';
+import EhubInviteCard from '@/components/modules/members/EhubInviteCard.vue';
+import EhubLeaveCard from '@/components/modules/members/EhubLeaveCard.vue';
 import EhubColorPicker from '@/components/inputs/ehub-color-picker.vue';
 import EhubProfileImageUpload from '@/components/inputs/EhubProfileImageUpload.vue';
 import EventCreateWizard from '@/components/modules/org/manage/events/create.vue';
@@ -52,7 +54,7 @@ const ROLE_CLASS = {
 };
 
 export default {
-  components: { EhubMgmtLayout, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubColorPicker, EhubProfileImageUpload },
+  components: { EhubMgmtLayout, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubInviteCard, EhubLeaveCard, EhubColorPicker, EhubProfileImageUpload },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -80,8 +82,6 @@ export default {
       mbRoleFilter: 'all',
       removeTarget: null,
       leaveOpen: false,
-      inviteEmail: '',
-      inviteRole: 'event_manager',
       inviteSending: false,
 
       // settings panel
@@ -378,14 +378,13 @@ export default {
       }
     },
 
-    async sendInvite() {
-      if (!this.inviteEmail.trim()) return;
+    async sendInvite({ identifier, role, reset }) {
       this.inviteSending = true;
-      const result = await Organization.addMember(this.orgRoute, this.inviteEmail.trim(), this.inviteRole);
+      const result = await Organization.addMember(this.orgRoute, identifier, role);
       this.inviteSending = false;
       if (result.code === 200 || result.code === 201) {
         toast.success(this.$t('pages.organization.manage.members.invited'));
-        this.inviteEmail = '';
+        reset();
         await this.loadMembers();
       } else {
         toast.error(this.memberError(result, 'invite_error'));
@@ -817,36 +816,29 @@ export default {
         </div>
 
         <!-- Invite (e-mail or username) -->
-        <div v-if="assignableRoles.length" class="set-card">
-          <h3>{{ $t('pages.organization.manage.members.invite_title') }}</h3>
-          <p class="set-desc">{{ $t('pages.organization.manage.members.invite_sub') }}</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <input v-model="inviteEmail" type="text" class="form-control" style="flex:1;min-width:180px"
-              :placeholder="$t('pages.organization.manage.members.invite_ph')" :disabled="inviteSending" @keyup.enter="sendInvite" />
-            <select v-model="inviteRole" class="form-select" style="flex:0 0 190px" :disabled="inviteSending">
-              <option v-for="r in assignableRoles" :key="r" :value="r">{{ $t('pages.organization.manage.roles.' + r) }}</option>
-            </select>
-          </div>
-          <button class="btn btn-primary round px-4 w-100 mt-2" :disabled="!inviteEmail.trim() || inviteSending" @click="sendInvite">
-            <span v-if="inviteSending" class="spinner-border spinner-border-sm me-2"></span>
-            {{ $t('pages.organization.manage.members.invite_send') }}
-          </button>
-        </div>
+        <EhubInviteCard
+          v-if="assignableRoles.length"
+          :title="$t('pages.organization.manage.members.invite_title')"
+          :description="$t('pages.organization.manage.members.invite_sub')"
+          :placeholder="$t('pages.organization.manage.members.invite_ph')"
+          :button-label="$t('pages.organization.manage.members.invite_send')"
+          :roles="assignableRoles.map((r) => ({ value: r, label: $t('pages.organization.manage.roles.' + r) }))"
+          :loading="inviteSending"
+          @submit="sendInvite"
+        />
 
         <!-- Danger zone -->
-        <div class="set-card danger">
-          <h3>{{ $t('pages.organization.manage.members.danger') }}</h3>
-          <p class="set-desc">{{ $t('pages.organization.manage.members.leave_desc') }}</p>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-            <button class="btn btn-outline-secondary round px-4" :disabled="isOnlyOwner" @click="leaveOpen = true">
-              <font-awesome-icon :icon="['fas', 'right-from-bracket']" class="me-2" />{{ $t('pages.organization.manage.members.leave') }}
-            </button>
-            <p v-if="isOnlyOwner" class="set-desc m-0">{{ $t('pages.organization.manage.members.leave_only_owner') }}</p>
-          </div>
-        </div>
+        <EhubLeaveCard
+          :title="$t('pages.organization.manage.members.danger')"
+          :description="$t('pages.organization.manage.members.leave_desc')"
+          :button-label="$t('pages.organization.manage.members.leave')"
+          :disabled="isOnlyOwner"
+          :disabled-message="$t('pages.organization.manage.members.leave_only_owner')"
+          @leave="leaveOpen = true"
+        />
       </section>
 
-      <EhubDialog :model-value="!!removeTarget" :title="$t('pages.organization.manage.members.remove_title')" size="sm" @close="removeTarget = null">
+      <EhubDialog :model-value="!!removeTarget" :title="$t('pages.organization.manage.members.remove_title')" icon="user-minus" size="sm" @close="removeTarget = null">
         <p class="m-0" style="font-size:.9rem">{{ $t('pages.organization.manage.members.remove_q', { name: removeTarget ? memberName(removeTarget) : '' }) }}</p>
         <template #footer>
           <button class="btn btn-outline-secondary round px-3" @click="removeTarget = null">{{ $t('pages.organization.manage.members.cancel') }}</button>
@@ -854,7 +846,7 @@ export default {
         </template>
       </EhubDialog>
 
-      <EhubDialog v-model="leaveOpen" :title="$t('pages.organization.manage.members.leave')" size="sm">
+      <EhubDialog v-model="leaveOpen" :title="$t('pages.organization.manage.members.leave')" icon="right-from-bracket" tone="muted" size="sm">
         <p class="m-0" style="font-size:.9rem">{{ $t('pages.organization.manage.members.leave_q') }}</p>
         <template #footer>
           <button class="btn btn-outline-secondary round px-3" @click="leaveOpen = false">{{ $t('pages.organization.manage.members.cancel') }}</button>

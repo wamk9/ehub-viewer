@@ -195,39 +195,25 @@
           </table>
         </div>
 
-        <div class="set-card" v-if="can('invite_members')">
-          <h3>{{ $t('pages.teams.manage.roster.invite') }}</h3>
-          <p class="set-desc">{{ $t('pages.teams.manage.roster.invite_sub') }}</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <input v-model="inviteInput" type="text" class="form-control"
-              :placeholder="$t('pages.teams.manage.roster.invite_ph')"
-              style="flex:1;min-width:180px" :disabled="inviteLoading" />
-            <select v-model="inviteRole" class="form-select" style="flex:0 0 140px" :disabled="inviteLoading">
-              <option v-for="r in invitableRoles" :key="r.id" :value="r.name">
-                {{ $t(`pages.teams.manage.roles.${r.name}`) }}
-              </option>
-            </select>
-          </div>
-          <button class="btn btn-primary round px-4 w-100 mt-2"
-            @click="sendInvite" :disabled="!inviteInput.trim() || inviteLoading">
-            <font-awesome-icon v-if="inviteLoading" :icon="['fas', 'circle-notch']" spin class="me-2" />
-            {{ $t('pages.teams.manage.roster.send_invite') }}
-          </button>
-        </div>
+        <EhubInviteCard
+          v-if="can('invite_members')"
+          :title="$t('pages.teams.manage.roster.invite')"
+          :description="$t('pages.teams.manage.roster.invite_sub')"
+          :placeholder="$t('pages.teams.manage.roster.invite_ph')"
+          :button-label="$t('pages.teams.manage.roster.send_invite')"
+          :roles="invitableRoles.map((r) => ({ value: r.name, label: $t(`pages.teams.manage.roles.${r.name}`) }))"
+          :loading="inviteLoading"
+          @submit="sendInvite"
+        />
 
-        <div class="set-card danger">
-          <h3>{{ $t('pages.teams.manage.settings.danger') }}</h3>
-          <p class="set-desc">{{ $t('pages.teams.manage.settings.leave_desc') }}</p>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-            <button class="btn btn-outline-secondary round px-4" @click="openModal('leave')" :disabled="isOnlyRoot">
-              <font-awesome-icon icon="right-from-bracket" class="me-2" />
-              {{ $t('pages.teams.manage.settings.leave') }}
-            </button>
-            <p v-if="isOnlyRoot" class="only-root-msg">
-              {{ $t('pages.teams.manage.settings.leave_only_root', { role: $t(`pages.teams.manage.roles.${rootRoleName}`) }) }}
-            </p>
-          </div>
-        </div>
+        <EhubLeaveCard
+          :title="$t('pages.teams.manage.settings.danger')"
+          :description="$t('pages.teams.manage.settings.leave_desc')"
+          :button-label="$t('pages.teams.manage.settings.leave')"
+          :disabled="isOnlyRoot"
+          :disabled-message="rootRoleName ? $t('pages.teams.manage.settings.leave_only_root', { role: $t(`pages.teams.manage.roles.${rootRoleName}`) }) : ''"
+          @leave="openModal('leave')"
+        />
 
       </section>
 
@@ -475,48 +461,28 @@
     </template>
 
     <!-- CONFIRM MODAL -->
-    <teleport to="body">
-      <transition name="modal-fade">
-        <div v-if="modal" class="cm-overlay" @click.self="closeModal">
-          <div class="cm-card">
-            <!-- remove member -->
-            <template v-if="modal.type === 'remove_member'">
-              <div class="cm-icon remove_member">
-                <font-awesome-icon icon="user-minus" />
-              </div>
-              <h3 class="cm-title">{{ $t('pages.teams.manage.roster.remove_confirm_title') }}</h3>
-              <p class="cm-desc" v-html="$t('pages.teams.manage.roster.remove_confirm_desc', { name: modal.data?.name })" />
-            </template>
-            <!-- leave -->
-            <template v-else-if="modal.type === 'leave'">
-              <div class="cm-icon leave">
-                <font-awesome-icon icon="right-from-bracket" />
-              </div>
-              <h3 class="cm-title">{{ $t('pages.teams.manage.settings.leave') }}</h3>
-              <p class="cm-desc">{{ $t('pages.teams.manage.settings.leave_confirm') }}</p>
-            </template>
-            <!-- delete -->
-            <template v-else>
-              <div class="cm-icon delete">
-                <font-awesome-icon icon="trash" />
-              </div>
-              <h3 class="cm-title">{{ $t('pages.teams.manage.settings.delete') }}</h3>
-              <p class="cm-desc">{{ $t('pages.teams.manage.settings.delete_confirm') }}</p>
-            </template>
-
-            <div class="cm-actions">
-              <button class="btn btn-outline-secondary round px-4" @click="closeModal" :disabled="modal.loading">
-                {{ $t('pages.teams.manage.settings.cancel') }}
-              </button>
-              <button class="btn btn-danger round px-4" :disabled="modal.loading" @click="onModalConfirm">
-                <font-awesome-icon v-if="modal.loading" icon="spinner" spin class="me-2" />
-                {{ $t('pages.teams.manage.settings.confirm') }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </transition>
-    </teleport>
+    <EhubDialog
+      :model-value="!!modal"
+      :title="modalTitle"
+      :icon="modal ? { remove_member: 'user-minus', leave: 'right-from-bracket', delete: 'trash' }[modal.type] : null"
+      :tone="modal?.type === 'leave' ? 'muted' : 'danger'"
+      :persistent="!!modal?.loading"
+      size="sm"
+      @close="closeModal"
+    >
+      <p v-if="modal?.type === 'remove_member'" class="cm-desc" v-html="$t('pages.teams.manage.roster.remove_confirm_desc', { name: modal.data?.name })" />
+      <p v-else-if="modal?.type === 'leave'" class="cm-desc">{{ $t('pages.teams.manage.settings.leave_confirm') }}</p>
+      <p v-else-if="modal" class="cm-desc">{{ $t('pages.teams.manage.settings.delete_confirm') }}</p>
+      <template #footer>
+        <button class="btn btn-outline-secondary round px-4" :disabled="modal?.loading" @click="closeModal">
+          {{ $t('pages.teams.manage.settings.cancel') }}
+        </button>
+        <button class="btn btn-danger round px-4" :disabled="modal?.loading" @click="onModalConfirm">
+          <font-awesome-icon v-if="modal?.loading" icon="spinner" spin class="me-2" />
+          {{ $t('pages.teams.manage.settings.confirm') }}
+        </button>
+      </template>
+    </EhubDialog>
 
     <!-- MOBILE MEMBER MODAL -->
     <teleport to="body">
@@ -572,6 +538,9 @@ import EhubStatCard from '@/components/EhubStatCard.vue'
 import EhubActivityLog from '@/components/EhubActivityLog.vue'
 import EhubRolePermissionsTable from '@/components/EhubRolePermissionsTable.vue'
 import EhubMgmtLayout from '@/components/general/EhubMgmtLayout.vue'
+import EhubDialog from '@/components/modals/EhubDialog.vue'
+import EhubInviteCard from '@/components/modules/members/EhubInviteCard.vue'
+import EhubLeaveCard from '@/components/modules/members/EhubLeaveCard.vue'
 
 const AVATAR_PALETTE = ['#0098D8', '#e23b3b', '#7C3AED', '#d6336c', '#f08c00', '#1f8a5b', '#495057', '#0f172a']
 
@@ -583,7 +552,7 @@ function strHash(s) {
 
 export default {
   name: 'TeamManage',
-  components: { EhubMgmtLayout, EhubColorPicker, EhubProfileImageUpload, EhubStatCard, EhubActivityLog, EhubRolePermissionsTable },
+  components: { EhubMgmtLayout, EhubDialog, EhubInviteCard, EhubLeaveCard, EhubColorPicker, EhubProfileImageUpload, EhubStatCard, EhubActivityLog, EhubRolePermissionsTable },
 
   data() {
     return {
@@ -592,8 +561,6 @@ export default {
       activePanel: 'overview',
       settingsForm: { name: '', tag: '', description: '', color: '#0098D8', is_open: true },
       settingsSaving: false,
-      inviteInput: '',
-      inviteRole: 'starter',
       inviteLoading: false,
       colorSwatches: ['#0098D8', '#e23b3b', '#7C3AED', '#d6336c', '#f08c00', '#1f8a5b', '#495057', '#0f172a'],
       modal: null,
@@ -716,6 +683,14 @@ export default {
     },
     activeColor() {
       return this.settingsForm.color || this.team?.color || '#0098D8'
+    },
+    modalTitle() {
+      if (!this.modal) return ''
+      return {
+        remove_member: this.$t('pages.teams.manage.roster.remove_confirm_title'),
+        leave: this.$t('pages.teams.manage.settings.leave'),
+        delete: this.$t('pages.teams.manage.settings.delete'),
+      }[this.modal.type]
     },
     sbLogoStyle() {
       return { background: this.activeColor }
@@ -935,13 +910,13 @@ export default {
       }
     },
 
-    async sendInvite() {
-      if (!this.inviteInput.trim() || this.inviteLoading) return
+    async sendInvite({ identifier, role, reset }) {
+      if (this.inviteLoading) return
       this.inviteLoading = true
-      const res = await Teams.invite(this.team.id, { input: this.inviteInput.trim(), role: this.inviteRole })
+      const res = await Teams.invite(this.team.id, { input: identifier, role })
       this.inviteLoading = false
       if (res.code === 200) {
-        this.inviteInput = ''
+        reset()
         toast.success(this.$t('pages.teams.manage.roster.invite_sent'))
       } else if (res.code === 409) {
         toast.error(this.$t('pages.teams.manage.roster.invite_already_member'))
@@ -1095,9 +1070,7 @@ export default {
       if (this.activePanel === 'overview' && this.team) this.loadActivities()
       if (this.activePanel === 'activity' && this.team) this.loadAllActivities()
     })
-    this.loadRoles().then(() => {
-      if (this.invitableRoles.length) this.inviteRole = this.invitableRoles[0].name
-    })
+    this.loadRoles()
   },
 }
 </script>
@@ -1145,31 +1118,8 @@ section .m-av-img { position: absolute; inset: 0; width: 100%; height: 100%; obj
 .ev-mini-name { font-size: .87rem; font-weight: 600; color: var(--ehub-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ev-mini-meta { font-size: .73rem; color: var(--ehub-muted); }
 
-/* Confirm modal */
-.cm-overlay {
-  position: fixed; inset: 0; z-index: 9999;
-  background: rgba(0,0,0,.45); backdrop-filter: blur(2px);
-  display: flex; align-items: center; justify-content: center; padding: 20px;
-}
-.cm-card {
-  background: var(--ehub-card); border: 1px solid var(--ehub-line);
-  border-radius: 18px; padding: 32px 28px; max-width: 420px; width: 100%;
-  box-shadow: var(--ehub-shadow); text-align: center;
-}
-.cm-icon {
-  width: 52px; height: 52px; border-radius: 14px; margin: 0 auto 18px;
-  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
-}
-.cm-icon.leave { background: var(--ehub-field-bg); color: var(--ehub-muted); }
-.cm-icon.delete { background: color-mix(in srgb,#e23b3b 12%,transparent); color: #e23b3b; }
-.cm-icon.remove_member { background: color-mix(in srgb,#e23b3b 12%,transparent); color: #e23b3b; }
-.only-root-msg { margin: 0; font-size: .8rem; color: var(--ehub-muted); max-width: 320px; }
-.cm-title { font-size: 1.05rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 8px; }
-.cm-desc  { font-size: .875rem; color: var(--ehub-muted); margin: 0 0 24px; line-height: 1.5; }
-.cm-actions { display: flex; gap: 10px; justify-content: center; }
-
-.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity .18s ease; }
-.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
+/* Confirm modal text */
+.cm-desc  { font-size: .875rem; color: var(--ehub-muted); margin: 0; line-height: 1.5; }
 
 .mob-role { display: none !important; }
 

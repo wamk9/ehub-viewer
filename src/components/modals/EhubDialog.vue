@@ -7,6 +7,9 @@
           <button type="button" class="btn-close" :aria-label="$t('common.ui.close')" @click="close"></button>
         </div>
         <div class="ehub-dialog__bd">
+          <div v-if="icon" class="ehub-dialog__ico" :class="'ehub-dialog__ico--' + tone">
+            <font-awesome-icon :icon="Array.isArray(icon) ? icon : ['fas', icon]" />
+          </div>
           <slot />
         </div>
         <div v-if="$slots.footer" class="ehub-dialog__ft">
@@ -28,6 +31,11 @@ export default {
     modelValue: { type: Boolean, default: false },
     title: { type: String, default: '' },
     size: { type: String, default: 'md' }, // sm | md | lg
+    // Optional icon badge above the body (e.g. 'trash'); tone: danger | muted | primary.
+    icon: { type: [String, Array], default: null },
+    tone: { type: String, default: 'danger' },
+    // While true the dialog can't be dismissed (e.g. request in flight).
+    persistent: { type: Boolean, default: false },
   },
   emits: ['update:modelValue', 'close'],
   watch: {
@@ -41,6 +49,7 @@ export default {
   },
   methods: {
     close() {
+      if (this.persistent) return;
       this.$emit('update:modelValue', false);
       this.$emit('close');
     },
@@ -60,6 +69,10 @@ export default {
 .ehub-dialog__hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--ehub-line); }
 .ehub-dialog__hd h5 { font-size: 1rem; font-weight: 800; margin: 0; }
 .ehub-dialog__bd { padding: 20px 22px; overflow-y: auto; }
+.ehub-dialog__ico { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 14px; }
+.ehub-dialog__ico--danger { background: color-mix(in srgb, #e23b3b 12%, transparent); color: #e23b3b; }
+.ehub-dialog__ico--muted { background: var(--ehub-field-bg); color: var(--ehub-muted); }
+.ehub-dialog__ico--primary { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
 .ehub-dialog__ft { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 22px; border-top: 1px solid var(--ehub-line); flex-wrap: wrap; }
 [data-bs-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
 </style>
