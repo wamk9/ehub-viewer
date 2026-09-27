@@ -22,7 +22,7 @@ const ORG_GRADS = [
 // owner > admin > everyone else (mirrors OrganizationController::roleLevel).
 const ROLE_LEVEL = { owner: 3, admin: 2 };
 const roleLevel = (role) => (role ? ROLE_LEVEL[role] ?? 1 : 0);
-const ASSIGNABLE_ROLES = ['admin', 'event_manager', 'financial', 'marketing'];
+const ASSIGNABLE_ROLES = ['owner', 'admin', 'event_manager', 'financial', 'marketing'];
 
 const ROLE_CLASS = {
   owner: 'owner',
@@ -143,9 +143,9 @@ export default {
     myRole() {
       return this.org?.role || null;
     },
-    /** Roles I may give: strictly below my own level (only the owner creates admins). */
+    /** Roles I may give: below my own level; owners may also appoint co-owners. */
     assignableRoles() {
-      return ASSIGNABLE_ROLES.filter((r) => roleLevel(r) < roleLevel(this.myRole));
+      return ASSIGNABLE_ROLES.filter((r) => roleLevel(r) < roleLevel(this.myRole) || (r === 'owner' && this.myRole === 'owner'));
     },
     standardReports() {
       return [
