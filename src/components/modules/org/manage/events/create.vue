@@ -8,7 +8,7 @@ import OrganizationEventStage from '@/helpers/communication/OrganizationEventSta
 import { toast } from '@/helpers/toast.js'
 import { categoryGradient } from '@/helpers/General/CategoryConfig.js'
 import SystemVars from '@/helpers/General/SystemVars'
-import { createWizardForm, buildEventPayload, populateFormFromEvent, slugify } from './create-wizard/wizardState.js'
+import { createWizardForm, buildEventPayload, populateFormFromEvent, diffPayload, slugify } from './create-wizard/wizardState.js'
 import WizardSidebar from './create-wizard/WizardSidebar.vue'
 import StepBasic from './create-wizard/steps/StepBasic.vue'
 import StepCategoryFormat from './create-wizard/steps/StepCategoryFormat.vue'
@@ -27,13 +27,15 @@ const props = defineProps({
 
 const route = useRoute()
 const router = useRouter()
-const { t, tm } = useI18n()
+const { t, te, tm } = useI18n()
 
 const form = createWizardForm()
 const currentStep = ref(1)
 const publishing = ref(false)
 const loadingEvent = ref(false)
 const isEditMode = computed(() => !!route.params.eventRoute)
+// Snapshot of the payload right after loading, used to send only changed fields.
+let initialPayload = null
 
 const STEP_COMPONENTS = [
   StepBasic, StepCategoryFormat, StepSpecific, StepFormBuilder, StepParticipants,
@@ -59,6 +61,10 @@ onMounted(async () => {
     loadingEvent.value = false
     if (eventResult.code === 200) {
       populateFormFromEvent(form, eventResult.data, SystemVars.baseUrl)
+      initialPayload = buildEventPayload(form)
+      // Deep link to a step, e.g. ?step=7 opens "Regulamento".
+      const step = parseInt(route.query.step, 10)
+      if (step >= 1 && step <= TOTAL_STEPS) currentStep.value = step
     } else {
       toast.error(t('pages.organization.manage.eventWizard.err.slug'))
       goToEventsList()
@@ -103,7 +109,12 @@ function goToStep(n) {
   if (n < currentStep.value) currentStep.value = n
 }
 
-function goToEventsList() {
+function goToEventsList(eventRoute = route.params.eventRoute) {
+  // Opened from the event manage screen → go back there.
+  if (route.query.return === 'manage' && eventRoute) {
+    router.push({ name: 'manage-event', params: { orgRoute: route.params.orgRoute, eventRoute } })
+    return
+  }
   router.push({ name: 'manage-organization-events', params: { orgRoute: route.params.orgRoute } })
 }
 
@@ -117,9 +128,12 @@ async function saveCreate(payload) {
 }
 
 async function saveEdit(payload) {
-  const result = await OrganizationEvent.update(route.params.orgRoute, route.params.eventRoute, payload)
+  const changed = initialPayload ? diffPayload(initialPayload, payload) : payload
+  if (!Object.keys(changed).length) return true
+  const result = await OrganizationEvent.update(route.params.orgRoute, route.params.eventRoute, changed)
   if (result.code !== 200) {
-    toast.error(result.data?.message ?? t('pages.organization.manage.eventWizard.err.slug'))
+    const key = 'pages.event.manage.err.' + result.data
+    toast.error(te(key) ? t(key) : (result.data?.message ?? t('pages.organization.manage.eventWizard.err.slug')))
     return false
   }
   return true
@@ -140,6 +154,8 @@ async function submit(publication) {
 
   for (const stage of form.stages) {
     if (stage._persisted) {
+      const i = stage._initial
+      if (i && i.name === stage.name && i.start_at === (stage.start_at || '') && i.config === JSON.stringify(stage.config || {})) continue
       await OrganizationEventStage.update(route.params.orgRoute, form.route, stage.route, {
         name: stage.name,
         start_at: stage.start_at || null,
@@ -158,7 +174,7 @@ async function submit(publication) {
 
   publishing.value = false
   toast.success(t('pages.organization.manage.eventWizard.toast.created'))
-  router.push({ name: 'manage-organization-events', params: { orgRoute: route.params.orgRoute } })
+  goToEventsList(form.route)
 }
 </script>
 
@@ -187,7 +203,7 @@ async function submit(publication) {
       </div>
 
       <div class="wiz-actions">
-        <button class="btn btn-ghost round px-3" @click="goToEventsList">
+        <button class="btn btn-ghost round px-3" @click="goToEventsList()">
           {{ $t('pages.organization.manage.eventWizard.btn.cancel') }}
         </button>
         <button v-if="currentStep > 1" class="btn btn-outline-secondary round px-4" @click="goBack">

@@ -4,6 +4,9 @@ import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import { toast } from '@/helpers/toast.js';
 import { eventStatus, lifecycleIndex, stageState, roundState, userName, apiError } from './store.js';
 
+// Wizard step that holds the rules (Regulamento).
+const RULES_STEP = 7;
+
 export default {
   name: 'EmOverview',
   components: { EhubStatCard },
@@ -46,7 +49,7 @@ export default {
         items.push({ ok, text: this.$t('pages.event.manage.ov.chk.' + (ok ? 'gw' : 'gw_missing')), href: `/org/${this.em.orgRoute}/manage` });
       }
       const hasRules = !!(ev.rules && ev.rules.replace(/<[^>]*>/g, '').trim());
-      items.push({ ok: hasRules, text: this.$t('pages.event.manage.ov.chk.' + (hasRules ? 'rules' : 'rules_missing')), edit: !hasRules && !ev.initialized });
+      items.push({ ok: hasRules, text: this.$t('pages.event.manage.ov.chk.' + (hasRules ? 'rules' : 'rules_missing')), step: RULES_STEP });
       items.push({ ok: this.stages.length > 0, text: this.$t('pages.event.manage.ov.chk.' + (this.stages.length ? 'stages' : 'stages_missing')), go: 'stages' });
       if (this.pending) items.push({ ok: false, text: this.$t('pages.event.manage.ov.chk.pending', { n: this.pending }), go: 'regs' });
       this.stages
@@ -89,7 +92,7 @@ export default {
     openItem(c) {
       if (c.go) this.go(c.go);
       else if (c.href) this.$router.push(c.href);
-      else if (c.edit) this.$router.push({ name: 'manage-organization-events-create', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute } });
+      else if (c.step) this.$router.push({ name: 'manage-organization-events-create', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute }, query: { step: c.step, return: 'manage' } });
     },
     async togglePublication() {
       if (this.busy) return;
@@ -185,7 +188,7 @@ export default {
             <font-awesome-icon :icon="['fas', c.ok ? 'check' : 'exclamation']" />
           </span>
           <span class="chk-txt">{{ c.text }}</span>
-          <font-awesome-icon v-if="c.go || c.href || c.edit" :icon="['fas', 'chevron-right']" class="chk-go" />
+          <font-awesome-icon v-if="c.go || c.href || c.step" :icon="['fas', 'chevron-right']" class="chk-go" />
         </div>
       </div>
 

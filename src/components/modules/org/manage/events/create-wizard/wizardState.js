@@ -77,6 +77,29 @@ export function createWizardForm() {
   })
 }
 
+function toDateInput(v) {
+  if (!v) return ''
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v
+  const d = new Date(v)
+  if (isNaN(d)) return ''
+  const p = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+}
+
+/**
+ * Edit mode: only send what changed since the event was loaded, so untouched
+ * fields keep their stored value (e.g. start_at time) and started events can
+ * still save the few fields the API allows after start (rules, streaming...).
+ */
+export function diffPayload(initial, current) {
+  const out = {}
+  for (const [k, v] of Object.entries(current)) {
+    if (v === undefined) continue
+    if (JSON.stringify(v) !== JSON.stringify(initial[k])) out[k] = v
+  }
+  return out
+}
+
 export function populateFormFromEvent(form, event, baseUrl) {
   const fields = [
     'name', 'description', 'cover_type', 'cover_gradient_index', 'color',
@@ -91,13 +114,18 @@ export function populateFormFromEvent(form, event, baseUrl) {
   for (const key of fields) {
     if (event[key] !== undefined && event[key] !== null) form[key] = event[key]
   }
+  // The wizard uses <input type="date">: API timestamps must become YYYY-MM-DD.
+  for (const key of ['start_at', 'end_at', 'registration_deadline']) {
+    form[key] = toDateInput(form[key])
+  }
   form.route_manually_edited = true
   if (event.logo_image) form._existing_logo_url = baseUrl + 'storage/' + event.logo_image
   if (event.cover_image) form._existing_cover_url = baseUrl + 'storage/' + event.cover_image
   if (Array.isArray(event.stages)) {
     form.stages = event.stages.map(s => ({
       id: s.id, name: s.name, route: s.route, stage_type: s.stage_type,
-      start_at: s.start_at, config: s.config || {}, _persisted: true,
+      start_at: toDateInput(s.start_at), config: s.config || {}, _persisted: true,
+      _initial: { name: s.name, start_at: toDateInput(s.start_at), config: JSON.stringify(s.config || {}) },
     }))
   }
 }

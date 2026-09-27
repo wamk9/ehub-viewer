@@ -118,7 +118,7 @@ export default {
         </button>
         <div class="nav-div"></div>
         <router-link v-if="event && !event.initialized"
-          :to="{ name: 'manage-organization-events-create', params: { orgRoute: em.orgRoute, eventRoute: em.eventRoute } }"
+          :to="{ name: 'manage-organization-events-create', params: { orgRoute: em.orgRoute, eventRoute: em.eventRoute }, query: { return: 'manage' } }"
           class="nav-item">
           <font-awesome-icon :icon="['fas', 'pen']" />
           <span>{{ $t('pages.event.manage.nav.edit') }}</span>
