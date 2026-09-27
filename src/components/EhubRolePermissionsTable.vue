@@ -30,7 +30,7 @@
     </div>
     <p class="rpt-legend">
       <span class="pd pd--yes">✓</span> {{ grantedLabel }}
-      <span class="pd pd--inherited" style="margin-left:8px">↑</span> {{ inheritedLabel }}
+      <template v-if="showInherited"><span class="pd pd--inherited" style="margin-left:8px">↑</span> {{ inheritedLabel }}</template>
       <span class="pd pd--no" style="margin-left:8px">—</span> {{ deniedLabel }}
     </p>
   </div>
@@ -48,6 +48,8 @@ export default {
     grantedLabel:   { type: String, default: '' },
     inheritedLabel: { type: String, default: '' },
     deniedLabel:    { type: String, default: '' },
+    // Hide the "inherited" legend when roles don't inherit permissions (e.g. organizations).
+    showInherited:  { type: Boolean, default: true },
   },
 }
 </script>
@@ -90,6 +92,7 @@ export default {
 .rpt-tbl tbody tr:hover .rpt-sticky { background: var(--ehub-card); }
 
 .rpt-center { text-align: center; }
+.rpt-tbl td.rpt-perm { text-align: left; }
 .rpt-perm { font-size: .82rem; color: var(--ehub-text); min-width: 150px; }
 
 .pd {

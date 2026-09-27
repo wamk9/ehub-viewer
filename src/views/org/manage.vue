@@ -979,7 +979,7 @@ export default {
           perm-prefix="pages.organization.manage.roles_panel.permissions"
           :col-label="$t('pages.organization.manage.members.tbl.role')"
           :granted-label="$t('pages.organization.manage.roles_panel.granted')"
-          :inherited-label="$t('pages.organization.manage.roles_panel.granted')"
+:show-inherited="false"
           :denied-label="$t('pages.organization.manage.roles_panel.denied')"
         />
       </section>
