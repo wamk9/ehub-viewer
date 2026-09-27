@@ -57,7 +57,7 @@ export default {
 
   data() {
     const forced = this.forceOption?.[0] ?? null;
-    const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
+    const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', roles: 'roles', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
     return {
       activePanel: panelMap[forced] ?? 'overview',
       org: null,
