@@ -54,13 +54,17 @@ const REG_BY_CATEGORY = {
     { key: 'rating', type: 'number', icon: 'star' },
   ],
 }
+// Hide a suggestion once a field with the same key or label exists ("SteamID" ≈ "steam-id").
+const norm = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+const taken = (list, s, keyProp, labelProp) => list.some((f) =>
+  norm(f[keyProp]) === norm(s.key) || norm(f[labelProp]) === norm(t(K + 'sug.' + s.key)))
 const regSuggestions = computed(() => {
   const cat = String(props.form.category || '')
   const extra = cat.startsWith('esports') ? REG_BY_CATEGORY.esports : (REG_BY_CATEGORY[cat] || [])
-  return [...extra, ...REG_BASE].filter((s) => !props.form.registration_form_template.some((f) => f.name === s.key))
+  return [...extra, ...REG_BASE].filter((s) => !taken(props.form.registration_form_template, s, 'name', 'label'))
 })
-const evtSuggestions = computed(() => EVT_SUGGESTIONS.filter((s) => !props.form.event_fields.some((f) => f.key === s.key)))
-const stgSuggestions = computed(() => STG_SUGGESTIONS.filter((s) => !props.form.stage_fields.some((f) => f.key === s.key)))
+const evtSuggestions = computed(() => EVT_SUGGESTIONS.filter((s) => !taken(props.form.event_fields, s, 'key', 'name')))
+const stgSuggestions = computed(() => STG_SUGGESTIONS.filter((s) => !taken(props.form.stage_fields, s, 'key', 'name')))
 
 // ── helpers ─────────────────────────────────────────────────────────────
 function uniqueKey(base, list, prop, self = null) {
