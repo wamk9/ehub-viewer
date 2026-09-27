@@ -10,7 +10,7 @@
     <div class="cnd-field">
       <label class="cnd-label" :for="inputId">{{ typeLabel }}</label>
       <div class="cnd-input" :class="{ ok: matches }">
-        <input :id="inputId" v-model="typed" class="form-control" :placeholder="name" autocomplete="off" spellcheck="false" @keyup.enter="confirm" />
+        <input :id="inputId" ref="input" v-model="typed" class="form-control" :placeholder="name" autocomplete="off" spellcheck="false" @keyup.enter="confirm" />
         <font-awesome-icon v-if="matches" :icon="['fas', 'circle-check']" class="cnd-check" />
       </div>
     </div>
@@ -58,7 +58,9 @@ export default {
   },
   watch: {
     modelValue(open) {
-      if (open) this.typed = '';
+      if (!open) return;
+      this.typed = '';
+      this.$nextTick(() => this.$refs.input?.focus());
     },
   },
   methods: {
@@ -81,6 +83,6 @@ export default {
 .cnd-label { display: block; font-size: .78rem; font-weight: 600; color: var(--ehub-muted); margin-bottom: 6px; }
 .cnd-input { position: relative; }
 .cnd-input .form-control { padding-right: 38px; transition: border-color .15s, box-shadow .15s; }
-.cnd-input.ok .form-control { border-color: #1f8a5b; box-shadow: 0 0 0 3px color-mix(in srgb, #1f8a5b 15%, transparent); }
+.cnd-input.ok .form-control, .cnd-input.ok .form-control:focus { border-color: #1f8a5b; box-shadow: 0 0 0 3px color-mix(in srgb, #1f8a5b 15%, transparent); }
 .cnd-check { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #1f8a5b; }
 </style>
