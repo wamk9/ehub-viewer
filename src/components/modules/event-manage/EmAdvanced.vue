@@ -22,6 +22,17 @@ export default {
         this.$router.push({ name: 'manage-organization-events-create', params: { orgRoute: this.em.orgRoute, eventRoute: res.data.route } });
       } else toast.error(apiError(this, res.data));
     },
+    async finish() {
+      const ok = await this.em.ask(this.$t('pages.event.manage.adv.finish_q'), this.$t('pages.event.manage.adv.finish_btn'), true);
+      if (!ok) return;
+      this.busy = true;
+      const res = await OrganizationEvent.control(this.em.orgRoute, this.em.eventRoute, 'finish');
+      this.busy = false;
+      if (res.code === 200) {
+        Object.assign(this.ev, res.data);
+        toast.success(this.$t('pages.event.manage.toast.ev_finished'));
+      } else toast.error(apiError(this, res.data));
+    },
     async remove() {
       if (this.confirmName.trim() !== this.ev.name) return;
       this.busy = true;
@@ -45,6 +56,18 @@ export default {
         <h1>{{ $t('pages.event.manage.adv.title') }}</h1>
         <p>{{ $t('pages.event.manage.adv.sub') }}</p>
       </div>
+    </div>
+
+    <div class="set-card">
+      <h3>{{ $t('pages.event.manage.adv.finish') }}</h3>
+      <p class="set-desc">{{ $t('pages.event.manage.adv.finish_hint') }}</p>
+      <p v-if="ev.finished" class="hint m-0"><font-awesome-icon :icon="['fas', 'flag-checkered']" />{{ $t('pages.event.manage.adv.finish_done') }}</p>
+      <template v-else>
+        <button class="btn btn-outline-secondary round px-3" :disabled="busy || !ev.initialized" @click="finish">
+          <font-awesome-icon :icon="['fas', 'flag-checkered']" class="me-2" />{{ $t('pages.event.manage.adv.finish_btn') }}
+        </button>
+        <p v-if="!ev.initialized" class="hint mt-2 mb-0"><font-awesome-icon :icon="['fas', 'circle-info']" />{{ $t('pages.event.manage.adv.finish_not_started') }}</p>
+      </template>
     </div>
 
     <div class="set-card">

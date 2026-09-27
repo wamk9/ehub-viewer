@@ -104,6 +104,12 @@ export default {
     split: 'Distribution', place: '{n} place', split_sum: 'Total: {n}%', add_place: 'Add place', save_split: 'Save distribution',
   },
   adv: {
+    finish: 'Finish event',
+    finish_hint: 'Freezes the final standings. New stages can't be started and results can't change.',
+    finish_btn: 'Finish event',
+    finish_q: 'Finish the event? Final standings will be frozen and no new stages can be started.',
+    finish_not_started: 'Available once the event starts (when the first stage starts).',
+    finish_done: 'This event has already finished.',
     title: 'Advanced', sub: 'Actions that affect the whole event',
     dup: 'Duplicate event', dup_hint: 'Creates a draft with the same settings, stages and sessions, without participants or results.', dup_btn: 'Duplicate',
     del: 'Delete event', del_hint: 'Permanently removes the event, registrations, stages, results and articles.',

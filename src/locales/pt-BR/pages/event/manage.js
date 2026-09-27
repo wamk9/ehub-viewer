@@ -104,6 +104,12 @@ export default {
     split: 'Distribuição', place: '{n}º lugar', split_sum: 'Soma: {n}%', add_place: 'Adicionar colocação', save_split: 'Salvar distribuição',
   },
   adv: {
+    finish: 'Encerrar evento',
+    finish_hint: 'Congela a classificação final. Não será possível iniciar novas etapas nem alterar resultados.',
+    finish_btn: 'Encerrar evento',
+    finish_q: 'Encerrar o evento? A classificação final será congelada e não será possível iniciar novas etapas.',
+    finish_not_started: 'Disponível depois que o evento começar (ao iniciar a primeira etapa).',
+    finish_done: 'Este evento já foi encerrado.',
     title: 'Avançado', sub: 'Ações que afetam o evento inteiro',
     dup: 'Duplicar evento', dup_hint: 'Cria um rascunho com as mesmas configurações, etapas e sessões, sem inscritos nem resultados.', dup_btn: 'Duplicar',
     del: 'Excluir evento', del_hint: 'Remove permanentemente o evento, inscrições, etapas, resultados e notícias.',

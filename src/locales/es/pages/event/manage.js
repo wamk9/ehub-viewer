@@ -104,6 +104,12 @@ export default {
     split: 'Distribución', place: '{n}º lugar', split_sum: 'Suma: {n}%', add_place: 'Agregar puesto', save_split: 'Guardar distribución',
   },
   adv: {
+    finish: 'Finalizar evento',
+    finish_hint: 'Congela la clasificación final. No se podrán iniciar nuevas etapas ni cambiar resultados.',
+    finish_btn: 'Finalizar evento',
+    finish_q: '¿Finalizar el evento? La clasificación final se congelará y no se podrán iniciar nuevas etapas.',
+    finish_not_started: 'Disponible cuando el evento comience (al iniciar la primera etapa).',
+    finish_done: 'Este evento ya finalizó.',
     title: 'Avanzado', sub: 'Acciones que afectan a todo el evento',
     dup: 'Duplicar evento', dup_hint: 'Crea un borrador con la misma configuración, etapas y sesiones, sin inscritos ni resultados.', dup_btn: 'Duplicar',
     del: 'Eliminar evento', del_hint: 'Elimina permanentemente el evento, inscripciones, etapas, resultados y noticias.',
