@@ -105,7 +105,7 @@ export default {
   },
   adv: {
     finish: 'Finish event',
-    finish_hint: 'Freezes the final standings. New stages can't be started and results can't change.',
+    finish_hint: 'Freezes the final standings. New stages cannot be started and results cannot change.',
     finish_btn: 'Finish event',
     finish_q: 'Finish the event? Final standings will be frozen and no new stages can be started.',
     finish_not_started: 'Available once the event starts (when the first stage starts).',
