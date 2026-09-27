@@ -178,6 +178,19 @@ import {
   faEnvelopeOpenText,
   faFileInvoice,
   faShareNodes,
+  faArrowUp,
+  faWandMagicSparkles,
+  faFont,
+  faToggleOn,
+  faHeadset,
+  faCakeCandles,
+  faFileSignature,
+  faServer,
+  faMap,
+  faCloudSun,
+  faHourglassHalf,
+  faTv,
+  faSignal,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -377,6 +390,19 @@ library.add(
   faBullhorn,
   faLanguage,
   faSwatchbook,
+  faArrowUp,
+  faWandMagicSparkles,
+  faFont,
+  faToggleOn,
+  faHeadset,
+  faCakeCandles,
+  faFileSignature,
+  faServer,
+  faMap,
+  faCloudSun,
+  faHourglassHalf,
+  faTv,
+  faSignal,
 );
 
 export default FontAwesomeIcon;

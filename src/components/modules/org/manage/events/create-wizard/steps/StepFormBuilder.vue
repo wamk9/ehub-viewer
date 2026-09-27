@@ -1,214 +1,431 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { slugify } from '../wizardState.js'
 import IconPickerModal from '../IconPickerModal.vue'
+import EhubRegistrationFields from '@/components/modules/event-registration/EhubRegistrationFields.vue'
 
 const props = defineProps({
   form: { type: Object, required: true },
 })
 
-const REG_TYPES = ['text', 'number', 'select', 'color', 'date', 'checkbox', 'url']
-const REG_TYPE_ICON = { text: 'font', number: 'hashtag', select: 'list-ul', color: 'palette', date: 'calendar-days', checkbox: 'toggle-on', url: 'link' }
+const { t } = useI18n()
+const K = 'pages.organization.manage.eventWizard.s4x.'
 
-// ── generic key/icon field lists (event_fields / stage_fields) ─────────
-const evtName = ref('')
-const evtIcon = ref('list')
-const stgName = ref('')
-const stgIcon = ref('road')
-const iconPickerFor = ref(null) // 'evt' | 'stg' | 'reg' | null
+const REG_TYPES = ['text', 'number', 'select', 'checkbox', 'date', 'url', 'color']
+const REG_TYPE_ICON = { text: 'font', number: 'hashtag', select: 'list-ul', color: 'palette', date: 'calendar-days', checkbox: 'toggle-on', switch: 'toggle-on', url: 'link' }
+const typeLabel = (type) => t(K + 'type' + (type === 'switch' ? 'Checkbox' : type.charAt(0).toUpperCase() + type.slice(1)))
 
-function addSimpleField(list, name, icon) {
-  if (!name.trim()) return
-  list.push({ key: slugify(name), name: name.trim(), icon })
+// ── ready-made suggestions ──────────────────────────────────────────────
+const EVT_SUGGESTIONS = [
+  { key: 'discord', icon: 'headset' },
+  { key: 'server', icon: 'server' },
+  { key: 'broadcast', icon: 'tv' },
+  { key: 'contact', icon: 'envelope' },
+  { key: 'extra-prize', icon: 'trophy' },
+]
+const STG_SUGGESTIONS = [
+  { key: 'track', icon: 'road' },
+  { key: 'map', icon: 'map' },
+  { key: 'time', icon: 'clock' },
+  { key: 'duration', icon: 'hourglass-half' },
+  { key: 'weather', icon: 'cloud-sun' },
+]
+const REG_BASE = [
+  { key: 'nickname', type: 'text', icon: 'user', required: true },
+  { key: 'discord', type: 'text', icon: 'headset' },
+  { key: 'team', type: 'text', icon: 'users' },
+  { key: 'city', type: 'text', icon: 'location-dot' },
+  { key: 'birthdate', type: 'date', icon: 'cake-candles' },
+  { key: 'accept-rules', type: 'checkbox', icon: 'file-signature', required: true },
+]
+const REG_BY_CATEGORY = {
+  simracing: [
+    { key: 'steam-id', type: 'text', icon: 'id-card' },
+    { key: 'car-number', type: 'number', icon: 'car', min: 1, max: 999 },
+    { key: 'sim-rating', type: 'number', icon: 'signal' },
+  ],
+  esports: [
+    { key: 'game-id', type: 'text', icon: 'gamepad', required: true },
+    { key: 'rank', type: 'text', icon: 'medal' },
+  ],
+  chess: [
+    { key: 'chess-username', type: 'text', icon: 'chess-knight', required: true },
+    { key: 'rating', type: 'number', icon: 'star' },
+  ],
 }
-function addEvtField() { addSimpleField(props.form.event_fields, evtName.value, evtIcon.value); evtName.value = ''; evtIcon.value = 'list' }
-function addStgField() { addSimpleField(props.form.stage_fields, stgName.value, stgIcon.value); stgName.value = ''; stgIcon.value = 'road' }
-function removeField(list, i) { list.splice(i, 1) }
+const regSuggestions = computed(() => {
+  const cat = String(props.form.category || '')
+  const extra = cat.startsWith('esports') ? REG_BY_CATEGORY.esports : (REG_BY_CATEGORY[cat] || [])
+  return [...extra, ...REG_BASE].filter((s) => !props.form.registration_form_template.some((f) => f.name === s.key))
+})
+const evtSuggestions = computed(() => EVT_SUGGESTIONS.filter((s) => !props.form.event_fields.some((f) => f.key === s.key)))
+const stgSuggestions = computed(() => STG_SUGGESTIONS.filter((s) => !props.form.stage_fields.some((f) => f.key === s.key)))
 
-// ── registration field builder ──────────────────────────────────────────
-const regName = ref('')
-const regIcon = ref('user')
-const regType = ref('text')
-const regOptions = ref('')
-const regMin = ref('')
-const regMax = ref('')
-const regColors = ref('')
-
-function addRegField() {
-  if (!regName.value.trim()) return
-  const field = {
-    type: regType.value,
-    name: slugify(regName.value),
-    label: regName.value.trim(),
-    icon: regIcon.value,
-    required: false,
-    values: regType.value === 'select'
-      ? regOptions.value.split(',').map(v => v.trim()).filter(Boolean)
-      : regType.value === 'color'
-        ? regColors.value.split(',').map(v => v.trim()).filter(Boolean)
-        : [],
-  }
-  if (regType.value === 'number' && (regMin.value || regMax.value)) {
-    field.min = regMin.value ? +regMin.value : null
-    field.max = regMax.value ? +regMax.value : null
-  }
-  props.form.registration_form_template.push(field)
-  regName.value = ''; regIcon.value = 'user'; regType.value = 'text'
-  regOptions.value = ''; regMin.value = ''; regMax.value = ''; regColors.value = ''
+// ── helpers ─────────────────────────────────────────────────────────────
+function uniqueKey(base, list, prop, self = null) {
+  const root = base || 'campo'
+  let key = root
+  let n = 2
+  while (list.some((f) => f !== self && f[prop] === key)) key = `${root}-${n++}`
+  return key
 }
-function toggleRequired(field) { field.required = !field.required }
-
-function openIconPicker(scope) { iconPickerFor.value = scope }
-function onIconPicked(icon) {
-  if (iconPickerFor.value === 'evt') evtIcon.value = icon
-  if (iconPickerFor.value === 'stg') stgIcon.value = icon
-  if (iconPickerFor.value === 'reg') regIcon.value = icon
+function move(list, i, dir) {
+  const j = i + dir
+  if (j < 0 || j >= list.length) return
+  const [item] = list.splice(i, 1)
+  list.splice(j, 0, item)
 }
+
+// Keys of fields created in this session follow the label while typing;
+// saved keys never change (answers and stage values reference them).
+const freshFields = new Set()
+function onLabel(field, list, prop, text) {
+  if (prop === 'name') field.label = text
+  else field.name = text
+  if (freshFields.has(field)) field[prop] = uniqueKey(slugify(text), list, prop, field)
+}
+
+// ── event info / stage info ─────────────────────────────────────────────
+function addInfo(list, suggestion = null) {
+  const label = suggestion ? t(K + 'sug.' + suggestion.key) : ''
+  list.push({ key: suggestion ? suggestion.key : uniqueKey('campo', list, 'key'), name: label, icon: suggestion?.icon || 'circle-info', value: '' })
+  const f = list[list.length - 1]
+  if (!suggestion) freshFields.add(f)
+}
+
+// ── registration fields ─────────────────────────────────────────────────
+const openIndex = ref(null)
+function addReg(suggestion = null) {
+  const list = props.form.registration_form_template
+  const field = suggestion
+    ? { type: suggestion.type, name: suggestion.key, label: t(K + 'sug.' + suggestion.key), icon: suggestion.icon, required: !!suggestion.required, values: [] }
+    : { type: 'text', name: uniqueKey('campo', list, 'name'), label: '', icon: 'font', required: false, values: [] }
+  if (suggestion?.min != null) { field.min = suggestion.min; field.max = suggestion.max ?? null }
+  list.push(field)
+  if (!suggestion) freshFields.add(list[list.length - 1])
+  openIndex.value = list.length - 1
+}
+function removeReg(i) {
+  props.form.registration_form_template.splice(i, 1)
+  openIndex.value = null
+}
+function moveReg(i, dir) {
+  move(props.form.registration_form_template, i, dir)
+  if (openIndex.value === i) openIndex.value = i + dir
+}
+function setType(field, type) {
+  field.type = type
+  if (!['select', 'color'].includes(type)) field.values = []
+  if (type !== 'number') { delete field.min; delete field.max }
+  if (!field.icon || Object.values(REG_TYPE_ICON).includes(field.icon)) field.icon = REG_TYPE_ICON[type]
+}
+function setRange(field, key, value) {
+  field[key] = value === '' ? null : +value
+}
+
+// options as chips
+const optDraft = ref('')
+function addOption(field) {
+  const parts = optDraft.value.split(',').map((v) => v.trim()).filter(Boolean)
+  if (!Array.isArray(field.values)) field.values = []
+  parts.forEach((p) => { if (!field.values.includes(p)) field.values.push(p) })
+  optDraft.value = ''
+}
+function onOptKey(e, field) {
+  if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addOption(field) }
+  else if (e.key === 'Backspace' && !optDraft.value && field.values?.length) field.values.pop()
+}
+function toggle(i) {
+  optDraft.value = ''
+  openIndex.value = openIndex.value === i ? null : i
+}
+
+// live preview answers (never saved)
+const previewData = ref({})
+
+// ── icon picker ─────────────────────────────────────────────────────────
+const iconTarget = ref(null)
+function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon }
 </script>
 
 <template>
   <div>
-    <h2 class="step-title">{{ $t('pages.organization.manage.eventWizard.s4x.title') }}</h2>
-    <p class="step-sub">{{ $t('pages.organization.manage.eventWizard.s4x.sub') }}</p>
+    <h2 class="step-title">{{ $t(K + 'title') }}</h2>
+    <p class="step-sub">{{ $t(K + 'sub') }}</p>
 
-    <!-- Event fields -->
-    <div class="form-section">
-      <div class="form-section-label">{{ $t('pages.organization.manage.eventWizard.s4x.evtLabel') }}</div>
-      <p class="field-hint mb-3">{{ $t('pages.organization.manage.eventWizard.s4x.evtHint') }}</p>
-      <div class="field-list">
-        <div v-for="(f, i) in form.event_fields" :key="i" class="evt-input-row">
-          <div class="evt-input-label">
-            <font-awesome-icon :icon="['fas', f.icon]" class="evt-inp-ico" />
-            <span class="evt-inp-name">{{ f.name }}</span>
-            <button class="evt-del-btn" @click="removeField(form.event_fields, i)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
-          </div>
+    <!-- ═══ 1 · Event info ═══ -->
+    <section class="fb-block">
+      <header class="fb-head">
+        <span class="fb-num">1</span>
+        <div class="fb-head-txt">
+          <h3 class="fb-title">{{ $t(K + 'evtLabel') }}</h3>
+          <p class="fb-desc">{{ $t(K + 'evtHint') }}</p>
         </div>
-        <div class="custom-field-row">
-          <button type="button" class="icon-btn" @click="openIconPicker('evt')"><font-awesome-icon :icon="['fas', evtIcon]" /></button>
-          <input type="text" class="form-control" v-model="evtName" :placeholder="$t('pages.organization.manage.eventWizard.s4x.customEvtPh')" @keydown.enter="addEvtField" />
-          <button class="btn btn-outline-secondary round px-3" @click="addEvtField"><font-awesome-icon :icon="['fas', 'plus']" class="me-1" />{{ $t('pages.organization.manage.eventWizard.s4x.addField') }}</button>
-        </div>
-      </div>
-    </div>
+        <span class="fb-where"><font-awesome-icon :icon="['fas', 'eye']" />{{ $t(K + 'evtWhere') }}</span>
+      </header>
 
-    <!-- Stage fields -->
-    <div class="form-section">
-      <div class="form-section-label">{{ $t('pages.organization.manage.eventWizard.s4x.stgLabel') }}</div>
-      <p class="field-hint mb-3">{{ $t('pages.organization.manage.eventWizard.s4x.stgHint') }}</p>
-      <div class="field-list">
-        <div v-for="(f, i) in form.stage_fields" :key="i" class="evt-input-row">
-          <div class="evt-input-label">
-            <font-awesome-icon :icon="['fas', f.icon]" class="evt-inp-ico" />
-            <span class="evt-inp-name">{{ f.name }}</span>
-            <button class="evt-del-btn" @click="removeField(form.stage_fields, i)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
-          </div>
+      <div class="fb-body">
+        <div v-if="form.event_fields.length" class="fb-cols fb-cols-evt">
+          <span>{{ $t(K + 'colName') }}</span><span>{{ $t(K + 'colValue') }}</span>
         </div>
-        <div class="custom-field-row">
-          <button type="button" class="icon-btn" @click="openIconPicker('stg')"><font-awesome-icon :icon="['fas', stgIcon]" /></button>
-          <input type="text" class="form-control" v-model="stgName" :placeholder="$t('pages.organization.manage.eventWizard.s4x.customStgPh')" @keydown.enter="addStgField" />
-          <button class="btn btn-outline-secondary round px-3" @click="addStgField"><font-awesome-icon :icon="['fas', 'plus']" class="me-1" />{{ $t('pages.organization.manage.eventWizard.s4x.addField') }}</button>
+        <div v-for="(f, i) in form.event_fields" :key="i" class="fb-row fb-row-evt">
+          <button type="button" class="icon-btn" :title="$t(K + 'chooseIcon')" @click="iconTarget = f"><font-awesome-icon :icon="['fas', f.icon || 'circle-info']" /></button>
+          <input type="text" class="form-control form-control-sm" :value="f.name" maxlength="120" :placeholder="$t(K + 'customEvtPh')" @input="onLabel(f, form.event_fields, 'key', $event.target.value)" />
+          <input type="text" class="form-control form-control-sm" v-model="f.value" maxlength="255" :placeholder="$t(K + 'valuePh')" />
+          <button type="button" class="row-btn danger" :title="$t(K + 'remove')" @click="form.event_fields.splice(i, 1)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
         </div>
-      </div>
-    </div>
+        <p v-if="!form.event_fields.length" class="fb-empty">{{ $t(K + 'evtEmpty') }}</p>
 
-    <!-- Registration fields -->
-    <div class="form-section">
-      <div class="form-section-label">{{ $t('pages.organization.manage.eventWizard.s4x.regLabel') }}</div>
-      <p class="field-hint mb-3">{{ $t('pages.organization.manage.eventWizard.s4x.regHint') }}</p>
-      <div class="field-list">
-        <div v-for="(f, i) in form.registration_form_template" :key="i" class="evt-input-row">
-          <div class="evt-input-label">
-            <font-awesome-icon :icon="['fas', f.icon || REG_TYPE_ICON[f.type]]" class="evt-inp-ico" />
-            <span class="evt-inp-name">{{ f.label }}</span>
-            <span class="field-type-chip"><font-awesome-icon :icon="['fas', REG_TYPE_ICON[f.type]]" />{{ f.type }}</span>
-            <button
-              type="button" class="req-chip" :class="f.required ? 'req' : 'opt'"
-              @click="toggleRequired(f)"
-            >{{ f.required ? $t('pages.organization.manage.eventWizard.s4x.required') : $t('pages.organization.manage.eventWizard.s4x.optional') }}</button>
-            <button class="evt-del-btn" @click="removeField(form.registration_form_template, i)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
-          </div>
-        </div>
-
-        <div class="creg-builder">
-          <div class="creg-builder-title">{{ $t('pages.organization.manage.eventWizard.s4x.newCustomField') }}</div>
-          <div class="creg-name-row">
-            <button type="button" class="icon-btn" @click="openIconPicker('reg')"><font-awesome-icon :icon="['fas', regIcon]" /></button>
-            <input type="text" class="form-control" v-model="regName" :placeholder="$t('pages.organization.manage.eventWizard.s4x.customRegPh')" @keydown.enter="addRegField" />
-          </div>
-          <div>
-            <div class="creg-extra-label"><font-awesome-icon :icon="['fas', 'sliders']" />{{ $t('pages.organization.manage.eventWizard.s4x.answerType') }}</div>
-            <div class="creg-type-grid">
-              <button
-                v-for="rt in REG_TYPES" :key="rt" type="button" class="creg-type-btn" :class="{ sel: regType === rt }"
-                @click="regType = rt"
-              ><font-awesome-icon :icon="['fas', REG_TYPE_ICON[rt]]" />{{ $t(`pages.organization.manage.eventWizard.s4x.type${rt.charAt(0).toUpperCase()}${rt.slice(1)}`) }}</button>
-            </div>
-          </div>
-          <div v-if="regType === 'select'" class="creg-extra">
-            <div class="creg-extra-label"><font-awesome-icon :icon="['fas', 'list-ul']" />{{ $t('pages.organization.manage.eventWizard.s4x.optsLabel') }}</div>
-            <input type="text" class="form-control form-control-sm" v-model="regOptions" :placeholder="$t('pages.organization.manage.eventWizard.s4x.optsPh')" />
-            <p class="field-hint" style="margin:2px 0 0">{{ $t('pages.organization.manage.eventWizard.s4x.optsHint') }}</p>
-          </div>
-          <div v-if="regType === 'number'" class="creg-extra">
-            <div class="creg-extra-label"><font-awesome-icon :icon="['fas', 'sliders']" />{{ $t('pages.organization.manage.eventWizard.s4x.rangeLabel') }} <span style="font-weight:400;opacity:.7">{{ $t('pages.organization.manage.eventWizard.s4x.rangeOptional') }}</span></div>
-            <div class="creg-num-row">
-              <input type="number" class="form-control form-control-sm" v-model="regMin" :placeholder="$t('pages.organization.manage.eventWizard.s4x.min')" style="width:110px" />
-              <span style="color:var(--ehub-muted);font-size:.82rem">{{ $t('pages.organization.manage.eventWizard.s4x.upTo') }}</span>
-              <input type="number" class="form-control form-control-sm" v-model="regMax" :placeholder="$t('pages.organization.manage.eventWizard.s4x.max')" style="width:110px" />
-            </div>
-          </div>
-          <div v-if="regType === 'color'" class="creg-extra">
-            <div class="creg-extra-label"><font-awesome-icon :icon="['fas', 'palette']" />{{ $t('pages.organization.manage.eventWizard.s4x.colorsLabel') }} <span style="font-weight:400;opacity:.7">{{ $t('pages.organization.manage.eventWizard.s4x.rangeOptional') }}</span></div>
-            <input type="text" class="form-control form-control-sm" v-model="regColors" :placeholder="$t('pages.organization.manage.eventWizard.s4x.colorsPh')" />
-            <p class="field-hint" style="margin:2px 0 0">{{ $t('pages.organization.manage.eventWizard.s4x.colorsHint') }}</p>
-          </div>
-          <div style="display:flex;justify-content:flex-end;padding-top:2px">
-            <button class="btn btn-outline-secondary round px-3" type="button" @click="addRegField">
-              <font-awesome-icon :icon="['fas', 'plus']" class="me-1" />{{ $t('pages.organization.manage.eventWizard.s4x.addField') }}
+        <div class="fb-add">
+          <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="addInfo(form.event_fields)">
+            <font-awesome-icon :icon="['fas', 'plus']" class="me-1" />{{ $t(K + 'addField') }}
+          </button>
+          <template v-if="evtSuggestions.length">
+            <span class="fb-sug-lbl"><font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" />{{ $t(K + 'suggestions') }}</span>
+            <button v-for="s in evtSuggestions" :key="s.key" type="button" class="sug-chip" @click="addInfo(form.event_fields, s)">
+              <font-awesome-icon :icon="['fas', s.icon]" />{{ $t(K + 'sug.' + s.key) }}
             </button>
-          </div>
+          </template>
         </div>
       </div>
-    </div>
+    </section>
 
-    <IconPickerModal v-if="iconPickerFor" @close="iconPickerFor = null" @update:model-value="onIconPicked" />
+    <!-- ═══ 2 · Stage info ═══ -->
+    <section class="fb-block">
+      <header class="fb-head">
+        <span class="fb-num">2</span>
+        <div class="fb-head-txt">
+          <h3 class="fb-title">{{ $t(K + 'stgLabel') }}</h3>
+          <p class="fb-desc">{{ $t(K + 'stgHint') }}</p>
+        </div>
+        <span class="fb-where"><font-awesome-icon :icon="['fas', 'eye']" />{{ $t(K + 'stgWhere') }}</span>
+      </header>
+
+      <div class="fb-body">
+        <div v-for="(f, i) in form.stage_fields" :key="i" class="fb-row fb-row-stg">
+          <button type="button" class="icon-btn" :title="$t(K + 'chooseIcon')" @click="iconTarget = f"><font-awesome-icon :icon="['fas', f.icon || 'circle-info']" /></button>
+          <input type="text" class="form-control form-control-sm" :value="f.name" maxlength="120" :placeholder="$t(K + 'customStgPh')" @input="onLabel(f, form.stage_fields, 'key', $event.target.value)" />
+          <button type="button" class="row-btn danger" :title="$t(K + 'remove')" @click="form.stage_fields.splice(i, 1)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
+        </div>
+        <p v-if="!form.stage_fields.length" class="fb-empty">{{ $t(K + 'stgEmpty') }}</p>
+        <p v-else class="fb-note"><font-awesome-icon :icon="['fas', 'circle-info']" />{{ $t(K + 'stgNote') }}</p>
+
+        <div class="fb-add">
+          <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="addInfo(form.stage_fields)">
+            <font-awesome-icon :icon="['fas', 'plus']" class="me-1" />{{ $t(K + 'addField') }}
+          </button>
+          <template v-if="stgSuggestions.length">
+            <span class="fb-sug-lbl"><font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" />{{ $t(K + 'suggestions') }}</span>
+            <button v-for="s in stgSuggestions" :key="s.key" type="button" class="sug-chip" @click="addInfo(form.stage_fields, s)">
+              <font-awesome-icon :icon="['fas', s.icon]" />{{ $t(K + 'sug.' + s.key) }}
+            </button>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 3 · Registration form ═══ -->
+    <section class="fb-block">
+      <header class="fb-head">
+        <span class="fb-num">3</span>
+        <div class="fb-head-txt">
+          <h3 class="fb-title">{{ $t(K + 'regLabel') }}</h3>
+          <p class="fb-desc">{{ $t(K + 'regHint') }}</p>
+        </div>
+        <span class="fb-where"><font-awesome-icon :icon="['fas', 'eye']" />{{ $t(K + 'regWhere') }}</span>
+      </header>
+
+      <div class="fb-body reg-grid">
+        <!-- builder -->
+        <div class="reg-builder">
+          <div v-for="(f, i) in form.registration_form_template" :key="i" class="reg-card" :class="{ open: openIndex === i }">
+            <div class="reg-card-head" @click="toggle(i)">
+              <font-awesome-icon :icon="['fas', f.icon || REG_TYPE_ICON[f.type] || 'font']" class="reg-ico" />
+              <span class="reg-name" :class="{ muted: !f.label }">{{ f.label || $t(K + 'untitled') }}</span>
+              <span class="type-chip"><font-awesome-icon :icon="['fas', REG_TYPE_ICON[f.type] || 'font']" />{{ typeLabel(f.type) }}</span>
+              <span v-if="f.required" class="req-chip">{{ $t(K + 'required') }}</span>
+              <div class="reg-actions" @click.stop>
+                <button type="button" class="row-btn" :disabled="i === 0" :title="$t(K + 'moveUp')" @click="moveReg(i, -1)"><font-awesome-icon :icon="['fas', 'arrow-up']" /></button>
+                <button type="button" class="row-btn" :disabled="i === form.registration_form_template.length - 1" :title="$t(K + 'moveDown')" @click="moveReg(i, 1)"><font-awesome-icon :icon="['fas', 'arrow-down']" /></button>
+                <button type="button" class="row-btn danger" :title="$t(K + 'remove')" @click="removeReg(i)"><font-awesome-icon :icon="['fas', 'trash']" /></button>
+              </div>
+              <font-awesome-icon :icon="['fas', openIndex === i ? 'chevron-up' : 'chevron-down']" class="reg-caret" />
+            </div>
+
+            <div v-if="openIndex === i" class="reg-edit">
+              <div class="reg-edit-row">
+                <button type="button" class="icon-btn" :title="$t(K + 'chooseIcon')" @click="iconTarget = f"><font-awesome-icon :icon="['fas', f.icon || REG_TYPE_ICON[f.type]]" /></button>
+                <div class="flex-grow-1">
+                  <label class="mini-lbl">{{ $t(K + 'question') }}</label>
+                  <input type="text" class="form-control form-control-sm" :value="f.label" maxlength="120" :placeholder="$t(K + 'customRegPh')" @input="onLabel(f, form.registration_form_template, 'name', $event.target.value)" />
+                </div>
+              </div>
+
+              <div>
+                <label class="mini-lbl">{{ $t(K + 'answerType') }}</label>
+                <div class="type-grid">
+                  <button v-for="rt in REG_TYPES" :key="rt" type="button" class="type-btn" :class="{ sel: f.type === rt || (rt === 'checkbox' && f.type === 'switch') }" @click="setType(f, rt)">
+                    <font-awesome-icon :icon="['fas', REG_TYPE_ICON[rt]]" />{{ typeLabel(rt) }}
+                  </button>
+                </div>
+                <p class="mini-hint">{{ $t(K + 'typeHint.' + (f.type === 'switch' ? 'checkbox' : f.type)) }}</p>
+              </div>
+
+              <div v-if="f.type === 'select' || f.type === 'color'">
+                <label class="mini-lbl">{{ $t(K + (f.type === 'select' ? 'optsLabel' : 'colorsLabel')) }}</label>
+                <div class="chips-input">
+                  <span v-for="(o, oi) in f.values" :key="o" class="opt-chip">
+                    <span v-if="f.type === 'color'" class="opt-swatch" :style="{ background: o }"></span>{{ o }}
+                    <button type="button" @click="f.values.splice(oi, 1)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
+                  </span>
+                  <input type="text" v-model="optDraft" :placeholder="$t(K + (f.type === 'select' ? 'optsPh' : 'colorsPh'))" @keydown="onOptKey($event, f)" @blur="addOption(f)" />
+                </div>
+                <p class="mini-hint">{{ $t(K + (f.type === 'select' ? 'optsHint' : 'colorsHint')) }}</p>
+              </div>
+
+              <div v-if="f.type === 'number'" class="reg-range">
+                <div>
+                  <label class="mini-lbl">{{ $t(K + 'min') }}</label>
+                  <input type="number" class="form-control form-control-sm" :value="f.min ?? ''" @input="setRange(f, 'min', $event.target.value)" />
+                </div>
+                <div>
+                  <label class="mini-lbl">{{ $t(K + 'max') }}</label>
+                  <input type="number" class="form-control form-control-sm" :value="f.max ?? ''" @input="setRange(f, 'max', $event.target.value)" />
+                </div>
+              </div>
+
+              <div v-if="!['checkbox', 'switch', 'select', 'color', 'date'].includes(f.type)">
+                <label class="mini-lbl">{{ $t(K + 'placeholder') }} <span class="opt-tag">{{ $t(K + 'rangeOptional') }}</span></label>
+                <input type="text" class="form-control form-control-sm" v-model="f.placeholder" maxlength="120" :placeholder="$t(K + 'placeholderPh')" />
+              </div>
+              <div>
+                <label class="mini-lbl">{{ $t(K + 'help') }} <span class="opt-tag">{{ $t(K + 'rangeOptional') }}</span></label>
+                <input type="text" class="form-control form-control-sm" v-model="f.help" maxlength="200" :placeholder="$t(K + 'helpPh')" />
+              </div>
+
+              <label class="req-switch">
+                <input type="checkbox" class="form-check-input" v-model="f.required" />
+                <span>
+                  <strong>{{ $t(K + 'requiredLabel') }}</strong>
+                  <small>{{ $t(K + (f.type === 'checkbox' || f.type === 'switch' ? 'requiredHintCheck' : 'requiredHint')) }}</small>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <p v-if="!form.registration_form_template.length" class="fb-empty">{{ $t(K + 'regEmpty') }}</p>
+
+          <div class="fb-add">
+            <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="addReg()">
+              <font-awesome-icon :icon="['fas', 'plus']" class="me-1" />{{ $t(K + 'addField') }}
+            </button>
+            <template v-if="regSuggestions.length">
+              <span class="fb-sug-lbl"><font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" />{{ $t(K + 'suggestions') }}</span>
+              <button v-for="s in regSuggestions" :key="s.key" type="button" class="sug-chip" @click="addReg(s)">
+                <font-awesome-icon :icon="['fas', s.icon]" />{{ $t(K + 'sug.' + s.key) }}
+              </button>
+            </template>
+          </div>
+        </div>
+
+        <!-- live preview -->
+        <aside class="reg-preview">
+          <div class="prev-head"><font-awesome-icon :icon="['fas', 'eye']" />{{ $t(K + 'preview') }}</div>
+          <div class="prev-body">
+            <div class="prev-event">{{ form.name || $t(K + 'previewEvent') }}</div>
+            <EhubRegistrationFields v-if="form.registration_form_template.length" :fields="form.registration_form_template" v-model="previewData" />
+            <p v-else class="prev-empty">{{ $t(K + 'previewEmpty') }}</p>
+            <button type="button" class="btn btn-primary btn-sm w-100 mt-3" disabled>{{ $t(K + 'previewBtn') }}</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <IconPickerModal v-if="iconTarget" @close="iconTarget = null" @update:model-value="onIconPicked" />
   </div>
 </template>
 
 <style scoped>
 .step-title { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 4px; letter-spacing: -.02em; }
-.step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 28px; }
-.form-section { margin-bottom: 26px; }
-.form-section-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ehub-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-.form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--ehub-line); }
-.field-hint { font-size: .78rem; color: var(--ehub-muted); }
+.step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 24px; }
 
-.field-list { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); overflow: visible; }
-.evt-input-row { padding: 10px 14px; border-bottom: 1px solid var(--ehub-line); }
-.evt-input-label { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.evt-inp-ico { color: var(--ehub-primary); font-size: .85rem; width: 20px; text-align: center; flex-shrink: 0; }
-.evt-inp-name { font-size: .85rem; font-weight: 600; color: var(--ehub-ink); }
-.evt-del-btn { margin-left: auto; background: transparent; border: 1px solid transparent; border-radius: 6px; color: var(--ehub-muted); cursor: pointer; padding: 2px 6px; font-size: .72rem; }
-.evt-del-btn:hover { border-color: color-mix(in srgb,#e23b3b 35%,transparent); background: color-mix(in srgb,#e23b3b 10%,transparent); color: #e23b3b; }
+.fb-block { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card, 14px); margin-bottom: 18px; }
+.fb-head { display: flex; align-items: flex-start; gap: 12px; padding: 16px 18px 12px; flex-wrap: wrap; }
+.fb-num { width: 28px; height: 28px; border-radius: 50%; background: var(--ehub-primary-tint); color: var(--ehub-primary); font-weight: 800; font-size: .8rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.fb-head-txt { flex: 1; min-width: 220px; }
+.fb-title { font-size: .98rem; font-weight: 800; color: var(--ehub-ink); margin: 3px 0 2px; }
+.fb-desc { font-size: .8rem; color: var(--ehub-muted); margin: 0; }
+.fb-where { display: inline-flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; color: var(--ehub-muted); background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 50rem; padding: 3px 10px; white-space: nowrap; margin-top: 3px; }
+.fb-body { padding: 0 18px 16px; }
+.fb-empty { font-size: .8rem; color: var(--ehub-muted); text-align: center; border: 1px dashed var(--ehub-line); border-radius: 10px; padding: 14px; margin: 0 0 10px; }
+.fb-note { display: flex; align-items: center; gap: 6px; font-size: .76rem; color: var(--ehub-muted); margin: 2px 0 10px; }
 
-.field-type-chip { display: inline-flex; align-items: center; gap: 4px; font-size: .65rem; font-weight: 700; padding: 2px 8px; border-radius: 50rem; background: var(--ehub-field-bg); color: var(--ehub-muted); border: 1px solid var(--ehub-line); white-space: nowrap; }
-.req-chip { font-size: .68rem; font-weight: 700; padding: 2px 9px; border-radius: 50rem; cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
-.req-chip.req { background: color-mix(in srgb,#e23b3b 12%,transparent); color: #e23b3b; border-color: color-mix(in srgb,#e23b3b 28%,transparent); }
-.req-chip.opt { background: var(--ehub-field-bg); color: var(--ehub-muted); border-color: var(--ehub-line); }
+.fb-cols { display: grid; gap: 8px; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); margin-bottom: 4px; }
+.fb-cols-evt { grid-template-columns: 36px 1fr 1.4fr 28px; }
+.fb-cols-evt span:first-child { grid-column: 2; }
+.fb-row { display: grid; gap: 8px; align-items: center; margin-bottom: 8px; }
+.fb-row-evt { grid-template-columns: 36px 1fr 1.4fr 28px; }
+.fb-row-stg { grid-template-columns: 36px 1fr 28px; }
+.fb-add { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
+.fb-sug-lbl { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; font-weight: 700; color: var(--ehub-muted); margin: 0 2px 0 8px; }
+.sug-chip { display: inline-flex; align-items: center; gap: 5px; font-size: .74rem; font-weight: 600; padding: 4px 10px; border-radius: 50rem; border: 1px dashed var(--ehub-line); background: transparent; color: var(--ehub-ink); cursor: pointer; }
+.sug-chip svg { color: var(--ehub-primary); font-size: .7rem; }
+.sug-chip:hover { border-style: solid; border-color: var(--ehub-primary); background: var(--ehub-primary-tint); }
 
-.custom-field-row { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px dashed var(--ehub-line); align-items: center; }
-.icon-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .9rem; color: var(--ehub-primary); flex-shrink: 0; padding: 0; }
+.icon-btn { width: 36px; height: 32px; border-radius: 8px; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .85rem; color: var(--ehub-primary); flex-shrink: 0; padding: 0; }
 .icon-btn:hover { border-color: var(--ehub-primary); background: var(--ehub-primary-tint); }
+.row-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: var(--ehub-muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: .72rem; padding: 0; }
+.row-btn:hover:not(:disabled) { border-color: var(--ehub-line); color: var(--ehub-ink); }
+.row-btn:disabled { opacity: .35; cursor: default; }
+.row-btn.danger:hover { border-color: color-mix(in srgb,#e23b3b 35%,transparent); background: color-mix(in srgb,#e23b3b 10%,transparent); color: #e23b3b; }
 
-.creg-builder { padding: 12px 14px; border-top: 1px dashed var(--ehub-line); display: flex; flex-direction: column; gap: 8px; }
-.creg-builder-title { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); }
-.creg-name-row { display: flex; gap: 8px; align-items: center; }
-.creg-name-row input { flex: 1; }
-.creg-extra-label { font-size: .72rem; font-weight: 700; color: var(--ehub-muted); display: flex; align-items: center; gap: 5px; margin-bottom: 7px; }
-.creg-extra { background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 9px; padding: 10px 12px; display: flex; flex-direction: column; gap: 7px; }
-.creg-num-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.creg-type-grid { display: flex; flex-wrap: wrap; gap: 5px; }
-.creg-type-btn { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 8px; border: 1.5px solid var(--ehub-line); background: var(--ehub-card); color: var(--ehub-muted); font-size: .78rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
-.creg-type-btn:hover { border-color: var(--ehub-primary); color: var(--ehub-primary); background: var(--ehub-primary-tint); }
-.creg-type-btn.sel { border-color: var(--ehub-primary); color: var(--ehub-primary); background: var(--ehub-primary-tint); }
+.reg-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.reg-card { border: 1px solid var(--ehub-line); border-radius: 10px; margin-bottom: 8px; background: var(--ehub-card); }
+.reg-card.open { border-color: var(--ehub-primary); box-shadow: 0 0 0 3px var(--ehub-primary-tint); }
+.reg-card-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; min-width: 0; }
+.reg-ico { color: var(--ehub-primary); width: 18px; font-size: .82rem; flex-shrink: 0; }
+.reg-name { font-size: .85rem; font-weight: 600; color: var(--ehub-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+.reg-name.muted { color: var(--ehub-muted); font-style: italic; font-weight: 500; }
+.type-chip { display: inline-flex; align-items: center; gap: 4px; font-size: .64rem; font-weight: 700; padding: 2px 8px; border-radius: 50rem; background: var(--ehub-field-bg); color: var(--ehub-muted); border: 1px solid var(--ehub-line); white-space: nowrap; }
+.req-chip { font-size: .64rem; font-weight: 700; padding: 2px 8px; border-radius: 50rem; white-space: nowrap; background: color-mix(in srgb,#e23b3b 12%,transparent); color: #e23b3b; border: 1px solid color-mix(in srgb,#e23b3b 28%,transparent); }
+.reg-actions { display: flex; gap: 1px; }
+.reg-caret { color: var(--ehub-muted); font-size: .7rem; }
+.reg-edit { border-top: 1px solid var(--ehub-line); padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+.reg-edit-row { display: flex; gap: 8px; align-items: flex-end; }
+.mini-lbl { display: block; font-size: .72rem; font-weight: 700; color: var(--ehub-ink); margin-bottom: 4px; }
+.mini-hint { font-size: .72rem; color: var(--ehub-muted); margin: 5px 0 0; }
+.opt-tag { font-weight: 400; color: var(--ehub-muted); }
+.type-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+.type-btn { display: flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 8px; border: 1.5px solid var(--ehub-line); background: var(--ehub-card); color: var(--ehub-muted); font-size: .76rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.type-btn:hover, .type-btn.sel { border-color: var(--ehub-primary); color: var(--ehub-primary); background: var(--ehub-primary-tint); }
+.chips-input { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); border-radius: 8px; padding: 5px 7px; }
+.chips-input:focus-within { border-color: var(--ehub-primary); }
+.chips-input input { flex: 1; min-width: 120px; border: 0; background: transparent; font-size: .8rem; color: var(--ehub-ink); outline: none; padding: 2px; }
+.opt-chip { display: inline-flex; align-items: center; gap: 5px; font-size: .74rem; font-weight: 600; background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 50rem; padding: 1px 4px 1px 9px; color: var(--ehub-ink); }
+.opt-chip button { border: 0; background: transparent; color: var(--ehub-muted); font-size: .65rem; cursor: pointer; padding: 0 4px; }
+.opt-chip button:hover { color: #e23b3b; }
+.opt-swatch { width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--ehub-line); }
+.reg-range { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.req-switch { display: flex; gap: 10px; align-items: flex-start; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 9px; padding: 9px 12px; cursor: pointer; }
+.req-switch .form-check-input { margin-top: 3px; flex-shrink: 0; }
+.req-switch strong { display: block; font-size: .8rem; color: var(--ehub-ink); }
+.req-switch small { display: block; font-size: .72rem; color: var(--ehub-muted); }
+
+.reg-preview { position: sticky; top: 16px; border: 1px solid var(--ehub-line); border-radius: 12px; background: var(--ehub-page, var(--ehub-field-bg)); overflow: hidden; }
+.prev-head { display: flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 9px 14px; border-bottom: 1px solid var(--ehub-line); background: var(--ehub-card); }
+.prev-body { padding: 14px; --org-accent: var(--ehub-primary); }
+.prev-event { font-size: .78rem; color: var(--ehub-muted); margin-bottom: 12px; }
+.prev-empty { font-size: .8rem; color: var(--ehub-muted); margin: 0; }
+
+@media (max-width: 860px) {
+  .reg-grid { grid-template-columns: minmax(0, 1fr); }
+  .reg-preview { position: static; }
+}
+@media (max-width: 560px) {
+  .fb-row-evt, .fb-cols-evt { grid-template-columns: 36px 1fr 28px; }
+  .fb-row-evt input:nth-of-type(2) { grid-column: 2; grid-row: 2; }
+  .fb-cols-evt { display: none; }
+  .type-chip { display: none; }
+}
 </style>

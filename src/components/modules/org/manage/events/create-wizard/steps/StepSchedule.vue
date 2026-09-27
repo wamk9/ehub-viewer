@@ -35,6 +35,15 @@ function removeStage(i) {
   props.form.stages.splice(i, 1)
 }
 
+// Values for the organizer's stage info fields (step 4) live in stage.config.info.
+function infoValue(stage, key) {
+  return stage.config?.info?.[key] ?? ''
+}
+function setInfo(stage, key, value) {
+  if (!stage.config) stage.config = {}
+  stage.config.info = { ...(stage.config.info || {}), [key]: value }
+}
+
 // Stage dates are YYYY-MM-DD strings, so a string compare is enough.
 function beforeStart(stage) {
   return !!(stage.start_at && props.form.start_at && String(stage.start_at).slice(0, 10) < String(props.form.start_at).slice(0, 10))
@@ -81,6 +90,12 @@ function beforeStart(stage) {
           <div v-if="beforeStart(stage)" class="stage-warn">
             <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />{{ $t('pages.organization.manage.eventWizard.s3.beforeStart') }}
           </div>
+          <div v-if="form.stage_fields?.length" class="stage-info">
+            <label v-for="f in form.stage_fields" :key="f.key" class="stage-info-field">
+              <span class="stage-info-lbl"><font-awesome-icon :icon="['fas', f.icon || 'circle-info']" />{{ f.name }}</span>
+              <input type="text" class="stage-info-inp" maxlength="120" :value="infoValue(stage, f.key)" @input="setInfo(stage, f.key, $event.target.value)" />
+            </label>
+          </div>
         </div>
       </div>
       <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="addStage">
@@ -106,6 +121,12 @@ function beforeStart(stage) {
             <span class="stage-name-inp">{{ stage.name }}</span>
             <span class="stage-slots-count">{{ $t('pages.organization.manage.eventWizard.s3.slotsCount', { n: stage.config.slots?.length || 0 }) }}</span>
             <input type="date" class="stage-date-inp" v-model="stage.start_at" />
+            <div v-if="form.stage_fields?.length" class="stage-info">
+              <label v-for="f in form.stage_fields" :key="f.key" class="stage-info-field">
+                <span class="stage-info-lbl"><font-awesome-icon :icon="['fas', f.icon || 'circle-info']" />{{ f.name }}</span>
+                <input type="text" class="stage-info-inp" maxlength="120" :value="infoValue(stage, f.key)" @input="setInfo(stage, f.key, $event.target.value)" />
+              </label>
+            </div>
           </div>
         </div>
         <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="showGroupsModal = true">
@@ -133,6 +154,13 @@ function beforeStart(stage) {
 
 <style scoped>
 .stage-row { flex-wrap: wrap; }
+.stage-info { flex-basis: 100%; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; padding-left: 36px; }
+.stage-info-field { display: flex; flex-direction: column; gap: 3px; margin: 0; }
+.stage-info-lbl { display: flex; align-items: center; gap: 5px; font-size: .68rem; font-weight: 700; color: var(--ehub-muted); }
+.stage-info-lbl svg { color: var(--ehub-primary); }
+.stage-info-inp { border: 1px solid var(--ehub-line); border-radius: 7px; padding: 4px 8px; font-size: .8rem; background: var(--ehub-field-bg); color: var(--ehub-ink); }
+.stage-info-inp:focus { outline: none; border-color: var(--ehub-primary); }
+@media (max-width: 560px) { .stage-info { padding-left: 0; } }
 .stage-date-inp.warn { border-color: color-mix(in srgb, var(--ehub-gold), #000 10%); }
 .stage-warn { flex-basis: 100%; font-size: .74rem; color: color-mix(in srgb, var(--ehub-gold), #000 30%); padding-left: 38px; }
 [data-bs-theme="dark"] .stage-warn { color: var(--ehub-gold); }

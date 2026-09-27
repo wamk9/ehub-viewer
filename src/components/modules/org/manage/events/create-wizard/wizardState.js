@@ -160,9 +160,10 @@ export function buildEventPayload(form) {
     location: form.runmode === 'irl' ? (form.location.trim() || null) : null,
     form_schema_id: form.form_schema_id,
     event_data: form.event_data,
-    event_fields: form.event_fields,
-    stage_fields: form.stage_fields,
-    registration_form_template: form.registration_form_template,
+    // Rows left without a name are dropped instead of failing validation.
+    event_fields: form.event_fields.filter(f => f.name?.trim()),
+    stage_fields: form.stage_fields.filter(f => f.name?.trim()),
+    registration_form_template: form.registration_form_template.filter(f => f.label?.trim()),
     entry_type: form.entry_type,
     team_size: form.entry_type === 'team' ? form.team_size : null,
     max_registrations: form.max_registrations ? +form.max_registrations : null,

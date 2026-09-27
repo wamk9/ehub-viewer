@@ -5,6 +5,8 @@ import OrganizationEventRegistration from '@/helpers/communication/OrganizationE
 import OrganizationEventArticle from '@/helpers/communication/OrganizationEventArticle.js';
 import SystemVars from '@/helpers/General/SystemVars';
 import { toast } from '@/helpers/toast.js';
+import EhubRegistrationFields from '@/components/modules/event-registration/EhubRegistrationFields.vue';
+import { initialValues, validateAnswers } from '@/components/modules/event-registration/regForm.js';
 
 const CAT_GRAD = {
   simracing:          ['#0098D8', '#00d4ff'],
@@ -41,6 +43,7 @@ const CAT_ICON = {
 }
 
 export default {
+  components: { EhubRegistrationFields },
   data() {
     return {
       event: null,
@@ -85,6 +88,11 @@ export default {
     },
     startAtIsPreview() {
       return !this.event?.stages?.find(s => s.start_at);
+    },
+    // Organizer-defined extra info (wizard step 4); blank values stay hidden.
+    extraInfo() {
+      return (Array.isArray(this.event?.event_fields) ? this.event.event_fields : [])
+        .filter(f => f?.name && String(f.value ?? '').trim());
     },
     regTemplate() {
       return Array.isArray(this.event?.registration_form_template)
@@ -223,25 +231,24 @@ export default {
       this.participantsLoaded = true;
       if (result.code === 200 && Array.isArray(result.data)) this.participants = result.data;
     },
+    isUrl(v) { return /^https?:\/\/\S+$/i.test(String(v || '').trim()); },
+    stageInfo(stage) {
+      const values = stage?.config?.info || {};
+      return (Array.isArray(this.event?.stage_fields) ? this.event.stage_fields : [])
+        .filter(f => f?.key && String(values[f.key] ?? '').trim())
+        .map(f => ({ ...f, value: values[f.key] }));
+    },
     handleRegister() {
       if (!this.$store.getters.getToken) {
         this.$router.push({ name: 'user-login', query: { redirect: this.$route.fullPath } });
         return;
       }
-      const fd = {};
-      this.regTemplate.forEach(f => { fd[f.name] = f.type === 'switch' || f.type === 'checkbox' ? false : ''; });
-      this.formData = fd;
+      this.formData = initialValues(this.regTemplate);
       this.formErrors = {};
       this.showRegisterModal = true;
     },
     async confirmRegister() {
-      const errors = {};
-      this.regTemplate.forEach(f => {
-        if (f.required) {
-          const val = this.formData[f.name];
-          if (val === '' || val === null || val === undefined) errors[f.name] = true;
-        }
-      });
+      const errors = validateAnswers(this.regTemplate, this.formData);
       this.formErrors = errors;
       if (Object.keys(errors).length) return;
       this.registering = true;
@@ -547,7 +554,17 @@ export default {
           <div v-if="event.description" class="ev-reg-card mb-4">
             <div class="ev-description" v-html="sanitizeHtml(event.description)"></div>
           </div>
-          <div class="ev-empty" v-if="!event.description && !effectiveStartAt && !event.max_registrations">
+          <div v-if="extraInfo.length" class="ev-extra-grid mb-4">
+            <div v-for="f in extraInfo" :key="f.key" class="ev-extra">
+              <font-awesome-icon :icon="['fas', f.icon || 'circle-info']" class="ev-extra__ico" />
+              <div class="ev-extra__txt">
+                <div class="ev-extra__lbl">{{ f.name }}</div>
+                <a v-if="isUrl(f.value)" :href="f.value" target="_blank" rel="noopener noreferrer" class="ev-extra__val">{{ f.value }}</a>
+                <div v-else class="ev-extra__val">{{ f.value }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="ev-empty" v-if="!event.description && !extraInfo.length && !effectiveStartAt && !event.max_registrations">
             <font-awesome-icon :icon="['fas', 'circle-info']" />
             <p class="mb-0 mt-2">—</p>
           </div>
@@ -576,6 +593,12 @@ export default {
                     <div v-if="stage.start_at" class="stage-date">
                       <font-awesome-icon :icon="['fas', 'calendar']" class="me-1" />
                       {{ formatDate(stage.start_at) }}
+                    </div>
+                    <div v-if="stageInfo(stage).length" class="stage-info">
+                      <span v-for="f in stageInfo(stage)" :key="f.key" class="stage-info__chip">
+                        <font-awesome-icon :icon="['fas', f.icon || 'circle-info']" />
+                        <span class="lbl">{{ f.name }}:</span> {{ f.value }}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -806,25 +829,7 @@ export default {
             {{ $t('events.show.registration.modal.fee_warning', { fee: (event.currency?.toUpperCase() || '') + ' ' + Number(event.fee).toFixed(2) }) }}
           </div>
           <template v-if="regTemplate.length">
-            <div v-for="field in regTemplate" :key="field.name" class="reg-field mb-3">
-              <label class="reg-field__label">{{ field.label }}<span v-if="field.required" class="text-danger ms-1">*</span></label>
-              <input v-if="field.type === 'text' || field.type === 'number'"
-                :type="field.type" class="form-control form-control-sm reg-input"
-                :class="{ 'is-invalid': formErrors[field.name] }" v-model="formData[field.name]" />
-              <select v-else-if="field.type === 'select'"
-                class="form-select form-select-sm reg-input"
-                :class="{ 'is-invalid': formErrors[field.name] }" v-model="formData[field.name]">
-                <option value="">—</option>
-                <option v-for="opt in field.values" :key="opt" :value="opt">{{ opt }}</option>
-              </select>
-              <div v-else-if="field.type === 'switch' || field.type === 'checkbox'" class="form-check mt-1">
-                <input class="form-check-input" type="checkbox" :id="`reg-${field.name}`" v-model="formData[field.name]" />
-                <label class="form-check-label small" :for="`reg-${field.name}`">{{ field.label }}</label>
-              </div>
-              <div v-if="formErrors[field.name]" class="invalid-feedback d-block" style="font-size:.75rem">
-                {{ $t('events.show.registration.modal.field_required') }}
-              </div>
-            </div>
+            <EhubRegistrationFields :fields="regTemplate" v-model="formData" :errors="formErrors" />
           </template>
           <p v-else class="mb-0 small">{{ $t('events.show.registration.modal.confirm_text') }}</p>
         </div>
@@ -998,6 +1003,17 @@ html[data-bs-theme="dark"] .pos-badge.p1 { color: var(--ehub-gold, #f59e0b); }
 .modal-card__header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--ehub-line); font-size: 1rem; font-weight: 600; color: var(--ehub-ink); }
 .modal-card__body { padding: 1.2rem 1.4rem; }
 .modal-card__footer { display: flex; justify-content: flex-end; gap: .5rem; padding: .9rem 1.4rem; border-top: 1px solid var(--ehub-line); }
+.ev-extra-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.ev-extra { display: flex; gap: 10px; align-items: flex-start; background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 12px; padding: 12px 14px; min-width: 0; }
+.ev-extra__ico { color: var(--org-accent, var(--ehub-primary)); margin-top: 3px; width: 16px; flex-shrink: 0; }
+.ev-extra__txt { min-width: 0; }
+.ev-extra__lbl { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); }
+.ev-extra__val { font-size: .88rem; font-weight: 600; color: var(--ehub-ink); overflow-wrap: anywhere; }
+a.ev-extra__val { color: var(--org-accent, var(--ehub-primary)); }
+.stage-info { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.stage-info__chip { display: inline-flex; align-items: center; gap: 5px; font-size: .74rem; color: var(--ehub-ink); background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 50rem; padding: 2px 10px; }
+.stage-info__chip svg { color: var(--org-accent, var(--ehub-primary)); font-size: .7rem; }
+.stage-info__chip .lbl { color: var(--ehub-muted); }
 .reg-field__label { display: block; font-size: .8rem; font-weight: 600; color: var(--ehub-ink); margin-bottom: .3rem; }
 .reg-input { background: var(--ehub-field-bg); border-color: var(--ehub-line); color: var(--ehub-ink); border-radius: 7px; }
 .reg-input:focus { background: var(--ehub-field-bg); border-color: var(--org-accent, var(--ehub-primary)); box-shadow: none; color: var(--ehub-ink); }
