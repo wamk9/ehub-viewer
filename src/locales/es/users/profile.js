@@ -87,9 +87,9 @@ export default {
     submit:      'Guardar Redes Sociales',
     form: {
       discord:   { label: 'Discord',     placeholder: 'usuario#0000' },
-      youtube:   { label: 'YouTube',     placeholder: '@canal' },
+      youtube:   { label: 'YouTube',     placeholder: "{'@'}canal" },
       twitch:    { label: 'Twitch',      placeholder: 'usuario' },
-      x_twitter: { label: 'X / Twitter', placeholder: '@usuario' },
+      x_twitter: { label: 'X / Twitter', placeholder: "{'@'}usuario" },
       linkedin:  { label: 'LinkedIn',    placeholder: 'usuario' },
       website:   { label: 'Sitio web',   placeholder: 'https://tusitio.com' },
     },

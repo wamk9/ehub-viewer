@@ -58,7 +58,7 @@ export default {
     search: 'Buscar miembro...',
     invite: 'Invitar',
     invite_email_label: 'Email del usuario',
-    invite_email_ph: 'email@ejemplo.com',
+    invite_email_ph: "email{'@'}ejemplo.com",
     invite_role_label: 'Rol',
     invite_send: 'Enviar invitación',
     cancel: 'Cancelar',

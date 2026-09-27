@@ -87,9 +87,9 @@ export default {
     submit:      'Save Social Links',
     form: {
       discord:   { label: 'Discord',     placeholder: 'user#0000' },
-      youtube:   { label: 'YouTube',     placeholder: '@channel' },
+      youtube:   { label: 'YouTube',     placeholder: "{'@'}channel" },
       twitch:    { label: 'Twitch',      placeholder: 'username' },
-      x_twitter: { label: 'X / Twitter', placeholder: '@username' },
+      x_twitter: { label: 'X / Twitter', placeholder: "{'@'}username" },
       linkedin:  { label: 'LinkedIn',    placeholder: 'username' },
       website:   { label: 'Website',     placeholder: 'https://yoursite.com' },
     },
