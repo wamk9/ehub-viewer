@@ -36,7 +36,7 @@ function goTo(n) {
       </div>
       <div style="min-width:0">
         <div class="sb-org-name">{{ eventName || $t('pages.organization.manage.eventWizard.' + (editMode ? 'editEvent' : 'newEvent')) }}</div>
-        <div class="sb-org-tag">{{ orgName }} · {{ $t('pages.organization.manage.eventWizard.' + (editMode ? 'editEvent' : 'newEvent')) }}</div>
+        <div class="sb-org-tag">{{ orgName }}</div>
       </div>
     </div>
 
