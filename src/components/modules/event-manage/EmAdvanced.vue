@@ -1,25 +1,30 @@
 <script>
+import EhubDialog from '@/components/modals/EhubDialog.vue';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import { toast } from '@/helpers/toast.js';
 import { apiError } from './store.js';
 
 export default {
   name: 'EmAdvanced',
+  components: { EhubDialog },
   inject: ['em'],
   data() {
-    return { confirmName: '', busy: false };
+    return { delOpen: false, confirmName: '', busy: false };
   },
   computed: {
     ev() { return this.em.event; },
+    published() { return this.ev.publication !== 'draft'; },
   },
   methods: {
-    async duplicate() {
+    async togglePublication() {
+      if (this.busy || this.ev.initialized) return;
+      const next = this.published ? 'draft' : 'published';
       this.busy = true;
-      const res = await OrganizationEvent.duplicate(this.em.orgRoute, this.em.eventRoute);
+      const res = await OrganizationEvent.update(this.em.orgRoute, this.em.eventRoute, { publication: next });
       this.busy = false;
-      if (res.code === 201) {
-        toast.success(this.$t('pages.event.manage.toast.dup'));
-        this.$router.push({ name: 'manage-organization-events-create', params: { orgRoute: this.em.orgRoute, eventRoute: res.data.route } });
+      if (res.code === 200) {
+        this.ev.publication = next;
+        toast.success(this.$t('pages.event.manage.toast.' + (next === 'published' ? 'pub' : 'unpub')));
       } else toast.error(apiError(this, res.data));
     },
     async finish() {
@@ -33,12 +38,26 @@ export default {
         toast.success(this.$t('pages.event.manage.toast.ev_finished'));
       } else toast.error(apiError(this, res.data));
     },
+    async duplicate() {
+      this.busy = true;
+      const res = await OrganizationEvent.duplicate(this.em.orgRoute, this.em.eventRoute);
+      this.busy = false;
+      if (res.code === 201) {
+        toast.success(this.$t('pages.event.manage.toast.dup'));
+        this.$router.push({ name: 'manage-organization-events-create', params: { orgRoute: this.em.orgRoute, eventRoute: res.data.route } });
+      } else toast.error(apiError(this, res.data));
+    },
+    openDelete() {
+      this.confirmName = '';
+      this.delOpen = true;
+    },
     async remove() {
       if (this.confirmName.trim() !== this.ev.name) return;
       this.busy = true;
       const res = await OrganizationEvent.destroy(this.em.orgRoute, this.em.eventRoute);
       this.busy = false;
       if (res.code === 200) {
+        this.delOpen = false;
         toast.success(this.$t('pages.event.manage.toast.ev_deleted'));
         this.$router.push(`/org/${this.em.orgRoute}/manage`);
       } else if (res.code === 401) {
@@ -56,6 +75,21 @@ export default {
         <h1>{{ $t('pages.event.manage.adv.title') }}</h1>
         <p>{{ $t('pages.event.manage.adv.sub') }}</p>
       </div>
+    </div>
+
+    <div class="set-card">
+      <h3>{{ $t('pages.event.manage.adv.pub') }}</h3>
+      <p class="set-desc">{{ $t('pages.event.manage.adv.pub_hint') }}</p>
+      <label class="pub-sw" :class="{ locked: ev.initialized }">
+        <div class="form-check form-switch m-0">
+          <input class="form-check-input" type="checkbox" :checked="published" :disabled="busy || ev.initialized" @change="togglePublication" />
+        </div>
+        <div>
+          <b>{{ $t('pages.event.manage.ov.' + (published ? 'published' : 'draft')) }}</b>
+          <span>{{ $t('pages.event.manage.ov.' + (published ? 'pub_hint' : 'draft_hint')) }}</span>
+        </div>
+      </label>
+      <p v-if="ev.initialized" class="hint mt-2 mb-0"><font-awesome-icon :icon="['fas', 'circle-info']" />{{ $t('pages.event.manage.adv.pub_locked') }}</p>
     </div>
 
     <div class="set-card">
@@ -81,15 +115,31 @@ export default {
     <div class="set-card danger">
       <h3>{{ $t('pages.event.manage.adv.del') }}</h3>
       <p class="set-desc">{{ $t('pages.event.manage.adv.del_hint') }}</p>
-      <div class="danger-box">
-        <label class="form-label mb-1" style="font-size:.84rem">{{ $t('pages.event.manage.adv.type_name', { n: ev.name }) }}</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input v-model="confirmName" class="form-control form-control-sm" style="flex:1;min-width:160px" />
-          <button class="btn btn-sm btn-danger round px-3" :disabled="busy || confirmName.trim() !== ev.name" @click="remove">
-            <font-awesome-icon :icon="['fas', 'trash']" class="me-2" />{{ $t('pages.event.manage.adv.del_btn') }}
-          </button>
-        </div>
-      </div>
+      <button class="btn btn-outline-danger round px-3" :disabled="busy" @click="openDelete">
+        <font-awesome-icon :icon="['fas', 'trash']" class="me-2" />{{ $t('pages.event.manage.adv.del') }}
+      </button>
     </div>
+
+    <EhubDialog v-model="delOpen" :title="$t('pages.event.manage.adv.del')" size="sm">
+      <p class="del-warn">
+        <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-2" />{{ $t('pages.event.manage.adv.del_hint') }}
+      </p>
+      <label class="form-label mb-1" style="font-size:.84rem">{{ $t('pages.event.manage.adv.type_name', { n: ev.name }) }}</label>
+      <input v-model="confirmName" class="form-control" autocomplete="off" @keyup.enter="remove" />
+      <template #footer>
+        <button class="btn btn-outline-secondary round px-3" @click="delOpen = false">{{ $t('pages.event.manage.c.cancel') }}</button>
+        <button class="btn btn-danger round px-3" :disabled="busy || confirmName.trim() !== ev.name" @click="remove">
+          <font-awesome-icon :icon="['fas', 'trash']" class="me-2" />{{ $t('pages.event.manage.adv.del_btn') }}
+        </button>
+      </template>
+    </EhubDialog>
   </section>
 </template>
+
+<style scoped>
+.pub-sw { display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; border: 1px solid var(--ehub-line); border-radius: 10px; background: var(--ehub-field-bg); cursor: pointer; margin: 0; }
+.pub-sw.locked { cursor: not-allowed; opacity: .8; }
+.pub-sw b { font-size: .82rem; color: var(--ehub-ink); display: block; line-height: 1.2; }
+.pub-sw span { font-size: .7rem; color: var(--ehub-muted); }
+.del-warn { font-size: .85rem; color: #e23b3b; background: color-mix(in srgb, #e23b3b 7%, transparent); border: 1px solid color-mix(in srgb, #e23b3b 25%, var(--ehub-line)); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; text-wrap: pretty; }
+</style>

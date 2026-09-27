@@ -52,6 +52,8 @@
 /* ── Content card ── */
 .ehub-mgmt .cc { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); overflow: hidden; }
 .ehub-mgmt .cc + .cc { margin-top: 16px; }
+/* Cards placed side by side in a grid stay aligned. */
+.ehub-mgmt .dash-grid > .cc, .ehub-mgmt .dash-grid > * > .cc:first-child { margin-top: 0; }
 .ehub-mgmt .cc-hd { display: flex; align-items: center; gap: 10px; padding: 13px 17px; border-bottom: 1px solid var(--ehub-line); flex-wrap: wrap; }
 .ehub-mgmt .cc-hd h3 { font-size: .9rem; font-weight: 700; color: var(--ehub-ink); margin: 0; flex: 1; display: flex; align-items: center; gap: 8px; }
 .ehub-mgmt .cc-bd { padding: 17px; }

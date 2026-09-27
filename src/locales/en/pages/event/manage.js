@@ -104,6 +104,9 @@ export default {
     split: 'Distribution', place: '{n} place', split_sum: 'Total: {n}%', add_place: 'Add place', save_split: 'Save distribution',
   },
   adv: {
+    pub: 'Visibility',
+    pub_hint: 'Controls whether the event is visible to the public on eHub.',
+    pub_locked: 'Visibility cannot change after the event has started.',
     finish: 'Finish event',
     finish_hint: 'Freezes the final standings. New stages cannot be started and results cannot change.',
     finish_btn: 'Finish event',

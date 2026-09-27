@@ -104,6 +104,9 @@ export default {
     split: 'Distribución', place: '{n}º lugar', split_sum: 'Suma: {n}%', add_place: 'Agregar puesto', save_split: 'Guardar distribución',
   },
   adv: {
+    pub: 'Visibilidad',
+    pub_hint: 'Controla si el evento es visible al público en eHub.',
+    pub_locked: 'La visibilidad no puede cambiar después de que el evento comenzó.',
     finish: 'Finalizar evento',
     finish_hint: 'Congela la clasificación final. No se podrán iniciar nuevas etapas ni cambiar resultados.',
     finish_btn: 'Finalizar evento',

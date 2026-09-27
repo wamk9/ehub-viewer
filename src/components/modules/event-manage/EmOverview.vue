@@ -1,8 +1,6 @@
 <script>
 import EhubStatCard from '@/components/EhubStatCard.vue';
-import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
-import { toast } from '@/helpers/toast.js';
-import { stageState, roundState, userName, apiError } from './store.js';
+import { stageState, roundState, userName } from './store.js';
 
 // Wizard step that holds the rules (Regulamento).
 const RULES_STEP = 7;
@@ -11,9 +9,6 @@ export default {
   name: 'EmOverview',
   components: { EhubStatCard },
   inject: ['em'],
-  data() {
-    return { busy: false };
-  },
   computed: {
     ev() { return this.em.event; },
     confirmedRegs() { return this.em.regs.filter((r) => r.payment_status !== 'pending'); },
@@ -91,17 +86,6 @@ export default {
       else if (c.href) this.$router.push(c.href);
       else if (c.step) this.$router.push({ name: 'manage-organization-events-create', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute }, query: { step: c.step, return: 'manage' } });
     },
-    async togglePublication() {
-      if (this.busy) return;
-      const next = this.ev.publication === 'draft' ? 'published' : 'draft';
-      this.busy = true;
-      const res = await OrganizationEvent.update(this.em.orgRoute, this.em.eventRoute, { publication: next });
-      this.busy = false;
-      if (res.code === 200) {
-        this.ev.publication = next;
-        toast.success(this.$t('pages.event.manage.toast.' + (next === 'published' ? 'pub' : 'unpub')));
-      } else toast.error(apiError(this, res.data));
-    },
   },
 };
 </script>
@@ -113,16 +97,6 @@ export default {
         <h1>{{ $t('pages.event.manage.ov.title') }}</h1>
         <p>{{ $t('pages.event.manage.ov.sub') }}</p>
       </div>
-      <div class="spacer"></div>
-      <label v-if="!ev.finished" class="pub-sw">
-        <div class="form-check form-switch m-0">
-          <input class="form-check-input" type="checkbox" :checked="ev.publication !== 'draft'" :disabled="busy || ev.initialized" @change="togglePublication" />
-        </div>
-        <div>
-          <b>{{ $t('pages.event.manage.ov.' + (ev.publication === 'draft' ? 'draft' : 'published')) }}</b>
-          <span>{{ $t('pages.event.manage.ov.' + (ev.publication === 'draft' ? 'draft_hint' : 'pub_hint')) }}</span>
-        </div>
-      </label>
     </div>
 
     <div class="stat-grid">
@@ -175,9 +149,6 @@ export default {
 </template>
 
 <style scoped>
-.pub-sw { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--ehub-line); border-radius: 10px; background: var(--ehub-field-bg); cursor: pointer; margin: 0; }
-.pub-sw b { font-size: .82rem; color: var(--ehub-ink); display: block; line-height: 1.2; }
-.pub-sw span { font-size: .7rem; color: var(--ehub-muted); }
 .chk { display: flex; align-items: center; gap: 11px; padding: 11px 17px; border-bottom: 1px solid var(--ehub-line); cursor: pointer; transition: background .12s; }
 .chk:last-child { border-bottom: 0; }
 .chk:hover { background: color-mix(in srgb, var(--ehub-field-bg) 55%, transparent); }
