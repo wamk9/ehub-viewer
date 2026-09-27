@@ -14,6 +14,9 @@ export default {
   },
   computed: {
     ev() { return this.em.event; },
+    canRun() { return this.em.can('event.manage'); },
+    canConfirm() { return this.em.can('regs.confirm_payment'); },
+    canFormData() { return this.em.can('regs.form_data'); },
     regs() { return this.em.regs; },
     counted() { return this.regs.filter((r) => r.payment_status !== 'pending').length; },
     counts() {
@@ -85,7 +88,7 @@ export default {
     },
     exportCsv() {
       const h = (k) => this.$t('pages.event.manage.reg.csv.' + k);
-      const fields = Object.keys(this.formLabels);
+      const fields = this.canFormData ? Object.keys(this.formLabels) : [];
       const head = [h('name'), h('username'), h('status'), h('date'), h('check'), ...fields.map((f) => this.formLabels[f])];
       const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
       const lines = this.rows.map((r) => [
@@ -186,14 +189,14 @@ export default {
               <td class="td-muted">{{ fmtDate(r.registered_at) }}</td>
               <td>
                 <div class="form-check form-switch m-0">
-                  <input class="form-check-input" type="checkbox" :checked="r.checked_in" :disabled="busyId === r.id" @change="toggleCheck(r, $event)" />
+                  <input class="form-check-input" type="checkbox" :checked="r.checked_in" :disabled="!canRun || busyId === r.id" @change="toggleCheck(r, $event)" />
                 </div>
               </td>
               <td>
                 <div class="act-row">
                   <button class="act-btn" :title="$t('pages.event.manage.reg.view')" @click="sheet = r"><font-awesome-icon :icon="['fas', 'eye']" /></button>
-                  <button v-if="r.payment_status === 'pending'" class="act-btn ok" :title="$t('pages.event.manage.reg.confirm_manual')" @click="confirmPay(r)"><font-awesome-icon :icon="['fas', 'check']" /></button>
-                  <button class="act-btn del" :title="$t('pages.event.manage.reg.remove')" @click="remove(r)"><font-awesome-icon :icon="['fas', 'user-minus']" /></button>
+                  <button v-if="canConfirm && r.payment_status === 'pending'" class="act-btn ok" :title="$t('pages.event.manage.reg.confirm_manual')" @click="confirmPay(r)"><font-awesome-icon :icon="['fas', 'check']" /></button>
+                  <button v-if="canRun" class="act-btn del" :title="$t('pages.event.manage.reg.remove')" @click="remove(r)"><font-awesome-icon :icon="['fas', 'user-minus']" /></button>
                 </div>
               </td>
             </tr>
@@ -209,13 +212,15 @@ export default {
           <InitialsAvatar :name="userName(sheet)" :image="sheet.user?.avatar || ''" :size="44" />
           <div style="flex:1"><b style="font-size:1rem;display:block">{{ userName(sheet) }}</b><span class="text-muted small">@{{ sheet.user?.username }}</span></div>
         </div>
-        <div class="kv-title">{{ $t('pages.event.manage.reg.form_data') }}</div>
-        <dl v-if="sheet.form_data && Object.keys(sheet.form_data).length" class="kv">
-          <template v-for="(v, k) in sheet.form_data" :key="k">
-            <dt>{{ formLabels[k] || k }}</dt><dd>{{ formValue(v) }}</dd>
-          </template>
-        </dl>
-        <p v-else class="text-muted small m-0">{{ $t('pages.event.manage.reg.no_form_data') }}</p>
+        <template v-if="canFormData">
+          <div class="kv-title">{{ $t('pages.event.manage.reg.form_data') }}</div>
+          <dl v-if="sheet.form_data && Object.keys(sheet.form_data).length" class="kv">
+            <template v-for="(v, k) in sheet.form_data" :key="k">
+              <dt>{{ formLabels[k] || k }}</dt><dd>{{ formValue(v) }}</dd>
+            </template>
+          </dl>
+          <p v-else class="text-muted small m-0">{{ $t('pages.event.manage.reg.no_form_data') }}</p>
+        </template>
         <div class="kv-title">{{ $t('pages.event.manage.reg.payment') }}</div>
         <dl class="kv">
           <dt>{{ $t('pages.event.manage.reg.col_pay') }}</dt><dd>{{ $t('pages.event.manage.reg.pay.' + sheet.payment_status) }}</dd>
@@ -225,7 +230,7 @@ export default {
         </dl>
       </template>
       <template #footer>
-        <button v-if="sheet?.payment_status === 'pending'" class="btn btn-primary round px-3" @click="confirmPay(sheet)">{{ $t('pages.event.manage.reg.confirm_manual') }}</button>
+        <button v-if="canConfirm && sheet?.payment_status === 'pending'" class="btn btn-primary round px-3" @click="confirmPay(sheet)">{{ $t('pages.event.manage.reg.confirm_manual') }}</button>
         <button class="btn btn-outline-secondary round px-3" @click="sheet = null">{{ $t('pages.event.manage.c.close') }}</button>
       </template>
     </EhubDialog>

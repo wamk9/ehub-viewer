@@ -27,6 +27,8 @@ export default {
   },
   computed: {
     ev() { return this.em.event; },
+    /** Marketing sees stages read-only. */
+    canRun() { return this.em.can('event.manage'); },
     stages() { return [...(this.ev.stages || [])].sort((a, b) => a.stage_order - b.stage_order); },
   },
   methods: {
@@ -183,7 +185,7 @@ export default {
         <p>{{ $t('pages.event.manage.stg.sub') }}</p>
       </div>
       <div class="spacer"></div>
-      <button v-if="!ev.finished" class="btn btn-primary round px-3" @click="openNew">
+      <button v-if="canRun && !ev.finished" class="btn btn-primary round px-3" @click="openNew">
         <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />{{ $t('pages.event.manage.stg.new') }}
       </button>
     </div>
@@ -197,7 +199,7 @@ export default {
 
     <div v-for="(s, i) in stages" :key="s.id" class="stg" :class="stageState(s)">
       <div class="stg-hd">
-        <div class="stg-move">
+        <div v-if="canRun" class="stg-move">
           <button class="mv" :disabled="!canMove(i, -1)" :title="$t('pages.event.manage.stg.move_up')" @click="move(i, -1)"><font-awesome-icon :icon="['fas', 'chevron-up']" /></button>
           <button class="mv" :disabled="!canMove(i, 1)" :title="$t('pages.event.manage.stg.move_down')" @click="move(i, 1)"><font-awesome-icon :icon="['fas', 'chevron-down']" /></button>
         </div>
@@ -217,19 +219,19 @@ export default {
           </div>
         </div>
         <div class="stg-acts">
-          <button v-if="canStart(i)" class="btn btn-sm btn-primary round px-3" :disabled="busy === s.id" @click="control(s, 'start')">
+          <button v-if="canRun && canStart(i)" class="btn btn-sm btn-primary round px-3" :disabled="busy === s.id" @click="control(s, 'start')">
             <font-awesome-icon :icon="['fas', 'play']" class="me-1" />{{ $t('pages.event.manage.stg.start') }}
           </button>
-          <template v-if="stageState(s) !== 'pending'">
+          <template v-if="stageState(s) !== 'pending' && em.canPanel('results')">
             <button class="btn btn-sm btn-outline-secondary round px-3" @click="goResults(s)">
               <font-awesome-icon :icon="['fas', 'ranking-star']" class="me-1" />{{ s.results_published ? $t('pages.event.manage.stg.view_results') : $t('pages.event.manage.stg.results') }}
             </button>
           </template>
-          <button v-if="stageState(s) === 'live'" class="btn btn-sm btn-primary round px-3" :disabled="busy === s.id" @click="control(s, 'finish')">
+          <button v-if="canRun && stageState(s) === 'live'" class="btn btn-sm btn-primary round px-3" :disabled="busy === s.id" @click="control(s, 'finish')">
             <font-awesome-icon :icon="['fas', 'flag-checkered']" class="me-1" />{{ $t('pages.event.manage.stg.finish') }}
           </button>
-          <button v-if="!ev.finished" class="act-btn" :title="$t('pages.event.manage.stg.edit')" @click="openEdit(s)"><font-awesome-icon :icon="['fas', 'pen']" /></button>
-          <button v-if="!s.initialized" class="act-btn del" @click="remove(s)"><font-awesome-icon :icon="['fas', 'trash']" /></button>
+          <button v-if="canRun && !ev.finished" class="act-btn" :title="$t('pages.event.manage.stg.edit')" @click="openEdit(s)"><font-awesome-icon :icon="['fas', 'pen']" /></button>
+          <button v-if="canRun && !s.initialized" class="act-btn del" @click="remove(s)"><font-awesome-icon :icon="['fas', 'trash']" /></button>
         </div>
       </div>
 
@@ -243,14 +245,14 @@ export default {
               <template v-else>{{ $t('pages.event.manage.stg.state.' + roundState(r)) }}</template>
             </div>
           </div>
-          <button v-if="canStartRound(s, j)" class="btn btn-xs btn-outline-secondary" :disabled="busy === r.id" @click="controlRound(s, r, 'start')">{{ $t('pages.event.manage.stg.r_start') }}</button>
-          <button v-else-if="roundState(r) === 'live'" class="btn btn-xs btn-outline-secondary" :disabled="busy === r.id" @click="controlRound(s, r, 'finish')">{{ $t('pages.event.manage.stg.r_finish') }}</button>
-          <button v-if="!r.initialized && !s.finished" class="act-btn del rnd-del" :title="$t('pages.event.manage.stg.r_remove')" @click="removeRound(s, r)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
+          <button v-if="canRun && canStartRound(s, j)" class="btn btn-xs btn-outline-secondary" :disabled="busy === r.id" @click="controlRound(s, r, 'start')">{{ $t('pages.event.manage.stg.r_start') }}</button>
+          <button v-else-if="canRun && roundState(r) === 'live'" class="btn btn-xs btn-outline-secondary" :disabled="busy === r.id" @click="controlRound(s, r, 'finish')">{{ $t('pages.event.manage.stg.r_finish') }}</button>
+          <button v-if="canRun && !r.initialized && !s.finished" class="act-btn del rnd-del" :title="$t('pages.event.manage.stg.r_remove')" @click="removeRound(s, r)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
         </div>
       </div>
       <div v-else class="rounds rounds-empty">{{ $t('pages.event.manage.stg.no_sessions') }}</div>
 
-      <div v-if="!s.finished && !ev.finished" class="rnd-add">
+      <div v-if="canRun && !s.finished && !ev.finished" class="rnd-add">
         <input v-model="newRound[s.id]" class="form-control form-control-sm" :placeholder="$t('pages.event.manage.stg.session_name')" maxlength="100" @keyup.enter="addRound(s)" />
         <button class="btn btn-sm btn-outline-secondary round px-3" :disabled="!(newRound[s.id] || '').trim()" @click="addRound(s)">
           <font-awesome-icon :icon="['fas', 'plus']" class="me-1" />{{ $t('pages.event.manage.stg.add_session') }}

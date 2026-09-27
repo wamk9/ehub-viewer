@@ -85,7 +85,7 @@ export default {
       </button>
     </div>
 
-    <div class="set-card danger">
+    <div v-if="em.can('event.delete')" class="set-card danger">
       <h3>{{ $t('pages.event.manage.adv.del') }}</h3>
       <p class="set-desc">{{ $t('pages.event.manage.adv.del_hint') }}</p>
       <button class="btn btn-outline-danger round px-3" :disabled="busy" @click="openDelete">

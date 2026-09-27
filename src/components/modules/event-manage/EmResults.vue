@@ -13,6 +13,8 @@ export default {
   },
   computed: {
     ev() { return this.em.event; },
+    /** Marketing reads results; only managers edit. Finished events are frozen for everyone. */
+    readonly() { return !this.em.can('event.manage') || this.ev.finished; },
     stages() { return [...(this.ev.stages || [])].sort((a, b) => a.stage_order - b.stage_order); },
     stage() { return this.stages.find((s) => s.id === this.stageId) || null; },
     eligible() { return this.em.regs.filter((r) => r.payment_status !== 'pending'); },
@@ -133,7 +135,7 @@ export default {
         <p>{{ $t('pages.event.manage.res.sub') }}</p>
       </div>
       <div class="spacer"></div>
-      <div v-if="stage?.initialized && !ev.finished && rows.length" class="hd-acts">
+      <div v-if="stage?.initialized && !readonly && rows.length" class="hd-acts">
         <template v-if="stage.results_published">
           <button class="btn btn-outline-secondary round px-3" :disabled="saving" @click="save(false)">
             <font-awesome-icon :icon="['fas', 'eye-slash']" class="me-2" />{{ $t('pages.event.manage.res.unpublish') }}
@@ -175,7 +177,7 @@ export default {
             <div v-else-if="!rows.length" class="cc-empty">
               <font-awesome-icon :icon="['fas', 'ranking-star']" class="ico" />
               <p class="mb-3">{{ $t('pages.event.manage.res.empty') }}</p>
-              <button v-if="!ev.finished" class="btn btn-primary round px-3" :disabled="!eligible.length" @click="fill">
+              <button v-if="!readonly" class="btn btn-primary round px-3" :disabled="!eligible.length" @click="fill">
                 <font-awesome-icon :icon="['fas', 'list-ol']" class="me-2" />{{ $t('pages.event.manage.res.fill') }}
               </button>
             </div>
@@ -195,24 +197,24 @@ export default {
                 </thead>
                 <tbody>
                   <tr v-for="row in sortedRows" :key="row.registration_id">
-                    <td class="pos-cell"><input :value="row.position" type="number" min="1" class="form-control res-in sm" :disabled="ev.finished" @change="row.position = Number($event.target.value); onPos(row)" /></td>
+                    <td class="pos-cell"><input :value="row.position" type="number" min="1" class="form-control res-in sm" :disabled="readonly" @change="row.position = Number($event.target.value); onPos(row)" /></td>
                     <td>
                       <div class="who">
                         <InitialsAvatar :name="nameOf(row.registration_id)" :image="avatarOf(row.registration_id)" :size="26" />
                         <b>{{ nameOf(row.registration_id) }}</b>
                       </div>
                     </td>
-                    <td><input v-model.number="row.score" type="number" step="any" class="form-control res-in sm" :disabled="ev.finished" @input="dirty = true" /></td>
-                    <td><input v-model="row.best" class="form-control res-in" placeholder="0:00.000" maxlength="20" :disabled="ev.finished" @input="dirty = true" /></td>
-                    <td><input v-model.number="row.laps" type="number" min="0" class="form-control res-in sm" :disabled="ev.finished" @input="dirty = true" /></td>
-                    <td><input v-model="row.pen" class="form-control res-in sm" placeholder="—" maxlength="20" :disabled="ev.finished" @input="dirty = true" /></td>
-                    <td><div class="form-check form-switch m-0"><input v-model="row.qualified" class="form-check-input" type="checkbox" :disabled="ev.finished" @change="dirty = true" /></div></td>
-                    <td><button v-if="!ev.finished" class="act-btn del" :title="$t('pages.event.manage.res.remove_row')" @click="removeRow(row)"><font-awesome-icon :icon="['fas', 'xmark']" /></button></td>
+                    <td><input v-model.number="row.score" type="number" step="any" class="form-control res-in sm" :disabled="readonly" @input="dirty = true" /></td>
+                    <td><input v-model="row.best" class="form-control res-in" placeholder="0:00.000" maxlength="20" :disabled="readonly" @input="dirty = true" /></td>
+                    <td><input v-model.number="row.laps" type="number" min="0" class="form-control res-in sm" :disabled="readonly" @input="dirty = true" /></td>
+                    <td><input v-model="row.pen" class="form-control res-in sm" placeholder="—" maxlength="20" :disabled="readonly" @input="dirty = true" /></td>
+                    <td><div class="form-check form-switch m-0"><input v-model="row.qualified" class="form-check-input" type="checkbox" :disabled="readonly" @change="dirty = true" /></div></td>
+                    <td><button v-if="!readonly" class="act-btn del" :title="$t('pages.event.manage.res.remove_row')" @click="removeRow(row)"><font-awesome-icon :icon="['fas', 'xmark']" /></button></td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div v-if="stage?.initialized && rows.length && !ev.finished && addable.length" class="add-row">
+            <div v-if="stage?.initialized && rows.length && !readonly && addable.length" class="add-row">
               <select v-model="addId" class="form-select form-select-sm" style="max-width:260px">
                 <option value="" disabled>{{ $t('pages.event.manage.res.add_row') }}</option>
                 <option v-for="r in addable" :key="r.id" :value="r.id">{{ userName(r) }}</option>
@@ -222,7 +224,7 @@ export default {
               </button>
             </div>
           </div>
-          <div v-if="stage?.initialized && rows.length" class="hint" style="margin-top:10px">
+          <div v-if="stage?.initialized && rows.length && !readonly" class="hint" style="margin-top:10px">
             <div class="form-check form-switch m-0">
               <input id="resAuto" v-model="auto" class="form-check-input" type="checkbox" />
               <label class="form-check-label" for="resAuto">{{ $t('pages.event.manage.res.auto_pts') }}</label>

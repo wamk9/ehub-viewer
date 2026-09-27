@@ -63,6 +63,8 @@ export function createEventManageStore(orgRoute, eventRoute) {
     gateways: null, // null = unknown (no permission / not loaded)
     loading: true,
     notFound: false,
+    // From the API (EventPermissions): which panels to show and what the user can do.
+    perms: { role: null, panels: [], abilities: [] },
     // Single confirm dialog rendered by the view; panels call s.ask().
     confirm: { open: false, message: '', label: '', danger: false, resolve: null },
   });
@@ -85,7 +87,11 @@ export function createEventManageStore(orgRoute, eventRoute) {
       return;
     }
     s.event = res.data;
+    s.perms = res.data.permissions || { role: null, panels: [], abilities: [] };
   };
+
+  s.canPanel = (panel) => s.perms.panels.includes(panel);
+  s.can = (ability) => s.perms.abilities.includes(ability);
 
   s.loadRegs = async () => {
     const res = await OrganizationEventRegistration.manage(s.orgRoute, s.eventRoute);
@@ -111,7 +117,12 @@ export function createEventManageStore(orgRoute, eventRoute) {
     s.loading = true;
     await s.loadEvent();
     if (!s.notFound) {
-      await Promise.all([s.loadRegs(), s.loadArticles(), s.loadNotices(), s.loadGateways()]);
+      await Promise.all([
+        s.can('regs.view') ? s.loadRegs() : null,
+        s.canPanel('news') || s.can('event.manage') ? s.loadArticles() : null,
+        s.can('news.write') ? s.loadNotices() : null,
+        s.can('gateways.view') ? s.loadGateways() : null,
+      ]);
     }
     s.loading = false;
   };

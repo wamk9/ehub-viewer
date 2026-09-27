@@ -11,7 +11,11 @@ export default {
   inject: ['em'],
   computed: {
     ev() { return this.em.event; },
+    full() { return this.em.can('event.manage'); },
+    seesRegs() { return this.em.can('regs.view'); },
     confirmedRegs() { return this.em.regs.filter((r) => r.payment_status !== 'pending'); },
+    /** Without registrations access (marketing) fall back to the public count. */
+    regsCount() { return this.seesRegs ? this.confirmedRegs.length : (this.ev.registrations_count || 0); },
     pending() { return this.em.regs.filter((r) => r.payment_status === 'pending').length; },
     stages() { return this.ev.stages || []; },
     revenue() {
@@ -79,6 +83,7 @@ export default {
       return rtf.format(-Math.round(diff / 86400), 'day');
     },
     go(panel) {
+      if (!this.em.canPanel(panel)) return;
       this.$router.push({ name: 'manage-event', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute, panel } });
     },
     openItem(c) {
@@ -101,11 +106,11 @@ export default {
 
     <div class="stat-grid">
       <EhubStatCard :icon="['fas', 'id-card']" icon-class="primary"
-        :value="ev.max_registrations ? `${confirmedRegs.length}/${ev.max_registrations}` : confirmedRegs.length"
+        :value="ev.max_registrations ? `${regsCount}/${ev.max_registrations}` : regsCount"
         :label="$t('pages.event.manage.ov.k_regs')" @click="go('regs')" />
-      <EhubStatCard :icon="['fas', 'clock']" icon-class="gold" :value="pending"
+      <EhubStatCard v-if="seesRegs" :icon="['fas', 'clock']" icon-class="gold" :value="pending"
         :label="$t('pages.event.manage.ov.k_pending')" @click="go('regs')" />
-      <EhubStatCard :icon="['fas', 'wallet']" icon-class="green" :value="revenue"
+      <EhubStatCard v-if="seesRegs" :icon="['fas', 'wallet']" icon-class="green" :value="revenue"
         :label="$t('pages.event.manage.ov.k_revenue')" @click="go('finance')" />
       <EhubStatCard :icon="['fas', 'stopwatch']" icon-bg="color-mix(in srgb,#e23b3b 14%,transparent)" icon-color="#e23b3b"
         :value="next ? (next.round ? next.round.name : next.stage.name) : '—'"
@@ -115,7 +120,7 @@ export default {
         @click="go('stages')" />
     </div>
 
-    <div class="dash-grid">
+    <div v-if="full" class="dash-grid">
       <div class="cc">
         <div class="cc-hd">
           <h3><font-awesome-icon :icon="['fas', 'list-check']" style="color:var(--ehub-primary)" />{{ $t('pages.event.manage.ov.todo') }}</h3>

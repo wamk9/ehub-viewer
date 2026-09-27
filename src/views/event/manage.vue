@@ -32,15 +32,20 @@ export default {
   data() {
     return {
       em: createEventManageStore(this.$route.params.orgRoute, this.$route.params.eventRoute),
-      panels: PANELS,
       mobileMenuOpen: false,
       baseUrl: SystemVars.baseUrl,
     };
   },
   computed: {
+    /** Panels this user can open (the API decides; see EventPermissions). */
+    visiblePanels() {
+      return PANELS.filter((x) => this.em.canPanel(x.key));
+    },
     panel() {
       const p = this.$route.params.panel;
-      return PANELS.some((x) => x.key === p) ? p : 'overview';
+      const allowed = this.visiblePanels;
+      if (allowed.some((x) => x.key === p)) return p;
+      return allowed[0]?.key || 'overview';
     },
     current() {
       return PANELS.find((x) => x.key === this.panel);
@@ -110,14 +115,14 @@ export default {
       </button>
 
       <nav class="sb-nav" :class="{ 'mob-open': mobileMenuOpen }">
-        <button v-for="p in panels" :key="p.key" class="nav-item" :class="{ active: panel === p.key }" @click="go(p.key)">
+        <button v-for="p in visiblePanels" :key="p.key" class="nav-item" :class="{ active: panel === p.key }" @click="go(p.key)">
           <font-awesome-icon :icon="['fas', p.icon]" />
           <span>{{ $t('pages.event.manage.nav.' + p.key) }}</span>
           <span v-if="p.key === 'regs' && pendingCount" class="nav-badge warn">{{ pendingCount }}</span>
           <span v-if="p.key === 'stages' && hasLiveStage" class="nav-live"></span>
         </button>
         <div class="nav-div"></div>
-        <router-link v-if="event && !event.initialized"
+        <router-link v-if="event && !event.initialized && em.can('event.manage')"
           :to="{ name: 'manage-organization-events-create', params: { orgRoute: em.orgRoute, eventRoute: em.eventRoute }, query: { return: 'manage' } }"
           class="nav-item">
           <font-awesome-icon :icon="['fas', 'pen']" />
