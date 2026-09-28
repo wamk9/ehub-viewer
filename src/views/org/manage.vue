@@ -73,6 +73,7 @@ export default {
     const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', roles: 'roles', activity: 'activity', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
     return {
       activePanel: panelMap[forced] ?? 'overview',
+      F: 'pages.organization.manage.financeiro.',
       org: null,
       loading: true,
       baseUrl: SystemVars.baseUrl,
@@ -621,6 +622,30 @@ export default {
       if (result.code === 200) this.finSelectedInvoice = result.data;
     },
 
+    // "2026-09" → "setembro de 2026"
+    finCycleLabel(cycle) {
+      if (!cycle) return '—';
+      const [y, m] = cycle.split('-').map(Number);
+      return new Intl.DateTimeFormat(this.$i18n.locale, { month: 'long', year: 'numeric' }).format(new Date(y, m - 1, 1));
+    },
+    finDate(value, withTime = false) {
+      if (!value) return '—';
+      const d = /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(value + 'T12:00:00') : new Date(value);
+      return new Intl.DateTimeFormat(this.$i18n.locale, withTime
+        ? { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }
+        : { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d);
+    },
+    finStatusClass(status) {
+      return { paid: 'ok', pending: 'warn', failed: 'live', empty: 'mute', waived: 'mute' }[status] || 'warn';
+    },
+    // When it was paid, when it failed, or when it is due.
+    finInvoiceSub(inv) {
+      const F = 'pages.organization.manage.financeiro.';
+      if (inv.status === 'paid') return this.$t(F + 'paid_on', { date: this.finDate(inv.paid_at, true) });
+      if (inv.status === 'failed') return this.$t(F + 'failed_on', { date: this.finDate(inv.failed_at, true) });
+      if (inv.status === 'empty' || inv.status === 'waived') return this.$t(F + 'no_charge');
+      return this.$t(F + 'due_on', { date: this.finDate(inv.due_date) });
+    },
     finFormatAmount(val) {
       return parseFloat(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
     },
@@ -1049,48 +1074,53 @@ export default {
           </div>
           <div v-if="finBillingLoading" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></div>
           <template v-else>
+            <!-- Current month: usage still accumulating, billed when the month closes -->
             <div class="vol-banner" :style="{ background: orgGrad }">
               <div class="vol-body">
-                <div class="vol-period">{{ $t('pages.organization.manage.financeiro.vol_period') }}: {{ finBilling?.current_cycle || '—' }}</div>
-                <div class="vol-title-text">{{ $t('pages.organization.manage.financeiro.vol_desc') }}</div>
+                <div class="vol-period">{{ $t(F + 'vol_period') }} · {{ finCycleLabel(finBilling?.current_cycle) }}</div>
+                <div class="vol-title-text">{{ $t(F + 'vol_open') }}</div>
                 <div class="vol-metric-row">
                   <div>
-                    <div class="vol-metric-val">{{ activeEvents }}</div>
-                    <div class="vol-metric-lbl">{{ $t('pages.organization.manage.financeiro.vol_events') }}</div>
-                  </div>
-                  <div>
-                    <div class="vol-metric-val">{{ finBilling?.pending_items ?? '—' }}</div>
-                    <div class="vol-metric-lbl">{{ $t('pages.organization.manage.financeiro.vol_regs') }}</div>
-                  </div>
-                  <div>
-                    <div class="vol-metric-val">{{ members.length || '—' }}</div>
-                    <div class="vol-metric-lbl">{{ $t('pages.organization.manage.financeiro.vol_members') }}</div>
+                    <div class="vol-metric-val">{{ finBilling?.pending_items ?? 0 }}</div>
+                    <div class="vol-metric-lbl">{{ $t(F + 'vol_regs') }}</div>
                   </div>
                 </div>
               </div>
               <div class="vol-aside">
-                <div class="vol-total-lbl">{{ $t('pages.organization.manage.financeiro.vol_total') }}</div>
+                <div class="vol-total-lbl">{{ $t(F + 'vol_total') }}</div>
                 <div class="vol-total-val">R$ {{ finFormatAmount(finBilling?.pending_total) }}</div>
-                <div class="vol-due">{{ $t('pages.organization.manage.financeiro.vol_due') }}: dia 5</div>
-                <span class="vol-status-badge" :class="(finBilling?.pending_total ?? 0) > 0 ? 'pending' : 'paid'">
-                  <font-awesome-icon :icon="['fas', (finBilling?.pending_total ?? 0) > 0 ? 'clock' : 'check']" />
-                  {{ (finBilling?.pending_total ?? 0) > 0 ? $t('pages.organization.manage.financeiro.vol_pending') : $t('pages.organization.manage.financeiro.vol_paid') }}
+                <div class="vol-due">{{ $t(F + 'vol_closes', { date: finDate(finBilling?.closes_at) }) }}</div>
+                <span class="vol-status-badge pending">
+                  <font-awesome-icon :icon="['fas', 'clock']" />{{ $t(F + 'vol_in_progress') }}
                 </span>
               </div>
             </div>
-            <div v-if="finBilling?.invoices?.length" class="fin-inv-list">
-              <div class="fin-inv-hd">{{ $t('pages.organization.manage.financeiro.history') }}</div>
-              <div v-for="inv in finBilling.invoices" :key="inv.id" class="fin-inv-row" @click="finOpenInvoice(inv.billing_cycle)">
-                <span class="fin-inv-cycle">{{ inv.billing_cycle }}</span>
-                <span class="s-badge" :class="inv.status === 'paid' ? 'active' : inv.status === 'pending' ? 'upcoming' : 'finished'">
-                  {{ $t('pages.organization.manage.financeiro.status_' + (inv.status || 'pending')) }}
+
+            <!-- One invoice per month -->
+            <div v-if="finBilling?.invoices?.length || finBilling?.closing_cycles?.length" class="fin-inv-list">
+              <div class="fin-inv-hd">{{ $t(F + 'history') }}</div>
+              <div v-for="c in (finBilling.closing_cycles || [])" :key="'c' + c.billing_cycle" class="fin-inv-row static">
+                <div class="fin-inv-main">
+                  <span class="fin-inv-cycle">{{ finCycleLabel(c.billing_cycle) }}</span>
+                  <span class="fin-inv-sub">{{ $t(F + 'closing_sub', { n: c.items_count }) }}</span>
+                </div>
+                <span class="s-badge pri">{{ $t(F + 'status_closing') }}</span>
+                <span class="fin-inv-amount">R$ {{ finFormatAmount(c.total_amount) }}</span>
+                <span class="fin-inv-caret"></span>
+              </div>
+              <div v-for="inv in (finBilling.invoices || [])" :key="inv.id" class="fin-inv-row" @click="finOpenInvoice(inv.billing_cycle)">
+                <div class="fin-inv-main">
+                  <span class="fin-inv-cycle">{{ finCycleLabel(inv.billing_cycle) }}</span>
+                  <span class="fin-inv-sub" :class="{ ok: inv.status === 'paid', bad: inv.status === 'failed' }">{{ finInvoiceSub(inv) }}</span>
+                </div>
+                <span class="s-badge" :class="finStatusClass(inv.status)">
+                  {{ $t(F + 'status_' + (inv.status || 'pending')) }}
                 </span>
-                <span style="flex:1"></span>
                 <span class="fin-inv-amount">R$ {{ finFormatAmount(inv.total_amount) }}</span>
-                <font-awesome-icon :icon="['fas', 'chevron-right']" style="color:var(--ehub-muted);font-size:.7rem" />
+                <font-awesome-icon :icon="['fas', 'chevron-right']" class="fin-inv-caret" />
               </div>
             </div>
-            <div v-else style="padding:16px 24px;font-size:.83rem;color:var(--ehub-muted)">{{ $t('pages.organization.manage.financeiro.no_invoices') }}</div>
+            <div v-else style="padding:16px 24px;font-size:.83rem;color:var(--ehub-muted)">{{ $t(F + 'no_invoices') }}</div>
           </template>
         </div>
 
@@ -1172,20 +1202,23 @@ export default {
         <div v-if="finSelectedInvoice" class="fin-modal-overlay" @click.self="finSelectedInvoice = null">
           <div class="fin-modal-card">
             <div class="fin-modal-hd">
-              <h5>{{ $t('pages.organization.manage.financeiro.invoice_detail', { cycle: finSelectedInvoice.billing_cycle }) }}</h5>
+              <h5>{{ $t('pages.organization.manage.financeiro.invoice_detail', { cycle: finCycleLabel(finSelectedInvoice.billing_cycle) }) }}</h5>
               <button class="btn-close" @click="finSelectedInvoice = null"></button>
             </div>
             <div class="fin-modal-body">
               <div v-if="finInvoiceLoading" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>
               <template v-else>
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                  <span class="s-badge" :class="finSelectedInvoice.status === 'paid' ? 'active' : 'upcoming'">
-                    {{ $t('pages.organization.manage.financeiro.status_' + (finSelectedInvoice.status || 'pending')) }}
-                  </span>
+                  <div class="d-flex flex-column gap-1">
+                    <span class="s-badge align-self-start" :class="finStatusClass(finSelectedInvoice.status)">
+                      {{ $t('pages.organization.manage.financeiro.status_' + (finSelectedInvoice.status || 'pending')) }}
+                    </span>
+                    <span class="fin-inv-sub" :class="{ ok: finSelectedInvoice.status === 'paid', bad: finSelectedInvoice.status === 'failed' }">{{ finInvoiceSub(finSelectedInvoice) }}</span>
+                  </div>
                   <span style="font-weight:700;font-size:.95rem">R$ {{ finFormatAmount(finSelectedInvoice.total_amount) }}</span>
                 </div>
                 <div v-for="item in (finSelectedInvoice.items ?? [])" :key="item.id" class="fin-inv-item">
-                  <span class="td-muted">{{ item.user?.name ?? '—' }}</span>
+                  <span class="td-muted">{{ item.user?.name ?? '—' }}<small v-if="item.created_at" class="d-block">{{ finDate(item.created_at) }}</small></span>
                   <span style="font-size:.83rem">{{ $t('finances.billing.type.' + item.billing_type) }}</span>
                   <span style="font-weight:600;font-size:.83rem">R$ {{ finFormatAmount(item.fee_amount) }}</span>
                 </div>
@@ -1479,6 +1512,13 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .vol-status-badge.pending { background: rgba(255,255,255,.22); color: #fff; }
 .vol-status-badge.paid    { background: rgba(16,185,129,.3); color: #6ee7b7; }
 .fin-inv-list { border-top: 1px solid var(--ehub-line); }
+.fin-inv-row.static { cursor: default; }
+.fin-inv-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.fin-inv-main .fin-inv-cycle { text-transform: capitalize; width: auto; }
+.fin-inv-sub { font-size: .74rem; color: var(--ehub-muted); }
+.fin-inv-sub.ok { color: #1f8a5b; }
+.fin-inv-sub.bad { color: #e23b3b; }
+.fin-inv-caret { color: var(--ehub-muted); font-size: .7rem; width: 10px; }
 .fin-inv-hd { font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 9px 24px; border-bottom: 1px solid var(--ehub-line); }
 .fin-inv-row { display: flex; align-items: center; gap: 10px; padding: 10px 24px; border-bottom: 1px solid var(--ehub-line); cursor: pointer; transition: background .12s; font-size: .87rem; }
 .fin-inv-row:last-child { border-bottom: 0; }
