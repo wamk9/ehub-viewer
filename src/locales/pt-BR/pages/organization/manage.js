@@ -191,7 +191,7 @@ export default {
     vol_open: 'Uso do mês em andamento',
     vol_closes: 'Fecha em {date}',
     vol_in_progress: 'Em andamento',
-    closing_sub: '{n} inscrições · aguardando cobrança',
+    closing_sub: '{n} inscrição · aguardando cobrança | {n} inscrições · aguardando cobrança',
     status_closing: 'Fechando',
     paid_on: 'Paga em {date}',
     failed_on: 'Cobrança falhou em {date}',

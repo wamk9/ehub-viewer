@@ -191,7 +191,7 @@ export default {
     vol_open: 'Uso del mes en curso',
     vol_closes: 'Cierra el {date}',
     vol_in_progress: 'En curso',
-    closing_sub: '{n} inscripciones · esperando cobro',
+    closing_sub: '{n} inscripción · esperando cobro | {n} inscripciones · esperando cobro',
     status_closing: 'Cerrando',
     paid_on: 'Pagada el {date}',
     failed_on: 'El cobro falló el {date}',

@@ -191,7 +191,7 @@ export default {
     vol_open: 'Current month usage',
     vol_closes: 'Closes on {date}',
     vol_in_progress: 'In progress',
-    closing_sub: '{n} registrations · awaiting charge',
+    closing_sub: '{n} registration · awaiting charge | {n} registrations · awaiting charge',
     status_closing: 'Closing',
     paid_on: 'Paid on {date}',
     failed_on: 'Charge failed on {date}',

@@ -626,7 +626,8 @@ export default {
     finCycleLabel(cycle) {
       if (!cycle) return '—';
       const [y, m] = cycle.split('-').map(Number);
-      return new Intl.DateTimeFormat(this.$i18n.locale, { month: 'long', year: 'numeric' }).format(new Date(y, m - 1, 1));
+      const label = new Intl.DateTimeFormat(this.$i18n.locale, { month: 'long', year: 'numeric' }).format(new Date(y, m - 1, 1));
+      return label.charAt(0).toUpperCase() + label.slice(1);
     },
     finDate(value, withTime = false) {
       if (!value) return '—';
@@ -1102,7 +1103,7 @@ export default {
               <div v-for="c in (finBilling.closing_cycles || [])" :key="'c' + c.billing_cycle" class="fin-inv-row static">
                 <div class="fin-inv-main">
                   <span class="fin-inv-cycle">{{ finCycleLabel(c.billing_cycle) }}</span>
-                  <span class="fin-inv-sub">{{ $t(F + 'closing_sub', { n: c.items_count }) }}</span>
+                  <span class="fin-inv-sub">{{ $t(F + 'closing_sub', { n: c.items_count }, c.items_count) }}</span>
                 </div>
                 <span class="s-badge pri">{{ $t(F + 'status_closing') }}</span>
                 <span class="fin-inv-amount">R$ {{ finFormatAmount(c.total_amount) }}</span>
@@ -1514,7 +1515,7 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .fin-inv-list { border-top: 1px solid var(--ehub-line); }
 .fin-inv-row.static { cursor: default; }
 .fin-inv-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-.fin-inv-main .fin-inv-cycle { text-transform: capitalize; width: auto; }
+.fin-inv-main .fin-inv-cycle { width: auto; }
 .fin-inv-sub { font-size: .74rem; color: var(--ehub-muted); }
 .fin-inv-sub.ok { color: #1f8a5b; }
 .fin-inv-sub.bad { color: #e23b3b; }
