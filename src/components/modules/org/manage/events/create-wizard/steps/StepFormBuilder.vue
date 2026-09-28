@@ -138,6 +138,7 @@ function setType(field, type) {
   if (type !== 'number') { delete field.min; delete field.max }
   if (!field.icon || Object.values(REG_TYPE_ICON).includes(field.icon)) field.icon = REG_TYPE_ICON[type]
 }
+const hasPlaceholder = (f) => ['text', 'number', 'url'].includes(f.type)
 function setRange(field, key, value) {
   field[key] = value === '' ? null : +value
 }
@@ -238,25 +239,20 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
             </div>
 
             <div v-if="openIndex === i" class="reg-edit">
-              <div class="reg-edit-row">
-                <button type="button" class="icon-btn" :title="$t(K + 'chooseIcon')" @click="iconTarget = f"><font-awesome-icon :icon="['fas', f.icon || REG_TYPE_ICON[f.type]]" /></button>
-                <div class="flex-grow-1">
-                  <label class="mini-lbl">{{ $t(K + 'question') }}</label>
-                  <input type="text" class="form-control fb-ctl" :value="f.label" maxlength="120" :placeholder="$t(K + 'customRegPh')" @input="onLabel(f, form.registration_form_template, 'name', $event.target.value)" />
-                </div>
+              <!-- question + answer type -->
+              <div class="re-grid re-main">
+                <label class="mini-lbl ga-lq">{{ $t(K + 'question') }}</label>
+                <label class="mini-lbl ga-lt">{{ $t(K + 'answerType') }}</label>
+                <button type="button" class="icon-btn ga-ic" :title="$t(K + 'chooseIcon')" @click="iconTarget = f"><font-awesome-icon :icon="['fas', f.icon || REG_TYPE_ICON[f.type]]" /></button>
+                <input type="text" class="form-control fb-ctl ga-q" :value="f.label" maxlength="120" :placeholder="$t(K + 'customRegPh')" @input="onLabel(f, form.registration_form_template, 'name', $event.target.value)" />
+                <select class="form-select fb-ctl ga-t" :value="f.type === 'switch' ? 'checkbox' : f.type" @change="setType(f, $event.target.value)">
+                  <option v-for="rt in REG_TYPES" :key="rt" :value="rt">{{ typeLabel(rt) }}</option>
+                </select>
+                <p class="mini-hint ga-h">{{ $t(K + 'typeHint.' + (f.type === 'switch' ? 'checkbox' : f.type)) }}</p>
               </div>
 
-              <div>
-                <label class="mini-lbl">{{ $t(K + 'answerType') }}</label>
-                <div class="type-grid">
-                  <button v-for="rt in REG_TYPES" :key="rt" type="button" class="type-btn" :class="{ sel: f.type === rt || (rt === 'checkbox' && f.type === 'switch') }" @click="setType(f, rt)">
-                    <font-awesome-icon :icon="['fas', REG_TYPE_ICON[rt]]" />{{ typeLabel(rt) }}
-                  </button>
-                </div>
-                <p class="mini-hint">{{ $t(K + 'typeHint.' + (f.type === 'switch' ? 'checkbox' : f.type)) }}</p>
-              </div>
-
-              <div v-if="f.type === 'select' || f.type === 'color'">
+              <!-- type-specific settings -->
+              <div v-if="f.type === 'select' || f.type === 'color'" class="re-block">
                 <label class="mini-lbl">{{ $t(K + (f.type === 'select' ? 'optsLabel' : 'colorsLabel')) }}</label>
                 <div class="chips-input">
                   <span v-for="(o, oi) in f.values" :key="o" class="opt-chip">
@@ -267,34 +263,37 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
                 </div>
                 <p class="mini-hint">{{ $t(K + (f.type === 'select' ? 'optsHint' : 'colorsHint')) }}</p>
               </div>
-
-              <div v-if="f.type === 'number'" class="reg-range">
+              <div v-if="f.type === 'number'" class="re-block re-two">
                 <div>
-                  <label class="mini-lbl">{{ $t(K + 'min') }}</label>
-                  <input type="number" class="form-control form-control-sm" :value="f.min ?? ''" @input="setRange(f, 'min', $event.target.value)" />
+                  <label class="mini-lbl">{{ $t(K + 'min') }} <span class="opt-tag">{{ $t(K + 'rangeOptional') }}</span></label>
+                  <input type="number" class="form-control fb-ctl" :value="f.min ?? ''" @input="setRange(f, 'min', $event.target.value)" />
                 </div>
                 <div>
-                  <label class="mini-lbl">{{ $t(K + 'max') }}</label>
-                  <input type="number" class="form-control form-control-sm" :value="f.max ?? ''" @input="setRange(f, 'max', $event.target.value)" />
+                  <label class="mini-lbl">{{ $t(K + 'max') }} <span class="opt-tag">{{ $t(K + 'rangeOptional') }}</span></label>
+                  <input type="number" class="form-control fb-ctl" :value="f.max ?? ''" @input="setRange(f, 'max', $event.target.value)" />
                 </div>
               </div>
 
-              <div v-if="!['checkbox', 'switch', 'select', 'color', 'date'].includes(f.type)">
-                <label class="mini-lbl">{{ $t(K + 'placeholder') }} <span class="opt-tag">{{ $t(K + 'rangeOptional') }}</span></label>
-                <input type="text" class="form-control form-control-sm" v-model="f.placeholder" maxlength="120" :placeholder="$t(K + 'placeholderPh')" />
+              <!-- optional texts -->
+              <div class="re-block" :class="{ 're-two': hasPlaceholder(f) }">
+                <div v-if="hasPlaceholder(f)">
+                  <label class="mini-lbl">{{ $t(K + 'placeholder') }} <span class="opt-tag">{{ $t(K + 'rangeOptional') }}</span></label>
+                  <input type="text" class="form-control fb-ctl" v-model="f.placeholder" maxlength="120" :placeholder="$t(K + 'placeholderPh')" />
+                </div>
+                <div>
+                  <label class="mini-lbl">{{ $t(K + 'help') }} <span class="opt-tag">{{ $t(K + 'rangeOptional') }}</span></label>
+                  <input type="text" class="form-control fb-ctl" v-model="f.help" maxlength="200" :placeholder="$t(K + 'helpPh')" />
+                </div>
               </div>
-              <div>
-                <label class="mini-lbl">{{ $t(K + 'help') }} <span class="opt-tag">{{ $t(K + 'rangeOptional') }}</span></label>
-                <input type="text" class="form-control form-control-sm" v-model="f.help" maxlength="200" :placeholder="$t(K + 'helpPh')" />
-              </div>
+            </div>
 
-              <label class="req-switch">
-                <input type="checkbox" class="form-check-input" v-model="f.required" />
-                <span>
-                  <strong>{{ $t(K + 'requiredLabel') }}</strong>
-                  <small>{{ $t(K + (f.type === 'checkbox' || f.type === 'switch' ? 'requiredHintCheck' : 'requiredHint')) }}</small>
-                </span>
-              </label>
+            <!-- footer: required toggle -->
+            <div v-if="openIndex === i" class="re-foot">
+              <div class="form-check form-switch m-0">
+                <input :id="'req-' + i" type="checkbox" class="form-check-input" role="switch" v-model="f.required" />
+                <label :for="'req-' + i" class="form-check-label">{{ $t(K + 'requiredLabel') }}</label>
+              </div>
+              <span class="re-foot-hint">{{ $t(K + (f.type === 'checkbox' || f.type === 'switch' ? 'requiredHintCheck' : 'requiredHint')) }}</span>
             </div>
           </div>
         </div>
@@ -404,14 +403,18 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
 .reg-actions { display: flex; gap: 1px; opacity: 0; transition: opacity .15s; }
 .reg-card:hover .reg-actions, .reg-card.open .reg-actions, .reg-actions:focus-within { opacity: 1; }
 .reg-caret { color: var(--ehub-muted); font-size: .7rem; }
-.reg-edit { border-top: 1px solid var(--ehub-line); padding: 14px; display: flex; flex-direction: column; gap: 14px; }
-.reg-edit-row { display: flex; gap: 8px; align-items: flex-end; }
-.mini-lbl { display: block; font-size: .72rem; font-weight: 700; color: var(--ehub-ink); margin-bottom: 4px; }
+.reg-edit { border-top: 1px solid var(--ehub-line); padding: 14px 14px 4px; display: flex; flex-direction: column; gap: 14px; }
+.re-grid.re-main { display: grid; grid-template-columns: 38px minmax(0, 1fr) 210px; grid-template-areas: ". lq lt" "ic q t" ". h h"; column-gap: 8px; row-gap: 5px; align-items: center; }
+.re-grid .mini-lbl { margin: 0; }
+.ga-lq { grid-area: lq; } .ga-lt { grid-area: lt; } .ga-ic { grid-area: ic; } .ga-q { grid-area: q; } .ga-t { grid-area: t; } .ga-h { grid-area: h; margin: 0; }
+.re-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mini-lbl { display: block; font-size: .72rem; font-weight: 700; color: var(--ehub-ink); margin-bottom: 5px; }
 .mini-hint { font-size: .72rem; color: var(--ehub-muted); margin: 5px 0 0; }
 .opt-tag { font-weight: 400; color: var(--ehub-muted); }
-.type-grid { display: flex; flex-wrap: wrap; gap: 5px; }
-.type-btn { display: flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 8px; border: 1.5px solid var(--ehub-line); background: var(--ehub-card); color: var(--ehub-muted); font-size: .76rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
-.type-btn:hover, .type-btn.sel { border-color: var(--ehub-primary); color: var(--ehub-primary); background: var(--ehub-primary-tint); }
+.re-foot { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 14px; margin-top: 10px; border-top: 1px solid var(--ehub-line); background: var(--ehub-field-bg); border-radius: 0 0 10px 10px; }
+.re-foot .form-check-label { font-size: .82rem; font-weight: 600; color: var(--ehub-ink); cursor: pointer; }
+.re-foot .form-check-input { cursor: pointer; }
+.re-foot-hint { font-size: .74rem; color: var(--ehub-muted); }
 .chips-input { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); border-radius: 8px; padding: 5px 7px; }
 .chips-input:focus-within { border-color: var(--ehub-primary); }
 .chips-input input { flex: 1; min-width: 120px; border: 0; background: transparent; font-size: .8rem; color: var(--ehub-ink); outline: none; padding: 2px; }
@@ -419,11 +422,6 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
 .opt-chip button { border: 0; background: transparent; color: var(--ehub-muted); font-size: .65rem; cursor: pointer; padding: 0 4px; }
 .opt-chip button:hover { color: #e23b3b; }
 .opt-swatch { width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--ehub-line); }
-.reg-range { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.req-switch { display: flex; gap: 10px; align-items: flex-start; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 9px; padding: 9px 12px; cursor: pointer; }
-.req-switch .form-check-input { margin-top: 3px; flex-shrink: 0; }
-.req-switch strong { display: block; font-size: .8rem; color: var(--ehub-ink); }
-.req-switch small { display: block; font-size: .72rem; color: var(--ehub-muted); }
 
 @media (hover: none) { .reg-actions { opacity: 1; } }
 @media (max-width: 560px) {
@@ -431,5 +429,7 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
   .info-cols { display: none; }
   .info-row.with-desc .info-desc { grid-column: 2; grid-row: 2; }
   .reg-type { display: none; }
+  .re-grid.re-main { grid-template-columns: 38px minmax(0, 1fr); grid-template-areas: ". lq" "ic q" ". lt" ". t" ". h"; }
+  .re-two { grid-template-columns: 1fr; }
 }
 </style>
