@@ -318,14 +318,14 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
         <div class="info-list">
           <div class="info-row info-cols" :class="{ 'with-desc': info.id === 'evt' }">
             <span>{{ $t(K + 'colIcon') }}</span>
-            <span>{{ $t(K + 'colName') }}<small>{{ $t(K + (info.id === 'evt' ? 'colNameHint' : 'colNameHintStg')) }}</small></span>
-            <span v-if="info.id === 'evt'">{{ $t(K + 'colValue') }}<small>{{ $t(K + 'colValueHint') }}</small></span>
+            <span>{{ $t(K + 'colName') }}</span>
+            <span v-if="info.id === 'evt'">{{ $t(K + 'colValue') }}</span>
           </div>
           <div v-for="(f, i) in info.list" :key="i" class="info-row" :class="{ 'with-desc': info.id === 'evt' }">
             <button type="button" class="icon-btn" :title="$t(K + 'chooseIcon')" @click="iconTarget = f"><font-awesome-icon :icon="['fas', f.icon || 'circle-info']" /></button>
             <input type="text" class="form-control info-name" :value="f.name" maxlength="120" :placeholder="$t(K + info.ph)" @input="onLabel(f, info.list, 'key', $event.target.value)" />
             <textarea v-if="info.id === 'evt'" class="form-control info-desc" v-model="f.value" rows="1" maxlength="500" :placeholder="$t(K + 'valuePh')"></textarea>
-            <button type="button" class="row-btn danger row-btn-lg" :title="$t(K + 'remove')" @click="info.list.splice(i, 1)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
+            <button type="button" class="row-btn danger row-btn-lg" :title="$t(K + 'remove')" @click="info.list.splice(i, 1)"><font-awesome-icon :icon="['fas', 'trash']" /></button>
           </div>
         </div>
         <p v-if="info.id === 'stg'" class="fb-note"><font-awesome-icon :icon="['fas', 'circle-info']" />{{ $t(K + 'stgNote') }}</p>
@@ -378,6 +378,7 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
 .row-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: var(--ehub-muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: .72rem; padding: 0; flex-shrink: 0; }
 .row-btn:hover:not(:disabled) { border-color: var(--ehub-line); color: var(--ehub-ink); }
 .row-btn:disabled { opacity: .3; cursor: default; }
+.row-btn.danger { color: #e23b3b; }
 .row-btn.danger:hover { border-color: color-mix(in srgb,#e23b3b 35%,transparent); background: color-mix(in srgb,#e23b3b 10%,transparent); color: #e23b3b; }
 
 .info-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
@@ -386,9 +387,10 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
 .info-row.with-desc { grid-template-columns: 38px minmax(0, 1fr) minmax(0, 2fr) 38px; }
 .info-name, .fb-ctl { height: 38px; font-size: .85rem; padding: 0 12px; }
 .info-desc { resize: vertical; min-height: 38px; height: 38px; font-size: .85rem; padding: 8px 12px; line-height: 1.4; }
-.row-btn-lg { width: 38px; height: 38px; }
+.row-btn-lg { width: 38px; height: 38px; font-size: .85rem; }
+.row-btn-lg.danger { color: #e23b3b; border-color: color-mix(in srgb,#e23b3b 30%,transparent); background: color-mix(in srgb,#e23b3b 6%,transparent); }
 .info-cols { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); align-items: end; }
-.info-cols small { display: block; text-transform: none; letter-spacing: 0; font-weight: 400; font-size: .72rem; margin-top: 1px; }
+.info-cols span:first-child { text-align: center; }
 
 .reg-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
 .reg-card { border: 1px solid var(--ehub-line); border-radius: 10px; background: var(--ehub-card); }
