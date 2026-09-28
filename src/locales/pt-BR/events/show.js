@@ -92,6 +92,9 @@ export default {
     payment_still_pending: 'Pagamento ainda não identificado.',
     modal: {
       title: 'Inscrição no evento',
+      intro: 'Você está se inscrevendo no evento {event}.',
+      paid_notice: 'Inscrição paga: {fee}. Sua inscrição só será confirmada após o pagamento no gateway de pagamento configurado pela organização.',
+      free_notice: 'Inscrição gratuita: sua inscrição será confirmada automaticamente.',
       fee_warning: 'Este evento requer pagamento de {fee} após a inscrição.',
       confirm_text: 'Deseja se inscrever neste evento?',
       confirm: 'Confirmar inscrição',

@@ -92,6 +92,9 @@ export default {
     payment_still_pending: 'Payment not identified yet.',
     modal: {
       title: 'Register for event',
+      intro: 'You are registering for the event {event}.',
+      paid_notice: 'Paid registration: {fee}. Your registration is only confirmed after payment through the payment gateway set up by the organization.',
+      free_notice: 'Free registration: your registration will be confirmed automatically.',
       fee_warning: 'This event requires payment of {fee} after registration.',
       confirm_text: 'Do you want to register for this event?',
       confirm: 'Register',

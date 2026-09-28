@@ -10,10 +10,16 @@
           <font-awesome-icon :icon="['fas', 'eye']" />{{ $t('common.regForm.previewBanner') }}
         </div>
         <div class="modal-card__body">
-          <p class="text-muted small mb-3">{{ eventName }}</p>
-          <div v-if="fee > 0" class="alert alert-warning small mb-3">
-            <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />
-            {{ $t('events.show.registration.modal.fee_warning', { fee: (currency?.toUpperCase() || '') + ' ' + Number(fee).toFixed(2) }) }}
+          <i18n-t keypath="events.show.registration.modal.intro" tag="p" class="modal-card__intro">
+            <template #event><strong>{{ eventName }}</strong></template>
+          </i18n-t>
+          <div v-if="fee > 0" class="modal-card__notice warn">
+            <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />
+            <span>{{ $t('events.show.registration.modal.paid_notice', { fee: (currency?.toUpperCase() || '') + ' ' + Number(fee).toFixed(2) }) }}</span>
+          </div>
+          <div v-else class="modal-card__notice ok">
+            <font-awesome-icon :icon="['fas', 'circle-check']" />
+            <span>{{ $t('events.show.registration.modal.free_notice') }}</span>
           </div>
           <EhubRegistrationFields v-if="fields.length" :fields="fields" :model-value="modelValue" :errors="errors" @update:model-value="$emit('update:modelValue', $event)" />
           <p v-else class="mb-0 small">{{ $t('events.show.registration.modal.confirm_text') }}</p>
@@ -68,6 +74,14 @@ export default {
 .modal-card__header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--ehub-line); font-size: 1rem; font-weight: 600; color: var(--ehub-ink); }
 .modal-card__preview { display: flex; align-items: center; gap: 7px; font-size: .75rem; font-weight: 600; color: var(--ehub-primary); background: var(--ehub-primary-tint); padding: .5rem 1.4rem; border-bottom: 1px solid var(--ehub-line); }
 .modal-card__body { padding: 1.2rem 1.4rem; overflow-y: auto; }
+.modal-card__intro { font-size: .88rem; color: var(--ehub-ink); margin: 0 0 .9rem; }
+.modal-card__intro strong { color: var(--org-accent, var(--ehub-primary)); }
+.modal-card__notice { display: flex; gap: 9px; align-items: flex-start; font-size: .8rem; line-height: 1.45; border-radius: 10px; padding: .7rem .85rem; margin-bottom: 1.1rem; border: 1px solid; }
+.modal-card__notice svg { margin-top: 3px; flex-shrink: 0; }
+.modal-card__notice.warn { color: var(--ehub-ink); background: color-mix(in srgb, var(--ehub-gold, #f0b400) 12%, transparent); border-color: color-mix(in srgb, var(--ehub-gold, #f0b400) 40%, transparent); }
+.modal-card__notice.warn svg { color: var(--ehub-gold, #f0b400); }
+.modal-card__notice.ok { color: var(--ehub-ink); background: color-mix(in srgb, #2f9e44 10%, transparent); border-color: color-mix(in srgb, #2f9e44 35%, transparent); }
+.modal-card__notice.ok svg { color: #2f9e44; }
 .modal-card__ok { display: flex; align-items: center; gap: 7px; margin-top: 1rem; font-size: .8rem; font-weight: 600; color: #2f9e44; }
 .modal-card__footer { display: flex; justify-content: flex-end; gap: .5rem; padding: .9rem 1.4rem; border-top: 1px solid var(--ehub-line); }
 [data-bs-theme="light"] .btn-close-white { filter: none; }
