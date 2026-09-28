@@ -12,8 +12,8 @@
         :placeholder="$t('common.prizes.whoPh')" @input="set(i, 'label', $event.target.value)" />
       <div v-if="hasCash" class="epe-cash">
         <div class="input-group">
-          <input type="number" class="form-control epe-ctl" min="0" max="100" step="0.5" :value="p.percent ?? ''"
-            placeholder="0" @input="set(i, 'percent', $event.target.value === '' ? null : Number($event.target.value))" />
+          <input type="number" class="form-control epe-ctl" min="0" :max="available(i)" step="0.5" :value="p.percent ?? ''"
+            placeholder="0" @input="setPercent(i, $event)" />
           <span class="input-group-text">%</span>
         </div>
         <span class="epe-amt">{{ money(total * (Number(p.percent) || 0) / 100) }}</span>
@@ -70,6 +70,17 @@ export default {
       const list = this.modelValue.map((p) => ({ ...p }));
       list[i][key] = value;
       this.emitList(list);
+    },
+    // Share still free for row i: the whole list never exceeds 100% of the pool.
+    available(i) {
+      const others = this.modelValue.reduce((s, p, j) => s + (j === i ? 0 : Number(p.percent) || 0), 0);
+      return Math.max(0, Math.round((100 - others) * 100) / 100);
+    },
+    setPercent(i, e) {
+      if (e.target.value === '') { this.set(i, 'percent', null); return; }
+      const v = Math.min(Math.max(Number(e.target.value) || 0, 0), this.available(i));
+      if (String(v) !== e.target.value) e.target.value = v;
+      this.set(i, 'percent', v);
     },
     add() { this.emitList([...this.modelValue, { label: '', percent: null, product: '' }]); },
     remove(i) { this.emitList(this.modelValue.filter((_, j) => j !== i)); },
