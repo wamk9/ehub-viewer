@@ -31,11 +31,11 @@ const OrganizationBilling = {
     },
     async setupStripe(orgRoute) {
         const result = await Api.postAsync(`/org/${orgRoute}/billing/stripe-setup`);
-        return { code: result.code, clientSecret: result.response?.message?.client_secret };
+        return { code: result.code, clientSecret: result.response?.message?.client_secret, publishableKey: result.response?.message?.publishable_key };
     },
-    async confirmStripeCard(orgRoute, paymentMethodId) {
-        const result = await Api.patchAsync(`/org/${orgRoute}/billing/stripe-setup`, { payment_method_id: paymentMethodId });
-        return { code: result.code };
+    async confirmStripeCard(orgRoute, setupIntentId) {
+        const result = await Api.patchAsync(`/org/${orgRoute}/billing/stripe-setup`, { setup_intent_id: setupIntentId });
+        return { code: result.code, card: result.response?.card };
     },
 };
 

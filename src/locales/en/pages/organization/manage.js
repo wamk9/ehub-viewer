@@ -188,6 +188,7 @@ export default {
     delete_error: 'Failed to delete organization.',
   },
   financeiro: {
+    card_dialog: { title: 'Billing card', intro: 'This card pays the monthly eHub usage invoice, charged on the 5th of each month.', secure: 'Card details go straight to Stripe, encrypted. eHub never stores the card number.', cancel: 'Cancel', save: 'Save card', saved: 'Card saved.', load_error: 'The card form could not be loaded. Please try again.', save_error: 'The card could not be saved. Check the details and try again.', receipts: 'Invoices and receipts on Stripe' },
     blocked_title: 'Management access blocked',
     blocked_text: 'The invoice was not paid on the 5th nor in the 5 daily retries. Events, members and other organization data are unavailable until it is paid. Pay below to restore access immediately.',
     pay_now: 'Pay now',

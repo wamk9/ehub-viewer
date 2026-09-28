@@ -13,6 +13,7 @@ import EhubConfirmNameDialog from '@/components/modals/EhubConfirmNameDialog.vue
 import EhubInviteCard from '@/components/modules/members/EhubInviteCard.vue';
 import EhubLeaveCard from '@/components/modules/members/EhubLeaveCard.vue';
 import EhubVisualFields from '@/components/inputs/EhubVisualFields.vue';
+import EhubCardSetupDialog from '@/components/modules/org/EhubCardSetupDialog.vue';
 import EventCreateWizard from '@/components/modules/org/manage/events/create.vue';
 
 const ORG_GRADS = [
@@ -62,7 +63,7 @@ const ROLE_CLASS = {
 };
 
 export default {
-  components: { EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubVisualFields },
+  components: { EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubVisualFields, EhubCardSetupDialog },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -115,6 +116,7 @@ export default {
       finGatewaysLoading: false,
       finLoaded: false,
       finPaying: null,
+      finCardOpen: false,
       finConnecting: null,
       finDisconnecting: null,
       finSelectedInvoice: null,
@@ -614,6 +616,11 @@ export default {
       if (result.code === 200) this.finGateways = this.finGateways.filter(g => g.gateway !== gateway);
     },
 
+    finCardSaved(card) {
+      if (this.finBilling) this.finBilling = { ...this.finBilling, has_card: !!card, card };
+      toast.success(this.$t(this.F + 'card_dialog.saved'));
+    },
+    // Invoices and receipts stay available in the Stripe customer portal.
     async finSetupCard() {
       this.finSettingUpCard = true;
       const returnUrl = window.location.origin + '/org/' + this.orgRoute + '/manage';
@@ -1178,10 +1185,13 @@ export default {
               <span v-if="finBilling.card?.exp" class="td-muted" style="font-size:.78rem">· {{ $t('pages.organization.manage.financeiro.card_exp', { exp: finBilling.card.exp }) }}</span>
             </div>
             <span v-else style="font-size:.83rem;color:var(--ehub-muted)">{{ $t('pages.organization.manage.financeiro.no_card') }}</span>
-            <button class="btn btn-sm btn-outline-primary round px-3" :disabled="finSettingUpCard" @click="finSetupCard">
-              <span v-if="finSettingUpCard" class="spinner-border spinner-border-sm me-1"></span>
+            <button class="btn btn-sm btn-outline-primary round px-3" @click="finCardOpen = true">
               {{ finBilling?.has_card ? $t('pages.organization.manage.financeiro.change_card') : $t('pages.organization.manage.financeiro.add_card') }}
             </button>
+            <button v-if="finBilling?.has_card" class="btn btn-sm btn-link px-1" :disabled="finSettingUpCard" @click="finSetupCard">
+              <span v-if="finSettingUpCard" class="spinner-border spinner-border-sm me-1"></span>{{ $t(F + 'card_dialog.receipts') }}
+            </button>
+            <EhubCardSetupDialog v-model="finCardOpen" :org-route="orgRoute" @saved="finCardSaved" />
           </div>
           <p class="mt-2 mb-0" style="font-size:.72rem;color:var(--ehub-muted)">{{ $t('pages.organization.manage.financeiro.card_notice') }}</p>
         </div>

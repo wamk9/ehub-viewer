@@ -188,6 +188,7 @@ export default {
     delete_error: 'Erro ao excluir organização.',
   },
   financeiro: {
+    card_dialog: { title: 'Cartão de cobrança', intro: 'Este cartão paga a fatura mensal de uso do eHub, cobrada no dia 5 de cada mês.', secure: 'Os dados do cartão vão direto para a Stripe, criptografados. O eHub não armazena o número do cartão.', cancel: 'Cancelar', save: 'Salvar cartão', saved: 'Cartão salvo.', load_error: 'Não foi possível carregar o formulário do cartão. Tente novamente.', save_error: 'Não foi possível salvar o cartão. Confira os dados e tente novamente.', receipts: 'Faturas e recibos na Stripe' },
     blocked_title: 'Acesso à gestão bloqueado',
     blocked_text: 'A fatura não foi paga após o dia 5 e as 5 novas tentativas diárias. Eventos, membros e demais dados da organização ficam indisponíveis até o pagamento. Pague abaixo para liberar o acesso na hora.',
     pay_now: 'Pagar agora',

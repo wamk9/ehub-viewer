@@ -188,6 +188,7 @@ export default {
     delete_error: 'Error al eliminar la organización.',
   },
   financeiro: {
+    card_dialog: { title: 'Tarjeta de cobro', intro: 'Esta tarjeta paga la factura mensual de uso de eHub, cobrada el día 5 de cada mes.', secure: 'Los datos de la tarjeta van directo a Stripe, cifrados. eHub no guarda el número de la tarjeta.', cancel: 'Cancelar', save: 'Guardar tarjeta', saved: 'Tarjeta guardada.', load_error: 'No se pudo cargar el formulario de la tarjeta. Inténtalo de nuevo.', save_error: 'No se pudo guardar la tarjeta. Revisa los datos e inténtalo de nuevo.', receipts: 'Facturas y recibos en Stripe' },
     blocked_title: 'Acceso a la gestión bloqueado',
     blocked_text: 'La factura no se pagó el día 5 ni en los 5 reintentos diarios. Eventos, miembros y demás datos de la organización no están disponibles hasta el pago. Paga abajo para liberar el acceso al instante.',
     pay_now: 'Pagar ahora',
