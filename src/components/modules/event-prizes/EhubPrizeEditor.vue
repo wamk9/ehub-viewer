@@ -83,13 +83,14 @@ export default {
 
 <style scoped>
 .epe-cols, .epe-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1.4fr) 38px; gap: 8px; align-items: center; }
-.epe-cols.cash, .epe-row.cash { grid-template-columns: 30px minmax(0, 1fr) 190px minmax(0, 1.4fr) 38px; }
+.epe-cols.cash, .epe-row.cash { grid-template-columns: 30px minmax(0, 1fr) 220px minmax(0, 1.4fr) 38px; }
 .epe-cols { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); margin-bottom: 5px; }
 .epe-row { margin-bottom: 8px; }
 .epe-medal { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 800; color: #fff; }
 .epe-ctl { height: 38px; font-size: .85rem; }
 .epe-cash { display: flex; align-items: center; gap: 8px; }
-.epe-cash .input-group { width: 96px; flex-shrink: 0; }
+.epe-cash .input-group { width: 112px; flex-shrink: 0; flex-wrap: nowrap; }
+.epe-cash .input-group .form-control { min-width: 0; padding: 0 8px; }
 .epe-cash .input-group-text { font-size: .8rem; }
 .epe-amt { font-size: .8rem; font-weight: 700; color: var(--ehub-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .epe-del { width: 38px; height: 38px; border-radius: 8px; border: 1px solid color-mix(in srgb,#e23b3b 30%,transparent); background: color-mix(in srgb,#e23b3b 6%,transparent); color: #e23b3b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .85rem; }
