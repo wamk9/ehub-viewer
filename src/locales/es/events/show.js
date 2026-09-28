@@ -24,14 +24,14 @@ export default {
   },
   regulation: {
     points: [
-      { t: 'Formato', i: 'flag-checkered', b: 'Campeonato por puntos a lo largo de varias etapas. Los puntos se acumulan y definen la clasificación final de la temporada.' },
+      { t: 'Formato', i: 'layer-group', b: 'Campeonato por puntos a lo largo de varias etapas. Los puntos se acumulan y definen la clasificación final de la temporada.' },
       { t: 'Puntuación', i: 'coins', b: 'Sistema de puntos definido por la organización para los primeros clasificados de cada etapa, con victorias como criterio de desempate.' },
       { t: 'Conducta', i: 'flag', b: 'Las conductas antideportivas son evaluadas por la dirección mediante protesta, con penalizaciones de tiempo, puntos o posiciones.' },
       { t: 'Inscripciones', i: 'clipboard-list', b: 'Abiertas hasta 48h antes de cada etapa. Los participantes deben cumplir los requisitos mínimos de la organización.' },
     ],
     bracket: [
       { t: 'Formato', i: 'arrow-right', b: 'Eliminación directa. El que pierde queda eliminado; los ganadores avanzan hasta la gran final.' },
-      { t: 'Partidas', i: 'flag-checkered', b: 'Enfrentamientos en serie definida por fase. En caso de empate, prórroga o criterio de desempate de la modalidad.' },
+      { t: 'Partidas', i: 'users', b: 'Enfrentamientos en serie definida por fase. En caso de empate, prórroga o criterio de desempate de la modalidad.' },
       { t: 'Seeding', i: 'list-ul', b: 'El cuadro se define por ranking/seed. Las cabezas de serie están distribuidas para enfrentarse solo en las fases finales.' },
       { t: 'Inscripciones', i: 'clipboard-list', b: 'Plazas limitadas al número de cuadros. Las inscripciones cierran antes del sorteo.' },
     ],

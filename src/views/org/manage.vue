@@ -50,7 +50,7 @@ const ORG_ACTIVITY_ICONS = {
   member_added: 'user-plus', member_joined_invite: 'user-plus', invite_sent: 'paper-plane',
   role_changed: 'id-badge', member_removed: 'user-minus', member_left: 'right-from-bracket',
   event_created: 'calendar-plus', event_published: 'bullhorn', event_started: 'play',
-  event_finished: 'flag-checkered', event_deleted: 'trash',
+  event_finished: 'flag', event_deleted: 'trash',
 };
 
 const ROLE_CLASS = {
@@ -691,7 +691,7 @@ export default {
             :label="$t('pages.organization.manage.overview.stats.members')"
           />
           <EhubStatCard
-            :icon="['fas', 'flag-checkered']"
+            :icon="['fas', 'trophy']"
             icon-class="purple"
             :value="org?.events_count ?? '—'"
             :label="$t('pages.organization.manage.overview.stats.total_events')"
@@ -720,7 +720,7 @@ export default {
               v-for="ev in events.slice(0, 4)" :key="ev.route"
               class="ev-mini" @click="goToEvent(ev)">
               <div class="ev-mini-ico" :style="{ background: orgGrad }">
-                <font-awesome-icon :icon="['fas', 'flag-checkered']" />
+                <font-awesome-icon :icon="['fas', 'trophy']" />
               </div>
               <div class="ev-mini-body">
                 <div class="ev-mini-name">{{ ev.name }}</div>

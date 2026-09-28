@@ -24,14 +24,14 @@ export default {
   },
   regulation: {
     points: [
-      { t: 'Formato', i: 'flag-checkered', b: 'Campeonato em pontos corridos ao longo de várias etapas. A pontuação é cumulativa e define a classificação final da temporada.' },
+      { t: 'Formato', i: 'layer-group', b: 'Campeonato em pontos corridos ao longo de várias etapas. A pontuação é cumulativa e define a classificação final da temporada.' },
       { t: 'Pontuação', i: 'coins', b: 'Sistema de pontos definido pela organização para os primeiros colocados de cada etapa, com critérios de desempate por número de vitórias.' },
       { t: 'Conduta', i: 'flag', b: 'Condutas antidesportivas são avaliadas pela direção mediante protesto, com penalidades de tempo, pontos ou posições.' },
       { t: 'Inscrições', i: 'clipboard-list', b: 'Abertas até 48h antes de cada etapa. Participantes devem cumprir os requisitos mínimos da organização.' },
     ],
     bracket: [
       { t: 'Formato', i: 'arrow-right', b: 'Eliminatória simples (mata-mata). Quem perde está fora; os vencedores avançam até a grande final.' },
-      { t: 'Partidas', i: 'flag-checkered', b: 'Confrontos em série definida por fase. Em caso de empate, prorrogação ou critério de desempate da modalidade.' },
+      { t: 'Partidas', i: 'users', b: 'Confrontos em série definida por fase. Em caso de empate, prorrogação ou critério de desempate da modalidade.' },
       { t: 'Seeding', i: 'list-ul', b: 'O chaveamento é definido por ranking/seed. Cabeças de chave são distribuídos para se enfrentarem apenas nas fases finais.' },
       { t: 'Inscrições', i: 'clipboard-list', b: 'Vagas limitadas ao número de chaves. Inscrições encerram antes do sorteio do chaveamento.' },
     ],

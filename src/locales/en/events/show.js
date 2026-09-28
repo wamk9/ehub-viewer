@@ -24,14 +24,14 @@ export default {
   },
   regulation: {
     points: [
-      { t: 'Format', i: 'flag-checkered', b: 'Points league across several stages. Points accumulate and define the final standings of the season.' },
+      { t: 'Format', i: 'layer-group', b: 'Points league across several stages. Points accumulate and define the final standings of the season.' },
       { t: 'Scoring', i: 'coins', b: 'Points system defined by the organization for top finishers in each stage, with wins as a tie-breaker.' },
       { t: 'Conduct', i: 'flag', b: 'Unsporting conduct is reviewed by officials upon protest, with time, points or position penalties.' },
       { t: 'Registration', i: 'clipboard-list', b: 'Open until 48h before each stage. Entrants must meet the organization minimum requirements.' },
     ],
     bracket: [
       { t: 'Format', i: 'arrow-right', b: 'Single elimination. Lose and you are out; winners advance all the way to the grand final.' },
-      { t: 'Matches', i: 'flag-checkered', b: 'Best-of series defined per phase. Ties are settled by overtime or the discipline tie-break rule.' },
+      { t: 'Matches', i: 'users', b: 'Best-of series defined per phase. Ties are settled by overtime or the discipline tie-break rule.' },
       { t: 'Seeding', i: 'list-ul', b: 'The bracket is seeded by ranking. Top seeds are spread out to meet only in the later rounds.' },
       { t: 'Registration', i: 'clipboard-list', b: 'Slots limited to the bracket size. Entries close before the draw.' },
     ],

@@ -284,7 +284,7 @@ onBeforeUnmount(() => {
         <nav class="drawer-section">
           <p class="drawer-section-label">{{ $t('navbar.links.explore') }}</p>
           <router-link class="drawer-item" to="/events" @click="drawerOpen = false">
-            <span class="di-icon"><font-awesome-icon :icon="['fas', 'flag-checkered']" /></span>
+            <span class="di-icon"><font-awesome-icon :icon="['fas', 'trophy']" /></span>
             {{ $t('navbar.links.events') }}
           </router-link>
           <router-link class="drawer-item" to="/orgs" @click="drawerOpen = false">

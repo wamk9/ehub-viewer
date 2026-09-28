@@ -412,7 +412,7 @@ export default {
                 <span v-if="event.category" class="badge-pill cat">{{ $t(`categories.names.${event.category}`) }}</span>
                 <span v-if="event.runmode" class="badge-pill sub">{{ event.runmode }}</span>
                 <span class="badge-pill" :class="event.finished ? 'finished' : 'active'">
-                  <font-awesome-icon :icon="['fas', event.finished ? 'flag-checkered' : 'bolt']" />
+                  <font-awesome-icon :icon="['fas', event.finished ? 'flag' : 'bolt']" />
                   {{ event.finished ? $t('pages.organization.show.events.finished') : (event.initialized ? $t('events.show.in_progress') : $t('pages.organization.show.events.active')) }}
                 </span>
                 <span class="badge-pill" :class="event.fee == 0 ? 'free' : 'paid'">
@@ -477,7 +477,7 @@ export default {
               {{ formatDate(effectiveStartAt) }}
             </span>
             <span v-if="event.stages?.length" class="m">
-              <font-awesome-icon :icon="['fas', 'flag-checkered']" />
+              <font-awesome-icon :icon="['fas', 'layer-group']" />
               <span class="lbl">{{ $t('events.show.tabs.stages') }}</span>
               {{ event.stages.length }}
             </span>
@@ -509,7 +509,7 @@ export default {
               </div>
             </div>
             <div v-if="nextStage" class="hl-card next">
-              <div class="hl-ico"><font-awesome-icon :icon="['fas', 'flag-checkered']" /></div>
+              <div class="hl-ico"><font-awesome-icon :icon="['fas', 'layer-group']" /></div>
               <div>
                 <div class="k">{{ $t('events.show.highlights.next_stage') }}</div>
                 <div class="v">{{ nextStage.name }}</div>
@@ -526,7 +526,7 @@ export default {
             {{ $t('events.show.tabs.info') }}
           </button>
           <button class="tab-btn" :class="{ active: activeTab === 'stages' }" @click="activeTab = 'stages'; $router.replace({ query: { ...$route.query, tab: 'stages' } })">
-            <font-awesome-icon :icon="['fas', 'flag-checkered']" />
+            <font-awesome-icon :icon="['fas', 'layer-group']" />
             {{ $t('events.show.tabs.stages') }}
             <span v-if="event.stages?.length" class="tab-badge">{{ event.stages.length }}</span>
           </button>
@@ -573,7 +573,7 @@ export default {
         <!-- ═══ TAB: STAGES ═══ -->
         <section v-if="activeTab === 'stages'" class="tab-pane active">
           <div v-if="!event.stages?.length" class="ev-empty">
-            <font-awesome-icon :icon="['fas', 'flag-checkered']" />
+            <font-awesome-icon :icon="['fas', 'layer-group']" />
             <p class="mb-0 mt-2">{{ $t('events.show.stages.empty') }}</p>
           </div>
           <div v-else class="stage-list">
@@ -581,7 +581,7 @@ export default {
               <div class="stage-head" role="button">
                 <div class="lhs">
                   <div class="stage-flag">
-                    <font-awesome-icon :icon="['fas', 'flag-checkered']" />
+                    <font-awesome-icon :icon="['fas', 'layer-group']" />
                   </div>
                   <div>
                     <div class="stage-title">

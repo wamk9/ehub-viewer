@@ -208,7 +208,7 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
       <div class="pub-cover" :style="coverStyle(profile)">
         <div class="pub-cover-fade"></div>
         <div class="pub-cover-deco">
-          <font-awesome-icon :icon="['fas', 'flag-checkered']" />
+          <font-awesome-icon :icon="['fas', 'trophy']" />
         </div>
       </div>
 
@@ -251,7 +251,7 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
                     {{ $t('pages.user.public.member_since') }} {{ memberSince(profile.created_at) }}
                   </span>
                   <span v-if="profile.favorite_category" class="pub-meta-item">
-                    <font-awesome-icon :icon="['fas', 'flag-checkered']" />
+                    <font-awesome-icon :icon="['fas', 'trophy']" />
                     {{ profile.favorite_category }}
                   </span>
                 </div>
@@ -381,7 +381,7 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
                   <h3><font-awesome-icon :icon="['fas', 'circle-user']" /> {{ $t('pages.user.public.overview.about') }}</h3>
                 </div>
                 <div v-if="profile.favorite_category" class="about-item">
-                  <div class="ai-ico"><font-awesome-icon :icon="['fas', 'flag-checkered']" /></div>
+                  <div class="ai-ico"><font-awesome-icon :icon="['fas', 'trophy']" /></div>
                   <div>
                     <div class="ai-lbl">{{ $t('pages.user.public.overview.about_items.favorite_category') }}</div>
                     <div class="ai-val">{{ profile.favorite_category }}</div>
@@ -424,7 +424,7 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
         <div v-if="activeTab === 'results'" class="pub-tab-pane">
           <div class="wcard">
             <div v-if="!profile.recent_results?.length" class="pub-empty">
-              <font-awesome-icon :icon="['fas', 'flag-checkered']" />
+              <font-awesome-icon :icon="['fas', 'trophy']" />
               <p>{{ $t('pages.user.public.results.empty') }}</p>
             </div>
             <template v-else>

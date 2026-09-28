@@ -126,7 +126,7 @@ function goToTeam(team) {
             </div>
             <div class="summary-pill">
               <div class="sp-icon violet">
-                <font-awesome-icon :icon="['fas', 'flag-checkered']" />
+                <font-awesome-icon :icon="['fas', 'trophy']" />
               </div>
               <div class="sp-text">
                 <span class="sp-num">{{ summary.totalEvents }}</span>

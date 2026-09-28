@@ -15,7 +15,7 @@
             </div>
 
             <div v-if="stages.length === 0" class="text-center py-5">
-                <font-awesome-icon :icon="['fas', 'flag-checkered']" class="mb-3 text-muted" style="font-size:2.5rem" />
+                <font-awesome-icon :icon="['fas', 'layer-group']" class="mb-3 text-muted" style="font-size:2.5rem" />
                 <p class="text-muted">{{ $t('events.manage.menu.stages.manage.empty') }}</p>
                 <button class="btn btn-primary btn-sm" @click="openCreate">
                     {{ $t('events.manage.menu.stages.manage.create_first') }}
@@ -249,7 +249,7 @@
                 </button>
                 <button v-if="managingStage.in_progress" class="btn btn-warning btn-sm text-dark"
                     :disabled="controlLoading" @click="showFinishConfirm = true">
-                    <font-awesome-icon :icon="['fas', 'flag-checkered']" class="me-1" />
+                    <font-awesome-icon :icon="['fas', 'flag']" class="me-1" />
                     {{ $t('events.manage.menu.stages.manage.manage_view.finish_btn') }}
                 </button>
             </div>

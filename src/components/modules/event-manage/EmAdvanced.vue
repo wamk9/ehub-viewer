@@ -66,10 +66,10 @@ export default {
     <div class="set-card">
       <h3>{{ $t('pages.event.manage.adv.finish') }}</h3>
       <p class="set-desc">{{ $t('pages.event.manage.adv.finish_hint') }}</p>
-      <p v-if="ev.finished" class="hint m-0"><font-awesome-icon :icon="['fas', 'flag-checkered']" />{{ $t('pages.event.manage.adv.finish_done') }}</p>
+      <p v-if="ev.finished" class="hint m-0"><font-awesome-icon :icon="['fas', 'flag']" />{{ $t('pages.event.manage.adv.finish_done') }}</p>
       <template v-else>
         <button class="btn btn-outline-secondary round px-3" :disabled="busy || !ev.initialized" @click="finish">
-          <font-awesome-icon :icon="['fas', 'flag-checkered']" class="me-2" />{{ $t('pages.event.manage.adv.finish_btn') }}
+          <font-awesome-icon :icon="['fas', 'flag']" class="me-2" />{{ $t('pages.event.manage.adv.finish_btn') }}
         </button>
         <p v-if="!ev.initialized" class="hint mt-2 mb-0"><font-awesome-icon :icon="['fas', 'circle-info']" />{{ $t('pages.event.manage.adv.finish_not_started') }}</p>
       </template>

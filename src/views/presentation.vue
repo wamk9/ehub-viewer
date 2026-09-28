@@ -76,7 +76,7 @@ const isLogged = computed(() => !!store.getters.getToken)
           </div>
           <div class="how-arrow-col"><font-awesome-icon icon="chevron-right" /></div>
           <div class="how-step">
-            <div class="step-ico"><font-awesome-icon icon="flag-checkered" /></div>
+            <div class="step-ico"><font-awesome-icon icon="trophy" /></div>
             <h4>{{ $t('pages.presentation.how.s3.title') }}</h4>
             <p>{{ $t('pages.presentation.how.s3.desc') }}</p>
           </div>
@@ -165,7 +165,7 @@ const isLogged = computed(() => !!store.getters.getToken)
             </div>
           </div>
           <div class="feature-card">
-            <div class="f-icon"><font-awesome-icon icon="flag-checkered" /></div>
+            <div class="f-icon"><font-awesome-icon icon="trophy" /></div>
             <div>
               <h4>{{ $t('pages.presentation.features.f2.title') }}</h4>
               <p>{{ $t('pages.presentation.features.f2.desc') }}</p>

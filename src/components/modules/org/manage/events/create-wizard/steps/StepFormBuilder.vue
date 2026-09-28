@@ -26,13 +26,18 @@ const EVT_SUGGESTIONS = [
   { key: 'contact', icon: 'envelope' },
   { key: 'extra-prize', icon: 'trophy' },
 ]
-const STG_SUGGESTIONS = [
-  { key: 'track', icon: 'road' },
-  { key: 'map', icon: 'map' },
+// Stage info suggestions stay sport-agnostic; a few extras depend on the category.
+const STG_BASE = [
+  { key: 'venue', icon: 'location-dot' },
   { key: 'time', icon: 'clock' },
   { key: 'duration', icon: 'hourglass-half' },
   { key: 'weather', icon: 'cloud-sun' },
 ]
+const STG_BY_CATEGORY = {
+  racing: [{ key: 'track', icon: 'road' }],
+  esports: [{ key: 'map', icon: 'map' }],
+}
+const RACING = ['simracing', 'racingcars', 'rally', 'motorsport', 'motorbike', 'karting', 'cycling']
 const REG_BASE = [
   { key: 'nickname', type: 'text', icon: 'user', required: true },
   { key: 'discord', type: 'text', icon: 'headset' },
@@ -66,7 +71,11 @@ const regSuggestions = computed(() => {
   return [...extra, ...REG_BASE].filter((s) => !taken(props.form.registration_form_template, s, 'name', 'label'))
 })
 const evtSuggestions = computed(() => EVT_SUGGESTIONS.filter((s) => !taken(props.form.event_fields, s, 'key', 'name')))
-const stgSuggestions = computed(() => STG_SUGGESTIONS.filter((s) => !taken(props.form.stage_fields, s, 'key', 'name')))
+const stgSuggestions = computed(() => {
+  const cat = String(props.form.category || '')
+  const extra = cat.startsWith('esports') ? STG_BY_CATEGORY.esports : (RACING.includes(cat) ? STG_BY_CATEGORY.racing : [])
+  return [...extra, ...STG_BASE].filter((s) => !taken(props.form.stage_fields, s, 'key', 'name'))
+})
 
 // ── helpers ─────────────────────────────────────────────────────────────
 function uniqueKey(base, list, prop, self = null) {
@@ -170,11 +179,11 @@ const tab = ref('reg')
 const tabs = computed(() => [
   { id: 'reg', icon: 'clipboard-list', label: 'tabReg', count: props.form.registration_form_template.length },
   { id: 'evt', icon: 'circle-info', label: 'tabEvt', count: props.form.event_fields.length },
-  { id: 'stg', icon: 'flag-checkered', label: 'tabStg', count: props.form.stage_fields.length },
+  { id: 'stg', icon: 'layer-group', label: 'tabStg', count: props.form.stage_fields.length },
 ])
 const infoPanels = computed(() => [
   { id: 'evt', icon: 'circle-info', hint: 'evtHint', empty: 'evtEmpty', ph: 'customEvtPh', list: props.form.event_fields, suggestions: evtSuggestions.value },
-  { id: 'stg', icon: 'flag-checkered', hint: 'stgHint', empty: 'stgEmpty', ph: 'customStgPh', list: props.form.stage_fields, suggestions: stgSuggestions.value },
+  { id: 'stg', icon: 'layer-group', hint: 'stgHint', empty: 'stgEmpty', ph: 'customStgPh', list: props.form.stage_fields, suggestions: stgSuggestions.value },
 ])
 const labelled = (list) => list.map((sg) => ({ ...sg, label: t(K + 'sug.' + sg.key) }))
 

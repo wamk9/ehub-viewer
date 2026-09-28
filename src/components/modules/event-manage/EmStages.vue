@@ -4,7 +4,7 @@ import OrganizationEventStage from '@/helpers/communication/OrganizationEventSta
 import { toast } from '@/helpers/toast.js';
 import { stageState, roundState, apiError } from './store.js';
 
-const ROUND_ICONS = ['road', 'stopwatch', 'flag-checkered'];
+const ROUND_ICONS = ['road', 'stopwatch', 'flag'];
 
 function slugify(v) {
   return (v || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -35,7 +35,7 @@ export default {
     stageState,
     roundState,
     roundIcon(i, total) {
-      return total === 3 ? ROUND_ICONS[i] : (i === total - 1 ? 'flag-checkered' : 'circle-play');
+      return total === 3 ? ROUND_ICONS[i] : (i === total - 1 ? 'flag' : 'circle-play');
     },
     fmtDT(d) {
       if (!d) return '—';
@@ -192,7 +192,7 @@ export default {
 
     <div v-if="!stages.length" class="cc">
       <div class="cc-empty">
-        <font-awesome-icon :icon="['fas', 'flag-checkered']" class="ico" />
+        <font-awesome-icon :icon="['fas', 'layer-group']" class="ico" />
         {{ $t('pages.event.manage.stg.empty') }}
       </div>
     </div>
@@ -228,7 +228,7 @@ export default {
             </button>
           </template>
           <button v-if="canRun && stageState(s) === 'live'" class="btn btn-sm btn-primary round px-3" :disabled="busy === s.id" @click="control(s, 'finish')">
-            <font-awesome-icon :icon="['fas', 'flag-checkered']" class="me-1" />{{ $t('pages.event.manage.stg.finish') }}
+            <font-awesome-icon :icon="['fas', 'flag']" class="me-1" />{{ $t('pages.event.manage.stg.finish') }}
           </button>
           <button v-if="canRun && !ev.finished" class="act-btn" :title="$t('pages.event.manage.stg.edit')" @click="openEdit(s)"><font-awesome-icon :icon="['fas', 'pen']" /></button>
           <button v-if="canRun && !s.initialized" class="act-btn del" @click="remove(s)"><font-awesome-icon :icon="['fas', 'trash']" /></button>

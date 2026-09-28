@@ -15,7 +15,7 @@ import EmAdvanced from '@/components/modules/event-manage/EmAdvanced.vue';
 const PANELS = [
   { key: 'overview', icon: 'gauge-high', comp: 'EmOverview' },
   { key: 'regs', icon: 'id-card', comp: 'EmRegistrations' },
-  { key: 'stages', icon: 'flag-checkered', comp: 'EmStages' },
+  { key: 'stages', icon: 'layer-group', comp: 'EmStages' },
   { key: 'results', icon: 'ranking-star', comp: 'EmResults' },
   { key: 'news', icon: 'bullhorn', comp: 'EmNews' },
   { key: 'live', icon: 'tower-broadcast', comp: 'EmLive' },

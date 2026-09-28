@@ -407,7 +407,7 @@ onMounted(() => {
         <!-- Stats -->
         <div class="stat-grid mb-4">
           <div class="stat-card">
-            <div class="sc-ico" style="background:var(--ehub-primary-tint);color:var(--ehub-primary)"><font-awesome-icon :icon="['fas', 'flag-checkered']" /></div>
+            <div class="sc-ico" style="background:var(--ehub-primary-tint);color:var(--ehub-primary)"><font-awesome-icon :icon="['fas', 'trophy']" /></div>
             <div class="sc-val">{{ profile.stats.events }}</div>
             <div class="sc-lbl">{{ $t('users.profile.overview.stats.events') }}</div>
           </div>

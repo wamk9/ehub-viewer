@@ -135,7 +135,7 @@ export default {
               </div>
             </div>
             <div class="summary-pill">
-              <div class="sp-icon primary"><font-awesome-icon :icon="['fas', 'flag-checkered']" /></div>
+              <div class="sp-icon primary"><font-awesome-icon :icon="['fas', 'trophy']" /></div>
               <div class="sp-text">
                 <span class="sp-num">{{ totalEvents }}</span>
                 <span class="sp-lbl">{{ $t('pages.organization.mine.summary.events') }}</span>
@@ -198,7 +198,7 @@ export default {
                 <font-awesome-icon :icon="['fas', 'sliders']" /> {{ $t('pages.organization.mine.actions.manage') }}
               </router-link>
               <router-link :to="`/org/${org.route}`" class="btn-maction">
-                <font-awesome-icon :icon="['fas', 'flag-checkered']" /> {{ $t('pages.organization.mine.actions.events') }}
+                <font-awesome-icon :icon="['fas', 'trophy']" /> {{ $t('pages.organization.mine.actions.events') }}
               </router-link>
               <router-link :to="`/org/${org.route}/manage`" class="btn-maction">
                 <font-awesome-icon :icon="['fas', 'users']" /> {{ $t('pages.organization.mine.actions.members') }}
@@ -209,12 +209,12 @@ export default {
                 <font-awesome-icon :icon="['fas', 'sliders']" /> {{ $t('pages.organization.mine.actions.manage') }}
               </router-link>
               <router-link :to="`/org/${org.route}`" class="btn-maction">
-                <font-awesome-icon :icon="['fas', 'flag-checkered']" /> {{ $t('pages.organization.mine.actions.events') }}
+                <font-awesome-icon :icon="['fas', 'trophy']" /> {{ $t('pages.organization.mine.actions.events') }}
               </router-link>
             </template>
             <template v-else>
               <router-link :to="`/org/${org.route}`" class="btn-maction primary-action">
-                <font-awesome-icon :icon="['fas', 'flag-checkered']" /> {{ $t('pages.organization.mine.actions.events') }}
+                <font-awesome-icon :icon="['fas', 'trophy']" /> {{ $t('pages.organization.mine.actions.events') }}
               </router-link>
             </template>
           </template>
