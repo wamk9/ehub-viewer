@@ -93,6 +93,7 @@ export default {
     embed: 'Show player on the event page', session: 'Session in progress', none: 'No session in progress',
   },
   fin: {
+    prize_hint: 'Each winner can receive a share of the pool, a product, or both.',
     title: 'Financial', sub: 'Revenue, payments and prize pool',
     gross: 'Confirmed revenue', ehub_fee: 'eHub fee (est.)', net: 'Estimated net', to_receive: 'Receivable (pending)',
     fee_hint: 'Gateway fees not included. Estimate: {p}% per registration, minimum {m}.',

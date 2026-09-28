@@ -66,7 +66,7 @@ export default {
     slotsLabel: 'Vagas', maxSlots: 'Máximo de inscritos', slotsHint: 'Deixe vazio para ilimitado.',
     slotsHintGroups: 'Obrigatório para o formato de grupos. Definido pelo Configurador de Grupos no Cronograma.',
     minSlots: 'Mínimo para realizar', minSlotsHint: 'Mínimo de inscritos esperado para o evento acontecer (informativo).',
-    feeLabel: 'Inscrição', prize: 'Premiação total', prizeHint: 'Opcional. Deixe vazio se não houver premiação em dinheiro.',
+    feeLabel: 'Inscrição', prize: 'Premiação total', prizeDist: 'Quem recebe o quê', prizeDistHint: 'Defina a premiação de cada colocação ou prêmio especial (ex.: volta mais rápida, MVP): uma parte do valor em dinheiro, um produto, ou os dois. Deixe o nome em branco para usar a colocação.', prizeHint: 'Opcional. Deixe vazio se não houver premiação em dinheiro.',
     requirements: 'Requisitos de participação', requirementsPh: 'ex: Licença categoria B; iRating mínimo 2000; residir no Brasil…',
   },
   s5: {

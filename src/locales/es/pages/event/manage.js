@@ -93,6 +93,7 @@ export default {
     embed: 'Mostrar reproductor en la página del evento', session: 'Sesión en curso', none: 'Ninguna sesión en curso',
   },
   fin: {
+    prize_hint: 'Cada premiado puede recibir parte del valor, un producto o ambos.',
     title: 'Financiero', sub: 'Ingresos, pagos y premios del evento',
     gross: 'Ingresos confirmados', ehub_fee: 'Tarifa eHub (est.)', net: 'Neto estimado', to_receive: 'Por cobrar (pendientes)',
     fee_hint: 'No incluye comisiones de la pasarela. Estimación: {p}% por inscripción, mínimo {m}.',

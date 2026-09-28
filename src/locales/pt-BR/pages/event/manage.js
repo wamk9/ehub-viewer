@@ -93,6 +93,7 @@ export default {
     embed: 'Exibir player na página do evento', session: 'Sessão em andamento', none: 'Nenhuma sessão em andamento',
   },
   fin: {
+    prize_hint: 'Cada premiado pode receber parte do valor, um produto ou os dois.',
     title: 'Financeiro', sub: 'Receita, pagamentos e premiação do evento',
     gross: 'Receita confirmada', ehub_fee: 'Taxa eHub (est.)', net: 'Líquido estimado', to_receive: 'A receber (pendentes)',
     fee_hint: 'Taxas do gateway não incluídas. Estimativa: {p}% por inscrição, mínimo {m}.',

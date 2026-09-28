@@ -3,16 +3,15 @@ import InitialsAvatar from '@/components/general/InitialsAvatar.vue';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import { toast } from '@/helpers/toast.js';
 import { EHUB_FEE, userName, apiError } from './store.js';
-
-const MEDALS = ['#d4a20f', '#8d99a6', '#b06a3b'];
+import EhubPrizeEditor from '@/components/modules/event-prizes/EhubPrizeEditor.vue';
+import { normalizePrizes, cleanPrizes, prizeSplit, percentSum } from '@/components/modules/event-prizes/prizes.js';
 
 export default {
   name: 'EmFinance',
-  components: { InitialsAvatar },
+  components: { InitialsAvatar, EhubPrizeEditor },
   inject: ['em'],
   data() {
-    const split = this.em.event.event_data?.prize_split;
-    return { split: Array.isArray(split) && split.length ? [...split] : [50, 30, 20], saving: false };
+    return { prizes: normalizePrizes(this.em.event.event_data), saving: false };
   },
   computed: {
     ev() { return this.em.event; },
@@ -28,8 +27,8 @@ export default {
           || new Date(b.confirmed_at || b.registered_at) - new Date(a.confirmed_at || a.registered_at));
     },
     prize() { return Number(this.ev.prize_pool_amount) || 0; },
-    splitSum() { return this.split.reduce((s, p) => s + (Number(p) || 0), 0); },
-    medals() { return MEDALS; },
+    splitSum() { return percentSum(this.prizes); },
+    canEdit() { return this.em.can('finance.write'); },
     feePercent() { return EHUB_FEE.percent; },
     feeMin() { return EHUB_FEE.min; },
   },
@@ -43,11 +42,13 @@ export default {
     },
     async saveSplit() {
       this.saving = true;
-      const prize_split = this.split.map((p) => Number(p) || 0);
-      const res = await OrganizationEvent.update(this.em.orgRoute, this.em.eventRoute, { event_data: { prize_split } });
+      const prizes = cleanPrizes(this.prizes);
+      const prize_split = prizeSplit(prizes);
+      const res = await OrganizationEvent.update(this.em.orgRoute, this.em.eventRoute, { event_data: { prizes, prize_split } });
       this.saving = false;
       if (res.code === 200) {
-        this.ev.event_data = { ...(this.ev.event_data || {}), prize_split };
+        this.ev.event_data = { ...(this.ev.event_data || {}), prizes, prize_split };
+        this.prizes = prizes;
         toast.success(this.$t('pages.event.manage.toast.saved'));
       } else toast.error(apiError(this, res.data));
     },
@@ -118,33 +119,17 @@ export default {
         <div class="cc-hd">
           <h3><font-awesome-icon :icon="['fas', 'trophy']" style="color:var(--ehub-gold)" />{{ $t('pages.event.manage.fin.prize') }}</h3>
         </div>
-        <div v-if="!prize" class="cc-empty">{{ $t('pages.event.manage.fin.prize_none') }}</div>
-        <template v-else>
-          <div class="prize-row total">
-            <span class="lbl">{{ $t('pages.event.manage.fin.prize_total') }}</span>
-            <span class="amt" style="font-size:1.05rem">{{ money(prize, ev.prize_pool_currency) }}</span>
+        <div v-if="prize" class="prize-row total">
+          <span class="lbl">{{ $t('pages.event.manage.fin.prize_total') }}</span>
+          <span class="amt" style="font-size:1.05rem">{{ money(prize, ev.prize_pool_currency) }}</span>
+        </div>
+        <div class="prize-body">
+          <p class="prize-hint">{{ $t('pages.event.manage.fin.prize_hint') }}</p>
+          <EhubPrizeEditor v-model="prizes" :total="prize" :currency="ev.prize_pool_currency || ev.currency || 'BRL'" />
+          <div v-if="canEdit" class="split-ft">
+            <button class="btn btn-sm btn-primary round px-3" :disabled="saving || splitSum > 100" @click="saveSplit">{{ $t('pages.event.manage.fin.save_split') }}</button>
           </div>
-          <div class="split-hd">
-            <span>{{ $t('pages.event.manage.fin.split') }}</span>
-            <span :class="{ bad: splitSum !== 100 }">{{ $t('pages.event.manage.fin.split_sum', { n: splitSum }) }}</span>
-          </div>
-          <div v-for="(p, i) in split" :key="i" class="prize-row">
-            <span class="medal" :style="{ background: medals[i] || 'var(--ehub-muted)' }">{{ i + 1 }}</span>
-            <span class="lbl">{{ $t('pages.event.manage.fin.place', { n: i + 1 }) }}</span>
-            <div class="input-group input-group-sm" style="width:92px">
-              <input v-model.number="split[i]" type="number" min="0" max="100" class="form-control" />
-              <span class="input-group-text">%</span>
-            </div>
-            <span class="amt">{{ money(prize * (Number(p) || 0) / 100, ev.prize_pool_currency) }}</span>
-            <button v-if="split.length > 1" class="act-btn del" @click="split.splice(i, 1)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
-          </div>
-          <div class="split-ft">
-            <button class="btn btn-sm btn-outline-secondary round px-3" :disabled="split.length >= 10" @click="split.push(0)">
-              <font-awesome-icon :icon="['fas', 'plus']" class="me-1" />{{ $t('pages.event.manage.fin.add_place') }}
-            </button>
-            <button class="btn btn-sm btn-primary round px-3" :disabled="saving || splitSum !== 100" @click="saveSplit">{{ $t('pages.event.manage.fin.save_split') }}</button>
-          </div>
-        </template>
+        </div>
       </div>
     </div>
   </section>
@@ -157,15 +142,18 @@ export default {
 .fin-kpi .l { font-size: .72rem; color: var(--ehub-muted); font-weight: 500; }
 .fin-kpi.hl { background: var(--ehub-primary); border-color: var(--ehub-primary); }
 .fin-kpi.hl .v, .fin-kpi.hl .l { color: #fff; }
-.fin-2 { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.fin-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
 .prize-row { display: flex; align-items: center; gap: 12px; padding: 10px 17px; border-bottom: 1px solid var(--ehub-line); }
 .prize-row.total { background: color-mix(in srgb, var(--ehub-field-bg) 60%, transparent); }
 .prize-row .lbl { flex: 1; font-size: .85rem; font-weight: 600; color: var(--ehub-ink); }
 .prize-row .amt { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 90px; text-align: right; color: var(--ehub-ink); }
 .medal { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 800; color: #fff; flex-shrink: 0; }
+
+.prize-body { padding: 12px 17px 14px; }
+.prize-hint { font-size: .76rem; color: var(--ehub-muted); margin: 0 0 12px; }
 .split-hd { display: flex; justify-content: space-between; padding: 10px 17px 6px; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); }
 .split-hd .bad { color: #e23b3b; }
-.split-ft { display: flex; justify-content: space-between; gap: 8px; padding: 12px 17px; flex-wrap: wrap; }
+.split-ft { display: flex; justify-content: flex-end; gap: 8px; padding-top: 12px; flex-wrap: wrap; }
 @media (max-width: 1100px) {
   .fin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .fin-2 { grid-template-columns: minmax(0, 1fr); }

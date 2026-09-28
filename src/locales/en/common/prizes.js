@@ -1,0 +1,14 @@
+export default {
+  title: 'Prizes',
+  total: 'Total prize pool',
+  who: 'Who receives',
+  cash: 'Share of the pool',
+  product: 'Product / gift',
+  place: 'Place {n}',
+  productPh: 'E.g. trophy, medal, gear… (optional)',
+  remove: 'Remove',
+  add: 'Add winner',
+  empty: 'No prizes defined yet. Add places or special awards.',
+  sum: '{n}% distributed · {left} left',
+  over: 'The total reaches {n}%, above 100%.',
+};

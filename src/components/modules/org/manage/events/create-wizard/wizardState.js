@@ -1,3 +1,4 @@
+import { normalizePrizes, cleanPrizes, prizeSplit } from '@/components/modules/event-prizes/prizes.js'
 import { reactive } from 'vue'
 
 export function slugify(str) {
@@ -34,6 +35,7 @@ export function createWizardForm() {
     // Step 3 — Específicas (form_schema dinâmico)
     form_schema_id: null,
     event_data: {},
+    prizes: [], // who gets what — saved inside event_data.prizes
 
     // Step 4 — Campos do Formulário
     event_fields: [],
@@ -125,6 +127,7 @@ export function populateFormFromEvent(form, event, baseUrl) {
     form[key] = toDateInput(form[key])
   }
   form.route_manually_edited = true
+  form.prizes = normalizePrizes(event.event_data)
   if (event.logo_image) form._existing_logo_url = baseUrl + 'storage/' + event.logo_image
   if (event.cover_image) form._existing_cover_url = baseUrl + 'storage/' + event.cover_image
   // Remember what the event had, so clearing an image in the wizard deletes it on save.
@@ -159,7 +162,8 @@ export function buildEventPayload(form) {
     format: form.format || null,
     location: form.runmode === 'irl' ? (form.location.trim() || null) : null,
     form_schema_id: form.form_schema_id,
-    event_data: form.event_data,
+    // Step 3 rebuilds event_data from its schema, so prizes are merged in here.
+    event_data: { ...form.event_data, prizes: cleanPrizes(form.prizes), prize_split: prizeSplit(cleanPrizes(form.prizes)) },
     // Rows left without a name are dropped instead of failing validation.
     event_fields: form.event_fields.filter(f => f.name?.trim()),
     stage_fields: form.stage_fields.filter(f => f.name?.trim()),

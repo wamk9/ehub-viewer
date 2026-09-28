@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import OrganizationBilling from '@/helpers/communication/OrganizationBilling.js'
+import EhubPrizeEditor from '@/components/modules/event-prizes/EhubPrizeEditor.vue'
 
 const props = defineProps({
   form: { type: Object, required: true },
@@ -144,6 +145,12 @@ watch(() => props.form.format, (fmt) => {
         </div>
       </div>
       <p class="field-hint">{{ $t('pages.organization.manage.eventWizard.s4.prizeHint') }}</p>
+    </div>
+
+    <div class="form-section">
+      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s4.prizeDist') }}</label>
+      <p class="field-hint mb-3">{{ $t('pages.organization.manage.eventWizard.s4.prizeDistHint') }}</p>
+      <EhubPrizeEditor v-model="form.prizes" :total="Number(form.prize_pool_amount) || 0" :currency="form.prize_pool_currency" />
     </div>
 
     <div class="form-section">

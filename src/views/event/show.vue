@@ -6,6 +6,8 @@ import OrganizationEventArticle from '@/helpers/communication/OrganizationEventA
 import SystemVars from '@/helpers/General/SystemVars';
 import { toast } from '@/helpers/toast.js';
 import EhubRegistrationModal from '@/components/modules/event-registration/EhubRegistrationModal.vue';
+import EhubPrizeList from '@/components/modules/event-prizes/EhubPrizeList.vue';
+import { normalizePrizes } from '@/components/modules/event-prizes/prizes.js';
 import { initialValues, validateAnswers } from '@/components/modules/event-registration/regForm.js';
 
 const CAT_GRAD = {
@@ -43,7 +45,7 @@ const CAT_ICON = {
 }
 
 export default {
-  components: { EhubRegistrationModal },
+  components: { EhubRegistrationModal, EhubPrizeList },
   data() {
     return {
       event: null,
@@ -93,6 +95,10 @@ export default {
     extraInfo() {
       return (Array.isArray(this.event?.event_fields) ? this.event.event_fields : [])
         .filter(f => f?.name && String(f.value ?? '').trim());
+    },
+    prizeTotal() { return Number(this.event?.prize_pool_amount) || 0; },
+    prizes() {
+      return normalizePrizes(this.event?.event_data).filter(p => p.product || (this.prizeTotal && p.percent));
     },
     regTemplate() {
       return Array.isArray(this.event?.registration_form_template)
@@ -564,7 +570,11 @@ export default {
               </div>
             </div>
           </div>
-          <div class="ev-empty" v-if="!event.description && !extraInfo.length && !effectiveStartAt && !event.max_registrations">
+          <div v-if="prizeTotal || prizes.length" class="mb-4">
+            <h3 class="ev-sec-title">{{ $t('common.prizes.title') }}</h3>
+            <EhubPrizeList :prizes="prizes" :total="prizeTotal" :currency="event.prize_pool_currency || event.currency || 'BRL'" />
+          </div>
+          <div class="ev-empty" v-if="!event.description && !extraInfo.length && !prizeTotal && !prizes.length && !effectiveStartAt && !event.max_registrations">
             <font-awesome-icon :icon="['fas', 'circle-info']" />
             <p class="mb-0 mt-2">—</p>
           </div>
@@ -988,6 +998,7 @@ html[data-bs-theme="dark"] .pos-badge.p1 { color: var(--ehub-gold, #f59e0b); }
 .modal-card__header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--ehub-line); font-size: 1rem; font-weight: 600; color: var(--ehub-ink); }
 .modal-card__body { padding: 1.2rem 1.4rem; }
 .modal-card__footer { display: flex; justify-content: flex-end; gap: .5rem; padding: .9rem 1.4rem; border-top: 1px solid var(--ehub-line); }
+.ev-sec-title { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); margin: 0 0 8px; }
 .ev-extra-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
 .ev-extra { display: flex; gap: 10px; align-items: flex-start; background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 12px; padding: 12px 14px; min-width: 0; }
 .ev-extra__ico { color: var(--org-accent, var(--ehub-primary)); margin-top: 3px; width: 16px; flex-shrink: 0; }

@@ -1,0 +1,14 @@
+export default {
+  title: 'Premios',
+  total: 'Premio total',
+  who: 'Quién recibe',
+  cash: 'Parte del valor',
+  product: 'Producto / obsequio',
+  place: '{n}º lugar',
+  productPh: 'Ej.: trofeo, medalla, periférico… (opcional)',
+  remove: 'Eliminar',
+  add: 'Agregar premiado',
+  empty: 'Aún no hay premios definidos. Agrega posiciones o premios especiales.',
+  sum: '{n}% distribuido · quedan {left}',
+  over: 'La suma llega a {n}%, por encima de 100%.',
+};
