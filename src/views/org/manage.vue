@@ -235,6 +235,8 @@ export default {
 
   async created() {
     await this.loadOrg();
+    // Opening /finances directly (reload, deep link, gateway return) never goes through switchPanel.
+    if (this.activePanel === 'financeiro' && !this.finLoaded) this.loadFinances();
     await this.loadEvents();
     await this.loadMembers();
     this.loadActivities();
@@ -573,7 +575,8 @@ export default {
       ]);
       this.finBillingLoading = false;
       this.finGatewaysLoading = false;
-      this.finLoaded = true;
+      // Only cache a successful load, so a failed request is retried next time the panel opens.
+      this.finLoaded = billingRes.code === 200 && gwRes.code === 200;
       if (billingRes.code === 200) this.finBilling = billingRes.data;
       if (gwRes.code === 200 && Array.isArray(gwRes.data)) this.finGateways = gwRes.data;
       const connected = this.$route?.query?.connected;
