@@ -1,9 +1,10 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { slugify } from '../wizardState.js'
 import IconPickerModal from '../IconPickerModal.vue'
-import EhubRegistrationFields from '@/components/modules/event-registration/EhubRegistrationFields.vue'
+import EhubRegistrationModal from '@/components/modules/event-registration/EhubRegistrationModal.vue'
+import { initialValues, validateAnswers } from '@/components/modules/event-registration/regForm.js'
 
 const props = defineProps({
   form: { type: Object, required: true },
@@ -145,8 +146,23 @@ function toggle(i) {
   openIndex.value = openIndex.value === i ? null : i
 }
 
-// live preview answers (never saved)
+// Preview modal: the exact public registration dialog; answers are never sent.
+const showPreview = ref(false)
 const previewData = ref({})
+const previewErrors = ref({})
+const previewOk = ref(false)
+const previewFields = computed(() => props.form.registration_form_template.filter((f) => f.label?.trim()))
+function openPreview() {
+  previewData.value = initialValues(previewFields.value)
+  previewErrors.value = {}
+  previewOk.value = false
+  showPreview.value = true
+}
+watch(previewData, () => { previewOk.value = false })
+function confirmPreview() {
+  previewErrors.value = validateAnswers(previewFields.value, previewData.value)
+  previewOk.value = !Object.keys(previewErrors.value).length
+}
 
 // ── icon picker ─────────────────────────────────────────────────────────
 const iconTarget = ref(null)
@@ -176,7 +192,7 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
         <div v-for="(f, i) in form.event_fields" :key="i" class="fb-row fb-row-evt">
           <button type="button" class="icon-btn" :title="$t(K + 'chooseIcon')" @click="iconTarget = f"><font-awesome-icon :icon="['fas', f.icon || 'circle-info']" /></button>
           <input type="text" class="form-control form-control-sm" :value="f.name" maxlength="120" :placeholder="$t(K + 'customEvtPh')" @input="onLabel(f, form.event_fields, 'key', $event.target.value)" />
-          <input type="text" class="form-control form-control-sm" v-model="f.value" maxlength="255" :placeholder="$t(K + 'valuePh')" />
+          <textarea class="form-control form-control-sm fb-desc-inp" v-model="f.value" rows="2" maxlength="500" :placeholder="$t(K + 'valuePh')"></textarea>
           <button type="button" class="row-btn danger" :title="$t(K + 'remove')" @click="form.event_fields.splice(i, 1)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
         </div>
         <p v-if="!form.event_fields.length" class="fb-empty">{{ $t(K + 'evtEmpty') }}</p>
@@ -240,7 +256,7 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
         <span class="fb-where"><font-awesome-icon :icon="['fas', 'eye']" />{{ $t(K + 'regWhere') }}</span>
       </header>
 
-      <div class="fb-body reg-grid">
+      <div class="fb-body">
         <!-- builder -->
         <div class="reg-builder">
           <div v-for="(f, i) in form.registration_form_template" :key="i" class="reg-card" :class="{ open: openIndex === i }">
@@ -324,6 +340,9 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
             <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="addReg()">
               <font-awesome-icon :icon="['fas', 'plus']" class="me-1" />{{ $t(K + 'addField') }}
             </button>
+            <button type="button" class="btn btn-sm btn-primary round px-3" @click="openPreview">
+              <font-awesome-icon :icon="['fas', 'eye']" class="me-1" />{{ $t(K + 'previewBtnOpen') }}
+            </button>
             <template v-if="regSuggestions.length">
               <span class="fb-sug-lbl"><font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" />{{ $t(K + 'suggestions') }}</span>
               <button v-for="s in regSuggestions" :key="s.key" type="button" class="sug-chip" @click="addReg(s)">
@@ -333,18 +352,23 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
           </div>
         </div>
 
-        <!-- live preview -->
-        <aside class="reg-preview">
-          <div class="prev-head"><font-awesome-icon :icon="['fas', 'eye']" />{{ $t(K + 'preview') }}</div>
-          <div class="prev-body">
-            <div class="prev-event">{{ form.name || $t(K + 'previewEvent') }}</div>
-            <EhubRegistrationFields v-if="form.registration_form_template.length" :fields="form.registration_form_template" v-model="previewData" />
-            <p v-else class="prev-empty">{{ $t(K + 'previewEmpty') }}</p>
-            <button type="button" class="btn btn-primary btn-sm w-100 mt-3" disabled>{{ $t(K + 'previewBtn') }}</button>
-          </div>
-        </aside>
       </div>
     </section>
+
+    <EhubRegistrationModal
+      v-if="showPreview"
+      preview
+      :preview-ok="previewOk"
+      :event-name="form.name || $t(K + 'previewEvent')"
+      :accent="form.color || ''"
+      :fee="Number(form.fee) || 0"
+      :currency="form.currency || ''"
+      :fields="previewFields"
+      v-model="previewData"
+      :errors="previewErrors"
+      @close="showPreview = false"
+      @confirm="confirmPreview"
+    />
 
     <IconPickerModal v-if="iconTarget" @close="iconTarget = null" @update:model-value="onIconPicked" />
   </div>
@@ -369,6 +393,8 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
 .fb-cols-evt { grid-template-columns: 36px 1fr 1.4fr 28px; }
 .fb-cols-evt span:first-child { grid-column: 2; }
 .fb-row { display: grid; gap: 8px; align-items: center; margin-bottom: 8px; }
+.fb-row-evt { align-items: start; }
+.fb-desc-inp { resize: vertical; min-height: 32px; }
 .fb-row-evt { grid-template-columns: 36px 1fr 1.4fr 28px; }
 .fb-row-stg { grid-template-columns: 36px 1fr 28px; }
 .fb-add { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
@@ -384,7 +410,6 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
 .row-btn:disabled { opacity: .35; cursor: default; }
 .row-btn.danger:hover { border-color: color-mix(in srgb,#e23b3b 35%,transparent); background: color-mix(in srgb,#e23b3b 10%,transparent); color: #e23b3b; }
 
-.reg-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 16px; align-items: start; }
 .reg-card { border: 1px solid var(--ehub-line); border-radius: 10px; margin-bottom: 8px; background: var(--ehub-card); }
 .reg-card.open { border-color: var(--ehub-primary); box-shadow: 0 0 0 3px var(--ehub-primary-tint); }
 .reg-card-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; min-width: 0; }
@@ -416,19 +441,10 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
 .req-switch strong { display: block; font-size: .8rem; color: var(--ehub-ink); }
 .req-switch small { display: block; font-size: .72rem; color: var(--ehub-muted); }
 
-.reg-preview { position: sticky; top: 16px; border: 1px solid var(--ehub-line); border-radius: 12px; background: var(--ehub-page, var(--ehub-field-bg)); overflow: hidden; }
-.prev-head { display: flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 9px 14px; border-bottom: 1px solid var(--ehub-line); background: var(--ehub-card); }
-.prev-body { padding: 14px; --org-accent: var(--ehub-primary); }
-.prev-event { font-size: .78rem; color: var(--ehub-muted); margin-bottom: 12px; }
-.prev-empty { font-size: .8rem; color: var(--ehub-muted); margin: 0; }
 
-@media (max-width: 860px) {
-  .reg-grid { grid-template-columns: minmax(0, 1fr); }
-  .reg-preview { position: static; }
-}
 @media (max-width: 560px) {
   .fb-row-evt, .fb-cols-evt { grid-template-columns: 36px 1fr 28px; }
-  .fb-row-evt input:nth-of-type(2) { grid-column: 2; grid-row: 2; }
+  .fb-row-evt textarea { grid-column: 2; grid-row: 2; }
   .fb-cols-evt { display: none; }
   .type-chip { display: none; }
 }

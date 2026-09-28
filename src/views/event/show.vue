@@ -5,7 +5,7 @@ import OrganizationEventRegistration from '@/helpers/communication/OrganizationE
 import OrganizationEventArticle from '@/helpers/communication/OrganizationEventArticle.js';
 import SystemVars from '@/helpers/General/SystemVars';
 import { toast } from '@/helpers/toast.js';
-import EhubRegistrationFields from '@/components/modules/event-registration/EhubRegistrationFields.vue';
+import EhubRegistrationModal from '@/components/modules/event-registration/EhubRegistrationModal.vue';
 import { initialValues, validateAnswers } from '@/components/modules/event-registration/regForm.js';
 
 const CAT_GRAD = {
@@ -43,7 +43,7 @@ const CAT_ICON = {
 }
 
 export default {
-  components: { EhubRegistrationFields },
+  components: { EhubRegistrationModal },
   data() {
     return {
       event: null,
@@ -816,34 +816,19 @@ export default {
     </div>
 
     <!-- ═══ REGISTER MODAL ═══ -->
-    <div v-if="showRegisterModal" class="modal-overlay" @click.self="showRegisterModal = false">
-      <div class="modal-card">
-        <div class="modal-card__header">
-          <h5 class="mb-0">{{ $t('events.show.registration.modal.title') }}</h5>
-          <button class="btn-close btn-close-white" @click="showRegisterModal = false"></button>
-        </div>
-        <div class="modal-card__body">
-          <p class="text-muted small mb-3">{{ event?.name }}</p>
-          <div v-if="event?.fee > 0" class="alert alert-warning small mb-3">
-            <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />
-            {{ $t('events.show.registration.modal.fee_warning', { fee: (event.currency?.toUpperCase() || '') + ' ' + Number(event.fee).toFixed(2) }) }}
-          </div>
-          <template v-if="regTemplate.length">
-            <EhubRegistrationFields :fields="regTemplate" v-model="formData" :errors="formErrors" />
-          </template>
-          <p v-else class="mb-0 small">{{ $t('events.show.registration.modal.confirm_text') }}</p>
-        </div>
-        <div class="modal-card__footer">
-          <button class="btn btn-outline-secondary btn-sm" @click="showRegisterModal = false">
-            {{ $t('events.show.registration.modal.cancel') }}
-          </button>
-          <button class="btn btn-primary btn-sm" :disabled="registering" @click="confirmRegister">
-            <span v-if="registering" class="spinner-border spinner-border-sm me-1"></span>
-            {{ $t('events.show.registration.modal.confirm') }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <EhubRegistrationModal
+      v-if="showRegisterModal"
+      :event-name="event?.name || ''"
+      :accent="orgColor || ''"
+      :fee="Number(event?.fee) || 0"
+      :currency="event?.currency || ''"
+      :fields="regTemplate"
+      v-model="formData"
+      :errors="formErrors"
+      :loading="registering"
+      @close="showRegisterModal = false"
+      @confirm="confirmRegister"
+    />
 
   </div>
 </template>
@@ -1008,7 +993,7 @@ html[data-bs-theme="dark"] .pos-badge.p1 { color: var(--ehub-gold, #f59e0b); }
 .ev-extra__ico { color: var(--org-accent, var(--ehub-primary)); margin-top: 3px; width: 16px; flex-shrink: 0; }
 .ev-extra__txt { min-width: 0; }
 .ev-extra__lbl { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); }
-.ev-extra__val { font-size: .88rem; font-weight: 600; color: var(--ehub-ink); overflow-wrap: anywhere; }
+.ev-extra__val { font-size: .86rem; font-weight: 500; color: var(--ehub-ink); overflow-wrap: anywhere; white-space: pre-line; }
 a.ev-extra__val { color: var(--org-accent, var(--ehub-primary)); }
 .stage-info { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .stage-info__chip { display: inline-flex; align-items: center; gap: 5px; font-size: .74rem; color: var(--ehub-ink); background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 50rem; padding: 2px 10px; }
