@@ -339,7 +339,8 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
 .step-title { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 4px; letter-spacing: -.02em; }
 .step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 20px; }
 
-.fb-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--ehub-line); margin-bottom: 18px; overflow-x: auto; }
+.fb-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--ehub-line); margin-bottom: 18px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.fb-tabs::-webkit-scrollbar { display: none; }
 .fb-tab { display: inline-flex; align-items: center; gap: 7px; border: 0; background: transparent; color: var(--ehub-muted); font-size: .84rem; font-weight: 600; padding: 9px 12px; border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; white-space: nowrap; }
 .fb-tab svg { font-size: .78rem; }
 .fb-tab:hover { color: var(--ehub-ink); }
