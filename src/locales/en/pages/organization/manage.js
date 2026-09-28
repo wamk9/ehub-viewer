@@ -230,6 +230,7 @@ export default {
     status_empty: 'No charges',
     card_title: 'Credit Card',
     card_desc: 'Used to pay the volumetry bill to eHub.',
+    card_exp: 'expires {exp}',
     card_registered: 'Card registered',
     no_card: 'No card registered.',
     add_card: 'Add card',

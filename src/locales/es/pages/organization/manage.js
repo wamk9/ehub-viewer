@@ -230,6 +230,7 @@ export default {
     status_empty: 'Sin cargos',
     card_title: 'Tarjeta de Crédito',
     card_desc: 'Utilizada para el pago de la volumetría a eHub.',
+    card_exp: 'vence {exp}',
     card_registered: 'Tarjeta registrada',
     no_card: 'Ninguna tarjeta registrada.',
     add_card: 'Agregar tarjeta',

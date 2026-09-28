@@ -1173,7 +1173,9 @@ export default {
           <div v-else class="d-flex align-items-center gap-3 flex-wrap">
             <div v-if="finBilling?.has_card" class="d-flex align-items-center gap-2" style="font-size:.87rem;color:var(--ehub-ink)">
               <font-awesome-icon :icon="['fas', 'credit-card']" style="color:var(--ehub-primary)" />
-              {{ $t('pages.organization.manage.financeiro.card_registered') }}
+              <span v-if="finBilling.card?.last4" style="text-transform:capitalize">{{ finBilling.card.brand }} •••• {{ finBilling.card.last4 }}</span>
+              <span v-else>{{ $t('pages.organization.manage.financeiro.card_registered') }}</span>
+              <span v-if="finBilling.card?.exp" class="td-muted" style="font-size:.78rem">· {{ $t('pages.organization.manage.financeiro.card_exp', { exp: finBilling.card.exp }) }}</span>
             </div>
             <span v-else style="font-size:.83rem;color:var(--ehub-muted)">{{ $t('pages.organization.manage.financeiro.no_card') }}</span>
             <button class="btn btn-sm btn-outline-primary round px-3" :disabled="finSettingUpCard" @click="finSetupCard">
