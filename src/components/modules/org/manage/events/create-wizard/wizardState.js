@@ -1,3 +1,4 @@
+import { normalizeTimezone, defaultTimezone } from '@/helpers/General/timezones.js'
 import { normalizePrizes, cleanPrizes, prizeSplit } from '@/components/modules/event-prizes/prizes.js'
 import { reactive } from 'vue'
 
@@ -57,7 +58,7 @@ export function createWizardForm() {
     registration_deadline: '',
     start_at: '',
     end_at: '',
-    timezone: 'BRT',
+    timezone: defaultTimezone(),
     stages: [], // local only — [{ id, name, route, stage_type, start_at, config }]
 
     // Step 7 — Regulamento
@@ -127,6 +128,7 @@ export function populateFormFromEvent(form, event, baseUrl) {
     form[key] = toDateInput(form[key])
   }
   form.route_manually_edited = true
+  form.timezone = normalizeTimezone(form.timezone)
   form.prizes = normalizePrizes(event.event_data)
   if (event.logo_image) form._existing_logo_url = baseUrl + 'storage/' + event.logo_image
   if (event.cover_image) form._existing_cover_url = baseUrl + 'storage/' + event.cover_image

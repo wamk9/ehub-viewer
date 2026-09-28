@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { slugify } from '../wizardState.js'
 import GroupsAutoFillModal from '../GroupsAutoFillModal.vue'
+import EhubTimezoneSelect from '@/components/inputs/EhubTimezoneSelect.vue'
 
 const props = defineProps({
   form: { type: Object, required: true },
@@ -137,15 +138,7 @@ function beforeStart(stage) {
 
     <div class="form-section">
       <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s3.timezone') }}</label>
-      <select class="form-select" v-model="form.timezone">
-        <option value="BRT">BRT — Brasília (UTC-3)</option>
-        <option value="ART">ART — Buenos Aires (UTC-3)</option>
-        <option value="CLT">CLT — Santiago (UTC-4)</option>
-        <option value="PET">PET — Lima (UTC-5)</option>
-        <option value="EST">EST — Nova York (UTC-5)</option>
-        <option value="UTC">UTC — Universal</option>
-        <option value="CET">CET — Lisboa / Madrid (UTC+1)</option>
-      </select>
+      <EhubTimezoneSelect v-model="form.timezone" />
     </div>
 
     <GroupsAutoFillModal v-if="showGroupsModal" :form="form" @close="showGroupsModal = false" />
