@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { slugify } from '../wizardState.js'
 import IconPickerModal from '../IconPickerModal.vue'
+import AddFieldMenu from '../AddFieldMenu.vue'
 import EhubRegistrationModal from '@/components/modules/event-registration/EhubRegistrationModal.vue'
 import { initialValues, validateAnswers } from '@/components/modules/event-registration/regForm.js'
 
@@ -164,6 +165,19 @@ function confirmPreview() {
   previewOk.value = !Object.keys(previewErrors.value).length
 }
 
+// ── tabs ─────────────────────────────────────────────────────────────────
+const tab = ref('reg')
+const tabs = computed(() => [
+  { id: 'reg', icon: 'clipboard-list', label: 'tabReg', count: props.form.registration_form_template.length },
+  { id: 'evt', icon: 'circle-info', label: 'tabEvt', count: props.form.event_fields.length },
+  { id: 'stg', icon: 'flag-checkered', label: 'tabStg', count: props.form.stage_fields.length },
+])
+const infoPanels = computed(() => [
+  { id: 'evt', icon: 'circle-info', hint: 'evtHint', empty: 'evtEmpty', ph: 'customEvtPh', list: props.form.event_fields, suggestions: evtSuggestions.value },
+  { id: 'stg', icon: 'flag-checkered', hint: 'stgHint', empty: 'stgEmpty', ph: 'customStgPh', list: props.form.stage_fields, suggestions: stgSuggestions.value },
+])
+const labelled = (list) => list.map((sg) => ({ ...sg, label: t(K + 'sug.' + sg.key) }))
+
 // ── icon picker ─────────────────────────────────────────────────────────
 const iconTarget = ref(null)
 function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon }
@@ -174,97 +188,35 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
     <h2 class="step-title">{{ $t(K + 'title') }}</h2>
     <p class="step-sub">{{ $t(K + 'sub') }}</p>
 
-    <!-- ═══ 1 · Event info ═══ -->
-    <section class="fb-block">
-      <header class="fb-head">
-        <span class="fb-num">1</span>
-        <div class="fb-head-txt">
-          <h3 class="fb-title">{{ $t(K + 'evtLabel') }}</h3>
-          <p class="fb-desc">{{ $t(K + 'evtHint') }}</p>
-        </div>
-        <span class="fb-where"><font-awesome-icon :icon="['fas', 'eye']" />{{ $t(K + 'evtWhere') }}</span>
-      </header>
+    <div class="fb-tabs" role="tablist">
+      <button v-for="tb in tabs" :key="tb.id" type="button" role="tab" class="fb-tab" :class="{ active: tab === tb.id }" @click="tab = tb.id">
+        <font-awesome-icon :icon="['fas', tb.icon]" />{{ $t(K + tb.label) }}
+        <span v-if="tb.count" class="fb-count">{{ tb.count }}</span>
+      </button>
+    </div>
 
-      <div class="fb-body">
-        <div v-if="form.event_fields.length" class="fb-cols fb-cols-evt">
-          <span>{{ $t(K + 'colName') }}</span><span>{{ $t(K + 'colValue') }}</span>
-        </div>
-        <div v-for="(f, i) in form.event_fields" :key="i" class="fb-row fb-row-evt">
-          <button type="button" class="icon-btn" :title="$t(K + 'chooseIcon')" @click="iconTarget = f"><font-awesome-icon :icon="['fas', f.icon || 'circle-info']" /></button>
-          <input type="text" class="form-control form-control-sm" :value="f.name" maxlength="120" :placeholder="$t(K + 'customEvtPh')" @input="onLabel(f, form.event_fields, 'key', $event.target.value)" />
-          <textarea class="form-control form-control-sm fb-desc-inp" v-model="f.value" rows="2" maxlength="500" :placeholder="$t(K + 'valuePh')"></textarea>
-          <button type="button" class="row-btn danger" :title="$t(K + 'remove')" @click="form.event_fields.splice(i, 1)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
-        </div>
-        <p v-if="!form.event_fields.length" class="fb-empty">{{ $t(K + 'evtEmpty') }}</p>
-
-        <div class="fb-add">
-          <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="addInfo(form.event_fields)">
-            <font-awesome-icon :icon="['fas', 'plus']" class="me-1" />{{ $t(K + 'addField') }}
-          </button>
-          <template v-if="evtSuggestions.length">
-            <span class="fb-sug-lbl"><font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" />{{ $t(K + 'suggestions') }}</span>
-            <button v-for="s in evtSuggestions" :key="s.key" type="button" class="sug-chip" @click="addInfo(form.event_fields, s)">
-              <font-awesome-icon :icon="['fas', s.icon]" />{{ $t(K + 'sug.' + s.key) }}
-            </button>
-          </template>
-        </div>
+    <!-- ═══ Registration form ═══ -->
+    <section v-if="tab === 'reg'" class="fb-panel">
+      <div class="fb-panel-head">
+        <p class="fb-desc">{{ $t(K + 'regHint') }}</p>
+        <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="openPreview">
+          <font-awesome-icon :icon="['fas', 'eye']" class="me-1" />{{ $t(K + 'previewBtnOpen') }}
+        </button>
       </div>
-    </section>
 
-    <!-- ═══ 2 · Stage info ═══ -->
-    <section class="fb-block">
-      <header class="fb-head">
-        <span class="fb-num">2</span>
-        <div class="fb-head-txt">
-          <h3 class="fb-title">{{ $t(K + 'stgLabel') }}</h3>
-          <p class="fb-desc">{{ $t(K + 'stgHint') }}</p>
-        </div>
-        <span class="fb-where"><font-awesome-icon :icon="['fas', 'eye']" />{{ $t(K + 'stgWhere') }}</span>
-      </header>
-
-      <div class="fb-body">
-        <div v-for="(f, i) in form.stage_fields" :key="i" class="fb-row fb-row-stg">
-          <button type="button" class="icon-btn" :title="$t(K + 'chooseIcon')" @click="iconTarget = f"><font-awesome-icon :icon="['fas', f.icon || 'circle-info']" /></button>
-          <input type="text" class="form-control form-control-sm" :value="f.name" maxlength="120" :placeholder="$t(K + 'customStgPh')" @input="onLabel(f, form.stage_fields, 'key', $event.target.value)" />
-          <button type="button" class="row-btn danger" :title="$t(K + 'remove')" @click="form.stage_fields.splice(i, 1)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
-        </div>
-        <p v-if="!form.stage_fields.length" class="fb-empty">{{ $t(K + 'stgEmpty') }}</p>
-        <p v-else class="fb-note"><font-awesome-icon :icon="['fas', 'circle-info']" />{{ $t(K + 'stgNote') }}</p>
-
-        <div class="fb-add">
-          <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="addInfo(form.stage_fields)">
-            <font-awesome-icon :icon="['fas', 'plus']" class="me-1" />{{ $t(K + 'addField') }}
-          </button>
-          <template v-if="stgSuggestions.length">
-            <span class="fb-sug-lbl"><font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" />{{ $t(K + 'suggestions') }}</span>
-            <button v-for="s in stgSuggestions" :key="s.key" type="button" class="sug-chip" @click="addInfo(form.stage_fields, s)">
-              <font-awesome-icon :icon="['fas', s.icon]" />{{ $t(K + 'sug.' + s.key) }}
-            </button>
-          </template>
-        </div>
+      <div v-if="!form.registration_form_template.length" class="fb-empty">
+        <font-awesome-icon :icon="['fas', 'clipboard-list']" class="fb-empty-ico" />
+        <p>{{ $t(K + 'regEmpty') }}</p>
+        <AddFieldMenu primary :label="$t(K + 'addField')" :blank-label="$t(K + 'blankField')" :suggestions-label="$t(K + 'suggestions')" :suggestions="labelled(regSuggestions)" @add="addReg" />
       </div>
-    </section>
 
-    <!-- ═══ 3 · Registration form ═══ -->
-    <section class="fb-block">
-      <header class="fb-head">
-        <span class="fb-num">3</span>
-        <div class="fb-head-txt">
-          <h3 class="fb-title">{{ $t(K + 'regLabel') }}</h3>
-          <p class="fb-desc">{{ $t(K + 'regHint') }}</p>
-        </div>
-        <span class="fb-where"><font-awesome-icon :icon="['fas', 'eye']" />{{ $t(K + 'regWhere') }}</span>
-      </header>
-
-      <div class="fb-body">
-        <!-- builder -->
-        <div class="reg-builder">
+      <template v-else>
+        <div class="reg-list">
           <div v-for="(f, i) in form.registration_form_template" :key="i" class="reg-card" :class="{ open: openIndex === i }">
             <div class="reg-card-head" @click="toggle(i)">
               <font-awesome-icon :icon="['fas', f.icon || REG_TYPE_ICON[f.type] || 'font']" class="reg-ico" />
-              <span class="reg-name" :class="{ muted: !f.label }">{{ f.label || $t(K + 'untitled') }}</span>
-              <span class="type-chip"><font-awesome-icon :icon="['fas', REG_TYPE_ICON[f.type] || 'font']" />{{ typeLabel(f.type) }}</span>
-              <span v-if="f.required" class="req-chip">{{ $t(K + 'required') }}</span>
+              <span class="reg-name" :class="{ muted: !f.label }">{{ f.label || $t(K + 'untitled') }}<span v-if="f.required" class="reg-req" :title="$t(K + 'required')">*</span></span>
+              <span class="reg-type">{{ typeLabel(f.type) }}</span>
               <div class="reg-actions" @click.stop>
                 <button type="button" class="row-btn" :disabled="i === 0" :title="$t(K + 'moveUp')" @click="moveReg(i, -1)"><font-awesome-icon :icon="['fas', 'arrow-up']" /></button>
                 <button type="button" class="row-btn" :disabled="i === form.registration_form_template.length - 1" :title="$t(K + 'moveDown')" @click="moveReg(i, 1)"><font-awesome-icon :icon="['fas', 'arrow-down']" /></button>
@@ -333,26 +285,35 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
               </label>
             </div>
           </div>
+        </div>
+        <AddFieldMenu :label="$t(K + 'addField')" :blank-label="$t(K + 'blankField')" :suggestions-label="$t(K + 'suggestions')" :suggestions="labelled(regSuggestions)" @add="addReg" />
+      </template>
+    </section>
 
-          <p v-if="!form.registration_form_template.length" class="fb-empty">{{ $t(K + 'regEmpty') }}</p>
+    <!-- ═══ Event info / stage info ═══ -->
+    <section v-for="info in infoPanels" v-show="tab === info.id" :key="info.id" class="fb-panel">
+      <div class="fb-panel-head">
+        <p class="fb-desc">{{ $t(K + info.hint) }}</p>
+      </div>
 
-          <div class="fb-add">
-            <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="addReg()">
-              <font-awesome-icon :icon="['fas', 'plus']" class="me-1" />{{ $t(K + 'addField') }}
-            </button>
-            <button type="button" class="btn btn-sm btn-primary round px-3" @click="openPreview">
-              <font-awesome-icon :icon="['fas', 'eye']" class="me-1" />{{ $t(K + 'previewBtnOpen') }}
-            </button>
-            <template v-if="regSuggestions.length">
-              <span class="fb-sug-lbl"><font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" />{{ $t(K + 'suggestions') }}</span>
-              <button v-for="s in regSuggestions" :key="s.key" type="button" class="sug-chip" @click="addReg(s)">
-                <font-awesome-icon :icon="['fas', s.icon]" />{{ $t(K + 'sug.' + s.key) }}
-              </button>
-            </template>
+      <div v-if="!info.list.length" class="fb-empty">
+        <font-awesome-icon :icon="['fas', info.icon]" class="fb-empty-ico" />
+        <p>{{ $t(K + info.empty) }}</p>
+        <AddFieldMenu primary :label="$t(K + 'addField')" :blank-label="$t(K + 'blankField')" :suggestions-label="$t(K + 'suggestions')" :suggestions="labelled(info.suggestions)" @add="(sg) => addInfo(info.list, sg)" />
+      </div>
+
+      <template v-else>
+        <div class="info-list">
+          <div v-for="(f, i) in info.list" :key="i" class="info-row" :class="{ 'with-desc': info.id === 'evt' }">
+            <button type="button" class="icon-btn" :title="$t(K + 'chooseIcon')" @click="iconTarget = f"><font-awesome-icon :icon="['fas', f.icon || 'circle-info']" /></button>
+            <input type="text" class="form-control form-control-sm info-name" :value="f.name" maxlength="120" :placeholder="$t(K + info.ph)" @input="onLabel(f, info.list, 'key', $event.target.value)" />
+            <textarea v-if="info.id === 'evt'" class="form-control form-control-sm info-desc" v-model="f.value" rows="1" maxlength="500" :placeholder="$t(K + 'valuePh')"></textarea>
+            <button type="button" class="row-btn danger" :title="$t(K + 'remove')" @click="info.list.splice(i, 1)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
           </div>
         </div>
-
-      </div>
+        <p v-if="info.id === 'stg'" class="fb-note"><font-awesome-icon :icon="['fas', 'circle-info']" />{{ $t(K + 'stgNote') }}</p>
+        <AddFieldMenu :label="$t(K + 'addField')" :blank-label="$t(K + 'blankField')" :suggestions-label="$t(K + 'suggestions')" :suggestions="labelled(info.suggestions)" @add="(sg) => addInfo(info.list, sg)" />
+      </template>
     </section>
 
     <EhubRegistrationModal
@@ -376,51 +337,49 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
 
 <style scoped>
 .step-title { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 4px; letter-spacing: -.02em; }
-.step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 24px; }
+.step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 20px; }
 
-.fb-block { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card, 14px); margin-bottom: 18px; }
-.fb-head { display: flex; align-items: flex-start; gap: 12px; padding: 16px 18px 12px; flex-wrap: wrap; }
-.fb-num { width: 28px; height: 28px; border-radius: 50%; background: var(--ehub-primary-tint); color: var(--ehub-primary); font-weight: 800; font-size: .8rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.fb-head-txt { flex: 1; min-width: 220px; }
-.fb-title { font-size: .98rem; font-weight: 800; color: var(--ehub-ink); margin: 3px 0 2px; }
-.fb-desc { font-size: .8rem; color: var(--ehub-muted); margin: 0; }
-.fb-where { display: inline-flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; color: var(--ehub-muted); background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 50rem; padding: 3px 10px; white-space: nowrap; margin-top: 3px; }
-.fb-body { padding: 0 18px 16px; }
-.fb-empty { font-size: .8rem; color: var(--ehub-muted); text-align: center; border: 1px dashed var(--ehub-line); border-radius: 10px; padding: 14px; margin: 0 0 10px; }
-.fb-note { display: flex; align-items: center; gap: 6px; font-size: .76rem; color: var(--ehub-muted); margin: 2px 0 10px; }
+.fb-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--ehub-line); margin-bottom: 18px; overflow-x: auto; }
+.fb-tab { display: inline-flex; align-items: center; gap: 7px; border: 0; background: transparent; color: var(--ehub-muted); font-size: .84rem; font-weight: 600; padding: 9px 12px; border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; white-space: nowrap; }
+.fb-tab svg { font-size: .78rem; }
+.fb-tab:hover { color: var(--ehub-ink); }
+.fb-tab.active { color: var(--ehub-primary); border-bottom-color: var(--ehub-primary); }
+.fb-count { font-size: .66rem; font-weight: 700; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); color: var(--ehub-muted); border-radius: 50rem; padding: 0 7px; }
+.fb-tab.active .fb-count { background: var(--ehub-primary-tint); border-color: transparent; color: var(--ehub-primary); }
 
-.fb-cols { display: grid; gap: 8px; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); margin-bottom: 4px; }
-.fb-cols-evt { grid-template-columns: 36px 1fr 1.4fr 28px; }
-.fb-cols-evt span:first-child { grid-column: 2; }
-.fb-row { display: grid; gap: 8px; align-items: center; margin-bottom: 8px; }
-.fb-row-evt { align-items: start; }
-.fb-desc-inp { resize: vertical; min-height: 32px; }
-.fb-row-evt { grid-template-columns: 36px 1fr 1.4fr 28px; }
-.fb-row-stg { grid-template-columns: 36px 1fr 28px; }
-.fb-add { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
-.fb-sug-lbl { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; font-weight: 700; color: var(--ehub-muted); margin: 0 2px 0 8px; }
-.sug-chip { display: inline-flex; align-items: center; gap: 5px; font-size: .74rem; font-weight: 600; padding: 4px 10px; border-radius: 50rem; border: 1px dashed var(--ehub-line); background: transparent; color: var(--ehub-ink); cursor: pointer; }
-.sug-chip svg { color: var(--ehub-primary); font-size: .7rem; }
-.sug-chip:hover { border-style: solid; border-color: var(--ehub-primary); background: var(--ehub-primary-tint); }
+.fb-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.fb-desc { font-size: .82rem; color: var(--ehub-muted); margin: 0; flex: 1; min-width: 220px; }
+.fb-empty { text-align: center; padding: 36px 16px; border: 1px dashed var(--ehub-line); border-radius: 14px; }
+.fb-empty p { font-size: .84rem; color: var(--ehub-muted); margin: 8px 0 14px; }
+.fb-empty-ico { font-size: 1.4rem; color: var(--ehub-primary); opacity: .75; }
+.fb-empty .afm :deep(.afm-menu) { left: 50%; transform: translateX(-50%); text-align: left; }
+.fb-note { display: flex; align-items: center; gap: 6px; font-size: .76rem; color: var(--ehub-muted); margin: 0 0 12px; }
 
-.icon-btn { width: 36px; height: 32px; border-radius: 8px; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .85rem; color: var(--ehub-primary); flex-shrink: 0; padding: 0; }
+.icon-btn { width: 34px; height: 32px; border-radius: 8px; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .82rem; color: var(--ehub-primary); flex-shrink: 0; padding: 0; }
 .icon-btn:hover { border-color: var(--ehub-primary); background: var(--ehub-primary-tint); }
-.row-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: var(--ehub-muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: .72rem; padding: 0; }
+.row-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: var(--ehub-muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: .72rem; padding: 0; flex-shrink: 0; }
 .row-btn:hover:not(:disabled) { border-color: var(--ehub-line); color: var(--ehub-ink); }
-.row-btn:disabled { opacity: .35; cursor: default; }
+.row-btn:disabled { opacity: .3; cursor: default; }
 .row-btn.danger:hover { border-color: color-mix(in srgb,#e23b3b 35%,transparent); background: color-mix(in srgb,#e23b3b 10%,transparent); color: #e23b3b; }
 
-.reg-card { border: 1px solid var(--ehub-line); border-radius: 10px; margin-bottom: 8px; background: var(--ehub-card); }
-.reg-card.open { border-color: var(--ehub-primary); box-shadow: 0 0 0 3px var(--ehub-primary-tint); }
-.reg-card-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; min-width: 0; }
-.reg-ico { color: var(--ehub-primary); width: 18px; font-size: .82rem; flex-shrink: 0; }
-.reg-name { font-size: .85rem; font-weight: 600; color: var(--ehub-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+.info-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.info-row { display: grid; grid-template-columns: 34px 1fr 28px; gap: 8px; align-items: start; }
+.info-row.with-desc { grid-template-columns: 34px minmax(0, 1fr) minmax(0, 2fr) 28px; }
+.info-desc { resize: vertical; min-height: 32px; }
+
+.reg-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.reg-card { border: 1px solid var(--ehub-line); border-radius: 10px; background: var(--ehub-card); }
+.reg-card.open { border-color: var(--ehub-primary); }
+.reg-card-head { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; min-width: 0; }
+.reg-ico { color: var(--ehub-primary); width: 16px; font-size: .82rem; flex-shrink: 0; }
+.reg-name { font-size: .86rem; font-weight: 600; color: var(--ehub-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
 .reg-name.muted { color: var(--ehub-muted); font-style: italic; font-weight: 500; }
-.type-chip { display: inline-flex; align-items: center; gap: 4px; font-size: .64rem; font-weight: 700; padding: 2px 8px; border-radius: 50rem; background: var(--ehub-field-bg); color: var(--ehub-muted); border: 1px solid var(--ehub-line); white-space: nowrap; }
-.req-chip { font-size: .64rem; font-weight: 700; padding: 2px 8px; border-radius: 50rem; white-space: nowrap; background: color-mix(in srgb,#e23b3b 12%,transparent); color: #e23b3b; border: 1px solid color-mix(in srgb,#e23b3b 28%,transparent); }
-.reg-actions { display: flex; gap: 1px; }
+.reg-req { color: #e23b3b; margin-left: 3px; }
+.reg-type { font-size: .74rem; color: var(--ehub-muted); white-space: nowrap; }
+.reg-actions { display: flex; gap: 1px; opacity: 0; transition: opacity .15s; }
+.reg-card:hover .reg-actions, .reg-card.open .reg-actions, .reg-actions:focus-within { opacity: 1; }
 .reg-caret { color: var(--ehub-muted); font-size: .7rem; }
-.reg-edit { border-top: 1px solid var(--ehub-line); padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+.reg-edit { border-top: 1px solid var(--ehub-line); padding: 14px; display: flex; flex-direction: column; gap: 14px; }
 .reg-edit-row { display: flex; gap: 8px; align-items: flex-end; }
 .mini-lbl { display: block; font-size: .72rem; font-weight: 700; color: var(--ehub-ink); margin-bottom: 4px; }
 .mini-hint { font-size: .72rem; color: var(--ehub-muted); margin: 5px 0 0; }
@@ -441,11 +400,10 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
 .req-switch strong { display: block; font-size: .8rem; color: var(--ehub-ink); }
 .req-switch small { display: block; font-size: .72rem; color: var(--ehub-muted); }
 
-
+@media (hover: none) { .reg-actions { opacity: 1; } }
 @media (max-width: 560px) {
-  .fb-row-evt, .fb-cols-evt { grid-template-columns: 36px 1fr 28px; }
-  .fb-row-evt textarea { grid-column: 2; grid-row: 2; }
-  .fb-cols-evt { display: none; }
-  .type-chip { display: none; }
+  .info-row.with-desc { grid-template-columns: 34px minmax(0, 1fr) 28px; }
+  .info-row.with-desc .info-desc { grid-column: 2; grid-row: 2; }
+  .reg-type { display: none; }
 }
 </style>

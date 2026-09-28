@@ -29,6 +29,7 @@ export default {
   },
   s3x: { notice: { title: 'Campos mantidos pela equipe eHub', text: 'Os campos desta modalidade são revisados com frequência e podem mudar. Sentiu falta de algo? Envie uma sugestão.' }, suggest: { btn: 'Sugerir campo', title: 'Sugerir campos', text: 'Conte quais informações você precisa configurar para esta modalidade. A equipe eHub avalia todas as sugestões.', ph: 'Descreva o campo que faltou, para que ele serve e quais opções ou valores deveria ter.', send: 'Enviar sugestão', sent: 'Sugestão enviada. Obrigado!', error: 'Não foi possível enviar a sugestão. Tente novamente.' }, yes: 'Sim', no: 'Não', title: 'Configurações Específicas', sub: 'Detalhes técnicos da modalidade escolhida.', lastUpd: 'Última atualização:' },
   s4x: {
+    tabReg: 'Inscrição', tabEvt: 'Informações do evento', tabStg: 'Informações por etapa', blankField: 'Campo em branco',
     title: 'Formulário e informações extras', sub: 'Escolha quais informações extras o evento mostra e o que o participante precisa responder ao se inscrever. Tudo aqui é opcional.',
     evtLabel: 'Informações extras do evento', evtHint: 'Informações livres exibidas na página do evento, como servidor, Discord ou contato. Itens sem descrição ficam ocultos.', evtWhere: 'Aba Informações',
     stgLabel: 'Informações por etapa', stgHint: 'Crie os campos que toda etapa terá, como pista, mapa ou horário. Os valores são preenchidos no passo Cronograma.', stgWhere: 'Aba Etapas',

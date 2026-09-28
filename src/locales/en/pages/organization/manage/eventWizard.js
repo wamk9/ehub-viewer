@@ -29,6 +29,7 @@ export default {
   },
   s3x: { notice: { title: 'Fields maintained by the eHub team', text: 'The fields for this mode are reviewed often and may change. Missing something? Send a suggestion.' }, suggest: { btn: 'Suggest a field', title: 'Suggest fields', text: 'Tell us what you need to configure for this mode. The eHub team reviews every suggestion.', ph: 'Describe the missing field, what it is for and which options or values it should have.', send: 'Send suggestion', sent: 'Suggestion sent. Thank you!', error: 'Could not send the suggestion. Please try again.' }, yes: 'Yes', no: 'No', title: 'Specific Settings', sub: 'Technical details for the chosen modality.', lastUpd: 'Last updated:' },
   s4x: {
+    tabReg: 'Registration', tabEvt: 'Event info', tabStg: 'Per-stage info', blankField: 'Blank field',
     title: 'Form and extra info', sub: 'Choose which extra info the event shows and what participants must answer when registering. Everything here is optional.',
     evtLabel: 'Extra event info', evtHint: 'Free-form details shown on the event page, such as server, Discord or contact. Items without a description stay hidden.', evtWhere: 'Info tab',
     stgLabel: 'Per-stage info', stgHint: 'Create fields every stage will have, such as track, map or time. Values are filled in the Schedule step.', stgWhere: 'Stages tab',
