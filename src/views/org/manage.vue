@@ -1140,7 +1140,7 @@ export default {
               <div v-for="c in (finBilling.closing_cycles || [])" :key="'c' + c.billing_cycle" class="fin-inv-row static">
                 <div class="fin-inv-main">
                   <span class="fin-inv-cycle">{{ finCycleLabel(c.billing_cycle) }}</span>
-                  <span class="fin-inv-sub">{{ $t(F + 'closing_sub', { n: c.items_count }, c.items_count) }}</span>
+                  <span class="fin-inv-sub">{{ $t(F + 'closing_sub', { n: c.items_count, date: finDate(c.charges_at) }, c.items_count) }}</span>
                 </div>
                 <span class="s-badge pri">{{ $t(F + 'status_closing') }}</span>
                 <span class="fin-inv-amount">R$ {{ finFormatAmount(c.total_amount) }}</span>

@@ -6,7 +6,7 @@ export default {
     billing_blocked:    'Management of {org} blocked due to an overdue invoice',
     billing_attempt: 'Charging the {cycle} invoice ({amount}) — {org}',
     billing_paid: '{cycle} invoice paid ({amount}) — {org}',
-    billing_failed: 'Payment of the {cycle} invoice ({amount}) failed. Pay by {block} to avoid the block — {org}',
+    billing_failed: 'Attempt {attempt} of {attempts}: payment of the {cycle} invoice ({amount}) failed. We retry tomorrow; if unpaid, blocked on {block} — {org}',
     billing_no_card: '{cycle} invoice ({amount}) has no card on file. Add a card and pay by {block} — {org}',
     billing_error: 'The {cycle} invoice ({amount}) could not be charged. Pay it in Finance by {block} — {org}',
     billing_unblocked: 'Payment confirmed: {org} management unlocked',

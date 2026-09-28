@@ -6,7 +6,7 @@ export default {
     billing_blocked:    'Gestión de {org} bloqueada por factura vencida',
     billing_attempt: 'Cobro de la factura de {cycle} ({amount}) en proceso — {org}',
     billing_paid: 'Factura de {cycle} pagada ({amount}) — {org}',
-    billing_failed: 'El pago de la factura de {cycle} ({amount}) no se realizó. Paga antes del {block} para evitar el bloqueo — {org}',
+    billing_failed: 'Intento {attempt} de {attempts}: el pago de la factura de {cycle} ({amount}) no se realizó. Reintentamos mañana; sin pago, bloqueo el {block} — {org}',
     billing_no_card: 'Factura de {cycle} ({amount}) sin tarjeta registrada. Registra una tarjeta y paga antes del {block} — {org}',
     billing_error: 'No se pudo cobrar la factura de {cycle} ({amount}). Págala en Finanzas antes del {block} — {org}',
     billing_unblocked: 'Pago confirmado: gestión de {org} liberada',
