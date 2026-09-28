@@ -174,6 +174,8 @@ onBeforeUnmount(() => {
             </button>
           </div>
           <hr class="nav-dropdown-divider" />
+          <!-- Header stays put; long lists scroll inside the panel. -->
+          <div class="notif-list">
           <div v-for="notif in notifications" :key="notif.id" class="notif-item" @click="handleNotifClick(notif)">
             <span class="notif-dot" :class="{ unread: !notif.read_at }"></span>
             <div class="flex-grow-1 overflow-hidden">
@@ -185,6 +187,7 @@ onBeforeUnmount(() => {
           <div v-if="!notifications.length" class="notif-empty">
             <font-awesome-icon :icon="['fas', 'bell']" class="opacity-25 me-2" />
             {{ $t('notification.empty') }}
+          </div>
           </div>
         </div>
       </div>
@@ -470,6 +473,7 @@ onBeforeUnmount(() => {
 
 /* ── Notification panel ── */
 .notif-panel { min-width: 300px; max-width: 340px; }
+.notif-list { max-height: min(420px, calc(100vh - 140px)); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .notif-item {
   display: flex;
   align-items: flex-start;
