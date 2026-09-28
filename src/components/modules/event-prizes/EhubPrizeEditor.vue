@@ -1,7 +1,6 @@
 <template>
   <div class="epe">
     <div v-if="modelValue.length" class="epe-cols" :class="{ cash: hasCash }">
-      <span></span>
       <span>{{ $t('common.prizes.who') }}</span>
       <span v-if="hasCash">{{ $t('common.prizes.cash') }}</span>
       <span>{{ $t('common.prizes.product') }}</span>
@@ -9,9 +8,8 @@
     </div>
 
     <div v-for="(p, i) in modelValue" :key="i" class="epe-row" :class="{ cash: hasCash }">
-      <span class="epe-medal" :style="{ background: medal(i) }">{{ i + 1 }}</span>
       <input type="text" class="form-control epe-ctl" :value="p.label" maxlength="80"
-        :placeholder="$t('common.prizes.place', { n: i + 1 })" @input="set(i, 'label', $event.target.value)" />
+        :placeholder="$t('common.prizes.whoPh')" @input="set(i, 'label', $event.target.value)" />
       <div v-if="hasCash" class="epe-cash">
         <div class="input-group">
           <input type="number" class="form-control epe-ctl" min="0" max="100" step="0.5" :value="p.percent ?? ''"
@@ -43,7 +41,6 @@
 <script>
 import { percentSum } from './prizes.js';
 
-const MEDALS = ['#d4a20f', '#8d99a6', '#b06a3b'];
 
 /**
  * Who gets what: one row per place (or special award) with an optional share
@@ -63,7 +60,6 @@ export default {
     sum() { return Math.round(percentSum(this.modelValue) * 100) / 100; },
   },
   methods: {
-    medal(i) { return MEDALS[i] || 'var(--ehub-muted)'; },
     money(v) {
       try {
         return new Intl.NumberFormat(this.$i18n.locale, { style: 'currency', currency: (this.currency || 'BRL').toUpperCase() }).format(v || 0);
@@ -82,14 +78,13 @@ export default {
 </script>
 
 <style scoped>
-.epe-cols, .epe-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1.4fr) 38px; gap: 8px; align-items: center; }
-.epe-cols.cash, .epe-row.cash { grid-template-columns: 30px minmax(0, 1fr) 220px minmax(0, 1.4fr) 38px; }
+.epe-cols, .epe-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 38px; gap: 8px; align-items: center; }
+.epe-cols.cash, .epe-row.cash { grid-template-columns: minmax(0, 1fr) 280px minmax(0, 1.3fr) 38px; }
 .epe-cols { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); margin-bottom: 5px; }
 .epe-row { margin-bottom: 8px; }
-.epe-medal { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 800; color: #fff; }
 .epe-ctl { height: 38px; font-size: .85rem; }
 .epe-cash { display: flex; align-items: center; gap: 8px; }
-.epe-cash .input-group { width: 112px; flex-shrink: 0; flex-wrap: nowrap; }
+.epe-cash .input-group { width: 150px; flex-shrink: 0; flex-wrap: nowrap; }
 .epe-cash .input-group .form-control { min-width: 0; padding: 0 8px; }
 .epe-cash .input-group-text { font-size: .8rem; }
 .epe-amt { font-size: .8rem; font-weight: 700; color: var(--ehub-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -102,9 +97,8 @@ export default {
 .epe-sum.bad { color: #e23b3b; }
 @media (max-width: 640px) {
   .epe-cols { display: none; }
-  .epe-row, .epe-row.cash { grid-template-columns: 30px minmax(0, 1fr) 38px; padding-bottom: 8px; border-bottom: 1px solid var(--ehub-line); }
-  .epe-row > :nth-child(2) { grid-column: 2; }
-  .epe-row > .epe-cash, .epe-row > input:nth-of-type(2), .epe-row.cash > input:last-of-type { grid-column: 2; }
-  .epe-row > .epe-del { grid-column: 3; grid-row: 1; }
+  .epe-row, .epe-row.cash { grid-template-columns: minmax(0, 1fr) 38px; padding-bottom: 8px; border-bottom: 1px solid var(--ehub-line); }
+  .epe-row > :not(.epe-del) { grid-column: 1; }
+  .epe-row > .epe-del { grid-column: 2; grid-row: 1; }
 }
 </style>

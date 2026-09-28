@@ -5,6 +5,7 @@ export default {
   cash: 'Parte del valor',
   product: 'Producto / obsequio',
   place: '{n}º lugar',
+  whoPh: 'Posición o premio especial',
   productPh: 'Ej.: trofeo, medalla, periférico… (opcional)',
   remove: 'Eliminar',
   add: 'Agregar premiado',

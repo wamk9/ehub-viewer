@@ -5,6 +5,7 @@ export default {
   cash: 'Share of the pool',
   product: 'Product / gift',
   place: 'Place {n}',
+  whoPh: 'Place or special award',
   productPh: 'E.g. trophy, medal, gear… (optional)',
   remove: 'Remove',
   add: 'Add winner',
