@@ -35,5 +35,6 @@ export function prizeSplit(prizes) {
 }
 
 export function percentSum(prizes) {
-  return (prizes || []).reduce((s, p) => s + (Number(p.percent) || 0), 0)
+  const sum = (prizes || []).reduce((s, p) => s + (Number(p.percent) || 0), 0)
+  return Math.round(sum * 100) / 100
 }

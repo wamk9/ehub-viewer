@@ -2,7 +2,13 @@
   <div class="epe">
     <div v-if="modelValue.length" class="epe-cols" :class="{ cash: hasCash }">
       <span>{{ $t('common.prizes.who') }}</span>
-      <span v-if="hasCash">{{ $t('common.prizes.cash') }}</span>
+      <span v-if="hasCash" class="epe-cash-hd">
+        {{ $t('common.prizes.cash') }}
+        <span class="epe-mode" role="group">
+          <button type="button" :class="{ on: mode === 'percent' }" @click="mode = 'percent'">%</button>
+          <button type="button" :class="{ on: mode === 'amount' }" @click="mode = 'amount'">{{ symbol }}</button>
+        </span>
+      </span>
       <span>{{ $t('common.prizes.product') }}</span>
       <span></span>
     </div>
@@ -12,11 +18,13 @@
         :placeholder="$t('common.prizes.whoPh')" @input="set(i, 'label', $event.target.value)" />
       <div v-if="hasCash" class="epe-cash">
         <div class="input-group">
-          <input type="number" class="form-control epe-ctl" min="0" :max="available(i)" step="0.5" :value="p.percent ?? ''"
+          <input v-if="mode === 'percent'" type="number" class="form-control epe-ctl" min="0" :max="available(i)" step="0.5" :value="p.percent ?? ''"
             placeholder="0" @input="setPercent(i, $event)" />
-          <span class="input-group-text">%</span>
+          <input v-else type="number" class="form-control epe-ctl" min="0" :max="availableAmount(i)" step="0.01" :value="amountOf(p) ?? ''"
+            placeholder="0,00" @input="setAmount(i, $event)" />
+          <span class="input-group-text">{{ mode === 'percent' ? '%' : symbol }}</span>
         </div>
-        <span class="epe-amt">{{ money(total * (Number(p.percent) || 0) / 100) }}</span>
+        <span class="epe-amt">{{ mode === 'percent' ? money(total * (Number(p.percent) || 0) / 100) : pct(p.percent) }}</span>
       </div>
       <input type="text" class="form-control epe-ctl" :value="p.product" maxlength="160"
         :placeholder="$t('common.prizes.productPh')" @input="set(i, 'product', $event.target.value)" />
@@ -55,9 +63,18 @@ export default {
     currency: { type: String, default: 'BRL' },
   },
   emits: ['update:modelValue'],
+  data() {
+    return { mode: 'percent' }; // how shares are typed; stored as percent either way
+  },
   computed: {
     hasCash() { return this.total > 0; },
     sum() { return Math.round(percentSum(this.modelValue) * 100) / 100; },
+    symbol() {
+      try {
+        return new Intl.NumberFormat(this.$i18n.locale, { style: 'currency', currency: (this.currency || 'BRL').toUpperCase() })
+          .formatToParts(0).find((x) => x.type === 'currency')?.value || '$';
+      } catch { return '$'; }
+    },
   },
   methods: {
     money(v) {
@@ -79,8 +96,22 @@ export default {
     setPercent(i, e) {
       if (e.target.value === '') { this.set(i, 'percent', null); return; }
       const v = Math.min(Math.max(Number(e.target.value) || 0, 0), this.available(i));
-      if (String(v) !== e.target.value) e.target.value = v;
+      if (v !== Number(e.target.value)) e.target.value = v;
       this.set(i, 'percent', v);
+    },
+    pct(v) { return (Math.round((Number(v) || 0) * 100) / 100).toLocaleString(this.$i18n.locale) + '%'; },
+    amountOf(p) {
+      return p.percent == null ? null : Math.round(this.total * p.percent) / 100;
+    },
+    availableAmount(i) { return Math.round(this.total * this.available(i)) / 100; },
+    // A direct amount is converted to a share of the pool, capped at what is left.
+    setAmount(i, e) {
+      if (e.target.value === '') { this.set(i, 'percent', null); return; }
+      const max = this.availableAmount(i);
+      const v = Math.min(Math.max(Number(e.target.value) || 0, 0), max);
+      if (v !== Number(e.target.value)) e.target.value = v;
+      const percent = v >= max ? this.available(i) : Math.round((v / this.total) * 100 * 10000) / 10000;
+      this.set(i, 'percent', percent);
     },
     add() { this.emitList([...this.modelValue, { label: '', percent: null, product: '' }]); },
     remove(i) { this.emitList(this.modelValue.filter((_, j) => j !== i)); },
@@ -98,6 +129,10 @@ export default {
 .epe-cash .input-group { width: 150px; flex-shrink: 0; flex-wrap: nowrap; }
 .epe-cash .input-group .form-control { min-width: 0; padding: 0 8px; }
 .epe-cash .input-group-text { font-size: .8rem; }
+.epe-cash-hd { display: flex; align-items: center; gap: 8px; }
+.epe-mode { display: inline-flex; border: 1px solid var(--ehub-line); border-radius: 6px; overflow: hidden; }
+.epe-mode button { border: 0; background: transparent; color: var(--ehub-muted); font-size: .66rem; font-weight: 700; padding: 1px 8px; cursor: pointer; }
+.epe-mode button.on { background: var(--ehub-primary); color: #fff; }
 .epe-amt { font-size: .8rem; font-weight: 700; color: var(--ehub-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .epe-del { width: 38px; height: 38px; border-radius: 8px; border: 1px solid color-mix(in srgb,#e23b3b 30%,transparent); background: color-mix(in srgb,#e23b3b 6%,transparent); color: #e23b3b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .85rem; }
 .epe-del:hover { background: color-mix(in srgb,#e23b3b 14%,transparent); }
