@@ -5,6 +5,7 @@ export default {
     edit: 'Editar evento', public: 'Ver página pública', back: 'Volver a la organización',
   },
   c: {
+    go_finances: 'Ir a Finanzas',
     save: 'Guardar', cancel: 'Cancelar', confirm: 'Confirmar', close: 'Cerrar', search: 'Buscar...',
     all: 'Todos', export: 'Exportar CSV', loading: 'Cargando...', error: 'Algo salió mal. Inténtalo de nuevo.',
     none: '—', not_found: 'Evento no encontrado o no tienes permiso para gestionarlo.',
@@ -135,6 +136,7 @@ export default {
     stage_not_started: 'Inicia la etapa antes de cargar resultados.',
     stage_in_progress: 'Finaliza la etapa en curso antes de finalizar el evento.',
     event_already_finished: 'El evento ya finalizó.',
+    org_billing_blocked: 'El acceso a la gestión está bloqueado por una factura vencida. Págala en Finanzas de la organización para liberarlo.',
     event_already_initialized: 'El evento ya comenzó; este campo ya no puede cambiar.',
     event_is_draft: 'Publica el evento antes de iniciarlo.',
     event_not_in_progress: 'El evento no está en curso.',

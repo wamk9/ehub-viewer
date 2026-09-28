@@ -133,7 +133,8 @@ function goToEventsList(eventRoute = route.params.eventRoute) {
 async function saveCreate(payload) {
   const result = await OrganizationEvent.store(route.params.orgRoute, payload)
   if (!result.created) {
-    toast.error(result.message ?? t('pages.organization.manage.eventWizard.err.slug'))
+    const key = 'pages.event.manage.err.' + result.message
+    toast.error(te(key) ? t(key) : (result.message ?? t('pages.organization.manage.eventWizard.err.slug')))
     return false
   }
   return true

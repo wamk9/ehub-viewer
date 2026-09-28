@@ -114,6 +114,7 @@ export default {
       finGateways: [],
       finGatewaysLoading: false,
       finLoaded: false,
+      finPaying: null,
       finConnecting: null,
       finDisconnecting: null,
       finSelectedInvoice: null,
@@ -204,8 +205,11 @@ export default {
         { key: 'events', icon: 'calendar-days', bg: 'color-mix(in srgb, #7C3AED 14%, transparent)', color: '#7C3AED' },
       ];
     },
+    // Overdue invoice: only the finance panel is reachable until it is paid.
+    billingBlocked() { return !!this.org?.billing_blocked; },
     navItems() {
       const t = (k) => this.$t('pages.organization.manage.nav.' + k);
+      if (this.billingBlocked) return [{ key: 'financeiro', icon: 'file-invoice-dollar', label: t('financeiro') }];
       return [
         { key: 'overview', icon: 'chart-line', label: t('overview') },
         { key: 'events', icon: 'calendar-days', label: t('events') },
@@ -236,6 +240,11 @@ export default {
 
   async created() {
     await this.loadOrg();
+    if (this.billingBlocked) {
+      this.activePanel = 'financeiro';
+      this.loadFinances();
+      return;
+    }
     // Opening /finances directly (reload, deep link, gateway return) never goes through switchPanel.
     if (this.activePanel === 'financeiro' && !this.finLoaded) this.loadFinances();
     await this.loadEvents();
@@ -302,6 +311,7 @@ export default {
     },
 
     async switchPanel(panel) {
+      if (this.billingBlocked && panel !== 'financeiro') return;
       this.activePanel = panel;
       const routeMap = {
         overview: 'manage-organization',
@@ -643,9 +653,33 @@ export default {
     finInvoiceSub(inv) {
       const F = 'pages.organization.manage.financeiro.';
       if (inv.status === 'paid') return this.$t(F + 'paid_on', { date: this.finDate(inv.paid_at, true) });
-      if (inv.status === 'failed') return this.$t(F + 'failed_on', { date: this.finDate(inv.failed_at, true) });
+      if (inv.status === 'failed') return this.$t(F + 'failed_on', { date: this.finDate(inv.failed_at, true) }) + (inv.blocks_at ? ' · ' + this.$t(F + 'blocks_on', { date: this.finDate(inv.blocks_at) }) : '');
       if (inv.status === 'empty' || inv.status === 'waived') return this.$t(F + 'no_charge');
+      if (inv.blocks_at) return this.$t(F + 'due_blocks', { date: this.finDate(inv.due_date), block: this.finDate(inv.blocks_at) });
       return this.$t(F + 'due_on', { date: this.finDate(inv.due_date) });
+    },
+    finPayable(inv) { return ['pending', 'failed'].includes(inv.status) && Number(inv.total_amount) > 0; },
+    async finPay(inv) {
+      if (!this.finBilling?.has_card) { toast.error(this.$t(this.F + 'pay_no_card')); return; }
+      this.finPaying = inv.billing_cycle;
+      const res = await OrganizationBilling.payInvoice(this.orgRoute, inv.billing_cycle);
+      this.finPaying = null;
+      if (res.code !== 200) {
+        const key = { billing_no_card: 'pay_no_card', billing_charge_failed: 'pay_failed' }[res.data] || 'pay_error';
+        toast.error(this.$t(this.F + key));
+        this.finLoaded = false;
+        this.loadFinances();
+        return;
+      }
+      toast.success(this.$t(this.F + 'pay_ok'));
+      if (this.billingBlocked && !res.blocked) {
+        // Released: reload everything the block was hiding.
+        window.location.reload();
+        return;
+      }
+      this.finLoaded = false;
+      this.loadFinances();
+      if (this.finSelectedInvoice?.billing_cycle === inv.billing_cycle) this.finOpenInvoice(inv.billing_cycle);
     },
     finFormatAmount(val) {
       return parseFloat(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
@@ -1062,9 +1096,12 @@ export default {
           </div>
         </div>
 
-        <div v-if="finBilling?.billing_blocked" class="alert alert-danger d-flex gap-2 align-items-center mb-4" style="font-size:.85rem">
-          <font-awesome-icon :icon="['fas', 'ban']" class="flex-shrink-0" />
-          <span>{{ $t('pages.organization.manage.financeiro.billing_blocked') }}</span>
+        <div v-if="billingBlocked || finBilling?.billing_blocked" class="fin-block">
+          <font-awesome-icon :icon="['fas', 'lock']" class="fin-block-ico" />
+          <div>
+            <strong>{{ $t(F + 'blocked_title') }}</strong>
+            <p>{{ $t(F + 'blocked_text') }}</p>
+          </div>
         </div>
 
         <!-- Volumetria -->
@@ -1118,6 +1155,9 @@ export default {
                   {{ $t(F + 'status_' + (inv.status || 'pending')) }}
                 </span>
                 <span class="fin-inv-amount">R$ {{ finFormatAmount(inv.total_amount) }}</span>
+                <button v-if="finPayable(inv)" type="button" class="btn btn-sm btn-primary round px-3" :disabled="finPaying === inv.billing_cycle" @click.stop="finPay(inv)">
+                  <span v-if="finPaying === inv.billing_cycle" class="spinner-border spinner-border-sm me-1"></span>{{ $t(F + 'pay_now') }}
+                </button>
                 <font-awesome-icon :icon="['fas', 'chevron-right']" class="fin-inv-caret" />
               </div>
             </div>
@@ -1216,7 +1256,12 @@ export default {
                     </span>
                     <span class="fin-inv-sub" :class="{ ok: finSelectedInvoice.status === 'paid', bad: finSelectedInvoice.status === 'failed' }">{{ finInvoiceSub(finSelectedInvoice) }}</span>
                   </div>
-                  <span style="font-weight:700;font-size:.95rem">R$ {{ finFormatAmount(finSelectedInvoice.total_amount) }}</span>
+                  <div class="d-flex align-items-center gap-2">
+                    <span style="font-weight:700;font-size:.95rem">R$ {{ finFormatAmount(finSelectedInvoice.total_amount) }}</span>
+                    <button v-if="finPayable(finSelectedInvoice)" type="button" class="btn btn-sm btn-primary round px-3" :disabled="!!finPaying" @click="finPay(finSelectedInvoice)">
+                      <span v-if="finPaying" class="spinner-border spinner-border-sm me-1"></span>{{ $t(F + 'pay_now') }}
+                    </button>
+                  </div>
                 </div>
                 <div v-for="item in (finSelectedInvoice.items ?? [])" :key="item.id" class="fin-inv-item">
                   <span class="td-muted">{{ item.user?.name ?? '—' }}<small v-if="item.created_at" class="d-block">{{ finDate(item.created_at) }}</small></span>
@@ -1514,6 +1559,10 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .vol-status-badge.paid    { background: rgba(16,185,129,.3); color: #6ee7b7; }
 .fin-inv-list { border-top: 1px solid var(--ehub-line); }
 .fin-inv-row.static { cursor: default; }
+.fin-block { display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; margin-bottom: 16px; border-radius: 13px; border: 1px solid color-mix(in srgb, #e23b3b 35%, transparent); background: color-mix(in srgb, #e23b3b 8%, transparent); }
+.fin-block-ico { color: #e23b3b; font-size: 1.1rem; margin-top: 3px; }
+.fin-block strong { display: block; font-size: .92rem; color: var(--ehub-ink); margin-bottom: 3px; }
+.fin-block p { margin: 0; font-size: .82rem; color: var(--ehub-muted); }
 .fin-inv-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .fin-inv-main .fin-inv-cycle { width: auto; }
 .fin-inv-sub { font-size: .74rem; color: var(--ehub-muted); }

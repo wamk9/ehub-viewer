@@ -3,6 +3,7 @@ export default {
     invite_accepted:    '¡Bienvenido(a) a {org}! Ahora eres {role}',
     article_published:  'Nuevo artículo: {title} — {org}',
     event_created:      'Nuevo evento: {name} — {org}',
+    billing_blocked:    'Gestión de {org} bloqueada por factura vencida',
     billing_invoice:    'Nueva factura de {cycle} — {org}',
     billing_card_saved:      'Método de pago guardado — {org}',
     event_article_published: 'Nueva publicación en "{event}": {title}',

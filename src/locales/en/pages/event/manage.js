@@ -5,6 +5,7 @@ export default {
     edit: 'Edit event', public: 'View public page', back: 'Back to organization',
   },
   c: {
+    go_finances: 'Go to Finance',
     save: 'Save', cancel: 'Cancel', confirm: 'Confirm', close: 'Close', search: 'Search...',
     all: 'All', export: 'Export CSV', loading: 'Loading...', error: 'Something went wrong. Please try again.',
     none: '—', not_found: 'Event not found or you are not allowed to manage it.',
@@ -135,6 +136,7 @@ export default {
     stage_not_started: 'Start the stage before submitting results.',
     stage_in_progress: 'Finish the stage in progress before finishing the event.',
     event_already_finished: 'The event has already finished.',
+    org_billing_blocked: 'Management access is blocked by an overdue invoice. Pay it in the organization Finance panel to unlock.',
     event_already_initialized: 'The event has started; this field can no longer change.',
     event_is_draft: 'Publish the event before starting it.',
     event_not_in_progress: 'The event is not in progress.',

@@ -121,6 +121,13 @@ export default {
     <div v-if="em.loading" class="text-center py-5">
       <div class="spinner-border text-primary" role="status"></div>
     </div>
+    <div v-else-if="event?.org_billing_blocked" class="cc">
+      <div class="cc-empty">
+        <font-awesome-icon :icon="['fas', 'lock']" class="ico" />
+        {{ $t('pages.event.manage.err.org_billing_blocked') }}
+        <router-link :to="`/org/${event.org_route || $route.params.orgRoute}/manage/finances`" class="btn btn-sm btn-primary round px-3 mt-3">{{ $t('pages.event.manage.c.go_finances') }}</router-link>
+      </div>
+    </div>
     <div v-else-if="em.notFound" class="cc">
       <div class="cc-empty">
         <font-awesome-icon :icon="['fas', 'lock']" class="ico" />
