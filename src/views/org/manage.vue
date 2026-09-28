@@ -207,6 +207,14 @@ export default {
         { key: 'events', icon: 'calendar-days', bg: 'color-mix(in srgb, #7C3AED 14%, transparent)', color: '#7C3AED' },
       ];
     },
+    finOpenInvoices() { return (this.finBilling?.invoices || []).filter((i) => this.finPayable(i)); },
+    finOpenTotal() { return this.finOpenInvoices.reduce((s, i) => s + (Number(i.total_amount) || 0), 0); },
+    finGatewayList() {
+      return [
+        { key: 'mercadopago', name: 'Mercado Pago', short: 'MP', logoClass: 'fin-gw-mp', feesKey: 'mp_fees' },
+        { key: 'stripe_connect', name: 'Stripe', short: 'S', logoClass: 'fin-gw-sc', feesKey: 'stripe_fees' },
+      ];
+    },
     // Overdue invoice: only the finance panel is reachable until it is paid.
     billingBlocked() { return !!this.org?.billing_blocked; },
     navItems() {
@@ -1111,144 +1119,133 @@ export default {
           </div>
         </div>
 
-        <!-- Volumetria -->
-        <div class="set-card" style="padding:0;overflow:hidden;margin-bottom:16px">
-          <div class="fin-vol-hd" style="padding:18px 24px 14px">
-            <span class="fin-sec-title">{{ $t('pages.organization.manage.financeiro.vol_title') }}</span>
-            <p class="set-desc mb-0">{{ $t('pages.organization.manage.financeiro.vol_desc') }}</p>
+        <div v-if="finBillingLoading && !finBilling" class="text-center py-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>
+        <template v-else>
+          <!-- Summary -->
+          <div class="fin-kpis">
+            <div class="fin-kpi hl">
+              <div class="l">{{ $t(F + 'kpi_usage', { month: finCycleLabel(finBilling?.current_cycle) }) }}</div>
+              <div class="v">R$ {{ finFormatAmount(finBilling?.pending_total) }}</div>
+              <div class="s">{{ $t(F + 'kpi_regs', { n: finBilling?.pending_items ?? 0 }, finBilling?.pending_items ?? 0) }}</div>
+            </div>
+            <div class="fin-kpi">
+              <div class="l">{{ $t(F + 'kpi_next') }}</div>
+              <div class="v">{{ finDate(finBilling?.closes_at) }}</div>
+              <div class="s" :class="{ bad: !finBilling?.has_card }">
+                {{ finBilling?.card?.last4 ? $t(F + 'kpi_next_card', { last4: finBilling.card.last4 }) : $t(F + 'kpi_next_nocard') }}
+              </div>
+            </div>
+            <div class="fin-kpi" :class="{ alert: finOpenTotal > 0 }">
+              <div class="l">{{ $t(F + 'kpi_open') }}</div>
+              <div class="v">R$ {{ finFormatAmount(finOpenTotal) }}</div>
+              <div class="s">{{ finOpenInvoices.length ? $t(F + 'kpi_open_n', { n: finOpenInvoices.length }, finOpenInvoices.length) : $t(F + 'kpi_open_none') }}</div>
+            </div>
           </div>
-          <div v-if="finBillingLoading" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></div>
-          <template v-else>
-            <!-- Current month: usage still accumulating, billed when the month closes -->
-            <div class="vol-banner" :style="{ background: orgGrad }">
-              <div class="vol-body">
-                <div class="vol-period">{{ $t(F + 'vol_period') }} · {{ finCycleLabel(finBilling?.current_cycle) }}</div>
-                <div class="vol-title-text">{{ $t(F + 'vol_open') }}</div>
-                <div class="vol-metric-row">
-                  <div>
-                    <div class="vol-metric-val">{{ finBilling?.pending_items ?? 0 }}</div>
-                    <div class="vol-metric-lbl">{{ $t(F + 'vol_regs') }}</div>
+
+          <div class="fin-cols">
+            <!-- Invoices, one per month -->
+            <div class="cc">
+              <div class="cc-hd">
+                <h3><font-awesome-icon :icon="['fas', 'file-invoice-dollar']" style="color:var(--ehub-primary)" />{{ $t(F + 'invoices_title') }}</h3>
+              </div>
+              <div v-if="!finBilling?.invoices?.length && !finBilling?.closing_cycles?.length" class="cc-empty">
+                <font-awesome-icon :icon="['fas', 'receipt']" class="ico" />{{ $t(F + 'no_invoices') }}
+              </div>
+              <div v-else class="fin-inv-list">
+                <div v-for="c in (finBilling.closing_cycles || [])" :key="'c' + c.billing_cycle" class="fin-inv-row static">
+                  <div class="fin-inv-main">
+                    <span class="fin-inv-cycle">{{ finCycleLabel(c.billing_cycle) }}</span>
+                    <span class="fin-inv-sub">{{ $t(F + 'closing_sub', { n: c.items_count, date: finDate(c.charges_at) }, c.items_count) }}</span>
                   </div>
+                  <span class="s-badge pri">{{ $t(F + 'status_closing') }}</span>
+                  <span class="fin-inv-amount">R$ {{ finFormatAmount(c.total_amount) }}</span>
+                  <span class="fin-inv-caret"></span>
                 </div>
-              </div>
-              <div class="vol-aside">
-                <div class="vol-total-lbl">{{ $t(F + 'vol_total') }}</div>
-                <div class="vol-total-val">R$ {{ finFormatAmount(finBilling?.pending_total) }}</div>
-                <div class="vol-due">{{ $t(F + 'vol_closes', { date: finDate(finBilling?.closes_at) }) }}</div>
-                <span class="vol-status-badge pending">
-                  <font-awesome-icon :icon="['fas', 'clock']" />{{ $t(F + 'vol_in_progress') }}
-                </span>
+                <div v-for="inv in (finBilling.invoices || [])" :key="inv.id" class="fin-inv-row" @click="finOpenInvoice(inv.billing_cycle)">
+                  <div class="fin-inv-main">
+                    <span class="fin-inv-cycle">{{ finCycleLabel(inv.billing_cycle) }}</span>
+                    <span class="fin-inv-sub" :class="{ ok: inv.status === 'paid', bad: inv.status === 'failed' }">{{ finInvoiceSub(inv) }}</span>
+                  </div>
+                  <span class="s-badge" :class="finStatusClass(inv.status)">{{ $t(F + 'status_' + (inv.status || 'pending')) }}</span>
+                  <span class="fin-inv-amount">R$ {{ finFormatAmount(inv.total_amount) }}</span>
+                  <button v-if="finPayable(inv)" type="button" class="btn btn-sm btn-primary round px-3" :disabled="finPaying === inv.billing_cycle" @click.stop="finPay(inv)">
+                    <span v-if="finPaying === inv.billing_cycle" class="spinner-border spinner-border-sm me-1"></span>{{ $t(F + 'pay_now') }}
+                  </button>
+                  <font-awesome-icon :icon="['fas', 'chevron-right']" class="fin-inv-caret" />
+                </div>
               </div>
             </div>
 
-            <!-- One invoice per month -->
-            <div v-if="finBilling?.invoices?.length || finBilling?.closing_cycles?.length" class="fin-inv-list">
-              <div class="fin-inv-hd">{{ $t(F + 'history') }}</div>
-              <div v-for="c in (finBilling.closing_cycles || [])" :key="'c' + c.billing_cycle" class="fin-inv-row static">
-                <div class="fin-inv-main">
-                  <span class="fin-inv-cycle">{{ finCycleLabel(c.billing_cycle) }}</span>
-                  <span class="fin-inv-sub">{{ $t(F + 'closing_sub', { n: c.items_count, date: finDate(c.charges_at) }, c.items_count) }}</span>
+            <div class="fin-side">
+              <!-- Payment method -->
+              <div class="cc">
+                <div class="cc-hd">
+                  <h3><font-awesome-icon :icon="['fas', 'credit-card']" style="color:var(--ehub-primary)" />{{ $t(F + 'pm_title') }}</h3>
                 </div>
-                <span class="s-badge pri">{{ $t(F + 'status_closing') }}</span>
-                <span class="fin-inv-amount">R$ {{ finFormatAmount(c.total_amount) }}</span>
-                <span class="fin-inv-caret"></span>
-              </div>
-              <div v-for="inv in (finBilling.invoices || [])" :key="inv.id" class="fin-inv-row" @click="finOpenInvoice(inv.billing_cycle)">
-                <div class="fin-inv-main">
-                  <span class="fin-inv-cycle">{{ finCycleLabel(inv.billing_cycle) }}</span>
-                  <span class="fin-inv-sub" :class="{ ok: inv.status === 'paid', bad: inv.status === 'failed' }">{{ finInvoiceSub(inv) }}</span>
+                <div class="cc-bd">
+                  <div v-if="finBilling?.has_card" class="fin-cardviz" :style="{ background: orgGrad }">
+                    <span class="brand">{{ finBilling.card?.brand || '' }}</span>
+                    <span class="num">•••• •••• •••• {{ finBilling.card?.last4 || '••••' }}</span>
+                    <span class="exp">{{ finBilling.card?.exp ? $t(F + 'card_exp', { exp: finBilling.card.exp }) : '' }}</span>
+                  </div>
+                  <div v-else class="fin-nocard">
+                    <font-awesome-icon :icon="['fas', 'credit-card']" />
+                    <span>{{ $t(F + 'no_card') }}</span>
+                  </div>
+                  <div class="fin-pm-actions">
+                    <button class="btn btn-sm round px-3" :class="finBilling?.has_card ? 'btn-outline-primary' : 'btn-primary'" @click="finCardOpen = true">
+                      {{ finBilling?.has_card ? $t(F + 'change_card') : $t(F + 'add_card') }}
+                    </button>
+                    <button v-if="finBilling?.has_card" class="btn btn-sm btn-link px-1" :disabled="finSettingUpCard" @click="finSetupCard">
+                      <span v-if="finSettingUpCard" class="spinner-border spinner-border-sm me-1"></span>{{ $t(F + 'card_dialog.receipts') }}
+                    </button>
+                  </div>
+                  <EhubCardSetupDialog v-model="finCardOpen" :org-route="orgRoute" @saved="finCardSaved" />
                 </div>
-                <span class="s-badge" :class="finStatusClass(inv.status)">
-                  {{ $t(F + 'status_' + (inv.status || 'pending')) }}
-                </span>
-                <span class="fin-inv-amount">R$ {{ finFormatAmount(inv.total_amount) }}</span>
-                <button v-if="finPayable(inv)" type="button" class="btn btn-sm btn-primary round px-3" :disabled="finPaying === inv.billing_cycle" @click.stop="finPay(inv)">
-                  <span v-if="finPaying === inv.billing_cycle" class="spinner-border spinner-border-sm me-1"></span>{{ $t(F + 'pay_now') }}
-                </button>
-                <font-awesome-icon :icon="['fas', 'chevron-right']" class="fin-inv-caret" />
               </div>
-            </div>
-            <div v-else style="padding:16px 24px;font-size:.83rem;color:var(--ehub-muted)">{{ $t(F + 'no_invoices') }}</div>
-          </template>
-        </div>
 
-        <!-- Cartão de Crédito -->
-        <div class="set-card" style="margin-bottom:16px">
-          <h3>{{ $t('pages.organization.manage.financeiro.card_title') }}</h3>
-          <p class="set-desc">{{ $t('pages.organization.manage.financeiro.card_desc') }}</p>
-          <div v-if="finBillingLoading" class="py-2"><div class="spinner-border spinner-border-sm text-primary"></div></div>
-          <div v-else class="d-flex align-items-center gap-3 flex-wrap">
-            <div v-if="finBilling?.has_card" class="d-flex align-items-center gap-2" style="font-size:.87rem;color:var(--ehub-ink)">
-              <font-awesome-icon :icon="['fas', 'credit-card']" style="color:var(--ehub-primary)" />
-              <span v-if="finBilling.card?.last4" style="text-transform:capitalize">{{ finBilling.card.brand }} •••• {{ finBilling.card.last4 }}</span>
-              <span v-else>{{ $t('pages.organization.manage.financeiro.card_registered') }}</span>
-              <span v-if="finBilling.card?.exp" class="td-muted" style="font-size:.78rem">· {{ $t('pages.organization.manage.financeiro.card_exp', { exp: finBilling.card.exp }) }}</span>
+              <!-- How billing works -->
+              <div class="cc">
+                <div class="cc-hd">
+                  <h3><font-awesome-icon :icon="['fas', 'circle-info']" style="color:var(--ehub-primary)" />{{ $t(F + 'how_title') }}</h3>
+                </div>
+                <ol class="fin-how">
+                  <li><span class="d">5</span><span>{{ $t(F + 'how_1') }}</span></li>
+                  <li><span class="d">6–10</span><span>{{ $t(F + 'how_2') }}</span></li>
+                  <li><span class="d bad">11</span><span>{{ $t(F + 'how_3') }}</span></li>
+                </ol>
+              </div>
             </div>
-            <span v-else style="font-size:.83rem;color:var(--ehub-muted)">{{ $t('pages.organization.manage.financeiro.no_card') }}</span>
-            <button class="btn btn-sm btn-outline-primary round px-3" @click="finCardOpen = true">
-              {{ finBilling?.has_card ? $t('pages.organization.manage.financeiro.change_card') : $t('pages.organization.manage.financeiro.add_card') }}
-            </button>
-            <button v-if="finBilling?.has_card" class="btn btn-sm btn-link px-1" :disabled="finSettingUpCard" @click="finSetupCard">
-              <span v-if="finSettingUpCard" class="spinner-border spinner-border-sm me-1"></span>{{ $t(F + 'card_dialog.receipts') }}
-            </button>
-            <EhubCardSetupDialog v-model="finCardOpen" :org-route="orgRoute" @saved="finCardSaved" />
           </div>
-          <p class="mt-2 mb-0" style="font-size:.72rem;color:var(--ehub-muted)">{{ $t('pages.organization.manage.financeiro.card_notice') }}</p>
-        </div>
+        </template>
 
-        <!-- Gateways -->
-        <div class="set-card">
-          <h3>{{ $t('pages.organization.manage.financeiro.gw_title') }}</h3>
-          <p class="set-desc">{{ $t('pages.organization.manage.financeiro.gw_desc') }}</p>
+        <!-- Gateways for paid event registrations -->
+        <div class="cc" style="margin-top:16px">
+          <div class="cc-hd">
+            <h3><font-awesome-icon :icon="['fas', 'plug']" style="color:var(--ehub-primary)" />{{ $t(F + 'gw_title') }}</h3>
+          </div>
+          <p class="fin-gw-desc">{{ $t(F + 'gw_desc') }}</p>
           <div v-if="finGatewaysLoading" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>
-          <div v-else class="fin-gw-grid">
-            <!-- MercadoPago -->
-            <div class="fin-gw-card">
-              <div class="d-flex align-items-center gap-3" style="margin-bottom:14px">
-                <div class="fin-gw-logo fin-gw-mp">MP</div>
-                <div style="flex:1;min-width:0">
-                  <div class="fin-gw-name">MercadoPago</div>
-                  <div class="fin-gw-fees">{{ $t('pages.organization.manage.financeiro.mp_fees') }}</div>
-                </div>
-                <span v-if="finGateway('mercadopago')" class="s-badge active">
-                  <font-awesome-icon :icon="['fas', 'check']" /> {{ $t('pages.organization.manage.financeiro.gw_connected') }}
-                </span>
+          <template v-else>
+            <div v-for="gw in finGatewayList" :key="gw.key" class="fin-gw-row">
+              <div class="fin-gw-logo" :class="gw.logoClass">{{ gw.short }}</div>
+              <div class="fin-gw-txt">
+                <div class="fin-gw-name">{{ gw.name }}</div>
+                <div class="fin-gw-fees">{{ $t(F + gw.feesKey) }}</div>
               </div>
-              <button v-if="!finGateway('mercadopago')" class="btn btn-sm btn-primary w-100 round" :disabled="finConnecting === 'mercadopago'" @click="finConnect('mercadopago')">
-                <span v-if="finConnecting === 'mercadopago'" class="spinner-border spinner-border-sm me-1"></span>
-                {{ $t('pages.organization.manage.financeiro.gw_connect') }}
+              <span v-if="finGateway(gw.key)" class="s-badge ok"><font-awesome-icon :icon="['fas', 'check']" /> {{ $t(F + 'gw_connected') }}</span>
+              <button v-if="!finGateway(gw.key)" class="btn btn-sm btn-primary round px-3" :disabled="finConnecting === gw.key" @click="finConnect(gw.key)">
+                <span v-if="finConnecting === gw.key" class="spinner-border spinner-border-sm me-1"></span>{{ $t(F + 'gw_connect') }}
               </button>
-              <button v-else class="btn btn-sm btn-outline-danger w-100 round" :disabled="finDisconnecting === 'mercadopago'" @click="finDisconnect('mercadopago')">
-                <span v-if="finDisconnecting === 'mercadopago'" class="spinner-border spinner-border-sm me-1"></span>
-                {{ $t('pages.organization.manage.financeiro.gw_disconnect') }}
+              <button v-else class="btn btn-sm btn-link text-danger px-1" :disabled="finDisconnecting === gw.key" @click="finDisconnect(gw.key)">
+                <span v-if="finDisconnecting === gw.key" class="spinner-border spinner-border-sm me-1"></span>{{ $t(F + 'gw_disconnect') }}
               </button>
             </div>
-            <!-- Stripe Connect -->
-            <div class="fin-gw-card">
-              <div class="d-flex align-items-center gap-3" style="margin-bottom:14px">
-                <div class="fin-gw-logo fin-gw-sc">SC</div>
-                <div style="flex:1;min-width:0">
-                  <div class="fin-gw-name">Stripe</div>
-                  <div class="fin-gw-fees">{{ $t('pages.organization.manage.financeiro.stripe_fees') }}</div>
-                </div>
-                <span v-if="finGateway('stripe_connect')" class="s-badge active">
-                  <font-awesome-icon :icon="['fas', 'check']" /> {{ $t('pages.organization.manage.financeiro.gw_connected') }}
-                </span>
-              </div>
-              <button v-if="!finGateway('stripe_connect')" class="btn btn-sm btn-primary w-100 round" :disabled="finConnecting === 'stripe_connect'" @click="finConnect('stripe_connect')">
-                <span v-if="finConnecting === 'stripe_connect'" class="spinner-border spinner-border-sm me-1"></span>
-                {{ $t('pages.organization.manage.financeiro.gw_connect') }}
-              </button>
-              <button v-else class="btn btn-sm btn-outline-danger w-100 round" :disabled="finDisconnecting === 'stripe_connect'" @click="finDisconnect('stripe_connect')">
-                <span v-if="finDisconnecting === 'stripe_connect'" class="spinner-border spinner-border-sm me-1"></span>
-                {{ $t('pages.organization.manage.financeiro.gw_disconnect') }}
-              </button>
+            <div v-if="finGateways.length === 0" class="hint" style="padding:12px 17px;color:#b07d00">
+              <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />
+              <span>{{ $t(F + 'gw_warning') }}</span>
             </div>
-          </div>
-          <div v-if="finGateways.length === 0 && !finGatewaysLoading" class="alert alert-warning mt-3 mb-0 small">
-            <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />
-            {{ $t('pages.organization.manage.financeiro.gw_warning') }}
-          </div>
+          </template>
         </div>
 
         <!-- Invoice detail modal -->
@@ -1554,22 +1551,38 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 
 
 /* ── Financial panel ── */
-.fin-sec-title { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--ehub-muted); }
-.vol-banner { padding: 22px 26px; color: #fff; display: flex; align-items: flex-start; gap: 28px; flex-wrap: wrap; }
-.vol-body { flex: 1; min-width: 180px; }
-.vol-period { font-size: .78rem; opacity: .8; margin-bottom: 2px; }
-.vol-title-text { font-size: .96rem; font-weight: 700; margin-bottom: 16px; }
-.vol-metric-row { display: flex; gap: 22px; flex-wrap: wrap; }
-.vol-metric-val { font-size: 1.45rem; font-weight: 800; line-height: 1; }
-.vol-metric-lbl { font-size: .7rem; opacity: .75; margin-top: 2px; }
-.vol-aside { text-align: right; flex-shrink: 0; min-width: 130px; }
-.vol-total-lbl { font-size: .74rem; opacity: .75; margin-bottom: 3px; }
-.vol-total-val { font-size: 1.9rem; font-weight: 800; letter-spacing: -.03em; line-height: 1; margin-bottom: 5px; }
-.vol-due { font-size: .72rem; opacity: .75; margin-bottom: 10px; }
-.vol-status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 50rem; }
-.vol-status-badge.pending { background: rgba(255,255,255,.22); color: #fff; }
-.vol-status-badge.paid    { background: rgba(16,185,129,.3); color: #6ee7b7; }
-.fin-inv-list { border-top: 1px solid var(--ehub-line); }
+.fin-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; margin-bottom: 16px; }
+.fin-kpi { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 13px; padding: 15px 18px; min-width: 0; }
+.fin-kpi .l { font-size: .72rem; color: var(--ehub-muted); font-weight: 500; }
+.fin-kpi .v { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin: 2px 0; }
+.fin-kpi .s { font-size: .74rem; color: var(--ehub-muted); }
+.fin-kpi .s.bad { color: #e23b3b; }
+.fin-kpi.hl { background: var(--ehub-primary); border-color: var(--ehub-primary); }
+.fin-kpi.hl .l, .fin-kpi.hl .v, .fin-kpi.hl .s { color: #fff; }
+.fin-kpi.hl .l, .fin-kpi.hl .s { opacity: .85; }
+.fin-kpi.alert { border-color: color-mix(in srgb, #e23b3b 45%, transparent); background: color-mix(in srgb, #e23b3b 6%, var(--ehub-card)); }
+.fin-kpi.alert .v { color: #e23b3b; }
+.fin-cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.fin-side { display: flex; flex-direction: column; gap: 16px; }
+.fin-side .cc + .cc { margin-top: 0; }
+.fin-cardviz { position: relative; border-radius: 14px; padding: 16px 18px; color: #fff; min-height: 116px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 8px 22px rgba(0,0,0,.18); }
+.fin-cardviz .brand { font-size: .82rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; opacity: .95; }
+.fin-cardviz .num { font-size: 1.02rem; font-weight: 700; letter-spacing: .12em; font-variant-numeric: tabular-nums; }
+.fin-cardviz .exp { font-size: .72rem; opacity: .85; }
+.fin-nocard { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 22px 12px; border: 1px dashed var(--ehub-line); border-radius: 12px; color: var(--ehub-muted); font-size: .84rem; text-align: center; }
+.fin-nocard svg { font-size: 1.3rem; }
+.fin-pm-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.fin-how { list-style: none; margin: 0; padding: 12px 17px 16px; display: flex; flex-direction: column; gap: 10px; }
+.fin-how li { display: flex; gap: 12px; align-items: flex-start; font-size: .8rem; color: var(--ehub-ink); line-height: 1.4; }
+.fin-how .d { flex-shrink: 0; min-width: 44px; text-align: center; font-size: .72rem; font-weight: 800; padding: 3px 6px; border-radius: 8px; background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.fin-how .d.bad { background: color-mix(in srgb, #e23b3b 12%, transparent); color: #e23b3b; }
+.fin-gw-desc { font-size: .8rem; color: var(--ehub-muted); margin: 0; padding: 12px 17px 4px; }
+.fin-gw-row { display: flex; align-items: center; gap: 12px; padding: 12px 17px; border-top: 1px solid var(--ehub-line); flex-wrap: wrap; }
+.fin-gw-row:first-of-type { border-top: 0; }
+.fin-gw-txt { flex: 1; min-width: 160px; }
+.fin-inv-list { display: flex; flex-direction: column; }
+@media (max-width: 1100px) { .fin-cols { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 700px) { .fin-kpis { grid-template-columns: minmax(0, 1fr); } }
 .fin-inv-row.static { cursor: default; }
 .fin-block { display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; margin-bottom: 16px; border-radius: 13px; border: 1px solid color-mix(in srgb, #e23b3b 35%, transparent); background: color-mix(in srgb, #e23b3b 8%, transparent); }
 .fin-block-ico { color: #e23b3b; font-size: 1.1rem; margin-top: 3px; }
@@ -1581,15 +1594,12 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .fin-inv-sub.ok { color: #1f8a5b; }
 .fin-inv-sub.bad { color: #e23b3b; }
 .fin-inv-caret { color: var(--ehub-muted); font-size: .7rem; width: 10px; }
-.fin-inv-hd { font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 9px 24px; border-bottom: 1px solid var(--ehub-line); }
 .fin-inv-row { display: flex; align-items: center; gap: 10px; padding: 10px 24px; border-bottom: 1px solid var(--ehub-line); cursor: pointer; transition: background .12s; font-size: .87rem; }
 .fin-inv-row:last-child { border-bottom: 0; }
 .fin-inv-row:hover { background: color-mix(in srgb, var(--ehub-field-bg) 55%, transparent); }
 .fin-inv-cycle { font-weight: 600; width: 6rem; color: var(--ehub-ink); }
 .fin-inv-amount { font-weight: 600; color: var(--ehub-ink); }
-.fin-gw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 13px; }
-.fin-gw-card { background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 12px; padding: 18px 20px; }
-.fin-gw-logo { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: .82rem; flex-shrink: 0; letter-spacing: -.01em; }
+.fin-gw-logo { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: .82rem; flex-shrink: 0; letter-spacing: -.01em; }
 .fin-gw-mp { background: rgba(0,158,227,.18); color: #009ee3; }
 .fin-gw-sc { background: rgba(99,91,255,.16); color: #635bff; }
 .fin-gw-name { font-size: .92rem; font-weight: 700; color: var(--ehub-ink); }
