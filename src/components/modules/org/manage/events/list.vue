@@ -176,7 +176,8 @@ export default {
             this.loadError = false;
             const result = await OrganizationEvent.index(
                 this.$route.params.orgRoute,
-                this.showFinishedEvents
+                this.showFinishedEvents,
+                true
             );
             this.loading = false;
             if (result.code === 200 && Array.isArray(result.data)) {

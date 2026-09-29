@@ -364,7 +364,7 @@ export default {
 
     async loadEvents() {
       this.eventsLoading = true;
-      const result = await OrganizationEvent.index(this.orgRoute, true);
+      const result = await OrganizationEvent.index(this.orgRoute, true, true);
       this.eventsLoading = false;
       if (result.code === 200 && Array.isArray(result.data)) this.events = result.data;
     },

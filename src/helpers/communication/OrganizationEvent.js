@@ -1,8 +1,9 @@
 import Api from '@/helpers/communication/Connection.js';
 
 const OrganizationEvent = {
-    async index(orgRoute, showFinished = false) {
-        const result = await Api.getAsync(`/org/${orgRoute}/events?finished=${showFinished ? 1 : 0}`);
+    // manage=true: management screens; drafts come back only to event managers.
+    async index(orgRoute, showFinished = false, manage = false) {
+        const result = await Api.getAsync(`/org/${orgRoute}/events?finished=${showFinished ? 1 : 0}${manage ? '&manage=1' : ''}`);
         return { code: result.code, data: result.response?.message };
     },
     async show(orgRoute, eventRoute) {
