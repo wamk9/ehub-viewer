@@ -10,6 +10,9 @@ const props = defineProps({
 
 const { t, te } = useI18n()
 const catName = (route) => (te(`categories.names.${route}`) ? t(`categories.names.${route}`) : route)
+const subName = (sub) => (te(`categories.subcategories.${sub.route}`) ? t(`categories.subcategories.${sub.route}`) : (sub.name || sub.route))
+// Accent-insensitive, so "automobilismo" and "automóvel" style searches behave.
+const norm = (v) => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 
 const categories = ref([])
 const subcategories = ref([])
@@ -33,13 +36,17 @@ const selectedCategoryObj = computed(() => categories.value.find(c => c.route ==
 const availableRunmodes = computed(() => selectedCategoryObj.value?.runmodes ?? [])
 
 const filteredCategories = computed(() => {
-  const q = catSearch.value.toLowerCase()
-  return categories.value.filter(c => !q || (c.name || c.route).toLowerCase().includes(q))
+  const q = norm(catSearch.value.trim())
+  if (!q) return categories.value
+  // Matches the translated name, the code, or any subcategory (e.g. "kart" → Automobilismo).
+  return categories.value.filter(c => [catName(c.route), c.route, c.name]
+    .concat((c.subcategory_routes || []).flatMap(r => [r, te(`categories.subcategories.${r}`) ? t(`categories.subcategories.${r}`) : '']))
+    .some(v => norm(v).includes(q)))
 })
 
 const filteredSubcategories = computed(() => {
-  const q = subcatSearch.value.toLowerCase()
-  return subcategories.value.filter(s => !q || s.name.toLowerCase().includes(q))
+  const q = norm(subcatSearch.value.trim())
+  return subcategories.value.filter(s => !q || norm(subName(s)).includes(q) || norm(s.route).includes(q))
 })
 
 async function selectCategory(cat) {
@@ -87,7 +94,7 @@ watch(() => props.form.runmode, (val) => {
               type="button" class="cat-card" @click="selectCategory(cat)"
             >
               <div class="cat-ico" :style="{ color: 'var(--ehub-primary)' }"><font-awesome-icon :icon="['fas', categoryIcon(cat.route)]" /></div>
-              <div class="cat-name">{{ cat.name }}</div>
+              <div class="cat-name">{{ catName(cat.route) }}</div>
             </button>
           </div>
           <div v-if="!filteredCategories.length" class="cat-no-results">{{ $t('pages.organization.manage.eventWizard.s2.catNoRes') }}</div>
@@ -119,7 +126,7 @@ watch(() => props.form.runmode, (val) => {
                 v-for="sub in filteredSubcategories" :key="sub.id"
                 type="button" class="subcat-card" :class="{ sel: form.subcategory === sub.route }"
                 @click="form.subcategory = sub.route"
-              >{{ sub.name }}</button>
+              >{{ subName(sub) }}</button>
             </div>
             <div v-if="!filteredSubcategories.length" class="cat-no-results">{{ $t('pages.organization.manage.eventWizard.s2.subcatNoRes') }}</div>
           </div>
