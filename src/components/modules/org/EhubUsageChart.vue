@@ -124,8 +124,8 @@ export default {
 .bar.fee { background: var(--c-fee); }
 .euc-col.partial .bar { opacity: .55; }
 .euc-x { position: absolute; bottom: 2px; font-size: .68rem; color: var(--ehub-muted); text-transform: capitalize; }
-.euc-tip { position: absolute; bottom: calc(100% - 18px); left: 50%; z-index: 5; min-width: 190px; background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 10px; box-shadow: 0 10px 24px rgba(0,0,0,.18); padding: 9px 11px; font-size: .74rem; color: var(--ehub-ink); pointer-events: none; }
-.euc-tip.left { left: auto; right: 50%; }
+.euc-tip { position: absolute; top: 4px; left: calc(50% + 14px); z-index: 5; min-width: 190px; background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 10px; box-shadow: 0 10px 24px rgba(0,0,0,.18); padding: 9px 11px; font-size: .74rem; color: var(--ehub-ink); pointer-events: none; }
+.euc-tip.left { left: auto; right: calc(50% + 14px); }
 .euc-tip .t { font-weight: 700; margin-bottom: 5px; }
 .euc-tip .r { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
 .euc-tip .r b { margin-left: auto; font-variant-numeric: tabular-nums; }

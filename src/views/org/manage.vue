@@ -208,6 +208,9 @@ export default {
         { key: 'events', icon: 'calendar-days', bg: 'color-mix(in srgb, #7C3AED 14%, transparent)', color: '#7C3AED' },
       ];
     },
+    // Invoices come newest first: the first one is the last closed month.
+    finLastInvoice() { return this.finBilling?.invoices?.[0] || null; },
+    finOlderInvoices() { return (this.finBilling?.invoices || []).slice(1); },
     finOpenInvoices() { return (this.finBilling?.invoices || []).filter((i) => this.finPayable(i)); },
     finOpenTotal() { return this.finOpenInvoices.reduce((s, i) => s + (Number(i.total_amount) || 0), 0); },
     finGatewayList() {
@@ -654,6 +657,10 @@ export default {
       const [y, m] = cycle.split('-').map(Number);
       const label = new Intl.DateTimeFormat(this.$i18n.locale, { month: 'long', year: 'numeric' }).format(new Date(y, m - 1, 1));
       return label.charAt(0).toUpperCase() + label.slice(1);
+    },
+    finCycleShort(cycle) {
+      const [y, m] = cycle.split('-').map(Number);
+      return new Intl.DateTimeFormat(this.$i18n.locale, { month: 'short', year: '2-digit' }).format(new Date(y, m - 1, 1)).replace('.', '');
     },
     finDate(value, withTime = false) {
       if (!value) return '—';
@@ -1152,33 +1159,45 @@ export default {
               <div v-if="finBilling?.usage_history?.length" class="cc-bd fin-chart">
                 <EhubUsageChart :months="finBilling.usage_history" />
               </div>
-              <div class="fin-sub-hd">{{ $t(F + 'invoices_title') }}</div>
-              <div v-if="!finBilling?.invoices?.length && !finBilling?.closing_cycles?.length" class="cc-empty">
+              <!-- Months already over, waiting for their charge day -->
+              <div v-for="c in (finBilling?.closing_cycles || [])" :key="'c' + c.billing_cycle" class="fin-inv-row static">
+                <div class="fin-inv-main">
+                  <span class="fin-inv-cycle">{{ finCycleLabel(c.billing_cycle) }}</span>
+                  <span class="fin-inv-sub">{{ $t(F + 'closing_sub', { n: c.items_count, date: finDate(c.charges_at) }, c.items_count) }}</span>
+                </div>
+                <span class="s-badge pri">{{ $t(F + 'status_closing') }}</span>
+                <span class="fin-inv-amount">R$ {{ finFormatAmount(c.total_amount) }}</span>
+              </div>
+
+              <div class="fin-sub-hd">{{ $t(F + 'last_invoice_title') }}</div>
+              <div v-if="!finLastInvoice" class="cc-empty">
                 <font-awesome-icon :icon="['fas', 'receipt']" class="ico" />{{ $t(F + 'no_invoices') }}
               </div>
-              <div v-else class="fin-inv-list">
-                <div v-for="c in (finBilling.closing_cycles || [])" :key="'c' + c.billing_cycle" class="fin-inv-row static">
-                  <div class="fin-inv-main">
-                    <span class="fin-inv-cycle">{{ finCycleLabel(c.billing_cycle) }}</span>
-                    <span class="fin-inv-sub">{{ $t(F + 'closing_sub', { n: c.items_count, date: finDate(c.charges_at) }, c.items_count) }}</span>
-                  </div>
-                  <span class="s-badge pri">{{ $t(F + 'status_closing') }}</span>
-                  <span class="fin-inv-amount">R$ {{ finFormatAmount(c.total_amount) }}</span>
-                  <span class="fin-inv-caret"></span>
-                </div>
-                <div v-for="inv in (finBilling.invoices || [])" :key="inv.id" class="fin-inv-row" @click="finOpenInvoice(inv.billing_cycle)">
-                  <div class="fin-inv-main">
-                    <span class="fin-inv-cycle">{{ finCycleLabel(inv.billing_cycle) }}</span>
-                    <span class="fin-inv-sub" :class="{ ok: inv.status === 'paid', bad: inv.status === 'failed' }">{{ finInvoiceSub(inv) }}</span>
-                  </div>
-                  <span class="s-badge" :class="finStatusClass(inv.status)">{{ $t(F + 'status_' + (inv.status || 'pending')) }}</span>
-                  <span class="fin-inv-amount">R$ {{ finFormatAmount(inv.total_amount) }}</span>
-                  <button v-if="finPayable(inv)" type="button" class="btn btn-sm btn-primary round px-3" :disabled="finPaying === inv.billing_cycle" @click.stop="finPay(inv)">
-                    <span v-if="finPaying === inv.billing_cycle" class="spinner-border spinner-border-sm me-1"></span>{{ $t(F + 'pay_now') }}
+              <template v-else>
+                <dl class="fin-last">
+                  <div><dt>{{ $t(F + 'li_month') }}</dt><dd>{{ finCycleLabel(finLastInvoice.billing_cycle) }}</dd></div>
+                  <div><dt>{{ $t(F + 'li_amount') }}</dt><dd class="num">R$ {{ finFormatAmount(finLastInvoice.total_amount) }}</dd></div>
+                  <div><dt>{{ $t(F + 'li_regs') }}</dt><dd class="num">{{ finLastInvoice.items_count ?? '—' }}</dd></div>
+                  <div><dt>{{ $t(F + 'li_status') }}</dt><dd><span class="s-badge" :class="finStatusClass(finLastInvoice.status)">{{ $t(F + 'status_' + (finLastInvoice.status || 'pending')) }}</span></dd></div>
+                  <div class="wide"><dt>{{ $t(F + 'li_payment') }}</dt><dd :class="{ ok: finLastInvoice.status === 'paid', bad: finLastInvoice.status === 'failed' }">{{ finInvoiceSub(finLastInvoice) }}</dd></div>
+                  <div v-if="finLastInvoice.attempts"><dt>{{ $t(F + 'li_attempts') }}</dt><dd class="num">{{ finLastInvoice.attempts }}</dd></div>
+                </dl>
+                <div class="fin-last-actions">
+                  <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="finOpenInvoice(finLastInvoice.billing_cycle)">
+                    <font-awesome-icon :icon="['fas', 'receipt']" class="me-1" />{{ $t(F + 'li_items') }}
                   </button>
-                  <font-awesome-icon :icon="['fas', 'chevron-right']" class="fin-inv-caret" />
+                  <button v-if="finPayable(finLastInvoice)" type="button" class="btn btn-sm btn-primary round px-3" :disabled="finPaying === finLastInvoice.billing_cycle" @click="finPay(finLastInvoice)">
+                    <span v-if="finPaying === finLastInvoice.billing_cycle" class="spinner-border spinner-border-sm me-1"></span>{{ $t(F + 'pay_now') }}
+                  </button>
                 </div>
-              </div>
+                <!-- Older invoices as compact shortcuts -->
+                <div v-if="finOlderInvoices.length" class="fin-older">
+                  <span class="lbl">{{ $t(F + 'older_invoices') }}</span>
+                  <button v-for="inv in finOlderInvoices" :key="inv.id" type="button" class="fin-older-chip" :class="'st-' + inv.status" @click="finOpenInvoice(inv.billing_cycle)">
+                    <i></i>{{ finCycleShort(inv.billing_cycle) }} · R$ {{ finFormatAmount(inv.total_amount) }}
+                  </button>
+                </div>
+              </template>
             </div>
 
             <div class="fin-side">
@@ -1570,6 +1589,22 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .fin-cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
 .fin-main { height: 100%; }
 .fin-chart { border-bottom: 1px solid var(--ehub-line); }
+.fin-last { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px 18px; margin: 0; padding: 4px 17px 6px; }
+.fin-last > div { min-width: 0; }
+.fin-last .wide { grid-column: span 2; }
+.fin-last dt { font-size: .7rem; font-weight: 600; color: var(--ehub-muted); margin-bottom: 2px; }
+.fin-last dd { margin: 0; font-size: .88rem; font-weight: 600; color: var(--ehub-ink); }
+.fin-last dd.num { font-variant-numeric: tabular-nums; }
+.fin-last dd.ok { color: #1f8a5b; }
+.fin-last dd.bad { color: #e23b3b; }
+.fin-last-actions { display: flex; gap: 8px; flex-wrap: wrap; padding: 10px 17px 14px; }
+.fin-older { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 10px 17px 14px; border-top: 1px solid var(--ehub-line); margin-top: auto; }
+.fin-older .lbl { font-size: .7rem; font-weight: 700; color: var(--ehub-muted); margin-right: 4px; }
+.fin-older-chip { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 600; color: var(--ehub-ink); background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 50rem; padding: 3px 10px; cursor: pointer; text-transform: capitalize; }
+.fin-older-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--ehub-muted); }
+.fin-older-chip.st-paid i { background: #1f8a5b; }
+.fin-older-chip.st-failed i, .fin-older-chip.st-pending i { background: #e23b3b; }
+.fin-older-chip:hover { border-color: var(--ehub-primary); }
 .fin-sub-hd { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 12px 17px 6px; }
 .fin-side { display: flex; flex-direction: column; gap: 16px; }
 .fin-side .cc + .cc { margin-top: 0; }
