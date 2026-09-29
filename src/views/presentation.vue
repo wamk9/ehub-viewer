@@ -1,11 +1,26 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import EhubEventFeed from '@/components/EhubEventFeed.vue'
 import EhubOrgFeed from '@/components/EhubOrgFeed.vue'
+import Organization from '@/helpers/communication/Organization.js'
 
 const store = useStore()
 const isLogged = computed(() => !!store.getters.getToken)
+
+// The main call to action follows where the visitor is in the journey:
+// sign up → create the first organization → manage it.
+const orgCount = ref(null)
+onMounted(async () => {
+  if (!isLogged.value) return
+  const res = await Organization.getMine()
+  if (res.code === 200) orgCount.value = Array.isArray(res.data) ? res.data.length : (res.data?.organizations?.length ?? 0)
+})
+const primaryCta = computed(() => {
+  if (!isLogged.value) return { to: '/register', label: 'pages.presentation.hero.cta_primary', icon: 'user-plus' }
+  if (orgCount.value) return { to: '/my-orgs', label: 'pages.presentation.hero.cta_my_orgs', icon: 'building' }
+  return { to: '/create-org', label: 'pages.presentation.hero.cta_create_org', icon: 'plus' }
+})
 </script>
 
 <template>
@@ -23,13 +38,17 @@ const isLogged = computed(() => !!store.getters.getToken)
       </h1>
       <p class="lead">{{ $t('pages.presentation.hero.subtitle') }}</p>
       <div class="hero-ctas">
-        <router-link v-if="!isLogged" to="/register" class="btn btn-primary round px-4 py-2">
-          {{ $t('pages.presentation.hero.cta_primary') }}
+        <router-link :to="primaryCta.to" class="btn btn-primary round px-4 py-2">
+          <font-awesome-icon :icon="['fas', primaryCta.icon]" class="me-2" />{{ $t(primaryCta.label) }}
         </router-link>
-        <router-link to="/pricing" class="btn btn-outline-primary round px-4 py-2">
-          {{ $t('pages.presentation.hero.cta_secondary') }}
+        <router-link to="/events" class="btn btn-outline-primary round px-4 py-2">
+          {{ $t('pages.presentation.hero.cta_events') }}
         </router-link>
       </div>
+      <p class="hero-free-note">
+        <font-awesome-icon :icon="['fas', 'circle-check']" class="me-1" />{{ $t('pages.presentation.hero.free_note') }}
+        <router-link to="/pricing">{{ $t('pages.presentation.hero.cta_secondary') }}</router-link>
+      </p>
     </header>
 
     <!-- PRODUCT PREVIEW -->
@@ -86,6 +105,12 @@ const isLogged = computed(() => !!store.getters.getToken)
             <h4>{{ $t('pages.presentation.how.s4.title') }}</h4>
             <p>{{ $t('pages.presentation.how.s4.desc') }}</p>
           </div>
+        </div>
+        <div class="how-cta">
+          <router-link :to="primaryCta.to" class="btn btn-primary round px-4 py-2">
+            <font-awesome-icon :icon="['fas', primaryCta.icon]" class="me-2" />{{ $t(primaryCta.label) }}
+          </router-link>
+          <span>{{ $t('pages.presentation.how.cta_hint') }}</span>
         </div>
       </div>
     </section>
@@ -241,6 +266,12 @@ const isLogged = computed(() => !!store.getters.getToken)
 </template>
 
 <style scoped>
+.hero-free-note { margin: 14px 0 0; font-size: .82rem; color: var(--ehub-muted); }
+.hero-free-note svg { color: #1f8a5b; }
+.hero-free-note a { margin-left: 6px; }
+.how-cta { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 28px; }
+.how-cta span { font-size: .82rem; color: var(--ehub-muted); }
+
 .container-narrow { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
 
 /* ── Hero ── */

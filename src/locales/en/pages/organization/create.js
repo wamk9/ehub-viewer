@@ -1,24 +1,42 @@
 export default {
-  title: 'Cool! Thanks for choosing us to manage {org_name}!',
-  title_default: 'New Organization',
-  subtitle: 'After creating your organization in our platform, you will be able to create events!',
-  url_placeholder: 'identifier',
+  eyebrow: 'Free to start',
+  title: 'Create your organization',
+  title_default: 'Create your organization',
+  subtitle: 'Your organization is your space on eHub: it is where you publish championships, take registrations and show results.',
+  url_placeholder: 'my-league',
+  free_note: 'No monthly fee. You only pay a small fee when you get registrations.',
   form: {
-    org_name: 'Your organization name (64 characters max)',
-    org_identifier: 'A unique identifier for your organization (like a username)',
-    org_description: 'A small description about your organization (180 characters max)',
-    org_submit: 'Send data to create your organization at eHub'
+    org_name: 'Organization name',
+    org_name_ph: 'E.g. Friends Kart League',
+    org_name_hint: 'How participants will know you.',
+    org_identifier: 'Page address',
+    org_description: 'Short description',
+    org_description_ph: 'E.g. Kart championships among friends, every month.',
+    optional: 'Optional',
+    org_submit: 'Create my organization',
   },
   tips: {
-    image: 'Tip: An organization logo is optional, but we recommend a square image (1:1 aspect ratio) with a resolution of 500px or more'
+    image: 'Logo is optional. You can add it later.',
+  },
+  next: {
+    title: 'What comes next',
+    s1_title: 'Create your first event',
+    s1_desc: 'A guided step-by-step helps you set up the championship: dates, stages and rules.',
+    s2_title: 'Share it and take registrations',
+    s2_desc: 'Share the event link. Free or paid registrations, no spreadsheets.',
+    s3_title: 'Publish the results',
+    s3_desc: 'Standings update automatically after each stage.',
   },
   loading: {
-    creating: 'Creating your organization...',
-    created: '"{name}" created! Redirecting...',
-    error: 'Failed to create organization.'
+    creating: 'Creating your organization…',
+    created: '"{name}" was created!',
+    error: 'The organization could not be created. Please try again.',
   },
   validation: {
-    route_min: 'Identifier must have at least 3 characters',
-    route_available: 'Identifier available!'
-  }
+    route_hint: 'Generated from the name. You can adjust it.',
+    route_min: 'Use at least 3 characters.',
+    route_checking: 'Checking whether the address is free…',
+    route_available: 'Address available!',
+    route_taken: 'This address is already in use. Try another one.',
+  },
 }

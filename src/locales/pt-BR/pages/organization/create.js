@@ -1,24 +1,42 @@
 export default {
-  title: 'Que ótimo! Obrigado por nos escolher para gerenciar {org_name}!',
-  title_default: 'Nova Organização',
-  subtitle: 'Após criar sua organização em nossa plataforma, você poderá criar eventos!',
-  url_placeholder: 'identificacao',
+  eyebrow: 'Grátis para começar',
+  title: 'Crie sua organização',
+  title_default: 'Crie sua organização',
+  subtitle: 'A organização é o seu espaço no eHub: é por ela que você publica campeonatos, recebe inscrições e mostra resultados.',
+  url_placeholder: 'minha-liga',
+  free_note: 'Sem mensalidade. Você só paga uma pequena taxa quando tiver inscrições.',
   form: {
-    org_name: 'Nome da sua organização (máximo 64 caracteres)',
-    org_identifier: 'Um identificador único para sua organização (como um nome de usuário)',
-    org_description: 'Uma pequena descrição sobre sua organização (máximo 180 caracteres)',
-    org_submit: 'Enviar dados para criar sua organização no eHub'
+    org_name: 'Nome da organização',
+    org_name_ph: 'Ex.: Liga Amigos do Kart',
+    org_name_hint: 'Como os participantes vão conhecer você.',
+    org_identifier: 'Endereço da página',
+    org_description: 'Descrição curta',
+    org_description_ph: 'Ex.: Campeonatos de kart entre amigos, todo mês.',
+    optional: 'Opcional',
+    org_submit: 'Criar minha organização',
   },
   tips: {
-    image: 'Dica: O logo da organização é opcional, mas recomendamos uma imagem quadrada (proporção 1:1) com resolução de 500px ou mais'
+    image: 'Logo opcional. Dá para adicionar depois.',
+  },
+  next: {
+    title: 'O que vem depois',
+    s1_title: 'Crie seu primeiro evento',
+    s1_desc: 'Um passo a passo guiado ajuda a montar o campeonato: datas, etapas e regras.',
+    s2_title: 'Divulgue e receba inscrições',
+    s2_desc: 'Compartilhe o link do evento. Inscrições gratuitas ou pagas, sem planilhas.',
+    s3_title: 'Publique os resultados',
+    s3_desc: 'A classificação é atualizada automaticamente a cada etapa.',
   },
   loading: {
-    creating: 'Criando sua organização...',
-    created: '"{name}" criada! Redirecionando...',
-    error: 'Falha ao criar a organização.'
+    creating: 'Criando sua organização…',
+    created: '"{name}" foi criada!',
+    error: 'Não foi possível criar a organização. Tente novamente.',
   },
   validation: {
-    route_min: 'O identificador precisa ter pelo menos 3 caracteres',
-    route_available: 'Identificador disponível!'
-  }
+    route_hint: 'Gerado a partir do nome. Pode ajustar se quiser.',
+    route_min: 'Use pelo menos 3 caracteres.',
+    route_checking: 'Verificando se o endereço está livre…',
+    route_available: 'Endereço disponível!',
+    route_taken: 'Este endereço já está em uso. Tente outro.',
+  },
 }

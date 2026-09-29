@@ -30,5 +30,9 @@ export default {
     verified: 'Verificada',
   },
   results: '{n} organizações',
+  create_cta: 'Criar minha organização',
+  create_hint: 'Grátis e leva menos de 2 minutos.',
+  empty_none: 'Ainda não há organizações por aqui. Que tal criar a primeira?',
+  empty_cta: 'Criar a primeira organização',
   empty: 'Nenhuma organização encontrada com esses filtros.',
 }

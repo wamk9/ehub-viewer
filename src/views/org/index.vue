@@ -47,6 +47,9 @@ const q        = ref('')
 const category = ref('')
 const showMode = ref('all')
 const sort     = ref('name')
+const hasFilters = computed(() => !!(q.value.trim() || category.value || showMode.value !== 'all'))
+// Where "create your organization" leads: straight to the form, or sign-up first.
+const createTo = computed(() => (isLogged.value ? '/create-org' : '/register'))
 
 // ── Filtered + sorted list ────────────────────────────────────────────
 const filtered = computed(() => {
@@ -115,6 +118,12 @@ async function handleFollow(org) {
       {{ $t('pages.organization.index.hero.title_suf') }}
     </h1>
     <p>{{ $t('pages.organization.index.hero.subtitle') }}</p>
+    <div class="orgs-hero-cta">
+      <router-link :to="createTo" class="btn btn-primary round px-4">
+        <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />{{ $t('pages.organization.index.create_cta') }}
+      </router-link>
+      <span>{{ $t('pages.organization.index.create_hint') }}</span>
+    </div>
     <div style="max-width:520px; margin: 0 auto;">
       <div class="input-group input-group-lg">
         <span class="input-group-text" style="background:var(--ehub-field-bg); border-color:var(--ehub-line); color:var(--ehub-muted);">
@@ -171,7 +180,10 @@ async function handleFollow(org) {
     <!-- Empty -->
     <div v-else-if="!filtered.length" class="empty-state">
       <div class="ico"><font-awesome-icon :icon="['far', 'building']" /></div>
-      <p class="mb-0">{{ $t('pages.organization.index.empty') }}</p>
+      <p class="mb-0">{{ $t(hasFilters ? 'pages.organization.index.empty' : 'pages.organization.index.empty_none') }}</p>
+      <router-link v-if="!hasFilters" :to="createTo" class="btn btn-primary round px-4 mt-3">
+        <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />{{ $t('pages.organization.index.empty_cta') }}
+      </router-link>
     </div>
 
     <!-- Grid -->
@@ -198,6 +210,9 @@ async function handleFollow(org) {
 </template>
 
 <style scoped>
+.orgs-hero-cta { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 0 0 18px; }
+.orgs-hero-cta span { font-size: .8rem; color: var(--ehub-muted); }
+
 .empty-state {
   text-align: center;
   padding: 60px 20px;

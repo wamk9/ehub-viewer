@@ -126,6 +126,11 @@ export default {
       finInvoiceLoading: false,
       finSettingUpCard: false,
 
+      // onboarding ("first steps") card
+      welcome: false,
+      onbDismissed: false,
+      onbGateways: null,
+
       // reports
       repTab: 'standard',
       customReports: [],
@@ -221,6 +226,22 @@ export default {
         { key: 'stripe_connect', name: 'Stripe', short: 'S', logoClass: 'fin-gw-sc', feesKey: 'stripe_fees' },
       ];
     },
+    // First steps after creating the organization; each one links to where it is done.
+    onboardingSteps() {
+      if (!this.org) return [];
+      const gateways = this.finLoaded ? this.finGateways.length : this.onbGateways;
+      return [
+        { key: 'event', icon: 'trophy', done: (this.org.events_count ?? this.events.length) > 0, action: () => this.goCreateEvent() },
+        { key: 'payments', icon: 'credit-card', done: gateways > 0, action: () => this.switchPanel('financeiro') },
+        { key: 'visual', icon: 'palette', done: !!(this.org.logo_image || this.org.color), action: () => this.switchPanel('settings') },
+        { key: 'team', icon: 'user-plus', done: (this.org.members_count ?? this.members.length) > 1, action: () => this.switchPanel('members') },
+      ];
+    },
+    onboardingDone() { return this.onboardingSteps.filter(s => s.done).length; },
+    showOnboarding() {
+      if (!this.org || this.onbDismissed || !this.canEv('event.manage')) return false;
+      return this.welcome || this.onboardingDone < this.onboardingSteps.length;
+    },
     // Overdue invoice: only the finance panel is reachable until it is paid.
     billingBlocked() { return !!this.org?.billing_blocked; },
     navItems() {
@@ -263,6 +284,7 @@ export default {
     }
     // Opening /finances directly (reload, deep link, gateway return) never goes through switchPanel.
     if (this.activePanel === 'financeiro' && !this.finLoaded) this.loadFinances();
+    this.initOnboarding();
     await this.loadEvents();
     await this.loadMembers();
     this.loadActivities();
@@ -324,6 +346,23 @@ export default {
         this.settingsForm.website = result.data.website || '';
         this.settingsForm.color = result.data.color || '';
       }
+    },
+
+    initOnboarding() {
+      try { this.onbDismissed = localStorage.getItem('ehub_onb_done_' + this.orgRoute) === '1'; } catch (e) { /* storage unavailable */ }
+      if (this.$route.query.welcome) {
+        this.welcome = true;
+        this.onbDismissed = false;
+        this.$router.replace({ query: {} });
+      }
+      if (this.onbDismissed) return;
+      OrganizationBilling.getGateways(this.orgRoute).then((res) => {
+        if (res.code === 200 && Array.isArray(res.data)) this.onbGateways = res.data.length;
+      });
+    },
+    dismissOnboarding() {
+      this.onbDismissed = true;
+      try { localStorage.setItem('ehub_onb_done_' + this.orgRoute, '1'); } catch (e) { /* storage unavailable */ }
     },
 
     async switchPanel(panel) {
@@ -793,6 +832,32 @@ export default {
           </button>
         </div>
 
+        <!-- First steps -->
+        <div v-if="showOnboarding" class="onb">
+          <div class="onb-hd">
+            <div>
+              <h3>{{ welcome ? $t('pages.organization.manage.onboarding.welcome_title', { name: org?.name }) : $t('pages.organization.manage.onboarding.title') }}</h3>
+              <p>{{ $t('pages.organization.manage.onboarding.sub', { done: onboardingDone, total: onboardingSteps.length }) }}</p>
+            </div>
+            <button type="button" class="onb-close" :title="$t('pages.organization.manage.onboarding.dismiss')" :aria-label="$t('pages.organization.manage.onboarding.dismiss')" @click="dismissOnboarding">
+              <font-awesome-icon :icon="['fas', 'xmark']" />
+            </button>
+          </div>
+          <div class="onb-bar"><span :style="{ width: (onboardingDone / onboardingSteps.length * 100) + '%' }"></span></div>
+          <div class="onb-grid">
+            <button v-for="(s, i) in onboardingSteps" :key="s.key" type="button" class="onb-step" :class="{ done: s.done }" @click="s.action()">
+              <span class="onb-ico">
+                <font-awesome-icon :icon="['fas', s.done ? 'check' : s.icon]" />
+              </span>
+              <span class="onb-txt">
+                <strong>{{ i + 1 }}. {{ $t('pages.organization.manage.onboarding.' + s.key + '_title') }}</strong>
+                <small>{{ $t('pages.organization.manage.onboarding.' + s.key + '_desc') }}</small>
+              </span>
+              <span class="onb-go">{{ s.done ? $t('pages.organization.manage.onboarding.done') : $t('pages.organization.manage.onboarding.' + s.key + '_cta') }}</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Stat cards -->
         <div class="stat-grid">
           <EhubStatCard
@@ -902,7 +967,7 @@ export default {
         <div class="pnl-hd">
           <div>
             <h1>{{ $t('pages.organization.manage.nav.events') }}</h1>
-            <p>{{ $t('pages.organization.manage.events.sub', { n: events.length }) }}</p>
+            <p>{{ $t('pages.organization.manage.events.sub', { n: events.length }, events.length) }}</p>
           </div>
           <div class="spacer"></div>
           <button v-if="canEv('event.manage')" class="btn btn-primary round px-3" @click="goCreateEvent">
@@ -976,7 +1041,7 @@ export default {
         <div class="pnl-hd">
           <div>
             <h1>{{ $t('pages.organization.manage.nav.members') }}</h1>
-            <p>{{ $t('pages.organization.manage.members.sub', { n: members.length }) }}</p>
+            <p>{{ $t('pages.organization.manage.members.sub', { n: members.length }, members.length) }}</p>
           </div>
         </div>
 
@@ -1609,6 +1674,28 @@ export default {
 </template>
 
 <style scoped>
+.onb { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-left: 4px solid var(--ehub-primary); border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; }
+.onb-hd { display: flex; align-items: flex-start; gap: 12px; }
+.onb-hd > div { flex: 1; }
+.onb-hd h3 { font-size: 1rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 2px; }
+.onb-hd p { font-size: .8rem; color: var(--ehub-muted); margin: 0; }
+.onb-close { border: 0; background: transparent; color: var(--ehub-muted); padding: 4px 6px; border-radius: 6px; }
+.onb-close:hover { background: var(--ehub-primary-tint); color: var(--ehub-ink); }
+.onb-bar { height: 6px; border-radius: 3px; background: var(--ehub-line); margin: 12px 0 14px; overflow: hidden; }
+.onb-bar span { display: block; height: 100%; background: var(--ehub-primary); transition: width .3s; }
+.onb-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.onb-step { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg, transparent); border-radius: 10px; padding: 12px; cursor: pointer; transition: border-color .15s, transform .15s; }
+.onb-step:hover { border-color: var(--ehub-primary); transform: translateY(-1px); }
+.onb-ico { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--ehub-primary-tint); color: var(--ehub-primary); font-size: .8rem; }
+.onb-step.done .onb-ico { background: rgba(31, 138, 91, .14); color: #1f8a5b; }
+.onb-txt strong { display: block; font-size: .82rem; color: var(--ehub-ink); }
+.onb-txt small { display: block; font-size: .73rem; color: var(--ehub-muted); line-height: 1.4; margin-top: 2px; }
+.onb-step.done .onb-txt strong { text-decoration: line-through; color: var(--ehub-muted); }
+.onb-go { margin-top: auto; font-size: .74rem; font-weight: 700; color: var(--ehub-primary); }
+.onb-step.done .onb-go { color: #1f8a5b; }
+@media (max-width: 900px) { .onb-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .onb-grid { grid-template-columns: minmax(0, 1fr); } }
+
 .cc-link { font-size: .78rem; font-weight: 600; color: var(--ehub-primary); cursor: pointer; background: none; border: 0; padding: 0; }
 .cc-link:hover { text-decoration: underline; }
 .td-name { font-weight: 600; }
