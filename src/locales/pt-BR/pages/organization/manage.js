@@ -188,6 +188,8 @@ export default {
     delete_error: 'Erro ao excluir organização.',
   },
   financeiro: {
+    usage_title: 'Uso e faturas',
+    chart: { revenue: 'Receita da organização', fee: 'Taxa eHub', partial: 'parcial', partial_note: 'Mês atual, ainda em andamento. Receita: inscrições pagas confirmadas no mês (eventos em R$).', regs: '{n} inscrição cobrada | {n} inscrições cobradas' },
     kpi_usage: 'Uso de {month}',
     kpi_regs: '{n} inscrição cobrada | {n} inscrições cobradas',
     kpi_next: 'Próxima cobrança',
@@ -196,7 +198,7 @@ export default {
     kpi_open: 'Em aberto',
     kpi_open_none: 'Nenhuma pendência',
     kpi_open_n: '{n} fatura pendente | {n} faturas pendentes',
-    invoices_title: 'Faturas',
+    invoices_title: 'Últimas faturas',
     pm_title: 'Forma de pagamento',
     how_title: 'Como funciona a cobrança',
     how_1: 'O mês anterior é fechado em uma fatura e cobrado no cartão.',

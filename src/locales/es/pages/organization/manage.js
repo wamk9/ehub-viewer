@@ -188,6 +188,8 @@ export default {
     delete_error: 'Error al eliminar la organización.',
   },
   financeiro: {
+    usage_title: 'Uso y facturas',
+    chart: { revenue: 'Ingresos de la organización', fee: 'Tarifa eHub', partial: 'parcial', partial_note: 'Mes actual, todavía en curso. Ingresos: inscripciones pagadas confirmadas en el mes (eventos en BRL).', regs: '{n} inscripción cobrada | {n} inscripciones cobradas' },
     kpi_usage: 'Uso de {month}',
     kpi_regs: '{n} inscripción cobrada | {n} inscripciones cobradas',
     kpi_next: 'Próximo cobro',
@@ -196,7 +198,7 @@ export default {
     kpi_open: 'Pendiente',
     kpi_open_none: 'Sin pendientes',
     kpi_open_n: '{n} factura pendiente | {n} facturas pendientes',
-    invoices_title: 'Facturas',
+    invoices_title: 'Últimas facturas',
     pm_title: 'Método de pago',
     how_title: 'Cómo funciona el cobro',
     how_1: 'El mes anterior se cierra en una factura y se cobra en la tarjeta.',

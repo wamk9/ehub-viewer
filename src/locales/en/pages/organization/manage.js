@@ -188,6 +188,8 @@ export default {
     delete_error: 'Failed to delete organization.',
   },
   financeiro: {
+    usage_title: 'Usage and invoices',
+    chart: { revenue: 'Organization revenue', fee: 'eHub fee', partial: 'partial', partial_note: 'Current month, still in progress. Revenue: paid registrations confirmed in the month (BRL events).', regs: '{n} billed registration | {n} billed registrations' },
     kpi_usage: '{month} usage',
     kpi_regs: '{n} billed registration | {n} billed registrations',
     kpi_next: 'Next charge',
@@ -196,7 +198,7 @@ export default {
     kpi_open: 'Outstanding',
     kpi_open_none: 'Nothing pending',
     kpi_open_n: '{n} pending invoice | {n} pending invoices',
-    invoices_title: 'Invoices',
+    invoices_title: 'Latest invoices',
     pm_title: 'Payment method',
     how_title: 'How billing works',
     how_1: 'The previous month is closed into one invoice and charged to the card.',

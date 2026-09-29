@@ -14,6 +14,7 @@ import EhubInviteCard from '@/components/modules/members/EhubInviteCard.vue';
 import EhubLeaveCard from '@/components/modules/members/EhubLeaveCard.vue';
 import EhubVisualFields from '@/components/inputs/EhubVisualFields.vue';
 import EhubCardSetupDialog from '@/components/modules/org/EhubCardSetupDialog.vue';
+import EhubUsageChart from '@/components/modules/org/EhubUsageChart.vue';
 import EventCreateWizard from '@/components/modules/org/manage/events/create.vue';
 
 const ORG_GRADS = [
@@ -63,7 +64,7 @@ const ROLE_CLASS = {
 };
 
 export default {
-  components: { EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubVisualFields, EhubCardSetupDialog },
+  components: { EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubVisualFields, EhubCardSetupDialog, EhubUsageChart },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -1143,11 +1144,15 @@ export default {
           </div>
 
           <div class="fin-cols">
-            <!-- Invoices, one per month -->
-            <div class="cc">
+            <!-- Usage chart + latest invoices, one per month -->
+            <div class="cc fin-main">
               <div class="cc-hd">
-                <h3><font-awesome-icon :icon="['fas', 'file-invoice-dollar']" style="color:var(--ehub-primary)" />{{ $t(F + 'invoices_title') }}</h3>
+                <h3><font-awesome-icon :icon="['fas', 'chart-bar']" style="color:var(--ehub-primary)" />{{ $t(F + 'usage_title') }}</h3>
               </div>
+              <div v-if="finBilling?.usage_history?.length" class="cc-bd fin-chart">
+                <EhubUsageChart :months="finBilling.usage_history" />
+              </div>
+              <div class="fin-sub-hd">{{ $t(F + 'invoices_title') }}</div>
               <div v-if="!finBilling?.invoices?.length && !finBilling?.closing_cycles?.length" class="cc-empty">
                 <font-awesome-icon :icon="['fas', 'receipt']" class="ico" />{{ $t(F + 'no_invoices') }}
               </div>
@@ -1562,7 +1567,10 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .fin-kpi.hl .l, .fin-kpi.hl .s { opacity: .85; }
 .fin-kpi.alert { border-color: color-mix(in srgb, #e23b3b 45%, transparent); background: color-mix(in srgb, #e23b3b 6%, var(--ehub-card)); }
 .fin-kpi.alert .v { color: #e23b3b; }
-.fin-cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.fin-cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.fin-main { height: 100%; }
+.fin-chart { border-bottom: 1px solid var(--ehub-line); }
+.fin-sub-hd { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 12px 17px 6px; }
 .fin-side { display: flex; flex-direction: column; gap: 16px; }
 .fin-side .cc + .cc { margin-top: 0; }
 .fin-cardviz { position: relative; border-radius: 14px; padding: 16px 18px; color: #fff; min-height: 116px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 8px 22px rgba(0,0,0,.18); }
