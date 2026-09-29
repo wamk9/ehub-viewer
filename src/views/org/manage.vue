@@ -658,6 +658,16 @@ export default {
       const label = new Intl.DateTimeFormat(this.$i18n.locale, { month: 'long', year: 'numeric' }).format(new Date(y, m - 1, 1));
       return label.charAt(0).toUpperCase() + label.slice(1);
     },
+    finPaymentLabel(inv) {
+      if (inv.status === 'paid') return 'li_paid_on';
+      if (inv.status === 'failed') return 'li_failed_on';
+      return 'li_due_on';
+    },
+    finPaymentDate(inv) {
+      if (inv.status === 'paid') return inv.paid_at ? this.finDate(inv.paid_at, true) : '—';
+      if (inv.status === 'failed') return this.finDate(inv.failed_at, true);
+      return this.finDate(inv.due_date);
+    },
     finCycleShort(cycle) {
       const [y, m] = cycle.split('-').map(Number);
       return new Intl.DateTimeFormat(this.$i18n.locale, { month: 'short', year: '2-digit' }).format(new Date(y, m - 1, 1)).replace('.', '');
@@ -1179,12 +1189,12 @@ export default {
                   <div><dt>{{ $t(F + 'li_amount') }}</dt><dd class="num">R$ {{ finFormatAmount(finLastInvoice.total_amount) }}</dd></div>
                   <div><dt>{{ $t(F + 'li_regs') }}</dt><dd class="num">{{ finLastInvoice.items_count ?? '—' }}</dd></div>
                   <div><dt>{{ $t(F + 'li_status') }}</dt><dd><span class="s-badge" :class="finStatusClass(finLastInvoice.status)">{{ $t(F + 'status_' + (finLastInvoice.status || 'pending')) }}</span></dd></div>
-                  <div class="wide"><dt>{{ $t(F + 'li_payment') }}</dt><dd :class="{ ok: finLastInvoice.status === 'paid', bad: finLastInvoice.status === 'failed' }">{{ finInvoiceSub(finLastInvoice) }}</dd></div>
-                  <div v-if="finLastInvoice.attempts"><dt>{{ $t(F + 'li_attempts') }}</dt><dd class="num">{{ finLastInvoice.attempts }}</dd></div>
+                  <div><dt>{{ $t(F + finPaymentLabel(finLastInvoice)) }}</dt><dd class="num" :class="{ ok: finLastInvoice.status === 'paid', bad: finLastInvoice.status === 'failed' }">{{ finPaymentDate(finLastInvoice) }}</dd></div>
+                  <div><dt>{{ $t(F + 'li_attempts') }}</dt><dd class="num">{{ finLastInvoice.attempts || 0 }}</dd></div>
                 </dl>
                 <div class="fin-last-actions">
                   <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="finOpenInvoice(finLastInvoice.billing_cycle)">
-                    <font-awesome-icon :icon="['fas', 'receipt']" class="me-1" />{{ $t(F + 'li_items') }}
+                    <font-awesome-icon :icon="['fas', 'receipt']" class="me-1" />{{ $t(F + 'li_docs') }}
                   </button>
                   <button v-if="finPayable(finLastInvoice)" type="button" class="btn btn-sm btn-primary round px-3" :disabled="finPaying === finLastInvoice.billing_cycle" @click="finPay(finLastInvoice)">
                     <span v-if="finPaying === finLastInvoice.billing_cycle" class="spinner-border spinner-border-sm me-1"></span>{{ $t(F + 'pay_now') }}
@@ -1296,6 +1306,18 @@ export default {
                     </button>
                   </div>
                 </div>
+                <div v-if="finSelectedInvoice.documents" class="fin-docs">
+                  <a v-if="finSelectedInvoice.documents.receipt_url" :href="finSelectedInvoice.documents.receipt_url" target="_blank" rel="noopener noreferrer" class="fin-doc">
+                    <font-awesome-icon :icon="['fas', 'receipt']" /><span>{{ $t(F + 'doc_receipt') }}</span>
+                  </a>
+                  <a v-if="finSelectedInvoice.documents.invoice_pdf" :href="finSelectedInvoice.documents.invoice_pdf" target="_blank" rel="noopener noreferrer" class="fin-doc">
+                    <font-awesome-icon :icon="['fas', 'file-invoice-dollar']" /><span>{{ $t(F + 'doc_invoice_pdf') }}</span>
+                  </a>
+                  <a v-if="finSelectedInvoice.documents.hosted_invoice_url" :href="finSelectedInvoice.documents.hosted_invoice_url" target="_blank" rel="noopener noreferrer" class="fin-doc">
+                    <font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" /><span>{{ $t(F + 'doc_hosted') }}</span>
+                  </a>
+                </div>
+                <div class="fin-sub-hd" style="padding:6px 0">{{ $t(F + 'doc_items') }}</div>
                 <div v-for="item in (finSelectedInvoice.items ?? [])" :key="item.id" class="fin-inv-item">
                   <span class="td-muted">{{ item.user?.name ?? '—' }}<small v-if="item.created_at" class="d-block">{{ finDate(item.created_at) }}</small></span>
                   <span style="font-size:.83rem">{{ $t('finances.billing.type.' + item.billing_type) }}</span>
@@ -1589,9 +1611,8 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .fin-cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
 .fin-main { height: 100%; }
 .fin-chart { border-bottom: 1px solid var(--ehub-line); }
-.fin-last { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px 18px; margin: 0; padding: 4px 17px 6px; }
+.fin-last { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 18px; margin: 0; padding: 4px 17px 6px; }
 .fin-last > div { min-width: 0; }
-.fin-last .wide { grid-column: span 2; }
 .fin-last dt { font-size: .7rem; font-weight: 600; color: var(--ehub-muted); margin-bottom: 2px; }
 .fin-last dd { margin: 0; font-size: .88rem; font-weight: 600; color: var(--ehub-ink); }
 .fin-last dd.num { font-variant-numeric: tabular-nums; }
@@ -1605,6 +1626,10 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .fin-older-chip.st-paid i { background: #1f8a5b; }
 .fin-older-chip.st-failed i, .fin-older-chip.st-pending i { background: #e23b3b; }
 .fin-older-chip:hover { border-color: var(--ehub-primary); }
+.fin-docs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.fin-doc { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid var(--ehub-line); border-radius: 10px; font-size: .8rem; font-weight: 600; color: var(--ehub-ink); text-decoration: none; background: var(--ehub-field-bg); }
+.fin-doc svg { color: var(--ehub-primary); }
+.fin-doc:hover { border-color: var(--ehub-primary); color: var(--ehub-primary); }
 .fin-sub-hd { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 12px 17px 6px; }
 .fin-side { display: flex; flex-direction: column; gap: 16px; }
 .fin-side .cc + .cc { margin-top: 0; }
