@@ -55,10 +55,11 @@ import { i18n } from '@/helpers/i18n';
         <label v-if="floating && !!placeholder" :for="id" class="form-label">
           {{ placeholder }}
         </label>
+      </div>
 
-        <div v-if="haveFeedback && validationReturn.value" :class="feedbackClass">
-          {{ i18n.t(validationReturn.value, validationReturn.variables) }}
-        </div>
+      <!-- Outside the field wrapper: it wraps to its own row, so the icon keeps the input's height. -->
+      <div v-if="haveFeedback && validationReturn.value" :class="feedbackClass">
+        {{ i18n.t(validationReturn.value, validationReturn.variables) }}
       </div>
     </div>
   </template>
@@ -196,7 +197,7 @@ export default {
         return base;
     },
     feedbackClass() {
-      const base = 'order-last '
+      const base = 'order-last w-100 d-block '
       if (this.validationReturn.success != null && !this.needsValidate)
         return `${base} ${this.validationReturn.success ? 'valid-feedback' : 'invalid-feedback'}`;
       else

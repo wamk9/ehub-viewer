@@ -191,6 +191,7 @@ import {
   faHourglassHalf,
   faTv,
   faSignal,
+  faAt,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -403,6 +404,7 @@ library.add(
   faHourglassHalf,
   faTv,
   faSignal,
+  faAt,
 );
 
 export default FontAwesomeIcon;
