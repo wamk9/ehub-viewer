@@ -189,7 +189,7 @@ export default {
   },
   financeiro: {
     usage_title: 'Usage and invoices',
-    chart: { revenue: 'Organization revenue', fee: 'eHub fee', partial: 'partial', partial_note: 'Current month, still in progress. Revenue: paid registrations confirmed in the month (BRL events).', regs: '{n} billed registration | {n} billed registrations' },
+    chart: { revenue: 'Organization revenue', fee: 'eHub fee', partial: 'partial', partial_note: 'Current month, still in progress. Revenue: paid registrations confirmed in the month, in the currency of each event.', fee_brl_note: 'The eHub fee is billed in BRL and shows on the BRL tab.', regs: '{n} billed registration | {n} billed registrations' },
     kpi_usage: '{month} usage',
     kpi_regs: '{n} billed registration | {n} billed registrations',
     kpi_next: 'Next charge',

@@ -189,7 +189,7 @@ export default {
   },
   financeiro: {
     usage_title: 'Uso y facturas',
-    chart: { revenue: 'Ingresos de la organización', fee: 'Tarifa eHub', partial: 'parcial', partial_note: 'Mes actual, todavía en curso. Ingresos: inscripciones pagadas confirmadas en el mes (eventos en BRL).', regs: '{n} inscripción cobrada | {n} inscripciones cobradas' },
+    chart: { revenue: 'Ingresos de la organización', fee: 'Tarifa eHub', partial: 'parcial', partial_note: 'Mes actual, todavía en curso. Ingresos: inscripciones pagadas confirmadas en el mes, en la moneda de cada evento.', fee_brl_note: 'La tarifa eHub se cobra en BRL y aparece en la pestaña BRL.', regs: '{n} inscripción cobrada | {n} inscripciones cobradas' },
     kpi_usage: 'Uso de {month}',
     kpi_regs: '{n} inscripción cobrada | {n} inscripciones cobradas',
     kpi_next: 'Próximo cobro',

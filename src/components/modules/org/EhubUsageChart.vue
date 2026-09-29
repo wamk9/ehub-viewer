@@ -1,8 +1,14 @@
 <template>
   <div class="euc">
-    <div class="euc-legend">
-      <span><i class="sw rev"></i>{{ $t(K + 'revenue') }}</span>
-      <span><i class="sw fee"></i>{{ $t(K + 'fee') }}</span>
+    <div class="euc-top">
+      <div class="euc-legend">
+        <span><i class="sw rev"></i>{{ $t(K + 'revenue') }} ({{ symbol(cur) }})</span>
+        <span v-if="showFee"><i class="sw fee"></i>{{ $t(K + 'fee') }}</span>
+      </div>
+      <!-- Revenue stays in each event's currency: one axis per currency. -->
+      <div v-if="currencies.length > 1" class="euc-cur" role="tablist">
+        <button v-for="c in currencies" :key="c" type="button" :class="{ on: cur === c }" @click="cur = c">{{ c.toUpperCase() }}</button>
+      </div>
     </div>
 
     <div class="euc-plot" @mouseleave="hover = null">
@@ -20,21 +26,21 @@
           @mouseenter="hover = i" @focus="hover = i" tabindex="0"
         >
           <div class="euc-bars">
-            <div class="bar rev" :style="{ height: h(m.revenue) }"></div>
-            <div class="bar fee" :style="{ height: h(m.total_amount) }"></div>
+            <div class="bar rev" :style="{ height: h(rev(m)) }"></div>
+            <div v-if="showFee" class="bar fee" :style="{ height: h(m.total_amount) }"></div>
           </div>
           <div class="euc-x">{{ monthShort(m.billing_cycle) }}<span v-if="i === months.length - 1">*</span></div>
 
           <div v-if="hover === i" class="euc-tip" :class="{ left: i > months.length / 2 }">
             <div class="t">{{ monthLong(m.billing_cycle) }}<span v-if="i === months.length - 1"> · {{ $t(K + 'partial') }}</span></div>
-            <div class="r"><i class="sw rev"></i>{{ $t(K + 'revenue') }}<b>{{ money(m.revenue) }}</b></div>
-            <div class="r"><i class="sw fee"></i>{{ $t(K + 'fee') }}<b>{{ money(m.total_amount) }}</b></div>
+            <div class="r"><i class="sw rev"></i>{{ $t(K + 'revenue') }}<b>{{ money(rev(m), cur) }}</b></div>
+            <div class="r"><i class="sw fee"></i>{{ $t(K + 'fee') }}<b>{{ money(m.total_amount, 'brl') }}</b></div>
             <div class="r muted">{{ $t(K + 'regs', { n: m.items_count }, m.items_count) }}</div>
           </div>
         </div>
       </div>
     </div>
-    <p class="euc-note">* {{ $t(K + 'partial_note') }}</p>
+    <p class="euc-note">* {{ $t(K + 'partial_note') }}<template v-if="!showFee"> {{ $t(K + 'fee_brl_note') }}</template></p>
   </div>
 </template>
 
@@ -50,11 +56,19 @@ export default {
     months: { type: Array, default: () => [] }, // [{ billing_cycle, revenue, total_amount, items_count }]
   },
   data() {
-    return { K: 'pages.organization.manage.financeiro.chart.', hover: null };
+    return { K: 'pages.organization.manage.financeiro.chart.', hover: null, cur: 'brl' };
   },
   computed: {
+    // Currencies with revenue in the window; BRL always present (eHub fee currency).
+    currencies() {
+      const set = new Set(['brl']);
+      this.months.forEach((m) => Object.keys(m.revenue || {}).forEach((c) => set.add(c)));
+      return [...set];
+    },
+    // The eHub fee is billed in BRL, so it only shares the BRL axis.
+    showFee() { return this.cur === 'brl'; },
     rawMax() {
-      return Math.max(1, ...this.months.map((m) => Math.max(Number(m.revenue) || 0, Number(m.total_amount) || 0)));
+      return Math.max(1, ...this.months.map((m) => Math.max(this.rev(m), this.showFee ? Number(m.total_amount) || 0 : 0)));
     },
     // Round the axis up to a friendly number: 1, 2 or 5 × 10^n.
     scaleMax() {
@@ -75,7 +89,11 @@ export default {
       const s = new Intl.DateTimeFormat(this.$i18n.locale, { month: 'long', year: 'numeric' }).format(this.date(c));
       return s.charAt(0).toUpperCase() + s.slice(1);
     },
-    money(v) { return new Intl.NumberFormat(this.$i18n.locale, { style: 'currency', currency: 'BRL' }).format(Number(v) || 0); },
+    rev(m) { return Number(m.revenue?.[this.cur]) || 0; },
+    money(v, c = this.cur) { return new Intl.NumberFormat(this.$i18n.locale, { style: 'currency', currency: c.toUpperCase() }).format(Number(v) || 0); },
+    symbol(c) {
+      return new Intl.NumberFormat(this.$i18n.locale, { style: 'currency', currency: c.toUpperCase() }).formatToParts(0).find((p) => p.type === 'currency')?.value || c.toUpperCase();
+    },
     short(v) { return new Intl.NumberFormat(this.$i18n.locale, { notation: 'compact', maximumFractionDigits: 1 }).format(v); },
   },
 };
@@ -84,7 +102,11 @@ export default {
 <style scoped>
 .euc { --c-rev: #0092CF; --c-fee: #B8740A; }
 [data-bs-theme="dark"] .euc { --c-rev: #1496CF; --c-fee: #C9820E; }
-.euc-legend { display: flex; gap: 16px; font-size: .74rem; color: var(--ehub-muted); margin-bottom: 10px; }
+.euc-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.euc-legend { display: flex; gap: 16px; font-size: .74rem; color: var(--ehub-muted); }
+.euc-cur { display: inline-flex; border: 1px solid var(--ehub-line); border-radius: 8px; overflow: hidden; }
+.euc-cur button { border: 0; background: transparent; color: var(--ehub-muted); font-size: .7rem; font-weight: 700; padding: 3px 10px; cursor: pointer; }
+.euc-cur button.on { background: var(--ehub-primary); color: #fff; }
 .euc-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
 .sw.rev { background: var(--c-rev); }
