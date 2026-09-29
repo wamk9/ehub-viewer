@@ -21,6 +21,10 @@ const OrganizationBilling = {
         const result = await Api.getAsync(`/org/${orgRoute}/billing/${cycle}`);
         return { code: result.code, data: result.response?.message };
     },
+    async updateFiscal(orgRoute, data) {
+        const result = await Api.patchAsync(`/org/${orgRoute}/billing/fiscal`, data);
+        return { code: result.code, data: result.response?.message, errors: result.response?.errors };
+    },
     async payInvoice(orgRoute, cycle) {
         const result = await Api.postAsync(`/org/${orgRoute}/billing/${cycle}/pay`);
         return { code: result.code, data: result.response?.message, blocked: result.response?.billing_blocked };

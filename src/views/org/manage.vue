@@ -15,6 +15,7 @@ import EhubLeaveCard from '@/components/modules/members/EhubLeaveCard.vue';
 import EhubVisualFields from '@/components/inputs/EhubVisualFields.vue';
 import EhubCardSetupDialog from '@/components/modules/org/EhubCardSetupDialog.vue';
 import EhubUsageChart from '@/components/modules/org/EhubUsageChart.vue';
+import EhubFiscalDataDialog from '@/components/modules/org/EhubFiscalDataDialog.vue';
 import EventCreateWizard from '@/components/modules/org/manage/events/create.vue';
 
 const ORG_GRADS = [
@@ -64,7 +65,7 @@ const ROLE_CLASS = {
 };
 
 export default {
-  components: { EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubVisualFields, EhubCardSetupDialog, EhubUsageChart },
+  components: { EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubVisualFields, EhubCardSetupDialog, EhubUsageChart, EhubFiscalDataDialog },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -118,6 +119,7 @@ export default {
       finLoaded: false,
       finPaying: null,
       finCardOpen: false,
+      finFiscalOpen: false,
       finConnecting: null,
       finDisconnecting: null,
       finSelectedInvoice: null,
@@ -628,6 +630,25 @@ export default {
       if (result.code === 200) this.finGateways = this.finGateways.filter(g => g.gateway !== gateway);
     },
 
+    // The card needs fiscal data first (NFS-e): ask for it before opening the card form.
+    finOpenCard() {
+      if (!this.finBilling?.fiscal_complete) {
+        toast.info(this.$t(this.F + 'fiscal.required_first'));
+        this.finFiscalOpen = true;
+        return;
+      }
+      this.finCardOpen = true;
+    },
+    finFiscalSaved(fiscal) {
+      this.finBilling = { ...(this.finBilling || {}), fiscal, fiscal_complete: true };
+      toast.success(this.$t(this.F + 'fiscal.saved'));
+    },
+    finDocMask(v) {
+      const d = String(v || '');
+      return d.length === 14
+        ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')
+        : d.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+    },
     finCardSaved(card) {
       if (this.finBilling) this.finBilling = { ...this.finBilling, has_card: !!card, card };
       toast.success(this.$t(this.F + 'card_dialog.saved'));
@@ -1211,6 +1232,25 @@ export default {
             </div>
 
             <div class="fin-side">
+              <!-- Fiscal data (NFS-e) — required before the card -->
+              <div class="cc" :class="{ 'fin-warn': !finBilling?.fiscal_complete }">
+                <div class="cc-hd">
+                  <h3><font-awesome-icon :icon="['fas', 'file-invoice']" style="color:var(--ehub-primary)" />{{ $t(F + 'fiscal.card_title') }}</h3>
+                  <button type="button" class="btn btn-sm round px-3" :class="finBilling?.fiscal_complete ? 'btn-outline-secondary' : 'btn-primary'" @click="finFiscalOpen = true">
+                    {{ finBilling?.fiscal_complete ? $t(F + 'fiscal.edit') : $t(F + 'fiscal.fill') }}
+                  </button>
+                </div>
+                <div class="cc-bd fin-fiscal">
+                  <template v-if="finBilling?.fiscal_complete">
+                    <strong>{{ finBilling.fiscal.name }}</strong>
+                    <span>{{ finDocMask(finBilling.fiscal.document) }}</span>
+                    <span>{{ finBilling.fiscal.city }}/{{ finBilling.fiscal.uf }} · {{ finBilling.fiscal.email }}</span>
+                  </template>
+                  <p v-else class="m-0"><font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />{{ $t(F + 'fiscal.missing') }}</p>
+                </div>
+                <EhubFiscalDataDialog v-model="finFiscalOpen" :org-route="orgRoute" :initial="finBilling?.fiscal" @saved="finFiscalSaved" />
+              </div>
+
               <!-- Payment method -->
               <div class="cc">
                 <div class="cc-hd">
@@ -1227,7 +1267,7 @@ export default {
                     <span>{{ $t(F + 'no_card') }}</span>
                   </div>
                   <div class="fin-pm-actions">
-                    <button class="btn btn-sm round px-3" :class="finBilling?.has_card ? 'btn-outline-primary' : 'btn-primary'" @click="finCardOpen = true">
+                    <button class="btn btn-sm round px-3" :class="finBilling?.has_card ? 'btn-outline-primary' : 'btn-primary'" @click="finOpenCard">
                       {{ finBilling?.has_card ? $t(F + 'change_card') : $t(F + 'add_card') }}
                     </button>
                     <button v-if="finBilling?.has_card" class="btn btn-sm btn-link px-1" :disabled="finSettingUpCard" @click="finSetupCard">
@@ -1306,14 +1346,20 @@ export default {
                     </button>
                   </div>
                 </div>
-                <div v-if="finSelectedInvoice.documents" class="fin-docs">
-                  <a v-if="finSelectedInvoice.documents.receipt_url" :href="finSelectedInvoice.documents.receipt_url" target="_blank" rel="noopener noreferrer" class="fin-doc">
+                <div v-if="finSelectedInvoice.documents || finSelectedInvoice.nfse" class="fin-docs">
+                  <a v-if="finSelectedInvoice.nfse?.link" :href="finSelectedInvoice.nfse.link" target="_blank" rel="noopener noreferrer" class="fin-doc">
+                    <font-awesome-icon :icon="['fas', 'file-invoice']" /><span>{{ $t(F + 'doc_nfse', { n: finSelectedInvoice.nfse.number || '' }) }}</span>
+                  </a>
+                  <span v-else-if="finSelectedInvoice.nfse" class="fin-doc muted">
+                    <font-awesome-icon :icon="['fas', 'file-invoice']" /><span>{{ $t(F + 'nfse_status.' + finSelectedInvoice.nfse.status) }}</span>
+                  </span>
+                  <a v-if="finSelectedInvoice.documents?.receipt_url" :href="finSelectedInvoice.documents.receipt_url" target="_blank" rel="noopener noreferrer" class="fin-doc">
                     <font-awesome-icon :icon="['fas', 'receipt']" /><span>{{ $t(F + 'doc_receipt') }}</span>
                   </a>
-                  <a v-if="finSelectedInvoice.documents.invoice_pdf" :href="finSelectedInvoice.documents.invoice_pdf" target="_blank" rel="noopener noreferrer" class="fin-doc">
+                  <a v-if="finSelectedInvoice.documents?.invoice_pdf" :href="finSelectedInvoice.documents.invoice_pdf" target="_blank" rel="noopener noreferrer" class="fin-doc">
                     <font-awesome-icon :icon="['fas', 'file-invoice-dollar']" /><span>{{ $t(F + 'doc_invoice_pdf') }}</span>
                   </a>
-                  <a v-if="finSelectedInvoice.documents.hosted_invoice_url" :href="finSelectedInvoice.documents.hosted_invoice_url" target="_blank" rel="noopener noreferrer" class="fin-doc">
+                  <a v-if="finSelectedInvoice.documents?.hosted_invoice_url" :href="finSelectedInvoice.documents.hosted_invoice_url" target="_blank" rel="noopener noreferrer" class="fin-doc">
                     <font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" /><span>{{ $t(F + 'doc_hosted') }}</span>
                   </a>
                 </div>
@@ -1630,6 +1676,12 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .fin-doc { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid var(--ehub-line); border-radius: 10px; font-size: .8rem; font-weight: 600; color: var(--ehub-ink); text-decoration: none; background: var(--ehub-field-bg); }
 .fin-doc svg { color: var(--ehub-primary); }
 .fin-doc:hover { border-color: var(--ehub-primary); color: var(--ehub-primary); }
+.fin-doc.muted { color: var(--ehub-muted); font-weight: 500; cursor: default; }
+.fin-doc.muted:hover { border-color: var(--ehub-line); color: var(--ehub-muted); }
+.fin-fiscal { display: flex; flex-direction: column; gap: 2px; font-size: .8rem; color: var(--ehub-muted); }
+.fin-fiscal strong { font-size: .88rem; color: var(--ehub-ink); }
+.fin-warn { border-color: color-mix(in srgb, var(--ehub-gold, #d4a20f) 55%, transparent); }
+.fin-warn .fin-fiscal p { color: color-mix(in srgb, var(--ehub-gold, #d4a20f), #000 30%); }
 .fin-sub-hd { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 12px 17px 6px; }
 .fin-side { display: flex; flex-direction: column; gap: 16px; }
 .fin-side .cc + .cc { margin-top: 0; }
