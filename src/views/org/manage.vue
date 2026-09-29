@@ -735,6 +735,9 @@ export default {
       this.loadFinances();
       if (this.finSelectedInvoice?.billing_cycle === inv.billing_cycle) this.finOpenInvoice(inv.billing_cycle);
     },
+    finMoney(v, cur) {
+      return new Intl.NumberFormat(this.$i18n.locale, { style: 'currency', currency: String(cur || 'brl').toUpperCase() }).format(Number(v) || 0);
+    },
     finFormatAmount(val) {
       return parseFloat(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
     },
@@ -1366,7 +1369,12 @@ export default {
                 <div class="fin-sub-hd" style="padding:6px 0">{{ $t(F + 'doc_items') }}</div>
                 <div v-for="item in (finSelectedInvoice.items ?? [])" :key="item.id" class="fin-inv-item">
                   <span class="td-muted">{{ item.user?.name ?? '—' }}<small v-if="item.created_at" class="d-block">{{ finDate(item.created_at) }}</small></span>
-                  <span style="font-size:.83rem">{{ $t('finances.billing.type.' + item.billing_type) }}</span>
+                  <span style="font-size:.83rem">
+                    {{ $t('finances.billing.type.' + item.billing_type) }}
+                    <small v-if="item.currency && item.currency !== 'brl' && item.fee_original != null" class="d-block td-muted">
+                      {{ $t(F + 'fx_line', { amount: finMoney(item.fee_original, item.currency), rate: item.exchange_rate ? Number(item.exchange_rate).toFixed(4) : '—' }) }}
+                    </small>
+                  </span>
                   <span style="font-weight:600;font-size:.83rem">R$ {{ finFormatAmount(item.fee_amount) }}</span>
                 </div>
                 <div v-if="!finSelectedInvoice.items?.length" class="text-center py-3 td-muted" style="font-size:.83rem">
