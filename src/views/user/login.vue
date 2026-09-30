@@ -157,8 +157,8 @@ async function submit() {
     </div>
 
     <div class="login-footer">
-      <!-- Switch to register -->
-      <p class="text-center text-muted small mt-3 mb-0">
+      <!-- Switch to register (the top card already offers it when coming from an action) -->
+      <p v-if="!redirectTo" class="text-center text-muted small mt-3 mb-0">
         {{ $t('users.login.no_account') }}
         <router-link :to="registerTo" class="fw-semibold">{{ $t('users.login.register_link') }}</router-link>
       </p>
