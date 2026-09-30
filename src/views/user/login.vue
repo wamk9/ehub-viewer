@@ -77,12 +77,12 @@ async function submit() {
   <AuthLayout :title="$t(redirectTo ? 'users.login.title_continue' : 'users.login.title')" :subtitle="$t(redirectTo ? 'users.login.description_continue' : 'users.login.description')">
 
     <div v-if="redirectTo" class="card ehub-card mb-3 login-new">
-      <div class="card-body p-3 d-flex align-items-center gap-3 flex-wrap">
-        <div class="flex-grow-1">
+      <div class="card-body p-3 d-flex flex-column gap-3">
+        <div>
           <strong>{{ $t('users.login.new_here') }}</strong>
           <div class="small text-muted">{{ $t('users.login.new_here_hint') }}</div>
         </div>
-        <router-link :to="registerTo" class="btn btn-primary round px-3">
+        <router-link :to="registerTo" class="btn btn-primary round px-4 align-self-center">
           <font-awesome-icon :icon="['fas', 'user-plus']" class="me-2" />{{ $t('users.login.create_free') }}
         </router-link>
       </div>
