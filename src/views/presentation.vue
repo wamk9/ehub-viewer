@@ -110,7 +110,7 @@ const primaryCta = computed(() => {
           <router-link :to="primaryCta.to" class="btn btn-primary round px-4 py-2">
             <font-awesome-icon :icon="['fas', primaryCta.icon]" class="me-2" />{{ $t(primaryCta.label) }}
           </router-link>
-          <span>{{ $t('pages.presentation.how.cta_hint') }}</span>
+          <span v-if="primaryCta.to !== '/my-orgs'">{{ $t('pages.presentation.how.cta_hint') }}</span>
         </div>
       </div>
     </section>
@@ -269,7 +269,7 @@ const primaryCta = computed(() => {
 .hero-free-note { margin: 14px 0 0; font-size: .82rem; color: var(--ehub-muted); }
 .hero-free-note svg { color: var(--ehub-success-text); }
 .hero-free-note a { margin-left: 6px; }
-.how-cta { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 28px; }
+.how-cta { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; margin-top: 32px; text-align: center; }
 .how-cta span { font-size: .82rem; color: var(--ehub-muted); }
 
 .container-narrow { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
