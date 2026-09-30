@@ -7,7 +7,7 @@ export default {
   title:         '¡Bienvenido de nuevo!',
   description:   'Ingresa tus datos para acceder a tu cuenta en eHub',
   form: {
-    mail:     { label: 'Correo electrónico', placeholder: 'Ingresa tu correo' },
+    mail:     { label: 'Correo o nombre de usuario', placeholder: 'Tu correo o nombre de usuario' },
     password: { label: 'Contraseña',         placeholder: 'Ingresa tu contraseña' },
   },
   submit:        'Acceder a mi cuenta',
@@ -16,7 +16,7 @@ export default {
   or:            'o',
   google:        'Entrar con Google',
   microsoft:     'Entrar con Microsoft',
-  error:         'Correo o contraseña incorrectos',
+  error:         'Usuario/correo o contraseña incorrectos',
   oauth_error: {
     '1':                     'Error al autenticar con el proveedor. Intenta de nuevo.',
     no_email:                'No se pudo obtener el correo de tu cuenta.',

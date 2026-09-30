@@ -1,7 +1,10 @@
 <script>
 import EhubStatCard from '@/components/EhubStatCard.vue';
 import EhubActivityLog from '@/components/EhubActivityLog.vue';
-import { stageState, roundState, userName } from './store.js';
+import { stageState, roundState, userName, apiError } from './store.js';
+import OrganizationEventStage from '@/helpers/communication/OrganizationEventStage.js';
+import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
+import { toast } from '@/helpers/toast.js';
 
 // Wizard step that holds the rules (Regulamento).
 const RULES_STEP = 7;
@@ -10,7 +13,25 @@ export default {
   name: 'EmOverview',
   components: { EhubStatCard, EhubActivityLog },
   inject: ['em'],
+  data() {
+    return { stepBusy: false };
+  },
   computed: {
+    /**
+     * The single thing to do now, in plain words: start a stage, enter its
+     * results, close it, or close the championship after the last one.
+     */
+    nextStep() {
+      const ev = this.ev;
+      if (!this.full || ev.finished || ev.publication === 'draft') return null;
+      const live = this.stages.find((s) => stageState(s) === 'live');
+      if (live && !live.results_published) return { key: 'results', stage: live, icon: 'ranking-star', action: () => this.goResults(live) };
+      if (live) return { key: 'finish', stage: live, icon: 'flag', action: () => this.controlStage(live, 'finish') };
+      const pending = this.stages.find((s) => stageState(s) === 'pending');
+      if (pending) return { key: ev.initialized ? 'start' : 'start_first', stage: pending, icon: 'play', action: () => this.controlStage(pending, 'start') };
+      if (this.stages.length && ev.initialized) return { key: 'close_event', stage: null, icon: 'trophy', action: () => this.finishEvent() };
+      return null;
+    },
     ev() { return this.em.event; },
     full() { return this.em.can('event.manage'); },
     seesRegs() { return this.em.can('regs.view'); },
@@ -81,6 +102,36 @@ export default {
     money(v) {
       return new Intl.NumberFormat(this.$i18n.locale, { style: 'currency', currency: (this.ev.currency || 'brl').toUpperCase() }).format(v || 0);
     },
+    goResults(stage) {
+      this.$router.push({ name: 'manage-event', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute, panel: 'results' }, query: { stage: stage.route } });
+    },
+    async controlStage(stage, action) {
+      const first = action === 'start' && !this.ev.initialized;
+      const msg = first
+        ? this.$t('pages.event.manage.stg.start_first_q')
+        : this.$t(`pages.event.manage.stg.${action}_q`, { s: stage.name });
+      const ok = await this.em.ask(msg, this.$t('pages.event.manage.stg.' + action));
+      if (!ok) return;
+      this.stepBusy = true;
+      const res = await OrganizationEventStage.control(this.em.orgRoute, this.em.eventRoute, stage.route, action);
+      this.stepBusy = false;
+      if (res.code === 200) {
+        this.em.putStage(res.data);
+        if (action === 'start') this.ev.initialized = true;
+        toast.success(this.$t('pages.event.manage.toast.' + (action === 'start' ? 'started' : 'finished')));
+      } else toast.error(apiError(this, res.data));
+    },
+    async finishEvent() {
+      const ok = await this.em.ask(this.$t('pages.event.manage.adv.finish_q'), this.$t('pages.event.manage.adv.finish_btn'), true);
+      if (!ok) return;
+      this.stepBusy = true;
+      const res = await OrganizationEvent.control(this.em.orgRoute, this.em.eventRoute, 'finish');
+      this.stepBusy = false;
+      if (res.code === 200) {
+        this.ev.finished = true;
+        toast.success(this.$t('pages.event.manage.ov.next.closed'));
+      } else toast.error(apiError(this, res.data));
+    },
     go(panel) {
       if (!this.em.canPanel(panel)) return;
       this.$router.push({ name: 'manage-event', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute, panel } });
@@ -101,6 +152,19 @@ export default {
         <h1>{{ $t('pages.event.manage.ov.title') }}</h1>
         <p>{{ $t('pages.event.manage.ov.sub') }}</p>
       </div>
+    </div>
+
+    <div v-if="nextStep" class="next-card">
+      <div class="next-card__ico"><font-awesome-icon :icon="['fas', nextStep.icon]" /></div>
+      <div class="next-card__txt">
+        <span class="next-card__k">{{ $t('pages.event.manage.ov.next.label') }}</span>
+        <strong>{{ $t('pages.event.manage.ov.next.' + nextStep.key + '_title', { s: nextStep.stage?.name }) }}</strong>
+        <span>{{ $t('pages.event.manage.ov.next.' + nextStep.key + '_text', { s: nextStep.stage?.name }) }}</span>
+      </div>
+      <button class="btn btn-primary round px-4" :disabled="stepBusy" @click="nextStep.action()">
+        <span v-if="stepBusy" class="spinner-border spinner-border-sm me-2"></span>
+        <font-awesome-icon v-else :icon="['fas', nextStep.icon]" class="me-2" />{{ $t('pages.event.manage.ov.next.' + nextStep.key + '_cta') }}
+      </button>
     </div>
 
     <div class="stat-grid">
@@ -145,6 +209,12 @@ export default {
 </template>
 
 <style scoped>
+.next-card { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; background: var(--ehub-card); border: 1px solid var(--ehub-line); border-left: 4px solid var(--ehub-primary); border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; box-shadow: 0 6px 20px rgba(0,0,0,.05); }
+.next-card__ico { width: 44px; height: 44px; border-radius: 12px; background: var(--ehub-primary-tint); color: var(--ehub-primary-text); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.next-card__txt { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 2px; font-size: .85rem; color: var(--ehub-muted); }
+.next-card__txt strong { font-size: 1rem; color: var(--ehub-ink); }
+.next-card__k { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-primary-text); }
+
 .chk { display: flex; align-items: center; gap: 11px; padding: 11px 17px; border-bottom: 1px solid var(--ehub-line); cursor: pointer; transition: background .12s; }
 .chk:last-child { border-bottom: 0; }
 .chk:hover { background: color-mix(in srgb, var(--ehub-field-bg) 55%, transparent); }

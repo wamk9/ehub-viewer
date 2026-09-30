@@ -63,7 +63,7 @@ async function submit() {
         router.push(last ? JSON.parse(last) : { name: 'events' })
       }
     } else {
-      toast.error(result.response?.message ?? t('users.login.error'))
+      toast.error(t('users.login.error'))
     }
   } catch {
     toast.error(t('users.login.error'))
@@ -96,8 +96,8 @@ async function submit() {
           <ehubInput
             v-model="form.mail"
             id="login-mail"
-            type="email"
-            :icon="['fas', 'envelope']"
+            type="text"
+            :icon="['fas', 'user']"
             :label="$t('users.login.form.mail.label')"
             placeholder=""
           />

@@ -64,7 +64,9 @@ export default {
     regulation: 'Regulamento',
     news: 'Notícias',
   },
+  orgbar: { text: 'Você organiza este evento.', cta: 'Gerenciar evento' },
   highlights: {
+    live_stage: 'Etapa em andamento',
     leader: 'Líder do campeonato',
     champion: 'Campeão',
     next_stage: 'Próxima etapa',
@@ -109,6 +111,7 @@ export default {
     by: 'Por',
   },
   info: {
+    live_now: 'Ao vivo agora',
     location: 'Local',
     deadline: 'Inscrições até',
     where: 'Onde',

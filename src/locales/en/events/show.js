@@ -64,7 +64,9 @@ export default {
     regulation: 'Rules',
     news: 'News',
   },
+  orgbar: { text: 'You organize this event.', cta: 'Manage event' },
   highlights: {
+    live_stage: 'Stage in progress',
     leader: 'Championship leader',
     champion: 'Champion',
     next_stage: 'Next stage',
@@ -109,6 +111,7 @@ export default {
     by: 'By',
   },
   info: {
+    live_now: 'Live now',
     location: 'Location',
     deadline: 'Register by',
     where: 'Where',

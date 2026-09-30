@@ -2,16 +2,12 @@
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import { toast } from '@/helpers/toast.js';
 import { stageState, roundState, apiError } from './store.js';
-
-// Accept either a bare channel or a full URL and keep only the channel handle.
-function channelOf(v, host) {
-  const s = (v || '').trim();
-  const m = s.match(new RegExp(host + '/(?:@)?([^/?#]+)', 'i'));
-  return (m ? m[1] : s).replace(/^@/, '');
-}
+import { parseTwitch, parseYouTube, normalizeYouTube } from '@/helpers/General/liveStream.js';
+import EhubLivePlayer from '@/components/modules/event-live/EhubLivePlayer.vue';
 
 export default {
   name: 'EmLive',
+  components: { EhubLivePlayer },
   inject: ['em'],
   data() {
     const ev = this.em.event;
@@ -36,17 +32,29 @@ export default {
     },
     channels() {
       return [
-        { key: 'twitch', icon: 'twitch', color: '#9146FF', prefix: 'twitch.tv/' },
-        { key: 'youtube', icon: 'youtube', color: '#FF0000', prefix: 'youtube.com/@' },
+        { key: 'twitch', icon: 'twitch', color: '#9146FF', prefix: 'twitch.tv/', ph: 'pages.event.manage.live.twitch_ph' },
+        { key: 'youtube', icon: 'youtube', color: '#FF0000', prefix: '', ph: 'pages.event.manage.live.youtube_ph' },
       ];
     },
+    // What the pasted text will turn into, so the organizer knows before saving.
+    ytInfo() {
+      const p = parseYouTube(this.form.youtube);
+      if (!this.form.youtube.trim()) return null;
+      if (!p) return 'invalid';
+      return p.handle ? 'handle' : 'ok';
+    },
+    twInvalid() { return !!this.form.twitch.trim() && !parseTwitch(this.form.twitch); },
+    previewTwitch() { return parseTwitch(this.form.twitch) || ''; },
+    previewYoutube() { return normalizeYouTube(this.form.youtube) || ''; },
   },
   methods: {
+    // A pasted address already carries the site, so the prefix would be repeated.
+    isFullUrl(v) { return /twitch\.tv|:\/\//i.test(v || ''); },
     async save() {
       this.saving = true;
       const payload = {
-        streaming_twitch: channelOf(this.form.twitch, 'twitch.tv') || null,
-        streaming_youtube: channelOf(this.form.youtube, 'youtube.com') || null,
+        streaming_twitch: parseTwitch(this.form.twitch),
+        streaming_youtube: normalizeYouTube(this.form.youtube),
         event_data: { live_embed: this.form.embed },
       };
       const res = await OrganizationEvent.update(this.em.orgRoute, this.em.eventRoute, payload);
@@ -87,10 +95,26 @@ export default {
           <span v-else-if="liveSession" class="s-badge live"><font-awesome-icon :icon="['fas', 'circle']" />{{ $t('pages.event.manage.live.live_now') }}</span>
           <span v-else class="s-badge mute">{{ $t('pages.event.manage.live.offline') }}</span>
         </div>
-        <div class="input-group">
-          <span class="input-group-text" style="font-size:.8rem">{{ c.prefix }}</span>
-          <input v-model="form[c.key]" class="form-control" maxlength="120" :placeholder="$t('pages.event.manage.live.channel')" />
+        <div class="ch-input">
+          <div class="input-group">
+            <span v-if="c.prefix && !isFullUrl(form[c.key])" class="input-group-text" style="font-size:.8rem">{{ c.prefix }}</span>
+            <input v-model="form[c.key]" class="form-control" maxlength="200" :placeholder="$t(c.ph)" :aria-label="c.key" />
+          </div>
+          <small v-if="c.key === 'twitch' && twInvalid" class="ch-hint bad">{{ $t('pages.event.manage.live.invalid') }}</small>
+          <small v-else-if="c.key === 'youtube' && ytInfo === 'invalid'" class="ch-hint bad">{{ $t('pages.event.manage.live.invalid') }}</small>
+          <small v-else-if="c.key === 'youtube' && ytInfo === 'handle'" class="ch-hint warn">{{ $t('pages.event.manage.live.handle_hint') }}</small>
+          <small v-else-if="c.key === 'youtube'" class="ch-hint">{{ $t('pages.event.manage.live.youtube_hint') }}</small>
         </div>
+      </div>
+    </div>
+
+    <div v-if="previewTwitch || previewYoutube" class="cc">
+      <div class="cc-hd">
+        <h3><font-awesome-icon :icon="['fas', 'eye']" style="color:var(--ehub-primary-text)" />{{ $t('pages.event.manage.live.preview') }}</h3>
+      </div>
+      <div class="cc-bd">
+        <p class="set-desc">{{ $t('pages.event.manage.live.preview_hint') }}</p>
+        <EhubLivePlayer :twitch="previewTwitch" :youtube="previewYoutube" />
       </div>
     </div>
 
@@ -120,6 +144,9 @@ export default {
 .ch-row:last-child { border-bottom: 0; }
 .ch-logo { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1rem; flex-shrink: 0; }
 .ch-name { font-weight: 700; font-size: .9rem; color: var(--ehub-ink); text-transform: capitalize; margin-bottom: 2px; }
-.ch-row .input-group { flex: 1; min-width: 200px; max-width: 420px; }
+.ch-input { flex: 1; min-width: 220px; max-width: 520px; display: flex; flex-direction: column; gap: 4px; }
+.ch-hint { font-size: .76rem; color: var(--ehub-muted); line-height: 1.4; }
+.ch-hint.bad { color: var(--ehub-danger-text); }
+.ch-hint.warn { color: var(--ehub-warn-text); }
 .sum-lbl { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); margin-bottom: 5px; }
 </style>

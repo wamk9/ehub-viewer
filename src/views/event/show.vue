@@ -8,6 +8,8 @@ import { toast } from '@/helpers/toast.js';
 import EhubRegistrationModal from '@/components/modules/event-registration/EhubRegistrationModal.vue';
 import EhubPrizeList from '@/components/modules/event-prizes/EhubPrizeList.vue';
 import { normalizePrizes } from '@/components/modules/event-prizes/prizes.js';
+import EhubLivePlayer from '@/components/modules/event-live/EhubLivePlayer.vue';
+import { watchUrl } from '@/helpers/General/liveStream.js';
 import { initialValues, validateAnswers } from '@/components/modules/event-registration/regForm.js';
 
 const CAT_GRAD = {
@@ -45,7 +47,7 @@ const CAT_ICON = {
 }
 
 export default {
-  components: { EhubRegistrationModal, EhubPrizeList },
+  components: { EhubRegistrationModal, EhubPrizeList, EhubLivePlayer },
   data() {
     return {
       event: null,
@@ -231,10 +233,19 @@ export default {
     },
     streams() {
       const out = [];
-      const norm = (u) => (/^https?:\/\//i.test(u) ? u : 'https://' + u);
-      if (this.event?.streaming_twitch) out.push({ key: 'twitch', icon: 'twitch', url: norm(this.event.streaming_twitch) });
-      if (this.event?.streaming_youtube) out.push({ key: 'youtube', icon: 'youtube', url: norm(this.event.streaming_youtube) });
+      const tw = watchUrl('twitch', this.event?.streaming_twitch);
+      const yt = watchUrl('youtube', this.event?.streaming_youtube);
+      if (tw) out.push({ key: 'twitch', icon: 'twitch', url: tw });
+      if (yt) out.push({ key: 'youtube', icon: 'youtube', url: yt });
       return out;
+    },
+    liveStage() {
+      return (this.event?.stages || []).find((s) => !s.finished && (s.in_progress || s.initialized)) || null;
+    },
+    // Player on the page while a stage is running (organizer can turn it off).
+    showPlayer() {
+      return !!this.streams.length && !!this.liveStage && !this.event?.finished
+        && this.event?.event_data?.live_embed !== false;
     },
     slotsPct() {
       if (!this.event?.max_registrations) return 0;
@@ -591,6 +602,15 @@ export default {
             </div>
           </div>
 
+          <!-- Organizer shortcut: the page looks like the participant view otherwise -->
+          <div v-if="event.can_manage" class="ev-orgbar">
+            <font-awesome-icon :icon="['fas', 'user-gear']" class="ev-orgbar__ico" />
+            <span class="ev-orgbar__txt">{{ $t('events.show.orgbar.text') }}</span>
+            <router-link :to="{ name: 'manage-event', params: { orgRoute, eventRoute } }" class="btn btn-primary btn-sm round px-3">
+              <font-awesome-icon :icon="['fas', 'sliders']" class="me-2" />{{ $t('events.show.orgbar.cta') }}
+            </router-link>
+          </div>
+
           <!-- Description -->
           <p v-if="event.short_description" class="ev-desc">{{ event.short_description }}</p>
 
@@ -646,7 +666,7 @@ export default {
             <div v-if="nextStage" class="hl-card next">
               <div class="hl-ico"><font-awesome-icon :icon="['fas', 'layer-group']" /></div>
               <div>
-                <div class="k">{{ $t('events.show.highlights.next_stage') }}</div>
+                <div class="k">{{ $t(nextStage === liveStage ? 'events.show.highlights.live_stage' : 'events.show.highlights.next_stage') }}</div>
                 <div class="v">{{ nextStage.name }}</div>
                 <div v-if="nextStage.start_at" class="s">{{ formatDate(nextStage.start_at) }}</div>
               </div>
@@ -764,6 +784,10 @@ export default {
           </aside>
 
           <div class="ev-info-main">
+          <div v-if="showPlayer" class="mb-4">
+            <h3 class="ev-sec-title ev-live-title"><span class="ev-live-dot"></span>{{ $t('events.show.info.live_now') }}</h3>
+            <EhubLivePlayer :twitch="event.streaming_twitch || ''" :youtube="event.streaming_youtube || ''" />
+          </div>
           <div v-if="event.description" class="ev-reg-card mb-4">
             <div class="ev-description" v-html="sanitizeHtml(event.description)"></div>
           </div>
@@ -781,7 +805,7 @@ export default {
             <h3 class="ev-sec-title">{{ $t('common.prizes.title') }}</h3>
             <EhubPrizeList :prizes="prizes" :total="prizeTotal" :currency="event.prize_pool_currency || event.currency || 'BRL'" />
           </div>
-          <div v-if="streams.length" class="mb-4">
+          <div v-if="streams.length && !showPlayer" class="mb-4">
             <h3 class="ev-sec-title">{{ $t('events.show.info.watch') }}</h3>
             <div class="ev-streams">
               <a v-for="s in streams" :key="s.key" :href="s.url" target="_blank" rel="noopener noreferrer" class="ev-stream" :class="s.key">
@@ -1095,6 +1119,14 @@ export default {
 </template>
 
 <style scoped>
+.ev-orgbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 16px; padding: 10px 14px; border-radius: 12px; background: var(--ehub-primary-tint); border: 1px solid var(--ehub-primary-border); }
+.ev-orgbar__ico { color: var(--ehub-primary-text); }
+.ev-orgbar__txt { flex: 1; min-width: 180px; font-size: .88rem; font-weight: 600; color: var(--ehub-ink); }
+
+.ev-live-title { display: flex; align-items: center; gap: 8px; }
+.ev-live-dot { width: 9px; height: 9px; border-radius: 50%; background: #e23b3b; box-shadow: 0 0 0 0 rgba(226,59,59,.6); animation: ev-live-pulse 1.6s infinite; }
+@keyframes ev-live-pulse { 0% { box-shadow: 0 0 0 0 rgba(226,59,59,.6); } 70% { box-shadow: 0 0 0 8px rgba(226,59,59,0); } 100% { box-shadow: 0 0 0 0 rgba(226,59,59,0); } }
+
 /* Org colors are chosen freely: small text uses a darker shade so it stays readable (WCAG AA). */
 .ev-root { --org-accent-text: color-mix(in srgb, var(--org-accent, var(--ehub-primary)), #000 28%); }
 html[data-bs-theme="dark"] .ev-root { --org-accent-text: color-mix(in srgb, var(--org-accent, var(--ehub-primary)), #fff 12%); }

@@ -134,7 +134,10 @@ export default {
     async control(stage, action) {
       let msg = this.$t(`pages.event.manage.stg.${action}_q`, { s: stage.name });
       if (action === 'start' && !this.ev.initialized) msg = this.$t('pages.event.manage.stg.start_first_q');
-      const ok = await this.em.ask(msg, this.$t('pages.event.manage.stg.' + action));
+      // Finishing without published results leaves the standings empty: say so plainly.
+      const noResults = action === 'finish' && !stage.results_published;
+      if (noResults) msg = this.$t('pages.event.manage.stg.finish_no_results_q', { s: stage.name });
+      const ok = await this.em.ask(msg, this.$t(noResults ? 'pages.event.manage.stg.finish_anyway' : 'pages.event.manage.stg.' + action), noResults);
       if (!ok) return;
       this.busy = stage.id;
       const res = await OrganizationEventStage.control(this.em.orgRoute, this.em.eventRoute, stage.route, action);
@@ -223,11 +226,11 @@ export default {
             <font-awesome-icon :icon="['fas', 'play']" class="me-1" />{{ $t('pages.event.manage.stg.start') }}
           </button>
           <template v-if="stageState(s) !== 'pending' && em.canPanel('results')">
-            <button class="btn btn-sm btn-outline-secondary round px-3" @click="goResults(s)">
+            <button class="btn btn-sm round px-3" :class="stageState(s) === 'live' && !s.results_published ? 'btn-primary' : 'btn-outline-secondary'" @click="goResults(s)">
               <font-awesome-icon :icon="['fas', 'ranking-star']" class="me-1" />{{ s.results_published ? $t('pages.event.manage.stg.view_results') : $t('pages.event.manage.stg.results') }}
             </button>
           </template>
-          <button v-if="canRun && stageState(s) === 'live'" class="btn btn-sm btn-primary round px-3" :disabled="busy === s.id" @click="control(s, 'finish')">
+          <button v-if="canRun && stageState(s) === 'live'" class="btn btn-sm round px-3" :class="s.results_published ? 'btn-primary' : 'btn-outline-secondary'" :disabled="busy === s.id" @click="control(s, 'finish')">
             <font-awesome-icon :icon="['fas', 'flag']" class="me-1" />{{ $t('pages.event.manage.stg.finish') }}
           </button>
           <button v-if="canRun && !ev.finished" class="act-btn" :title="$t('pages.event.manage.stg.edit')" @click="openEdit(s)"><font-awesome-icon :icon="['fas', 'pen']" /></button>

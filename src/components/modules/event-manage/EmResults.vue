@@ -109,6 +109,20 @@ export default {
         };
       });
     },
+    // Published results of a running stage: the next thing to do is closing it.
+    async finishStage() {
+      const st = this.stage;
+      if (!st) return;
+      const ok = await this.em.ask(this.$t('pages.event.manage.stg.finish_q', { s: st.name }), this.$t('pages.event.manage.stg.finish'));
+      if (!ok) return;
+      this.saving = true;
+      const res = await OrganizationEventStage.control(this.em.orgRoute, this.em.eventRoute, st.route, 'finish');
+      this.saving = false;
+      if (res.code === 200) {
+        this.em.putStage(res.data);
+        toast.success(this.$t('pages.event.manage.toast.finished'));
+      } else toast.error(apiError(this, res.data));
+    },
     async save(publish) {
       if (!this.stage || this.saving) return;
       if (this.rows.some((r) => !r.position || r.position < 1)) return;
@@ -151,6 +165,17 @@ export default {
           </button>
         </template>
       </div>
+    </div>
+
+    <div v-if="stage && stage.results_published && stageState(stage) === 'live' && !dirty && em.can('event.manage')" class="next-step">
+      <font-awesome-icon :icon="['fas', 'circle-check']" class="next-step__ico" />
+      <div class="next-step__txt">
+        <strong>{{ $t('pages.event.manage.res.next_title') }}</strong>
+        <span>{{ $t(stages.some((x) => x.id !== stage.id && !x.finished) ? 'pages.event.manage.res.next_text' : 'pages.event.manage.res.next_text_last', { s: stage.name }) }}</span>
+      </div>
+      <button class="btn btn-primary round px-3" :disabled="saving" @click="finishStage">
+        <font-awesome-icon :icon="['fas', 'flag']" class="me-2" />{{ $t('pages.event.manage.stg.finish') }}
+      </button>
     </div>
 
     <div v-if="!stages.length" class="cc">
@@ -253,6 +278,11 @@ export default {
 </template>
 
 <style scoped>
+.next-step { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: color-mix(in srgb, #1f8a5b 10%, var(--ehub-card)); border: 1px solid color-mix(in srgb, #1f8a5b 35%, transparent); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; }
+.next-step__ico { color: var(--ehub-success-text); font-size: 1.2rem; }
+.next-step__txt { flex: 1; min-width: 200px; display: flex; flex-direction: column; font-size: .85rem; color: var(--ehub-muted); }
+.next-step__txt strong { color: var(--ehub-ink); font-size: .92rem; }
+
 .res-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
 .res-in { width: 84px; padding: 4px 8px; font-size: .82rem; border-radius: 7px; }
 .res-in.sm { width: 62px; }

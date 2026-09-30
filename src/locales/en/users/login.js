@@ -7,7 +7,7 @@ export default {
   title:         'Welcome back!',
   description:   'Enter your details to access your eHub account',
   form: {
-    mail:     { label: 'E-mail',   placeholder: 'Enter your e-mail' },
+    mail:     { label: 'E-mail or username', placeholder: 'Your e-mail or username' },
     password: { label: 'Password', placeholder: 'Enter your password' },
   },
   submit:        'Sign in',
@@ -16,7 +16,7 @@ export default {
   or:            'or',
   google:        'Sign in with Google',
   microsoft:     'Sign in with Microsoft',
-  error:         'Incorrect e-mail or password',
+  error:         'Incorrect username/e-mail or password',
   oauth_error: {
     '1':                     'Failed to authenticate with the provider. Please try again.',
     no_email:                'Could not retrieve your e-mail from the provider.',
