@@ -44,7 +44,7 @@ export default {
     stageId() { this.load(); },
   },
   created() {
-    const q = this.$route.query.stage;
+    const q = this.$route.params.sub;
     const byQuery = q && this.stages.find((s) => s.route === q);
     const live = this.stages.find((s) => stageState(s) === 'live');
     const started = [...this.stages].reverse().find((s) => s.initialized);

@@ -195,15 +195,18 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/org/:orgRoute/event/:eventRoute/manage/:panel?',
+      path: '/org/:orgRoute/event/:eventRoute/manage/:panel?/:sub?',
       name: 'manage-event',
       component: () => import('@/views/event/manage.vue'),
       meta: { requiresAuth: true }
     },
     {
-      path: '/org/:orgRoute/event/:eventRoute',
+      // Event page: /tab, /stages/<stage>, /join (after sign-in) and /payment/<status> (gateway return).
+      path: '/org/:orgRoute/event/:eventRoute/:tab(info|stages|standings|participants|regulation|news|join|payment)?/:sub?',
       name: 'show-event-info',
-      component: () => import('@/views/event/show.vue')
+      component: () => import('@/views/event/show.vue'),
+      // Switching tabs must not reload the page: one view per event.
+      meta: { viewKey: (r) => `/org/${r.params.orgRoute}/event/${r.params.eventRoute}` },
     },
     {
       path: '/org/:orgRoute/event/:eventRoute/news/:articleSlug',

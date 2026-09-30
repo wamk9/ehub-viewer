@@ -49,7 +49,7 @@ export default {
       return j >= 0 && j < this.stages.length && !this.stages[i].initialized && !this.stages[j].initialized;
     },
     goResults(stage) {
-      this.$router.push({ name: 'manage-event', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute, panel: 'results' }, query: { stage: stage.route } });
+      this.$router.push({ name: 'manage-event', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute, panel: 'results', sub: stage.route } });
     },
 
     // ── Stage CRUD ──

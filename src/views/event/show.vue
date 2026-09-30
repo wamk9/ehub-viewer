@@ -277,13 +277,8 @@ export default {
   },
 
   watch: {
-    '$route.query.tab'(tab) {
-      const valid = ['info', 'stages', 'standings', 'participants', 'regulation', 'news'];
-      if (!tab || !valid.includes(tab)) { this.activeTab = 'info'; return; }
-      if (tab === 'participants') { this.loadParticipants(); return; }
-      if (tab === 'news') { this.loadArticles(); return; }
-      this.activeTab = tab;
-    },
+    '$route.params.tab'() { this.applyRoute(); },
+    '$route.params.sub'() { this.applyRoute(); },
   },
 
   async created() {
@@ -294,19 +289,12 @@ export default {
     }
     this.checkPaymentReturn();
     // Back from sign-in/sign-up started by "register": continue right where the visitor left.
-    if (this.$route.query.join) {
-      const { join, ...rest } = this.$route.query;
-      this.$router.replace({ query: rest });
+    if (this.$route.params.tab === 'join') {
+      this.goTab('info');
       if (this.$store.getters.getToken && this.regOpen && !this.event?.user_registration) this.handleRegister();
-    }
-    const tab = this.$route.query.tab;
-    if (this.$route.query.stage) {
-      this.openStage(String(this.$route.query.stage));
       return;
     }
-    if (tab === 'participants') this.loadParticipants();
-    else if (tab === 'news') this.loadArticles();
-    else if (tab) this.activeTab = tab;
+    this.applyRoute();
   },
 
   methods: {
@@ -323,12 +311,34 @@ export default {
       if (!d.getHours() && !d.getMinutes()) return date;
       return date + ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
     },
+    eventPath(tab, sub) {
+      return { name: 'show-event-info', params: { orgRoute: this.orgRoute, eventRoute: this.eventRoute, tab: tab && tab !== 'info' ? tab : undefined, sub: sub || undefined } };
+    },
+    // Tabs live in the path (/stages, /standings...), never in ?query.
+    goTab(tab, sub) {
+      this.$router.replace(this.eventPath(tab, sub));
+    },
+    // Reflect the path on screen: tab, and the stage to highlight.
+    applyRoute() {
+      // Old links (?tab=stages&stage=...) move to the path form.
+      const q = this.$route.query;
+      if (q.tab || q.stage) {
+        this.goTab(q.stage ? 'stages' : String(q.tab), q.stage ? String(q.stage) : undefined);
+        return;
+      }
+      const tab = this.$route.params.tab || 'info';
+      if (tab === 'join' || tab === 'payment') return;
+      if (tab === 'participants') this.loadParticipants();
+      else if (tab === 'news') this.loadArticles();
+      else this.activeTab = tab;
+      this.focusStage = tab === 'stages' ? (this.$route.params.sub || null) : null;
+      if (this.focusStage) {
+        this.$nextTick(() => document.getElementById('stage-' + this.focusStage)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      }
+    },
     // Open the Stages tab on one stage (from a notification or "my results").
     openStage(route) {
-      this.activeTab = 'stages';
-      this.focusStage = route;
-      this.$router.replace({ query: { ...this.$route.query, tab: 'stages', stage: route } });
-      this.$nextTick(() => document.getElementById('stage-' + route)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      this.goTab('stages', route);
     },
     async shareEvent() {
       const url = window.location.origin + this.$route.path;
@@ -378,7 +388,7 @@ export default {
     },
     async loadParticipants() {
       this.activeTab = 'participants';
-      this.$router.replace({ query: { ...this.$route.query, tab: 'participants' } });
+      if (this.$route.params.tab !== 'participants') this.goTab('participants');
       if (this.participantsLoaded) return;
       this.participantsLoading = true;
       const result = await OrganizationEventRegistration.index(this.orgRoute, this.eventRoute);
@@ -395,7 +405,7 @@ export default {
     },
     handleRegister() {
       if (!this.$store.getters.getToken) {
-        const back = this.$router.resolve({ path: this.$route.path, query: { ...this.$route.query, join: '1' } }).fullPath;
+        const back = this.$router.resolve(this.eventPath('join')).fullPath;
         this.$router.push({ name: 'user-login', query: { redirect: back } });
         return;
       }
@@ -471,7 +481,7 @@ export default {
     async selectGateway(gateway) { await this.doRetryPayment(gateway); },
     async loadArticles() {
       this.activeTab = 'news';
-      this.$router.replace({ query: { ...this.$route.query, tab: 'news' } });
+      if (this.$route.params.tab !== 'news') this.goTab('news');
       if (this.articlesLoaded) return;
       this.articlesLoading = true;
       const result = await OrganizationEventArticle.getAll(this.orgRoute, this.eventRoute);
@@ -480,13 +490,12 @@ export default {
       if (result.code === 200 && Array.isArray(result.data)) this.articles = result.data;
     },
     checkPaymentReturn() {
-      const payment = this.$route.query.payment;
+      const payment = this.$route.params.tab === 'payment' ? this.$route.params.sub : this.$route.query.payment;
       if (!payment) return;
       if (payment === 'success')                      toast.success(this.$t('events.show.registration.payment_success'));
       else if (payment === 'failure' || payment === 'cancelled') toast.error(this.$t('events.show.registration.payment_failure'));
       else if (payment === 'pending')                 toast.warning(this.$t('events.show.registration.payment_pending'));
-      const tab = this.$route.query.tab;
-      this.$router.replace({ query: tab ? { tab } : {} });
+      this.$router.replace(this.eventPath('info'));
     },
   },
 };
@@ -708,16 +717,16 @@ export default {
 
         <!-- ═══ TABS ═══ -->
         <div class="ehub-tabs">
-          <button class="tab-btn" :class="{ active: activeTab === 'info' }" @click="activeTab = 'info'; $router.replace({ query: { ...$route.query, tab: 'info' } })">
+          <button class="tab-btn" :class="{ active: activeTab === 'info' }" @click="goTab('info')">
             <font-awesome-icon :icon="['fas', 'circle-info']" />
             {{ $t('events.show.tabs.info') }}
           </button>
-          <button class="tab-btn" :class="{ active: activeTab === 'stages' }" @click="activeTab = 'stages'; $router.replace({ query: { ...$route.query, tab: 'stages' } })">
+          <button class="tab-btn" :class="{ active: activeTab === 'stages' }" @click="goTab('stages')">
             <font-awesome-icon :icon="['fas', 'layer-group']" />
             {{ $t('events.show.tabs.stages') }}
             <span v-if="event.stages?.length" class="tab-badge">{{ event.stages.length }}</span>
           </button>
-          <button v-if="finishedStages.length" class="tab-btn" :class="{ active: activeTab === 'standings' }" @click="activeTab = 'standings'; $router.replace({ query: { ...$route.query, tab: 'standings' } })">
+          <button v-if="finishedStages.length" class="tab-btn" :class="{ active: activeTab === 'standings' }" @click="goTab('standings')">
             <font-awesome-icon :icon="['fas', 'trophy']" />
             {{ $t('events.show.tabs.standings') }}
           </button>
@@ -726,7 +735,7 @@ export default {
             {{ $t('events.show.tabs.participants') }}
             <span v-if="event.registrations_count" class="tab-badge">{{ event.registrations_count }}</span>
           </button>
-          <button class="tab-btn" :class="{ active: activeTab === 'regulation' }" @click="activeTab = 'regulation'; $router.replace({ query: { ...$route.query, tab: 'regulation' } })">
+          <button class="tab-btn" :class="{ active: activeTab === 'regulation' }" @click="goTab('regulation')">
             <font-awesome-icon :icon="['fas', 'clipboard-list']" />
             {{ $t('events.show.tabs.regulation') }}
           </button>
@@ -1112,7 +1121,7 @@ export default {
       :rules-available="!!event?.rules"
       @close="showRegisterModal = false"
       @confirm="confirmRegister"
-      @open-rules="showRegisterModal = false; activeTab = 'regulation'; $router.replace({ query: { ...$route.query, tab: 'regulation' } })"
+      @open-rules="showRegisterModal = false; goTab('regulation')"
     />
 
     <!-- ═══ CANCEL REGISTRATION ═══ -->

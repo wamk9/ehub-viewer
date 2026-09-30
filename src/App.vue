@@ -9,6 +9,8 @@ import { useI18n } from 'vue-i18n'
 const { locale, t } = useI18n()
 
 const router = useRouter()
+// Pages whose path carries sub-sections (tabs) keep the same instance across them.
+const viewKey = (route) => (typeof route.meta.viewKey === 'function' ? route.meta.viewKey(route) : route.path)
 const pageLoading = ref(false)
 let doneTimer = null
 
@@ -24,13 +26,13 @@ router.afterEach(() => {
 <template>
   <TopLoadingBar :active="pageLoading" />
   <template v-if="$route.meta.authPage">
-    <RouterView :key="$route.path" />
+    <RouterView :key="viewKey($route)" />
     <AppToast />
   </template>
   <template v-else>
     <navbar />
     <div class="page-content">
-      <RouterView :key="$route.path" />
+      <RouterView :key="viewKey($route)" />
     </div>
     <customFooter />
     <AppToast />
