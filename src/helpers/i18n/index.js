@@ -1,12 +1,13 @@
-import { useI18n } from 'vue-i18n'
+import instance from './init.js'
 
 export class i18n {
   static _i18n = null
 
-  // Initialize the static i18n reference
+  // Initialize the static i18n reference. Uses the global composer, so it works
+  // anywhere (event handlers, helpers), not only at the top of a setup().
   static init() {
     if (!this._i18n) {
-      this._i18n = useI18n()
+      this._i18n = instance.global
     }
   }
 
@@ -39,7 +40,8 @@ static d(value, format = 'short', timeZone = null) {
 
   // Apply custom timezone if passed
   if (timeZone) {
-    return d(dateObj, { ...this._i18n.datetimeFormats[locale.value][format], timeZone })
+    const formats = this._i18n.datetimeFormats?.value ?? this._i18n.datetimeFormats
+    return d(dateObj, { ...formats[locale.value][format], timeZone })
   }
 
   return d(dateObj, format)

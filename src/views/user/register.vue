@@ -22,6 +22,17 @@ const form = reactive({
   username: '', password: '', password_confirm: '', image: '',
 })
 const inviteToken  = ref(null)
+const comingBack   = !!route.query.redirect
+
+function redirectTo() {
+  const r = route.query.redirect
+  if (!r) return null
+  try {
+    return new URL(String(r), window.location.origin).origin === window.location.origin ? String(r) : null
+  } catch {
+    return null
+  }
+}
 const mailVerified = ref(false)
 
 onMounted(() => {
@@ -69,6 +80,11 @@ async function submit() {
   const valid = inputs.value.every(el => el.forceValidate?.() !== false)
   if (!valid) return
 
+  if (form.password !== form.password_confirm) {
+    serverErrors.value = [i18n.t('users.create.form.password-confirm.validation.mismatch')]
+    return
+  }
+
   inputs.value.splice(0)
   isLoading.value = true
   loadingText.value = i18n.t('users.create.loading.creating.title')
@@ -94,6 +110,9 @@ async function submit() {
         await OrgApi.acceptInvite(inviteToken.value)
         const org = route.query.org
         setTimeout(() => router.push(org ? `/org/${org}` : '/my-orgs'), 1500)
+      } else if (redirectTo()) {
+        // Came from an action (e.g. registering for an event): go back and finish it.
+        setTimeout(() => router.push(redirectTo()), 1500)
       } else {
         setTimeout(() => router.push({ name: 'events' }), 2000)
       }
@@ -148,6 +167,10 @@ async function submit() {
         <div class="sp-label">{{ $t('users.create.steps.credentials') }}</div>
       </div>
     </div>
+
+    <p v-if="comingBack" class="text-center small text-muted mb-3">
+      <font-awesome-icon :icon="['fas', 'circle-check']" class="me-1" />{{ $t('users.create.coming_back') }}
+    </p>
 
     <!-- Tip -->
     <div class="tip-alert rounded-3 d-flex align-items-center gap-2 px-3 py-2 mb-3 small">
@@ -250,7 +273,7 @@ async function submit() {
     <!-- Switch to login -->
     <p class="text-center text-muted small mt-3 mb-0">
       {{ $t('users.create.has_account') }}
-      <router-link to="/login" class="fw-semibold">{{ $t('users.create.login_link') }}</router-link>
+      <router-link :to="route.query.redirect ? { path: '/login', query: { redirect: route.query.redirect } } : '/login'" class="fw-semibold">{{ $t('users.create.login_link') }}</router-link>
     </p>
 
   </AuthLayout>

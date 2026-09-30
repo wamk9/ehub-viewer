@@ -112,7 +112,7 @@ import SystemVars from '@/helpers/General/SystemVars';
                         </span>
                         <span v-if="item.category" class="event-row__category">
                             {{ item.category }}
-                            <template v-if="item.runmode"> · {{ item.runmode }}</template>
+                            <template v-if="item.runmode"> · {{ $te('categories.runmode.' + item.runmode) ? $t('categories.runmode.' + item.runmode) : item.runmode }}</template>
                         </span>
                     </div>
                     <h5 class="event-row__title mb-1">{{ item.name }}</h5>

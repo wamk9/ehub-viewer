@@ -27,7 +27,7 @@ export default {
       stages: 'Stages created', stages_missing: 'No stages created',
       pending: '{n} payment(s) awaiting confirmation',
       results: 'Results for {s} not published yet',
-      stream: 'No streaming channel configured',
+      stream: 'Tip: add a streaming link (Twitch or YouTube) so the audience can watch',
     },
     feed: {
       reg: '{a} registered', pay: '{a} confirmed payment',

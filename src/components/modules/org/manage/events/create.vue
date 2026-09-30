@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Organization from '@/helpers/communication/Organization.js'
@@ -78,6 +78,82 @@ onMounted(async () => {
 
 watch(() => form.name, (val) => {
   if (!form.route_manually_edited) form.route = slugify(val)
+})
+
+// ── Local autosave (new events only) ───────────────────────────────────
+// Progress survives a refresh or a closed tab; images are left out (too big).
+const DRAFT_KEY = computed(() => 'ehub_event_draft_' + route.params.orgRoute)
+const DRAFT_SKIP = ['logo_image', 'cover_image']
+const savedDraft = ref(null)
+let saveTimer = null
+let submitted = false
+
+function readDraft() {
+  try { return JSON.parse(localStorage.getItem(DRAFT_KEY.value) || 'null') } catch (e) { return null }
+}
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_KEY.value) } catch (e) { /* storage unavailable */ }
+}
+function hasProgress() {
+  return !isEditMode.value && !submitted && !!String(form.name || '').trim()
+}
+function writeDraft() {
+  if (!hasProgress()) return
+  const data = {}
+  for (const [k, v] of Object.entries(form)) if (!DRAFT_SKIP.includes(k)) data[k] = v
+  try { localStorage.setItem(DRAFT_KEY.value, JSON.stringify({ at: Date.now(), step: currentStep.value, data })) } catch (e) { /* quota */ }
+}
+watch([form, currentStep], () => {
+  clearTimeout(saveTimer)
+  saveTimer = setTimeout(writeDraft, 600)
+}, { deep: true })
+
+function restoreDraft() {
+  const d = savedDraft.value
+  if (d?.data) {
+    for (const [k, v] of Object.entries(d.data)) if (k in form) form[k] = v
+    if (d.step >= 1 && d.step <= TOTAL_STEPS) currentStep.value = d.step
+  }
+  savedDraft.value = null
+}
+function discardDraft() {
+  clearDraft()
+  savedDraft.value = null
+}
+const savedDraftWhen = computed(() => savedDraft.value?.at
+  ? new Date(savedDraft.value.at).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+  : '')
+
+function onBeforeUnload(e) {
+  if (!hasProgress()) return
+  writeDraft()
+  e.preventDefault()
+  e.returnValue = ''
+}
+onMounted(() => {
+  window.addEventListener('beforeunload', onBeforeUnload)
+  if (!isEditMode.value) {
+    const d = readDraft()
+    if (d?.data?.name) savedDraft.value = d
+  }
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', onBeforeUnload)
+  clearTimeout(saveTimer)
+  writeDraft()
+})
+
+// A new step starts at the top, whatever element is scrolling the page.
+const wizRoot = ref(null)
+watch(currentStep, async () => {
+  await nextTick()
+  let el = wizRoot.value?.parentElement
+  while (el && el !== document.body) {
+    const oy = getComputedStyle(el).overflowY
+    if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight) el.scrollTop = 0
+    el = el.parentElement
+  }
+  window.scrollTo({ top: 0 })
 })
 
 // ── Step validation (mirrors the mockup's per-step guards) ─────────────
@@ -190,6 +266,8 @@ async function submit(publication) {
   }
 
   publishing.value = false
+  submitted = true
+  clearDraft()
   toast.success(t('pages.organization.manage.eventWizard.toast.' + (isEditMode.value ? 'updated' : 'created')))
   goToEventsList(form.route)
 }
@@ -200,7 +278,7 @@ async function submit(publication) {
     <div class="spinner-border text-primary" role="status"></div>
   </div>
 
-  <div v-else-if="show" class="wiz-wrap">
+  <div v-else-if="show" ref="wizRoot" class="wiz-wrap">
 
     <WizardSidebar
       :steps="steps"
@@ -216,6 +294,15 @@ async function submit(publication) {
 
     <div class="wiz-main">
       <div class="wiz-content">
+        <div v-if="savedDraft" class="wiz-restore">
+          <font-awesome-icon :icon="['fas', 'clock-rotate-left']" class="wiz-restore__ico" />
+          <div class="wiz-restore__txt">
+            <strong>{{ $t('pages.organization.manage.eventWizard.restore.title') }}</strong>
+            <span>{{ $t('pages.organization.manage.eventWizard.restore.text', { name: savedDraft.data.name, when: savedDraftWhen }) }}</span>
+          </div>
+          <button class="btn btn-sm btn-primary round px-3" @click="restoreDraft">{{ $t('pages.organization.manage.eventWizard.restore.continue') }}</button>
+          <button class="btn btn-sm btn-ghost round px-3" @click="discardDraft">{{ $t('pages.organization.manage.eventWizard.restore.discard') }}</button>
+        </div>
         <component
           :is="activeComponent"
           :form="form"
@@ -256,6 +343,10 @@ async function submit(publication) {
 .wiz-main { display: flex; flex-direction: column; min-height: calc(100vh - 60px); }
 .wiz-content { flex: 1; padding: 36px 44px; }
 /* Actions sit at the end of the content (not stuck to the viewport). */
+.wiz-restore { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--ehub-primary-tint); border: 1px solid color-mix(in srgb, var(--ehub-primary) 30%, transparent); border-radius: 12px; padding: 12px 14px; margin-bottom: 24px; }
+.wiz-restore__ico { color: var(--ehub-primary); font-size: 1.1rem; }
+.wiz-restore__txt { flex: 1; min-width: 200px; display: flex; flex-direction: column; font-size: .82rem; color: var(--ehub-muted); }
+.wiz-restore__txt strong { color: var(--ehub-ink); font-size: .88rem; }
 .wiz-actions { border-top: 1px solid var(--ehub-line); margin: 0 44px; padding: 18px 0 32px; display: flex; align-items: center; gap: 10px; }
 
 @media (max-width: 860px) {

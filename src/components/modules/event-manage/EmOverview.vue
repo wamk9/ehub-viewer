@@ -43,7 +43,7 @@ export default {
       }
       if ((ev.fee || 0) > 0 && this.em.gateways !== null) {
         const ok = this.em.gateways.some((g) => g.active);
-        items.push({ ok, text: this.$t('pages.event.manage.ov.chk.' + (ok ? 'gw' : 'gw_missing')), href: `/org/${this.em.orgRoute}/manage` });
+        items.push({ ok, text: this.$t('pages.event.manage.ov.chk.' + (ok ? 'gw' : 'gw_missing')), href: `/org/${this.em.orgRoute}/manage/finances` });
       }
       const hasRules = !!(ev.rules && ev.rules.replace(/<[^>]*>/g, '').trim());
       items.push({ ok: hasRules, text: this.$t('pages.event.manage.ov.chk.' + (hasRules ? 'rules' : 'rules_missing')), step: RULES_STEP });
@@ -52,8 +52,10 @@ export default {
       this.stages
         .filter((s) => s.initialized && !s.results_published)
         .forEach((s) => items.push({ ok: false, text: this.$t('pages.event.manage.ov.chk.results', { s: s.name }), go: 'results' }));
-      if (!ev.streaming_twitch && !ev.streaming_youtube) items.push({ ok: false, text: this.$t('pages.event.manage.ov.chk.stream'), go: 'live' });
-      return items.sort((a, b) => Number(a.ok) - Number(b.ok));
+      // Optional suggestion, not a problem: listed after the real pendencies.
+      if (!ev.streaming_twitch && !ev.streaming_youtube) items.push({ ok: false, tip: true, text: this.$t('pages.event.manage.ov.chk.stream'), go: 'live' });
+      const rank = (c) => (c.ok ? 2 : c.tip ? 1 : 0);
+      return items.sort((a, b) => rank(a) - rank(b));
     },
     feed() {
       const items = [];
@@ -123,8 +125,8 @@ export default {
           <h3><font-awesome-icon :icon="['fas', 'list-check']" style="color:var(--ehub-primary)" />{{ $t('pages.event.manage.ov.todo') }}</h3>
         </div>
         <div v-for="(c, i) in checklist" :key="i" class="chk" @click="openItem(c)">
-          <span class="chk-ico" :class="c.ok ? 'ok' : 'warn'">
-            <font-awesome-icon :icon="['fas', c.ok ? 'check' : 'exclamation']" />
+          <span class="chk-ico" :class="c.ok ? 'ok' : (c.tip ? 'tip' : 'warn')">
+            <font-awesome-icon :icon="['fas', c.ok ? 'check' : (c.tip ? 'lightbulb' : 'exclamation')]" />
           </span>
           <span class="chk-txt">{{ c.text }}</span>
           <font-awesome-icon v-if="c.go || c.href || c.step" :icon="['fas', 'chevron-right']" class="chk-go" />
@@ -148,6 +150,7 @@ export default {
 .chk:hover { background: color-mix(in srgb, var(--ehub-field-bg) 55%, transparent); }
 .chk-ico { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .62rem; flex-shrink: 0; }
 .chk-ico.ok { background: color-mix(in srgb, #1f8a5b 15%, transparent); color: #1f8a5b; }
+.chk-ico.tip { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
 .chk-ico.warn { background: color-mix(in srgb, var(--ehub-gold) 22%, transparent); color: color-mix(in srgb, var(--ehub-gold), #000 38%); }
 .chk-txt { flex: 1; font-size: .84rem; color: var(--ehub-ink); }
 .chk-go { font-size: .66rem; color: var(--ehub-muted); }

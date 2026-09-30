@@ -59,6 +59,17 @@ const grad = computed(() => {
 
 const catIcon = computed(() => CAT_ICON[props.event.category] || 'trophy')
 
+// Same wording as the event page: can a visitor still join?
+const cardStatus = computed(() => {
+  const e = props.event
+  if (e.finished) return 'finished'
+  if (e.initialized) return 'in_progress'
+  const deadline = e.registration_deadline ? new Date(String(e.registration_deadline).slice(0, 10) + 'T23:59:59') : null
+  if (deadline && Date.now() > deadline.getTime()) return 'reg_closed'
+  if (e.max_registrations && (e.registrations_count || 0) >= e.max_registrations) return 'full'
+  return 'reg_open'
+})
+
 const logoInitials = computed(() => {
   const name = props.event.name || props.orgName || '?'
   return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
@@ -107,10 +118,8 @@ const slotsBarColor = computed(() => {
       <div class="ec-banner-stripe"></div>
       <font-awesome-icon :icon="['fas', catIcon]" class="ec-shield" />
       <div class="ec-badges">
-        <span class="ec-badge" :class="event.finished ? 'finished' : 'active'">
-          {{ event.finished
-            ? $t('pages.organization.show.events.finished')
-            : $t('pages.organization.show.events.active') }}
+        <span class="ec-badge" :class="event.finished ? 'finished' : (cardStatus === 'reg_open' ? 'open' : 'active')">
+          {{ $t('events.show.status.' + cardStatus) }}
         </span>
         <span class="ec-badge" :class="event.fee == 0 ? 'free' : 'paid'">
           {{ feeLabel }}
@@ -233,6 +242,7 @@ const slotsBarColor = computed(() => {
   backdrop-filter: blur(8px);
   white-space: nowrap;
 }
+.ec-badge.open     { background: rgba(31,138,91,.9); color: #fff; }
 .ec-badge.active   { background: rgba(0,0,0,.42); color: rgba(255,255,255,.9); }
 .ec-badge.finished { background: rgba(0,0,0,.55); color: rgba(255,255,255,.45); }
 .ec-badge.free     { background: color-mix(in srgb, #1f8a5b 75%, rgba(0,0,0,.3)); color: #d1fae5; }

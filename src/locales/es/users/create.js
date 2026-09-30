@@ -1,4 +1,5 @@
 export default {
+  coming_back: 'Gratis. Al terminar, vuelves directo a donde estabas.',
   title: '¡Bienvenido a eHub{name}!',
   description: 'Completa tus datos a continuación para crear tu cuenta en nuestra plataforma',
   form: {
@@ -41,7 +42,7 @@ export default {
     'password-confirm': {
       label: 'Confirmar contraseña',
       placeholder: 'Repite tu contraseña',
-      validation: { 'min-length': 'Ingresa al menos {length} carácter | Ingresa al menos {length} caracteres' }
+      validation: { mismatch: 'Las contraseñas no coinciden. Escribe la misma contraseña en ambos campos.', 'min-length': 'Ingresa al menos {length} carácter | Ingresa al menos {length} caracteres' }
     },
     image: {
       button:    'Haz clic para subir una foto de perfil',

@@ -50,7 +50,7 @@ const ORG_ROLE_PERMS = {
 };
 
 const ORG_ACTIVITY_ICONS = {
-  member_added: 'user-plus', member_joined_invite: 'user-plus', invite_sent: 'paper-plane',
+  org_created: 'building', member_added: 'user-plus', member_joined_invite: 'user-plus', invite_sent: 'paper-plane',
   role_changed: 'id-badge', member_removed: 'user-minus', member_left: 'right-from-bracket',
   event_created: 'calendar-plus', event_published: 'bullhorn', event_started: 'play',
   event_finished: 'flag', event_deleted: 'trash',
@@ -350,10 +350,15 @@ export default {
 
     initOnboarding() {
       try { this.onbDismissed = localStorage.getItem('ehub_onb_done_' + this.orgRoute) === '1'; } catch (e) { /* storage unavailable */ }
-      if (this.$route.query.welcome) {
+      let fromCreate = false;
+      try {
+        fromCreate = sessionStorage.getItem('ehub_org_welcome') === this.orgRoute;
+        if (fromCreate) sessionStorage.removeItem('ehub_org_welcome');
+      } catch (e) { /* storage unavailable */ }
+      if (this.$route.query.welcome || fromCreate) {
         this.welcome = true;
         this.onbDismissed = false;
-        this.$router.replace({ query: {} });
+        if (this.$route.query.welcome) this.$router.replace({ query: {} });
       }
       if (this.onbDismissed) return;
       OrganizationBilling.getGateways(this.orgRoute).then((res) => {
@@ -1016,8 +1021,8 @@ export default {
                 <td><span class="s-badge" :class="eventStatus(ev)">{{ $t('pages.organization.manage.events.status.' + eventStatus(ev)) }}</span></td>
                 <td @click.stop>
                   <div class="act-row">
-                    <button v-if="canOpenEvent()" class="act-btn" :title="$t('pages.organization.manage.events.manage_btn')" @click="manageEvent(ev)">
-                      <font-awesome-icon :icon="['fas', 'sliders']" />
+                    <button v-if="canOpenEvent()" class="act-btn act-btn--label" :title="$t('pages.organization.manage.events.manage_btn')" @click="manageEvent(ev)">
+                      <font-awesome-icon :icon="['fas', 'sliders']" /><span>{{ $t('pages.organization.manage.events.manage_btn') }}</span>
                     </button>
                     <button v-if="canEditEvent(ev)" class="act-btn" :title="$t('pages.organization.manage.events.edit_btn')" @click="editEvent(ev)">
                       <font-awesome-icon :icon="['fas', 'pen']" />
@@ -1674,6 +1679,8 @@ export default {
 </template>
 
 <style scoped>
+.act-btn.act-btn--label { width: auto; padding: 0 10px; gap: 6px; font-size: .76rem; font-weight: 700; display: inline-flex; align-items: center; }
+
 .onb { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-left: 4px solid var(--ehub-primary); border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; }
 .onb-hd { display: flex; align-items: flex-start; gap: 12px; }
 .onb-hd > div { flex: 1; }

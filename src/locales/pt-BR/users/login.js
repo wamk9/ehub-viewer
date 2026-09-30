@@ -1,4 +1,9 @@
 export default {
+  title_continue: 'Falta pouco!',
+  description_continue: 'Entre na sua conta para continuar.',
+  new_here: 'Primeira vez no eHub?',
+  new_here_hint: 'Crie sua conta grátis em 1 minuto e volte direto para cá.',
+  create_free: 'Criar conta grátis',
   title:         'Que bom que você voltou!',
   description:   'Insira seus dados para acessar sua conta no eHub',
   form: {

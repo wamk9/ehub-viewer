@@ -123,9 +123,10 @@ watch(() => props.form.format, (fmt) => {
         <div>
           <div class="gw-alert-title">{{ $t('pages.organization.manage.eventWizard.gw.alertTitle') }}</div>
           <div class="gw-alert-desc">{{ $t('pages.organization.manage.eventWizard.gw.alertDesc') }}</div>
-          <router-link :to="`/org/${route.params.orgRoute}/manage/finances`" class="btn btn-sm round px-3 gw-connect-btn">
-            <font-awesome-icon :icon="['fas', 'plug']" class="me-2" />{{ $t('pages.organization.manage.eventWizard.gw.connectBtn') }}
-          </router-link>
+          <a :href="`/org/${route.params.orgRoute}/manage/finances`" target="_blank" rel="noopener" class="btn btn-sm round px-3 gw-connect-btn">
+            <font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" class="me-2" />{{ $t('pages.organization.manage.eventWizard.gw.connectBtn') }}
+          </a>
+          <div class="gw-alert-desc mt-2">{{ $t('pages.organization.manage.eventWizard.gw.newTabHint') }}</div>
         </div>
       </div>
     </div>

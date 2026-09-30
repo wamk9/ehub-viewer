@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AuthLayout from '@/layouts/AuthLayout.vue'
@@ -22,6 +22,14 @@ function isSafeRedirect(url) {
 }
 
 const form    = reactive({ mail: '', password: '', remember: true })
+
+// Sent here from an action (e.g. "register for this event"): the visitor may be new,
+// so sign-up is offered up front and keeps the way back.
+const redirectTo = computed(() => {
+  const r = route.query.redirect
+  return r && isSafeRedirect(r) ? String(r) : null
+})
+const registerTo = computed(() => (redirectTo.value ? { path: '/register', query: { redirect: redirectTo.value } } : '/register'))
 const loading = ref(false)
 
 onMounted(() => {
@@ -61,7 +69,19 @@ async function submit() {
 </script>
 
 <template>
-  <AuthLayout :title="$t('users.login.title')" :subtitle="$t('users.login.description')">
+  <AuthLayout :title="$t(redirectTo ? 'users.login.title_continue' : 'users.login.title')" :subtitle="$t(redirectTo ? 'users.login.description_continue' : 'users.login.description')">
+
+    <div v-if="redirectTo" class="card ehub-card mb-3 login-new">
+      <div class="card-body p-3 d-flex align-items-center gap-3 flex-wrap">
+        <div class="flex-grow-1">
+          <strong>{{ $t('users.login.new_here') }}</strong>
+          <div class="small text-muted">{{ $t('users.login.new_here_hint') }}</div>
+        </div>
+        <router-link :to="registerTo" class="btn btn-primary round px-3">
+          <font-awesome-icon :icon="['fas', 'user-plus']" class="me-2" />{{ $t('users.login.create_free') }}
+        </router-link>
+      </div>
+    </div>
 
     <div class="card ehub-card">
       <div class="card-body p-4">
@@ -135,7 +155,7 @@ async function submit() {
       <!-- Switch to register -->
       <p class="text-center text-muted small mt-3 mb-0">
         {{ $t('users.login.no_account') }}
-        <router-link to="/register" class="fw-semibold">{{ $t('users.login.register_link') }}</router-link>
+        <router-link :to="registerTo" class="fw-semibold">{{ $t('users.login.register_link') }}</router-link>
       </p>
 
       <!-- Terms -->
@@ -155,6 +175,8 @@ async function submit() {
 </template>
 
 <style scoped>
+.login-new { border-left: 4px solid var(--ehub-primary); }
+.login-new strong { font-size: .92rem; color: var(--ehub-ink); }
 .login-footer {
   min-height: 6.5rem;
 }

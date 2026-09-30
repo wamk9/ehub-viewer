@@ -64,6 +64,8 @@ export default {
       availableGateways: [],
       showGatewayModal: false,
       registerError: null,
+      cancelOpen: false,
+      cancelling: false,
       articles: [],
       articlesLoading: false,
       articlesLoaded: false,
@@ -170,6 +172,59 @@ export default {
     coverUrl() {
       return this.baseUrl + 'storage/org/' + this.orgRoute + '/events/' + this.eventRoute + '/cover.webp';
     },
+    // Registration window: deadline is a calendar day, open until its end.
+    deadlinePassed() {
+      const d = this.event?.registration_deadline;
+      if (!d) return false;
+      const end = new Date(String(d).slice(0, 10) + 'T23:59:59');
+      return Date.now() > end.getTime();
+    },
+    deadlineDaysLeft() {
+      const d = this.event?.registration_deadline;
+      if (!d || this.deadlinePassed) return null;
+      const end = new Date(String(d).slice(0, 10) + 'T23:59:59');
+      return Math.max(0, Math.floor((end.getTime() - Date.now()) / 86400000));
+    },
+    isFull() {
+      const max = this.event?.max_registrations;
+      return !!max && (this.event.registrations_count || 0) >= max;
+    },
+    spotsLeft() {
+      const max = this.event?.max_registrations;
+      return max ? Math.max(0, max - (this.event.registrations_count || 0)) : null;
+    },
+    regOpen() {
+      return !!this.event && !this.event.initialized && !this.event.finished && !this.deadlinePassed && !this.isFull;
+    },
+    // What a visitor needs to know first: can I still join?
+    statusKey() {
+      if (this.event?.finished) return 'finished';
+      if (this.event?.initialized) return 'in_progress';
+      if (this.regOpen) return 'reg_open';
+      return this.isFull ? 'full' : 'reg_closed';
+    },
+    runmodeLabel() {
+      const m = this.event?.runmode;
+      if (!m) return '';
+      const key = 'pages.organization.manage.eventWizard.mode.' + m;
+      return this.$te(key) ? this.$t(key) : m;
+    },
+    mapsUrl() {
+      const loc = String(this.event?.location || '').trim();
+      return loc ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(loc) : '';
+    },
+    canCancel() {
+      const r = this.event?.user_registration;
+      if (!r || this.event.initialized || this.event.finished) return false;
+      return !(r.payment_status === 'confirmed' && Number(this.event.fee) > 0);
+    },
+    streams() {
+      const out = [];
+      const norm = (u) => (/^https?:\/\//i.test(u) ? u : 'https://' + u);
+      if (this.event?.streaming_twitch) out.push({ key: 'twitch', icon: 'twitch', url: norm(this.event.streaming_twitch) });
+      if (this.event?.streaming_youtube) out.push({ key: 'youtube', icon: 'youtube', url: norm(this.event.streaming_youtube) });
+      return out;
+    },
     slotsPct() {
       if (!this.event?.max_registrations) return 0;
       return Math.min(100, Math.round((this.event.registrations_count || 0) / this.event.max_registrations * 100));
@@ -193,6 +248,12 @@ export default {
       this.event = result.data;
     }
     this.checkPaymentReturn();
+    // Back from sign-in/sign-up started by "register": continue right where the visitor left.
+    if (this.$route.query.join) {
+      const { join, ...rest } = this.$route.query;
+      this.$router.replace({ query: rest });
+      if (this.$store.getters.getToken && this.regOpen && !this.event?.user_registration) this.handleRegister();
+    }
     const tab = this.$route.query.tab;
     if (tab === 'participants') this.loadParticipants();
     else if (tab === 'news') this.loadArticles();
@@ -204,6 +265,36 @@ export default {
     formatDate(dateStr) {
       if (!dateStr) return '';
       return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    },
+    // Date plus time when the organizer set one (naive local strings, no midnight noise).
+    formatDateTime(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      const date = d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+      if (!d.getHours() && !d.getMinutes()) return date;
+      return date + ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    },
+    async shareEvent() {
+      const url = window.location.origin + this.$route.path;
+      try {
+        if (navigator.share) { await navigator.share({ title: this.event?.name, url }); return; }
+        await navigator.clipboard.writeText(url);
+        toast.success(this.$t('events.show.join.link_copied'));
+      } catch (e) { /* user closed the share sheet */ }
+    },
+    async doCancelRegistration() {
+      this.cancelling = true;
+      const res = await OrganizationEventRegistration.destroy(this.orgRoute, this.eventRoute);
+      this.cancelling = false;
+      this.cancelOpen = false;
+      if (res.code === 200) {
+        this.event.user_registration = null;
+        this.event.registrations_count = Math.max(0, (this.event.registrations_count || 1) - 1);
+        this.participantsLoaded = false;
+        toast.success(this.$t('events.show.join.cancelled'));
+      } else {
+        toast.error(this.$t('events.show.join.cancel_error'));
+      }
     },
     initials(name) {
       if (!name) return '?';
@@ -246,7 +337,8 @@ export default {
     },
     handleRegister() {
       if (!this.$store.getters.getToken) {
-        this.$router.push({ name: 'user-login', query: { redirect: this.$route.fullPath } });
+        const back = this.$router.resolve({ path: this.$route.path, query: { ...this.$route.query, join: '1' } }).fullPath;
+        this.$router.push({ name: 'user-login', query: { redirect: back } });
         return;
       }
       this.formData = initialValues(this.regTemplate);
@@ -268,10 +360,18 @@ export default {
         this.registerError = 'no_compatible_gateway';
         return;
       }
+      if (!result.registered) {
+        const known = ['event_full', 'registrations_closed', 'registration_deadline_passed', 'already_registered'];
+        toast.error(this.$t('events.show.join.err.' + (known.includes(result.message) ? result.message : 'generic')));
+        return;
+      }
       if (result.registered) {
         this.event.user_registration = result.data;
         this.event.registrations_count = (this.event.registrations_count || 0) + 1;
         this.participantsLoaded = false;
+        if (!result.data?.payment_url && !result.data?.available_gateways?.length) {
+          toast.success(this.$t('events.show.join.registered_toast', { event: this.event.name }));
+        }
         if (result.data?.payment_url) {
           window.location.href = result.data.payment_url;
         } else if (result.data?.available_gateways?.length) {
@@ -416,10 +516,13 @@ export default {
               <h1>{{ event.name }}</h1>
               <div class="ev-badges">
                 <span v-if="event.category" class="badge-pill cat">{{ $t(`categories.names.${event.category}`) }}</span>
-                <span v-if="event.runmode" class="badge-pill sub">{{ event.runmode }}</span>
-                <span class="badge-pill" :class="event.finished ? 'finished' : 'active'">
-                  <font-awesome-icon :icon="['fas', event.finished ? 'flag' : 'bolt']" />
-                  {{ event.finished ? $t('pages.organization.show.events.finished') : (event.initialized ? $t('events.show.in_progress') : $t('pages.organization.show.events.active')) }}
+                <span v-if="event.runmode" class="badge-pill sub">
+                  <font-awesome-icon :icon="['fas', event.runmode === 'irl' ? 'location-dot' : 'globe']" />
+                  {{ runmodeLabel }}
+                </span>
+                <span class="badge-pill" :class="statusKey === 'finished' ? 'finished' : (statusKey === 'reg_closed' || statusKey === 'full' ? 'closed' : 'active')">
+                  <font-awesome-icon :icon="['fas', { finished: 'flag', in_progress: 'bolt', reg_open: 'door-open', reg_closed: 'lock', full: 'lock' }[statusKey]]" />
+                  {{ $t('events.show.status.' + statusKey) }}
                 </span>
                 <span class="badge-pill" :class="event.fee == 0 ? 'free' : 'paid'">
                   <font-awesome-icon :icon="['fas', event.fee == 0 ? 'circle-check' : 'coins']" />
@@ -458,7 +561,7 @@ export default {
               </template>
 
               <!-- Can register -->
-              <template v-else-if="!event.initialized && !event.finished">
+              <template v-else-if="regOpen">
                 <button class="btn btn-primary round px-4" :disabled="registering" @click="handleRegister">
                   <span v-if="registering" class="spinner-border spinner-border-sm me-1"></span>
                   <font-awesome-icon v-else :icon="['fas', 'user-plus']" class="me-2" />
@@ -469,6 +572,9 @@ export default {
                   {{ $t('events.show.registration.no_compatible_gateway') }}
                 </p>
               </template>
+              <button type="button" class="btn btn-ghost round px-3" :title="$t('events.show.join.share')" @click="shareEvent">
+                <font-awesome-icon :icon="['fas', 'share-nodes']" class="me-1" />{{ $t('events.show.join.share') }}
+              </button>
             </div>
           </div>
 
@@ -479,8 +585,18 @@ export default {
           <div class="ev-metabar">
             <span v-if="effectiveStartAt" class="m">
               <font-awesome-icon :icon="['fas', 'calendar-days']" />
-              <span class="lbl">{{ $t('events.show.info.details') }}</span>
-              {{ formatDate(effectiveStartAt) }}
+              <span class="lbl">{{ $t(startAtIsPreview ? 'events.show.info.start_at_preview' : 'events.show.info.start_at') }}</span>
+              {{ formatDateTime(effectiveStartAt) }}
+            </span>
+            <a v-if="event.location" class="m m-link" :href="mapsUrl" target="_blank" rel="noopener noreferrer">
+              <font-awesome-icon :icon="['fas', 'location-dot']" />
+              <span class="lbl">{{ $t('events.show.info.location') }}</span>
+              {{ event.location }}
+            </a>
+            <span v-if="event.registration_deadline" class="m">
+              <font-awesome-icon :icon="['fas', 'hourglass-half']" />
+              <span class="lbl">{{ $t('events.show.info.deadline') }}</span>
+              {{ formatDate(String(event.registration_deadline).slice(0, 10) + 'T12:00:00') }}
             </span>
             <span v-if="event.stages?.length" class="m">
               <font-awesome-icon :icon="['fas', 'layer-group']" />
@@ -556,7 +672,81 @@ export default {
         </div>
 
         <!-- ═══ TAB: INFO ═══ -->
-        <section v-if="activeTab === 'info'" class="tab-pane active">
+        <section v-if="activeTab === 'info'" class="tab-pane active ev-info-grid">
+          <aside class="ev-join">
+            <div class="ev-join__price" :class="{ free: event.fee == 0 }">
+              <span class="k">{{ $t('events.show.join.entry') }}</span>
+              <span class="v">{{ fmtFee(event) }}</span>
+            </div>
+
+            <div v-if="event.max_registrations" class="ev-join__slots">
+              <div class="ev-join__slots-row">
+                <span>{{ $t('events.show.join.registered_n', { n: event.registrations_count || 0 }, event.registrations_count || 0) }}</span>
+                <strong v-if="regOpen">{{ $t('events.show.join.spots_left', { n: spotsLeft }, spotsLeft) }}</strong>
+              </div>
+              <div class="ev-join__bar"><span :style="{ width: slotsPct + '%' }"></span></div>
+            </div>
+
+            <ul class="ev-join__facts">
+              <li v-if="effectiveStartAt">
+                <font-awesome-icon :icon="['fas', 'calendar-days']" />
+                <div><span class="k">{{ $t(startAtIsPreview ? 'events.show.info.start_at_preview' : 'events.show.info.start_at') }}</span>{{ formatDateTime(effectiveStartAt) }}</div>
+              </li>
+              <li v-if="event.runmode">
+                <font-awesome-icon :icon="['fas', event.runmode === 'irl' ? 'location-dot' : 'globe']" />
+                <div>
+                  <span class="k">{{ $t('events.show.info.where') }}</span>
+                  <a v-if="event.location" :href="mapsUrl" target="_blank" rel="noopener noreferrer">{{ event.location }}</a>
+                  <template v-else>{{ runmodeLabel }}</template>
+                </div>
+              </li>
+              <li v-if="event.registration_deadline">
+                <font-awesome-icon :icon="['fas', 'hourglass-half']" />
+                <div>
+                  <span class="k">{{ $t('events.show.info.deadline') }}</span>
+                  {{ formatDate(String(event.registration_deadline).slice(0, 10) + 'T12:00:00') }}
+                  <em v-if="regOpen && deadlineDaysLeft !== null" class="ev-join__urgent">
+                    {{ deadlineDaysLeft === 0 ? $t('events.show.join.last_day') : $t('events.show.join.days_left', { n: deadlineDaysLeft }, deadlineDaysLeft) }}
+                  </em>
+                </div>
+              </li>
+              <li v-if="event.stages?.length">
+                <font-awesome-icon :icon="['fas', 'layer-group']" />
+                <div><span class="k">{{ $t('events.show.tabs.stages') }}</span>{{ $t('events.show.join.stages_n', { n: event.stages.length }, event.stages.length) }}</div>
+              </li>
+            </ul>
+
+            <!-- Registered -->
+            <template v-if="event.user_registration">
+              <div class="ev-join__state ok">
+                <font-awesome-icon :icon="['fas', event.user_registration.payment_status === 'pending' ? 'clock' : 'circle-check']" />
+                {{ event.user_registration.payment_status === 'pending' ? $t('events.show.registration.pending') : $t('events.show.join.you_are_in') }}
+              </div>
+              <button v-if="canCancel" type="button" class="btn btn-link btn-sm ev-join__cancel" @click="cancelOpen = true">
+                {{ $t('events.show.join.cancel') }}
+              </button>
+            </template>
+            <!-- Open -->
+            <template v-else-if="regOpen">
+              <button class="btn btn-primary round w-100 ev-join__cta" :disabled="registering" @click="handleRegister">
+                <span v-if="registering" class="spinner-border spinner-border-sm me-1"></span>
+                <font-awesome-icon v-else :icon="['fas', 'user-plus']" class="me-2" />
+                {{ $store.getters.getToken ? $t('events.show.join.cta') : $t('events.show.join.cta_guest') }}
+              </button>
+              <p class="ev-join__note">{{ event.fee == 0 ? $t('events.show.join.note_free') : $t('events.show.join.note_paid') }}</p>
+            </template>
+            <!-- Closed -->
+            <div v-else class="ev-join__state closed">
+              <font-awesome-icon :icon="['fas', 'lock']" />
+              {{ $t('events.show.join.closed.' + statusKey) }}
+            </div>
+
+            <button type="button" class="btn btn-ghost btn-sm round w-100 mt-2" @click="shareEvent">
+              <font-awesome-icon :icon="['fas', 'share-nodes']" class="me-1" />{{ $t('events.show.join.share_long') }}
+            </button>
+          </aside>
+
+          <div class="ev-info-main">
           <div v-if="event.description" class="ev-reg-card mb-4">
             <div class="ev-description" v-html="sanitizeHtml(event.description)"></div>
           </div>
@@ -574,9 +764,18 @@ export default {
             <h3 class="ev-sec-title">{{ $t('common.prizes.title') }}</h3>
             <EhubPrizeList :prizes="prizes" :total="prizeTotal" :currency="event.prize_pool_currency || event.currency || 'BRL'" />
           </div>
-          <div class="ev-empty" v-if="!event.description && !extraInfo.length && !prizeTotal && !prizes.length && !effectiveStartAt && !event.max_registrations">
+          <div v-if="streams.length" class="mb-4">
+            <h3 class="ev-sec-title">{{ $t('events.show.info.watch') }}</h3>
+            <div class="ev-streams">
+              <a v-for="s in streams" :key="s.key" :href="s.url" target="_blank" rel="noopener noreferrer" class="ev-stream" :class="s.key">
+                <font-awesome-icon :icon="['fab', s.icon]" />{{ s.url.replace(/^https?:\/\//, '') }}
+              </a>
+            </div>
+          </div>
+          <div class="ev-empty" v-if="!event.description && !extraInfo.length && !prizeTotal && !prizes.length && !streams.length">
             <font-awesome-icon :icon="['fas', 'circle-info']" />
-            <p class="mb-0 mt-2">—</p>
+            <p class="mb-0 mt-2">{{ $t('events.show.info.no_details') }}</p>
+          </div>
           </div>
         </section>
 
@@ -791,6 +990,15 @@ export default {
 
         <!-- ═══ TAB: REGULATION ═══ -->
         <section v-if="activeTab === 'regulation'" class="tab-pane active">
+          <div v-if="event.rules" class="ev-reg-card mb-4">
+            <h3 class="ev-sec-title">{{ $t('events.show.regulation_title') }}</h3>
+            <div class="ev-rules">{{ event.rules }}</div>
+          </div>
+          <div v-if="event.tech_requirements" class="ev-reg-card mb-4">
+            <h3 class="ev-sec-title">{{ $t('events.show.tech_requirements') }}</h3>
+            <div class="ev-rules">{{ event.tech_requirements }}</div>
+          </div>
+          <template v-if="!event.rules">
           <div v-if="!regulationCards.length" class="ev-empty">
             <font-awesome-icon :icon="['fas', 'clipboard-list']" />
             <p class="mb-0 mt-2">—</p>
@@ -801,6 +1009,7 @@ export default {
               <p>{{ card.b }}</p>
             </div>
           </div>
+          </template>
         </section>
 
       </div>
@@ -836,9 +1045,30 @@ export default {
       v-model="formData"
       :errors="formErrors"
       :loading="registering"
+      :rules-available="!!event?.rules"
       @close="showRegisterModal = false"
       @confirm="confirmRegister"
+      @open-rules="showRegisterModal = false; activeTab = 'regulation'; $router.replace({ query: { ...$route.query, tab: 'regulation' } })"
     />
+
+    <!-- ═══ CANCEL REGISTRATION ═══ -->
+    <div v-if="cancelOpen" class="modal-overlay" @click.self="cancelOpen = false">
+      <div class="modal-card">
+        <div class="modal-card__header">
+          <h5 class="mb-0">{{ $t('events.show.join.cancel_title') }}</h5>
+          <button class="btn-close btn-close-white" @click="cancelOpen = false"></button>
+        </div>
+        <div class="modal-card__body">
+          <p class="mb-0">{{ $t('events.show.join.cancel_text', { event: event?.name }) }}</p>
+        </div>
+        <div class="modal-card__footer">
+          <button class="btn btn-outline-secondary btn-sm" @click="cancelOpen = false">{{ $t('events.show.join.keep') }}</button>
+          <button class="btn btn-danger btn-sm" :disabled="cancelling" @click="doCancelRegistration">
+            <span v-if="cancelling" class="spinner-border spinner-border-sm me-1"></span>{{ $t('events.show.join.cancel_confirm') }}
+          </button>
+        </div>
+      </div>
+    </div>
 
   </div>
 </template>
@@ -876,6 +1106,46 @@ export default {
 .ev-metabar .m { display: inline-flex; align-items: center; gap: 8px; color: var(--ehub-ink); font-size: .9rem; font-weight: 600; }
 .ev-metabar .m svg { color: var(--org-accent, var(--ehub-primary)); width: 16px; }
 .ev-metabar .m .lbl { color: var(--ehub-muted); font-weight: 500; }
+.ev-metabar .m-link { text-decoration: none; }
+.ev-metabar .m-link:hover { color: var(--org-accent, var(--ehub-primary)); }
+.badge-pill.closed { background: color-mix(in srgb, #868e96 16%, transparent); color: var(--ehub-muted); }
+
+/* ── Info tab: content + sticky join card ── */
+.ev-info-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 22px; align-items: start; }
+.ev-info-grid .ev-join { order: 2; position: sticky; top: 84px; }
+.ev-info-main { min-width: 0; }
+.ev-join { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-top: 4px solid var(--org-accent, var(--ehub-primary)); border-radius: 14px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.08); }
+.ev-join__price { display: flex; flex-direction: column; margin-bottom: 12px; }
+.ev-join__price .k { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); }
+.ev-join__price .v { font-size: 1.7rem; font-weight: 800; color: var(--ehub-ink); letter-spacing: -.02em; }
+.ev-join__price.free .v { color: #1f8a5b; }
+.ev-join__slots { margin-bottom: 14px; }
+.ev-join__slots-row { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ehub-muted); margin-bottom: 6px; }
+.ev-join__slots-row strong { color: var(--org-accent, var(--ehub-primary)); }
+.ev-join__bar { height: 7px; border-radius: 4px; background: var(--ehub-line); overflow: hidden; }
+.ev-join__bar span { display: block; height: 100%; background: var(--org-accent, var(--ehub-primary)); }
+.ev-join__facts { list-style: none; padding: 0; margin: 0 0 16px; display: flex; flex-direction: column; gap: 11px; }
+.ev-join__facts li { display: flex; gap: 11px; font-size: .86rem; color: var(--ehub-ink); font-weight: 600; }
+.ev-join__facts li svg { color: var(--org-accent, var(--ehub-primary)); width: 16px; margin-top: 3px; flex-shrink: 0; }
+.ev-join__facts .k { display: block; font-size: .7rem; font-weight: 600; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .04em; }
+.ev-join__facts a { color: inherit; }
+.ev-join__urgent { display: inline-block; margin-left: 6px; font-style: normal; font-size: .72rem; font-weight: 700; color: #b07d00; background: color-mix(in srgb, #f0b400 18%, transparent); padding: 1px 8px; border-radius: 50rem; }
+.ev-join__cta { padding: 11px; font-weight: 700; font-size: .95rem; }
+.ev-join__note { font-size: .74rem; color: var(--ehub-muted); text-align: center; margin: 8px 0 0; }
+.ev-join__state { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: .9rem; padding: 11px; border-radius: 10px; }
+.ev-join__state.ok { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: #1f8a5b; }
+.ev-join__state.closed { background: color-mix(in srgb, #868e96 14%, transparent); color: var(--ehub-muted); }
+.ev-join__cancel { display: block; margin: 6px auto 0; color: var(--ehub-muted); font-size: .78rem; }
+.ev-join__cancel:hover { color: #e23b3b; }
+.ev-streams { display: flex; flex-wrap: wrap; gap: 10px; }
+.ev-stream { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--ehub-line); background: var(--ehub-card); color: var(--ehub-ink); font-size: .85rem; font-weight: 600; text-decoration: none; }
+.ev-stream.twitch svg { color: #9146ff; }
+.ev-stream.youtube svg { color: #ff0000; }
+.ev-rules { white-space: pre-wrap; font-size: .92rem; line-height: 1.65; color: var(--ehub-ink); }
+@media (max-width: 900px) {
+  .ev-info-grid { grid-template-columns: minmax(0, 1fr); }
+  .ev-info-grid .ev-join { order: 0; position: static; }
+}
 
 /* ── badge-pill ── */
 .badge-pill { font-size: .74rem; font-weight: 700; padding: 4px 11px; border-radius: 50rem; letter-spacing: .02em; display: inline-flex; align-items: center; gap: 5px; }

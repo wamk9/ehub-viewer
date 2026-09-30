@@ -20,5 +20,6 @@ export default {
   },
   password: {
     required: 'La contraseña es obligatoria.',
+    min: 'La contraseña debe tener al menos 8 caracteres.',
   },
 }

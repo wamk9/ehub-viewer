@@ -164,7 +164,7 @@ onMounted(() => fetchEvents(1))
       <!-- All available events -->
       <section class="all-events-section">
         <div v-if="eventsTotal" class="ae-header">
-          <span class="ae-count">{{ $t('pages.homepage.events.results', { n: eventsTotal }) }}</span>
+          <span class="ae-count">{{ $t('pages.homepage.events.results', { n: eventsTotal }, eventsTotal) }}</span>
         </div>
 
         <!-- Loading -->

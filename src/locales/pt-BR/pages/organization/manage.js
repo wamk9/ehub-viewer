@@ -135,6 +135,7 @@ export default {
     sub: "{n} registros",
     empty: "Nenhuma atividade ainda.",
     load_more: "Carregar mais",
+    org_created: "{actor} criou a organização {name}",
     member_added: "{actor} adicionou {target} como {role}",
     member_joined_invite: "{target} entrou como {role} por convite",
     invite_sent: "{actor} convidou {target} como {role}",

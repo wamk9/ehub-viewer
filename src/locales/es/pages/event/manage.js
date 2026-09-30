@@ -27,7 +27,7 @@ export default {
       stages: 'Etapas registradas', stages_missing: 'Ninguna etapa registrada',
       pending: '{n} pago(s) esperando confirmación',
       results: 'Resultados de {s} aún no publicados',
-      stream: 'Ningún canal de transmisión configurado',
+      stream: 'Consejo: agrega un enlace de transmisión (Twitch o YouTube) para que el público mire',
     },
     feed: {
       reg: '{a} se inscribió', pay: '{a} confirmó el pago',

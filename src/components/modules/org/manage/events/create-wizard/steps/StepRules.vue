@@ -1,7 +1,16 @@
 <script setup>
-defineProps({
+import { useI18n } from 'vue-i18n'
+
+const props = defineProps({
   form: { type: Object, required: true },
 })
+const { t } = useI18n()
+
+// Starting point for organizers who have never written a regulation.
+function useTemplate() {
+  const tpl = t('pages.organization.manage.eventWizard.s5.template')
+  props.form.rules = props.form.rules.trim() ? props.form.rules.trim() + '\n\n' + tpl : tpl
+}
 
 function addExtra(form) {
   form.default_extra_points.push({ name: '', value: 0 })
@@ -17,7 +26,13 @@ function removeExtra(form, i) {
     <p class="step-sub">{{ $t('pages.organization.manage.eventWizard.s5.sub') }}</p>
 
     <div class="form-section">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s5.generalRules') }} <span class="req-mark">*</span></label>
+      <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+        <label class="form-label mb-0">{{ $t('pages.organization.manage.eventWizard.s5.generalRules') }} <span class="req-mark">*</span></label>
+        <button type="button" class="btn btn-sm btn-outline-primary round px-3 ms-auto" @click="useTemplate">
+          <font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" class="me-1" />{{ $t('pages.organization.manage.eventWizard.s5.useTemplate') }}
+        </button>
+      </div>
+      <p class="field-hint mb-2">{{ $t('pages.organization.manage.eventWizard.s5.templateHint') }}</p>
       <textarea class="form-control" rows="7" maxlength="3000" style="resize:vertical" v-model="form.rules" :placeholder="$t('pages.organization.manage.eventWizard.s5.rulesPh')"></textarea>
       <div class="char-count">{{ form.rules.length }}/3000</div>
     </div>
@@ -43,12 +58,12 @@ function removeExtra(form, i) {
       </div>
       <div class="extra-pts-list">
         <div v-for="(ep, i) in form.default_extra_points" :key="i" class="extra-pts-row">
-          <input type="text" class="form-control form-control-sm" v-model="ep.name" placeholder="ex: Volta mais rápida" />
+          <input type="text" class="form-control form-control-sm" v-model="ep.name" :placeholder="$t('pages.organization.manage.eventWizard.s5.bonusPh')" />
           <input type="number" class="pts-input" v-model.number="ep.value" />
           <button type="button" class="stage-del" @click="removeExtra(form, i)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
         </div>
         <button type="button" class="btn btn-sm btn-outline-secondary round px-3 mt-2" @click="addExtra(form)">
-          <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />Bônus extra
+          <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />{{ $t('pages.organization.manage.eventWizard.s5.bonusAdd') }}
         </button>
       </div>
     </div>
@@ -59,7 +74,7 @@ function removeExtra(form, i) {
     </div>
 
     <div class="form-section">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s5.streaming') }}</label>
+      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s5.streaming') }} <span class="field-hint">({{ $t('pages.organization.manage.eventWizard.optional') }})</span></label>
       <div class="row g-2">
         <div class="col">
           <div class="input-group">

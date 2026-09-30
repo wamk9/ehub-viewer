@@ -146,6 +146,8 @@ export default {
 
       if (response.created) {
         toast.success(i18n.t(this.K + 'loading.created', { name: this.orgForm.name.trim() }));
+        // The manage route redirects and drops the query, so the welcome flag travels in the session.
+        try { sessionStorage.setItem('ehub_org_welcome', route); } catch (e) { /* storage unavailable */ }
         router.push({ path: `/org/${route}/manage`, query: { welcome: 1 } });
         return;
       }

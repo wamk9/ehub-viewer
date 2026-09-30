@@ -27,7 +27,7 @@ export default {
       stages: 'Etapas cadastradas', stages_missing: 'Nenhuma etapa cadastrada',
       pending: '{n} pagamento(s) aguardando confirmação',
       results: 'Resultados de {s} ainda não publicados',
-      stream: 'Nenhum canal de transmissão configurado',
+      stream: 'Dica: adicione um link de transmissão (Twitch ou YouTube) para o público assistir',
     },
     feed: {
       reg: '{a} se inscreveu', pay: '{a} confirmou o pagamento',

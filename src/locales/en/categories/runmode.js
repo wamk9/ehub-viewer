@@ -1,5 +1,5 @@
 export default {
   unselected: 'Where will your event take place?',
-  irl: 'IRL (In Real Life)',
+  irl: 'In person',
   online: 'Online'
 }

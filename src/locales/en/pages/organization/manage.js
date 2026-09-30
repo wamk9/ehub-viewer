@@ -135,6 +135,7 @@ export default {
     sub: "{n} entries",
     empty: "No activity yet.",
     load_more: "Load more",
+    org_created: "{actor} created the organization {name}",
     member_added: "{actor} added {target} as {role}",
     member_joined_invite: "{target} joined as {role} by invite",
     invite_sent: "{actor} invited {target} as {role}",

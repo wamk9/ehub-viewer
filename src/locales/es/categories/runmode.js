@@ -1,5 +1,5 @@
 export default {
   unselected: '¿Dónde aplicarás tu evento?',
-  irl: 'IRL (En la vida real)',
+  irl: 'Presencial',
   online: 'Online'
 }

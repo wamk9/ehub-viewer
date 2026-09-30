@@ -21,6 +21,11 @@
             <font-awesome-icon :icon="['fas', 'circle-check']" />
             <span>{{ $t('events.show.registration.modal.free_notice') }}</span>
           </div>
+          <p v-if="rulesAvailable && !preview" class="modal-card__rules">
+            <font-awesome-icon :icon="['fas', 'clipboard-list']" />
+            {{ $t('events.show.registration.modal.rules_hint') }}
+            <a href="#" @click.prevent="$emit('open-rules')">{{ $t('events.show.registration.modal.rules_link') }}</a>
+          </p>
           <EhubRegistrationFields v-if="fields.length" :fields="fields" :model-value="modelValue" :errors="errors" @update:model-value="$emit('update:modelValue', $event)" />
           <p v-else class="mb-0 small">{{ $t('events.show.registration.modal.confirm_text') }}</p>
           <div v-if="preview && previewOk" class="modal-card__ok">
@@ -52,6 +57,7 @@ export default {
   name: 'EhubRegistrationModal',
   components: { EhubRegistrationFields },
   props: {
+    rulesAvailable: { type: Boolean, default: false },
     eventName: { type: String, default: '' },
     // Teleported out of the page, so the event color is passed explicitly.
     accent: { type: String, default: '' },
@@ -64,11 +70,13 @@ export default {
     preview: { type: Boolean, default: false },
     previewOk: { type: Boolean, default: false },
   },
-  emits: ['close', 'confirm', 'update:modelValue'],
+  emits: ['close', 'confirm', 'update:modelValue', 'open-rules'],
 };
 </script>
 
 <style scoped>
+.modal-card__rules { font-size: .8rem; color: var(--ehub-muted); margin: 0 0 12px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 1050; padding: 1rem; }
 .modal-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 14px; width: 100%; max-width: 420px; max-height: calc(100vh - 2rem); display: flex; flex-direction: column; overflow: hidden; }
 .modal-card__header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--ehub-line); font-size: 1rem; font-weight: 600; color: var(--ehub-ink); }

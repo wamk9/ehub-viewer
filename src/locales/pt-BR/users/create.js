@@ -1,4 +1,5 @@
 export default {
+  coming_back: 'Grátis. Ao terminar, você volta direto para onde estava.',
   title: 'Saudações da equipe do eHub{name}!',
   description: 'Insira seus dados nos campos abaixo para podermos criar o seu cadastro na nossa plataforma',
   form: {
@@ -40,7 +41,7 @@ export default {
     'password-confirm': {
       label: 'Confirmação da senha de acesso',
       placeholder: 'Repita a senha que você gostaria de utilizar para acessar o eHub',
-      validation: { 'min-length': 'Insira ao menos {length} caractere neste campo | Insira ao menos {length} caracteres neste campo' }
+      validation: { mismatch: 'As senhas não são iguais. Digite a mesma senha nos dois campos.', 'min-length': 'Insira ao menos {length} caractere neste campo | Insira ao menos {length} caracteres neste campo' }
     },
     image: {
       button: 'Clique para enviar uma imagem de perfil',

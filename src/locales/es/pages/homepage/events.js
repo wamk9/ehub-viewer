@@ -45,5 +45,5 @@ export default {
     online: 'Online',
     irl: 'Presencial'
   },
-  results: '{n} eventos'
+  results: '{n} evento | {n} eventos'
 }

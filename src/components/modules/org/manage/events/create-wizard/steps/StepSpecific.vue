@@ -153,8 +153,12 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
       <div class="spinner-border text-primary" role="status"></div>
     </div>
 
-    <div v-else-if="!advancedForm.data?.[0]?.length" class="empty-hint">
-      {{ $t('pages.organization.manage.eventWizard.s3x.sub') }}
+    <div v-else-if="!advancedForm.data?.[0]?.length" class="empty-friendly">
+      <font-awesome-icon :icon="['fas', 'circle-check']" />
+      <div>
+        <strong>{{ $t('pages.organization.manage.eventWizard.s3x.noneTitle') }}</strong>
+        <p>{{ $t('pages.organization.manage.eventWizard.s3x.noneText') }}</p>
+      </div>
     </div>
 
     <template v-else>
@@ -223,5 +227,9 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
 .last-upd-bar { display: flex; align-items: center; gap: 8px; padding: 9px 14px; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 9px; margin-bottom: 22px; font-size: .82rem; color: var(--ehub-muted); }
 .last-upd-bar svg { color: var(--ehub-primary); }
 .field-label { font-size: .85rem; font-weight: 600; color: var(--ehub-ink); }
+.empty-friendly { display: flex; gap: 12px; align-items: flex-start; background: color-mix(in srgb, #1f8a5b 10%, transparent); border: 1px solid color-mix(in srgb, #1f8a5b 30%, transparent); border-radius: 12px; padding: 14px 16px; }
+.empty-friendly > svg { color: #1f8a5b; font-size: 1.1rem; margin-top: 2px; }
+.empty-friendly strong { display: block; font-size: .9rem; color: var(--ehub-ink); }
+.empty-friendly p { margin: 2px 0 0; font-size: .82rem; color: var(--ehub-muted); }
 .empty-hint { color: var(--ehub-muted); font-size: .88rem; padding: 20px 0; }
 </style>
