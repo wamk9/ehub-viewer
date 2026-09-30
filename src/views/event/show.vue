@@ -506,16 +506,6 @@ export default {
         </div>
         <div class="cover-fade"></div>
         <font-awesome-icon :icon="['fas', catIcon]" class="cover-ico" />
-        <div class="breadcrumb-bar">
-          <router-link v-if="event.can_manage" :to="{ name: 'manage-event', params: { orgRoute, eventRoute } }">
-            <font-awesome-icon :icon="['fas', 'sliders']" />
-            {{ $t('events.show.manage') }}
-          </router-link>
-          <router-link :to="`/org/${orgRoute}`">
-            <font-awesome-icon :icon="['fas', 'building-flag']" />
-            {{ event.organization?.name || orgRoute }}
-          </router-link>
-        </div>
       </header>
 
       <!-- ═══ HEAD ═══ -->
@@ -578,10 +568,6 @@ export default {
                     {{ paymentCheckMessage === 'confirmed' ? $t('events.show.registration.payment_now_confirmed') : $t('events.show.registration.payment_still_pending') }}
                   </span>
                 </div>
-                <span v-else class="badge-pill active">
-                  <font-awesome-icon :icon="['fas', 'check']" />
-                  {{ $t('events.show.registration.confirmed') }}
-                </span>
               </template>
 
               <!-- Can register -->
@@ -589,7 +575,7 @@ export default {
                 <button class="btn btn-primary round px-4" :disabled="registering" @click="handleRegister">
                   <span v-if="registering" class="spinner-border spinner-border-sm me-1"></span>
                   <font-awesome-icon v-else :icon="['fas', 'user-plus']" class="me-2" />
-                  {{ $t('events.show.registration.register') }}
+                  {{ $store.getters.getToken ? $t('events.show.join.cta') : $t('events.show.registration.register') }}
                 </button>
                 <p v-if="registerError === 'no_compatible_gateway'" class="text-warning small mb-0 mt-1" style="max-width:240px;text-align:right;font-size:.8rem">
                   <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />
@@ -761,11 +747,6 @@ export default {
             </template>
             <!-- Open -->
             <template v-else-if="regOpen">
-              <button class="btn btn-primary round w-100 ev-join__cta" :disabled="registering" @click="handleRegister">
-                <span v-if="registering" class="spinner-border spinner-border-sm me-1"></span>
-                <font-awesome-icon v-else :icon="['fas', 'user-plus']" class="me-2" />
-                {{ $store.getters.getToken ? $t('events.show.join.cta') : $t('events.show.join.cta_guest') }}
-              </button>
               <p class="ev-join__note">{{ event.fee == 0 ? $t('events.show.join.note_free') : $t('events.show.join.note_paid') }}</p>
               <p v-if="refundPolicyKey" class="ev-join__policy">
                 <font-awesome-icon :icon="['fas', refundPolicyKey === 'policy_full' ? 'rotate-left' : 'circle-info']" />
@@ -778,9 +759,6 @@ export default {
               {{ $t('events.show.join.closed.' + statusKey) }}
             </div>
 
-            <button type="button" class="btn btn-ghost btn-sm round w-100 mt-2" @click="shareEvent">
-              <font-awesome-icon :icon="['fas', 'share-nodes']" class="me-1" />{{ $t('events.show.join.share_long') }}
-            </button>
           </aside>
 
           <div class="ev-info-main">
@@ -1131,7 +1109,7 @@ export default {
 .ev-root { --org-accent-text: color-mix(in srgb, var(--org-accent, var(--ehub-primary)), #000 28%); }
 html[data-bs-theme="dark"] .ev-root { --org-accent-text: color-mix(in srgb, var(--org-accent, var(--ehub-primary)), #fff 12%); }
 
-.ev-join__policy { display: flex; gap: 6px; justify-content: center; align-items: center; font-size: .72rem; color: var(--ehub-muted); margin: 6px 0 0; text-align: center; }
+.ev-join__policy { display: flex; gap: 6px; align-items: center; font-size: .78rem; color: var(--ehub-muted); margin: 6px 0 0; }
 .ev-refund-note { display: flex; gap: 8px; align-items: flex-start; font-size: .84rem; background: color-mix(in srgb, #1f8a5b 10%, transparent); color: var(--ehub-ink); border-radius: 8px; padding: 9px 11px; }
 .ev-refund-note svg { color: var(--ehub-success-text); margin-top: 3px; }
 
@@ -1155,18 +1133,19 @@ html[data-bs-theme="dark"] .ev-root { --org-accent-text: color-mix(in srgb, var(
 .ev-logo { width: 110px; height: 110px; border-radius: 24px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 2.6rem; color: #fff; border: 4px solid var(--ehub-card); box-shadow: 0 8px 24px rgba(0,0,0,.24); overflow: hidden; position: relative; }
 .ev-logo-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 2; }
 .ev-logo-fallback { position: relative; z-index: 1; }
-.ev-titleblock { flex: 1; min-width: 260px; padding-bottom: 4px; }
+.ev-titleblock { flex: 1; min-width: 260px; padding-bottom: 0; }
 .ev-titleblock .org-link { display: inline-flex; align-items: center; gap: 7px; font-size: .85rem; font-weight: 600; color: var(--ehub-muted); margin-bottom: 6px; text-decoration: none; }
 .ev-titleblock .org-link:hover { color: var(--org-accent-text); }
 .ev-titleblock .org-link .dot { width: 18px; height: 18px; border-radius: 6px; display: inline-block; flex-shrink: 0; }
 .ev-titleblock h1 { font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 800; letter-spacing: -.02em; margin: 0 0 10px; color: var(--ehub-ink); }
 .ev-badges { display: flex; flex-wrap: wrap; gap: 7px; }
-.ev-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; padding-bottom: 6px; }
+.ev-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: flex-end; padding-bottom: 0; }
 .ev-desc { color: var(--ehub-muted); font-size: .98rem; line-height: 1.6; margin: 18px 0 0; max-width: 820px; }
-.ev-metabar { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: 18px; }
-.ev-metabar .m { display: inline-flex; align-items: center; gap: 8px; color: var(--ehub-ink); font-size: .9rem; font-weight: 600; }
+.ev-metabar { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px 24px; margin-top: 18px; }
+.ev-metabar .m { display: flex; align-items: center; gap: 8px; color: var(--ehub-ink); font-size: .9rem; font-weight: 600; min-width: 0; }
 .ev-metabar .m svg { color: var(--org-accent-text); width: 16px; }
-.ev-metabar .m .lbl { color: var(--ehub-muted); font-weight: 500; }
+.ev-metabar .m .lbl { color: var(--ehub-muted); font-weight: 500; white-space: nowrap; }
+.ev-metabar .m svg { flex-shrink: 0; }
 .ev-metabar .m-link { text-decoration: none; }
 .ev-metabar .m-link:hover { color: var(--org-accent-text); }
 .badge-pill.closed { background: color-mix(in srgb, #868e96 16%, transparent); color: var(--ehub-muted); }
@@ -1192,7 +1171,7 @@ html[data-bs-theme="dark"] .ev-root { --org-accent-text: color-mix(in srgb, var(
 .ev-join__facts a { color: inherit; }
 .ev-join__urgent { display: inline-block; margin-left: 6px; font-style: normal; font-size: .72rem; font-weight: 700; color: var(--ehub-warn-text); background: color-mix(in srgb, #f0b400 18%, transparent); padding: 1px 8px; border-radius: 50rem; }
 .ev-join__cta { padding: 11px; font-weight: 700; font-size: .95rem; }
-.ev-join__note { font-size: .74rem; color: var(--ehub-muted); text-align: center; margin: 8px 0 0; }
+.ev-join__note { font-size: .78rem; color: var(--ehub-muted); margin: 0; }
 .ev-join__state { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: .9rem; padding: 11px; border-radius: 10px; }
 .ev-join__state.ok { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: var(--ehub-success-text); }
 .ev-join__state.closed { background: color-mix(in srgb, #868e96 14%, transparent); color: var(--ehub-muted); }
@@ -1287,8 +1266,7 @@ table.ev-table tbody tr:last-child td { border-bottom: 0; }
 .news-read-more { font-size: .78rem; font-weight: 600; color: var(--org-accent-text); background: none; border: 0; cursor: pointer; padding: 0; display: inline-flex; align-items: center; gap: 5px; }
 
 /* ── Highlight row ── */
-.highlight-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 22px; }
-@media (max-width: 720px) { .highlight-row { grid-template-columns: 1fr; } }
+.highlight-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 22px; }
 .hl-card { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-radius: var(--ehub-radius-card); border: 1px solid var(--ehub-line); background: var(--ehub-card); }
 .hl-card.leader { background: color-mix(in srgb, var(--ehub-gold, #f59e0b) 9%, var(--ehub-card)); border-color: color-mix(in srgb, var(--ehub-gold, #f59e0b) 35%, var(--ehub-line)); }
 .hl-ico { width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
