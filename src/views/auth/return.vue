@@ -11,6 +11,14 @@ const router = useRouter()
 const loading = ref(false)
 
 function getLastRoute() {
+  // Set by the login page before going to the provider (same-origin paths only).
+  try {
+    const saved = localStorage.getItem('ehub_post_login_redirect')
+    if (saved) {
+      localStorage.removeItem('ehub_post_login_redirect')
+      if (new URL(saved, window.location.origin).origin === window.location.origin) return saved
+    }
+  } catch { /* storage unavailable or bad value */ }
   const raw = localStorage.getItem('lastKnowRoute')
   return raw ? JSON.parse(raw) : { name: 'events' }
 }

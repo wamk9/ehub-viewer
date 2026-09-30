@@ -41,6 +41,11 @@ onMounted(() => {
 })
 
 function oauthLogin(provider) {
+  // The provider round-trip loses the query: keep where to go back (e.g. event + ?join=1).
+  try {
+    if (redirectTo.value) localStorage.setItem('ehub_post_login_redirect', redirectTo.value)
+    else localStorage.removeItem('ehub_post_login_redirect')
+  } catch { /* storage unavailable */ }
   window.location.href = SystemVars.baseUrl + 'auth/social/' + provider
 }
 
