@@ -61,7 +61,7 @@ export default {
 .erf-field:last-child { margin-bottom: 0; }
 .erf-label { display: flex; align-items: center; gap: 6px; font-size: .8rem; font-weight: 600; color: var(--ehub-ink); margin-bottom: .3rem; }
 .erf-ico { color: var(--org-accent, var(--ehub-primary)); font-size: .78rem; }
-.erf-req { color: #e23b3b; margin-left: 3px; }
+.erf-req { color: var(--ehub-danger-text); margin-left: 3px; }
 .erf-input { background: var(--ehub-field-bg); border-color: var(--ehub-line); color: var(--ehub-ink); border-radius: 7px; }
 .erf-input:focus { background: var(--ehub-field-bg); border-color: var(--org-accent, var(--ehub-primary)); box-shadow: none; color: var(--ehub-ink); }
 .erf-color { width: 64px; height: 34px; padding: 3px; }
@@ -72,5 +72,5 @@ export default {
 .erf-swatch { width: 28px; height: 28px; border-radius: 8px; border: 2px solid var(--ehub-line); cursor: pointer; padding: 0; }
 .erf-swatch.sel { border-color: var(--ehub-ink); box-shadow: 0 0 0 2px var(--ehub-card) inset; }
 .erf-help { font-size: .72rem; color: var(--ehub-muted); margin-top: 3px; }
-.erf-err { font-size: .72rem; color: #e23b3b; margin-top: 3px; }
+.erf-err { font-size: .72rem; color: var(--ehub-danger-text); margin-top: 3px; }
 </style>

@@ -110,7 +110,7 @@ watch(() => props.form.runmode, (val) => {
             <div class="cat-sel-name">{{ catName(form.category) }}</div>
             <div class="cat-sel-hint">{{ $t('pages.organization.manage.eventWizard.s2.catSelected') }}</div>
           </div>
-          <font-awesome-icon :icon="['fas', 'circle-check']" style="color:var(--ehub-primary);font-size:1.1rem" />
+          <font-awesome-icon :icon="['fas', 'circle-check']" style="color:var(--ehub-primary-text);font-size:1.1rem" />
           <button type="button" class="cat-change-btn" @click="resetCategory">{{ $t('pages.organization.manage.eventWizard.s2.catChange') }}</button>
         </div>
 
@@ -182,7 +182,7 @@ watch(() => props.form.runmode, (val) => {
 .step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 28px; }
 .form-section { margin-bottom: 26px; }
 .form-label { font-size: .85rem; font-weight: 600; color: var(--ehub-ink); }
-.form-section-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ehub-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.form-section-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ehub-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
 .form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--ehub-line); }
 .field-hint { font-size: .78rem; color: var(--ehub-muted); }
 
@@ -203,19 +203,19 @@ watch(() => props.form.runmode, (val) => {
 .cat-sel-txt { flex: 1; min-width: 0; }
 .cat-sel-name { font-size: .92rem; font-weight: 700; color: var(--ehub-ink); }
 .cat-sel-hint { font-size: .73rem; color: var(--ehub-muted); }
-.cat-change-btn { font-size: .78rem; font-weight: 600; cursor: pointer; color: var(--ehub-primary); background: none; border: 1px solid var(--ehub-primary-border); border-radius: 8px; padding: 4px 12px; white-space: nowrap; }
+.cat-change-btn { font-size: .78rem; font-weight: 600; cursor: pointer; color: var(--ehub-primary-text); background: none; border: 1px solid var(--ehub-primary-border); border-radius: 8px; padding: 4px 12px; white-space: nowrap; }
 .cat-change-btn:hover { background: var(--ehub-primary-tint); }
 
 .subcat-grid { display: flex; flex-wrap: wrap; gap: 7px; }
 .subcat-card { border: 2px solid var(--ehub-line); border-radius: 50rem; padding: 7px 16px; cursor: pointer; font-size: .82rem; font-weight: 600; color: var(--ehub-ink); background: var(--ehub-card); transition: all .15s; white-space: nowrap; }
-.subcat-card:hover, .subcat-card.sel { border-color: var(--ehub-primary); background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.subcat-card:hover, .subcat-card.sel { border-color: var(--ehub-primary); background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 
 .mode-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
 .mode-card { border: 2px solid var(--ehub-line); border-radius: 12px; padding: 16px; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all .15s; background: var(--ehub-card); }
 .mode-card:hover { border-color: var(--ehub-primary); }
 .mode-card.sel { border-color: var(--ehub-primary); background: var(--ehub-primary-tint); }
 .mode-card .mi { font-size: 1.4rem; color: var(--ehub-muted); }
-.mode-card.sel .mi { color: var(--ehub-primary); }
+.mode-card.sel .mi { color: var(--ehub-primary-text); }
 .mode-card .mn { font-size: .88rem; font-weight: 700; color: var(--ehub-ink); }
 .mode-card .ms { font-size: .76rem; color: var(--ehub-muted); }
 
@@ -224,7 +224,7 @@ watch(() => props.form.runmode, (val) => {
 .fmt-card:hover { border-color: var(--ehub-primary); }
 .fmt-card.sel { border-color: var(--ehub-primary); background: var(--ehub-primary-tint); }
 .fmt-card .fi { font-size: 1.1rem; color: var(--ehub-muted); margin-bottom: 7px; }
-.fmt-card.sel .fi { color: var(--ehub-primary); }
+.fmt-card.sel .fi { color: var(--ehub-primary-text); }
 .fmt-card .fn { font-size: .88rem; font-weight: 700; color: var(--ehub-ink); margin-bottom: 2px; }
 .fmt-card .fd { font-size: .76rem; color: var(--ehub-muted); line-height: 1.4; }
 

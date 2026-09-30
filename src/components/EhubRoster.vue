@@ -80,10 +80,10 @@ const groups = computed(() => {
 .er-role-group-label { font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 11px; border-radius: 50rem; background: var(--ehub-field-bg); color: var(--ehub-muted); }
 .er-role-group-label.owner   { background: color-mix(in srgb, var(--ehub-gold) 20%, transparent); color: color-mix(in srgb, var(--ehub-gold), #000 28%); }
 .er-role-group-label.captain { background: color-mix(in srgb, var(--ehub-gold) 20%, transparent); color: color-mix(in srgb, var(--ehub-gold), #000 28%); }
-.er-role-group-label.admin   { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
-.er-role-group-label.vice    { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.er-role-group-label.admin   { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
+.er-role-group-label.vice    { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 .er-role-group-label.coach   { background: color-mix(in srgb, #7C3AED 14%, transparent); color: #7C3AED; }
-.er-role-group-label.starter { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: #1f8a5b; }
+.er-role-group-label.starter { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: var(--ehub-success-text); }
 html[data-bs-theme="dark"] .er-role-group-label.owner   { color: var(--ehub-gold); }
 html[data-bs-theme="dark"] .er-role-group-label.captain { color: var(--ehub-gold); }
 html[data-bs-theme="dark"] .er-role-group-label.coach   { color: #c89bff; background: color-mix(in srgb, #b06bff 18%, transparent); }

@@ -770,7 +770,7 @@ watch(() => props.event, (newEvent) => {
 
 /* ── Form sections ── */
 .gen-section        { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1.25rem 1.4rem; }
-.gen-section__label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 1rem; }
+.gen-section__label { font-size: .72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 1rem; }
 
 /* ── Dark inputs ── */
 .form-control-dark {
@@ -808,7 +808,7 @@ watch(() => props.event, (newEvent) => {
 .extra-point-row { display: flex; align-items: center; }
 
 /* ── Form hints ── */
-.form-hint { font-size: 0.7rem; color: rgba(255,255,255,0.3); margin-top: 0.3rem; margin-bottom: 0; }
+.form-hint { font-size: .72rem; color: rgba(255,255,255,0.3); margin-top: 0.3rem; margin-bottom: 0; }
 
 /* ── Cover upload ── */
 .cover-upload { position: relative; width: 100%; aspect-ratio: 16/9; border: 2px dashed rgba(255,255,255,0.15); border-radius: 8px; overflow: hidden; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.15s; max-height: 140px; }
@@ -818,7 +818,7 @@ watch(() => props.event, (newEvent) => {
 
 /* ── Manage table ── */
 .manage-table { width: 100%; border-collapse: collapse; }
-.manage-table th { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.35); padding: 0.4rem 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.manage-table th { font-size: .72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.35); padding: 0.4rem 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
 .manage-table td { padding: 0.45rem 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
 .manage-table tr:last-child td { border-bottom: none; }
 .manage-table .pos-input   { width: 64px; text-align: center; }

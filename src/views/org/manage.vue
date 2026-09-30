@@ -899,7 +899,7 @@ export default {
           <!-- Recent events -->
           <div class="cc">
             <div class="cc-hd">
-              <h3><font-awesome-icon :icon="['fas', 'calendar-days']" class="me-2" style="color:var(--ehub-primary)" />{{ $t('pages.organization.manage.overview.recent') }}</h3>
+              <h3><font-awesome-icon :icon="['fas', 'calendar-days']" class="me-2" style="color:var(--ehub-primary-text)" />{{ $t('pages.organization.manage.overview.recent') }}</h3>
               <button class="cc-link" @click="switchPanel('events')">{{ $t('pages.organization.manage.overview.see_all') }}</button>
             </div>
             <div v-if="!events.length && !eventsLoading" class="cc-empty">
@@ -1258,7 +1258,7 @@ export default {
             <!-- Usage chart + latest invoices, one per month -->
             <div class="cc fin-main">
               <div class="cc-hd">
-                <h3><font-awesome-icon :icon="['fas', 'chart-bar']" style="color:var(--ehub-primary)" />{{ $t(F + 'usage_title') }}</h3>
+                <h3><font-awesome-icon :icon="['fas', 'chart-bar']" style="color:var(--ehub-primary-text)" />{{ $t(F + 'usage_title') }}</h3>
               </div>
               <div v-if="finBilling?.usage_history?.length" class="cc-bd fin-chart">
                 <EhubUsageChart :months="finBilling.usage_history" />
@@ -1308,7 +1308,7 @@ export default {
               <!-- Fiscal data (NFS-e) — required before the card -->
               <div class="cc" :class="{ 'fin-warn': !finBilling?.fiscal_complete }">
                 <div class="cc-hd">
-                  <h3><font-awesome-icon :icon="['fas', 'file-invoice']" style="color:var(--ehub-primary)" />{{ $t(F + 'fiscal.card_title') }}</h3>
+                  <h3><font-awesome-icon :icon="['fas', 'file-invoice']" style="color:var(--ehub-primary-text)" />{{ $t(F + 'fiscal.card_title') }}</h3>
                   <button type="button" class="btn btn-sm round px-3" :class="finBilling?.fiscal_complete ? 'btn-outline-secondary' : 'btn-primary'" @click="finFiscalOpen = true">
                     {{ finBilling?.fiscal_complete ? $t(F + 'fiscal.edit') : $t(F + 'fiscal.fill') }}
                   </button>
@@ -1327,7 +1327,7 @@ export default {
               <!-- Payment method -->
               <div class="cc">
                 <div class="cc-hd">
-                  <h3><font-awesome-icon :icon="['fas', 'credit-card']" style="color:var(--ehub-primary)" />{{ $t(F + 'pm_title') }}</h3>
+                  <h3><font-awesome-icon :icon="['fas', 'credit-card']" style="color:var(--ehub-primary-text)" />{{ $t(F + 'pm_title') }}</h3>
                 </div>
                 <div class="cc-bd">
                   <div v-if="finBilling?.has_card" class="fin-cardviz" :style="{ background: orgGrad }">
@@ -1354,7 +1354,7 @@ export default {
               <!-- How billing works -->
               <div class="cc">
                 <div class="cc-hd">
-                  <h3><font-awesome-icon :icon="['fas', 'circle-info']" style="color:var(--ehub-primary)" />{{ $t(F + 'how_title') }}</h3>
+                  <h3><font-awesome-icon :icon="['fas', 'circle-info']" style="color:var(--ehub-primary-text)" />{{ $t(F + 'how_title') }}</h3>
                 </div>
                 <ol class="fin-how">
                   <li><span class="d">5</span><span>{{ $t(F + 'how_1') }}</span></li>
@@ -1369,7 +1369,7 @@ export default {
         <!-- Gateways for paid event registrations -->
         <div class="cc" style="margin-top:16px">
           <div class="cc-hd">
-            <h3><font-awesome-icon :icon="['fas', 'plug']" style="color:var(--ehub-primary)" />{{ $t(F + 'gw_title') }}</h3>
+            <h3><font-awesome-icon :icon="['fas', 'plug']" style="color:var(--ehub-primary-text)" />{{ $t(F + 'gw_title') }}</h3>
           </div>
           <p class="fin-gw-desc">{{ $t(F + 'gw_desc') }}</p>
           <div v-if="finGatewaysLoading" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>
@@ -1388,7 +1388,7 @@ export default {
                 <span v-if="finDisconnecting === gw.key" class="spinner-border spinner-border-sm me-1"></span>{{ $t(F + 'gw_disconnect') }}
               </button>
             </div>
-            <div v-if="finGateways.length === 0" class="hint" style="padding:12px 17px;color:#b07d00">
+            <div v-if="finGateways.length === 0" class="hint" style="padding:12px 17px;color:var(--ehub-warn-text)">
               <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />
               <span>{{ $t(F + 'gw_warning') }}</span>
             </div>
@@ -1668,7 +1668,7 @@ export default {
           <h3>{{ $t('pages.organization.manage.settings.danger') }}</h3>
           <p class="set-desc">{{ $t('pages.organization.manage.settings.danger_desc') }}</p>
           <div style="background:color-mix(in srgb,#e23b3b 8%,transparent);border:1px solid color-mix(in srgb,#e23b3b 25%,var(--ehub-line));border-radius:10px;padding:14px 16px;max-width:400px">
-            <div style="font-size:.88rem;font-weight:700;color:#e23b3b;margin-bottom:3px">{{ $t('pages.organization.manage.settings.delete_title') }}</div>
+            <div style="font-size:.88rem;font-weight:700;color:var(--ehub-danger-text);margin-bottom:3px">{{ $t('pages.organization.manage.settings.delete_title') }}</div>
             <div style="font-size:.8rem;color:var(--ehub-muted);margin-bottom:10px">{{ $t('pages.organization.manage.settings.delete_desc') }}</div>
             <button class="btn btn-sm btn-danger round px-3" @click="deleteOrg">{{ $t('pages.organization.manage.settings.delete_btn') }}</button>
           </div>
@@ -1686,39 +1686,39 @@ export default {
 .onb-hd > div { flex: 1; }
 .onb-hd h3 { font-size: 1rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 2px; }
 .onb-hd p { font-size: .8rem; color: var(--ehub-muted); margin: 0; }
-.onb-close { border: 0; background: transparent; color: var(--ehub-muted); padding: 4px 6px; border-radius: 6px; }
+.onb-close { border: 0; background: transparent; color: var(--ehub-muted); width: 40px; height: 40px; margin: -8px -8px 0 0; border-radius: 8px; }
 .onb-close:hover { background: var(--ehub-primary-tint); color: var(--ehub-ink); }
 .onb-bar { height: 6px; border-radius: 3px; background: var(--ehub-line); margin: 12px 0 14px; overflow: hidden; }
-.onb-bar span { display: block; height: 100%; background: var(--ehub-primary); transition: width .3s; }
+.onb-bar span { display: block; height: 100%; background: var(--ehub-primary-strong); transition: width .3s; }
 .onb-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .onb-step { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg, transparent); border-radius: 10px; padding: 12px; cursor: pointer; transition: border-color .15s, transform .15s; }
 .onb-step:hover { border-color: var(--ehub-primary); transform: translateY(-1px); }
-.onb-ico { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--ehub-primary-tint); color: var(--ehub-primary); font-size: .8rem; }
-.onb-step.done .onb-ico { background: rgba(31, 138, 91, .14); color: #1f8a5b; }
+.onb-ico { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--ehub-primary-tint); color: var(--ehub-primary-text); font-size: .8rem; }
+.onb-step.done .onb-ico { background: rgba(31, 138, 91, .14); color: var(--ehub-success-text); }
 .onb-txt strong { display: block; font-size: .82rem; color: var(--ehub-ink); }
 .onb-txt small { display: block; font-size: .73rem; color: var(--ehub-muted); line-height: 1.4; margin-top: 2px; }
 .onb-step.done .onb-txt strong { text-decoration: line-through; color: var(--ehub-muted); }
-.onb-go { margin-top: auto; font-size: .74rem; font-weight: 700; color: var(--ehub-primary); }
-.onb-step.done .onb-go { color: #1f8a5b; }
+.onb-go { margin-top: auto; font-size: .74rem; font-weight: 700; color: var(--ehub-primary-text); }
+.onb-step.done .onb-go { color: var(--ehub-success-text); }
 @media (max-width: 900px) { .onb-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .onb-grid { grid-template-columns: minmax(0, 1fr); } }
 
-.cc-link { font-size: .78rem; font-weight: 600; color: var(--ehub-primary); cursor: pointer; background: none; border: 0; padding: 0; }
+.cc-link { font-size: .78rem; font-weight: 600; color: var(--ehub-primary-text); cursor: pointer; background: none; border: 0; padding: 8px 4px; margin: -8px -4px; }
 .cc-link:hover { text-decoration: underline; }
 .td-name { font-weight: 600; }
 .set-desc { margin-bottom: 18px; }
 .set-label { font-size: .82rem; font-weight: 600; color: var(--ehub-ink); margin-bottom: 5px; }
 
 /* ── Status badges ── */
-.s-badge.active   { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: #1f8a5b; }
+.s-badge.active   { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: var(--ehub-success-text); }
 .s-badge.finished { background: var(--ehub-field-bg); color: var(--ehub-muted); }
-.s-badge.upcoming { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.s-badge.upcoming { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 .s-badge.draft    { background: color-mix(in srgb, #f08c00 16%, transparent); color: #f08c00; }
 
 .role-seg { display: flex; gap: 4px; flex-wrap: wrap; }
 .role-seg button { background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); color: var(--ehub-muted); font-size: .78rem; font-weight: 600; padding: 5px 13px; border-radius: 50rem; cursor: pointer; transition: all .14s; }
 .role-seg button:hover { border-color: var(--ehub-primary); color: var(--ehub-ink); }
-.role-seg button.active { background: var(--ehub-primary); border-color: var(--ehub-primary); color: #fff; }
+.role-seg button.active { background: var(--ehub-primary-strong); border-color: var(--ehub-primary); color: #fff; }
 
 /* ── Event mini / member row ── */
 .ev-mini { display: flex; align-items: center; gap: 11px; padding: 11px 17px; border-bottom: 1px solid var(--ehub-line); cursor: pointer; transition: background .12s; }
@@ -1731,9 +1731,9 @@ export default {
 
 /* ── Member avatar ── */
 .m-av-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.role-chip { font-size: .7rem; font-weight: 600; padding: 3px 9px; border-radius: 50rem; display: inline-block; white-space: nowrap; }
-.role-chip.owner   { background: color-mix(in srgb, var(--ehub-gold) 20%, transparent); color: color-mix(in srgb, var(--ehub-gold), #000 28%); }
-.role-chip.admin   { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.role-chip { font-size: .75rem; font-weight: 600; padding: 3px 9px; border-radius: 50rem; display: inline-block; white-space: nowrap; }
+.role-chip.owner   { background: color-mix(in srgb, var(--ehub-gold) 20%, transparent); color: var(--ehub-warn-text); }
+.role-chip.admin   { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 .role-chip.manager { background: color-mix(in srgb, #7C3AED 14%, transparent); color: #7C3AED; }
 .role-chip.staff   { background: var(--ehub-field-bg); color: var(--ehub-muted); }
 .role-chip.marketing { background: color-mix(in srgb, #d6336c 14%, transparent); color: #d6336c; }
@@ -1750,25 +1750,25 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .fin-kpi .l { font-size: .72rem; color: var(--ehub-muted); font-weight: 500; }
 .fin-kpi .v { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin: 2px 0; }
 .fin-kpi .s { font-size: .74rem; color: var(--ehub-muted); }
-.fin-kpi .s.bad { color: #e23b3b; }
-.fin-kpi.hl { background: var(--ehub-primary); border-color: var(--ehub-primary); }
+.fin-kpi .s.bad { color: var(--ehub-danger-text); }
+.fin-kpi.hl { background: var(--ehub-primary-strong); border-color: var(--ehub-primary); }
 .fin-kpi.hl .l, .fin-kpi.hl .v, .fin-kpi.hl .s { color: #fff; }
 .fin-kpi.hl .l, .fin-kpi.hl .s { opacity: .85; }
 .fin-kpi.alert { border-color: color-mix(in srgb, #e23b3b 45%, transparent); background: color-mix(in srgb, #e23b3b 6%, var(--ehub-card)); }
-.fin-kpi.alert .v { color: #e23b3b; }
+.fin-kpi.alert .v { color: var(--ehub-danger-text); }
 .fin-cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
 .fin-main { height: 100%; }
 .fin-chart { border-bottom: 1px solid var(--ehub-line); }
 .fin-last { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 18px; margin: 0; padding: 4px 17px 6px; }
 .fin-last > div { min-width: 0; }
-.fin-last dt { font-size: .7rem; font-weight: 600; color: var(--ehub-muted); margin-bottom: 2px; }
+.fin-last dt { font-size: .72rem; font-weight: 600; color: var(--ehub-muted); margin-bottom: 2px; }
 .fin-last dd { margin: 0; font-size: .88rem; font-weight: 600; color: var(--ehub-ink); }
 .fin-last dd.num { font-variant-numeric: tabular-nums; }
-.fin-last dd.ok { color: #1f8a5b; }
-.fin-last dd.bad { color: #e23b3b; }
+.fin-last dd.ok { color: var(--ehub-success-text); }
+.fin-last dd.bad { color: var(--ehub-danger-text); }
 .fin-last-actions { display: flex; gap: 8px; flex-wrap: wrap; padding: 10px 17px 14px; }
 .fin-older { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 10px 17px 14px; border-top: 1px solid var(--ehub-line); margin-top: auto; }
-.fin-older .lbl { font-size: .7rem; font-weight: 700; color: var(--ehub-muted); margin-right: 4px; }
+.fin-older .lbl { font-size: .72rem; font-weight: 700; color: var(--ehub-muted); margin-right: 4px; }
 .fin-older-chip { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 600; color: var(--ehub-ink); background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 50rem; padding: 3px 10px; cursor: pointer; text-transform: capitalize; }
 .fin-older-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--ehub-muted); }
 .fin-older-chip.st-paid i { background: #1f8a5b; }
@@ -1776,15 +1776,15 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .fin-older-chip:hover { border-color: var(--ehub-primary); }
 .fin-docs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 14px; }
 .fin-doc { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid var(--ehub-line); border-radius: 10px; font-size: .8rem; font-weight: 600; color: var(--ehub-ink); text-decoration: none; background: var(--ehub-field-bg); }
-.fin-doc svg { color: var(--ehub-primary); }
-.fin-doc:hover { border-color: var(--ehub-primary); color: var(--ehub-primary); }
+.fin-doc svg { color: var(--ehub-primary-text); }
+.fin-doc:hover { border-color: var(--ehub-primary); color: var(--ehub-primary-text); }
 .fin-doc.muted { color: var(--ehub-muted); font-weight: 500; cursor: default; }
 .fin-doc.muted:hover { border-color: var(--ehub-line); color: var(--ehub-muted); }
 .fin-fiscal { display: flex; flex-direction: column; gap: 2px; font-size: .8rem; color: var(--ehub-muted); }
 .fin-fiscal strong { font-size: .88rem; color: var(--ehub-ink); }
 .fin-warn { border-color: color-mix(in srgb, var(--ehub-gold, #d4a20f) 55%, transparent); }
 .fin-warn .fin-fiscal p { color: color-mix(in srgb, var(--ehub-gold, #d4a20f), #000 30%); }
-.fin-sub-hd { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 12px 17px 6px; }
+.fin-sub-hd { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 12px 17px 6px; }
 .fin-side { display: flex; flex-direction: column; gap: 16px; }
 .fin-side .cc + .cc { margin-top: 0; }
 .fin-cardviz { position: relative; border-radius: 14px; padding: 16px 18px; color: #fff; min-height: 116px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 8px 22px rgba(0,0,0,.18); }
@@ -1796,8 +1796,8 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 .fin-pm-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
 .fin-how { list-style: none; margin: 0; padding: 12px 17px 16px; display: flex; flex-direction: column; gap: 10px; }
 .fin-how li { display: flex; gap: 12px; align-items: flex-start; font-size: .8rem; color: var(--ehub-ink); line-height: 1.4; }
-.fin-how .d { flex-shrink: 0; min-width: 44px; text-align: center; font-size: .72rem; font-weight: 800; padding: 3px 6px; border-radius: 8px; background: var(--ehub-primary-tint); color: var(--ehub-primary); }
-.fin-how .d.bad { background: color-mix(in srgb, #e23b3b 12%, transparent); color: #e23b3b; }
+.fin-how .d { flex-shrink: 0; min-width: 44px; text-align: center; font-size: .72rem; font-weight: 800; padding: 3px 6px; border-radius: 8px; background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
+.fin-how .d.bad { background: color-mix(in srgb, #e23b3b 12%, transparent); color: var(--ehub-danger-text); }
 .fin-gw-desc { font-size: .8rem; color: var(--ehub-muted); margin: 0; padding: 12px 17px 4px; }
 .fin-gw-row { display: flex; align-items: center; gap: 12px; padding: 12px 17px; border-top: 1px solid var(--ehub-line); flex-wrap: wrap; }
 .fin-gw-row:first-of-type { border-top: 0; }
@@ -1807,15 +1807,15 @@ html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 @media (max-width: 700px) { .fin-kpis { grid-template-columns: minmax(0, 1fr); } }
 .fin-inv-row.static { cursor: default; }
 .fin-block { display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; margin-bottom: 16px; border-radius: 13px; border: 1px solid color-mix(in srgb, #e23b3b 35%, transparent); background: color-mix(in srgb, #e23b3b 8%, transparent); }
-.fin-block-ico { color: #e23b3b; font-size: 1.1rem; margin-top: 3px; }
+.fin-block-ico { color: var(--ehub-danger-text); font-size: 1.1rem; margin-top: 3px; }
 .fin-block strong { display: block; font-size: .92rem; color: var(--ehub-ink); margin-bottom: 3px; }
 .fin-block p { margin: 0; font-size: .82rem; color: var(--ehub-muted); }
 .fin-inv-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .fin-inv-main .fin-inv-cycle { width: auto; }
 .fin-inv-sub { font-size: .74rem; color: var(--ehub-muted); }
-.fin-inv-sub.ok { color: #1f8a5b; }
-.fin-inv-sub.bad { color: #e23b3b; }
-.fin-inv-caret { color: var(--ehub-muted); font-size: .7rem; width: 10px; }
+.fin-inv-sub.ok { color: var(--ehub-success-text); }
+.fin-inv-sub.bad { color: var(--ehub-danger-text); }
+.fin-inv-caret { color: var(--ehub-muted); font-size: .72rem; width: 10px; }
 .fin-inv-row { display: flex; align-items: center; gap: 10px; padding: 10px 24px; border-bottom: 1px solid var(--ehub-line); cursor: pointer; transition: background .12s; font-size: .87rem; }
 .fin-inv-row:last-child { border-bottom: 0; }
 .fin-inv-row:hover { background: color-mix(in srgb, var(--ehub-field-bg) 55%, transparent); }

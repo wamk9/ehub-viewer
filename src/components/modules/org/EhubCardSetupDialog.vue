@@ -106,6 +106,6 @@ export default {
 <style scoped>
 .ecs-intro { font-size: .84rem; color: var(--ehub-muted); margin: 0 0 14px; }
 .ecs-element { min-height: 60px; }
-.ecs-error { display: flex; gap: 7px; align-items: flex-start; font-size: .8rem; color: #e23b3b; margin: 12px 0 0; }
+.ecs-error { display: flex; gap: 7px; align-items: flex-start; font-size: .8rem; color: var(--ehub-danger-text); margin: 12px 0 0; }
 .ecs-secure { display: flex; gap: 7px; align-items: center; font-size: .72rem; color: var(--ehub-muted); margin: 14px 0 0; }
 </style>

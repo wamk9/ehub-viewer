@@ -65,7 +65,7 @@ export default {
 .rpt-tbl { width: 100%; border-collapse: collapse; }
 
 .rpt-tbl th {
-  font-size: .67rem; font-weight: 700; text-transform: uppercase;
+  font-size: .72rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: .06em; color: var(--ehub-muted);
   padding: 9px 15px; border-bottom: 1px solid var(--ehub-line);
   white-space: nowrap; text-align: center;
@@ -99,9 +99,9 @@ export default {
   display: inline-flex; align-items: center; justify-content: center;
   width: 24px; height: 24px; border-radius: 50%; font-size: .75rem; font-weight: 700;
 }
-.pd--yes       { background: color-mix(in srgb,#1f8a5b 18%,transparent); color: #1f8a5b; }
+.pd--yes       { background: color-mix(in srgb,#1f8a5b 18%,transparent); color: var(--ehub-success-text); }
 .pd--always    { background: color-mix(in srgb,var(--ehub-gold) 18%,transparent); color: color-mix(in srgb,var(--ehub-gold),#000 20%); }
-.pd--inherited { background: color-mix(in srgb,var(--ehub-primary) 14%,transparent); color: var(--ehub-primary); }
+.pd--inherited { background: color-mix(in srgb,var(--ehub-primary) 14%,transparent); color: var(--ehub-primary-text); }
 .pd--no        { background: var(--ehub-field-bg); color: var(--ehub-muted); }
 
 .rpt-legend {
@@ -113,9 +113,9 @@ html[data-bs-theme="dark"] .pd--yes    { color: #51cf66; background: color-mix(i
 html[data-bs-theme="dark"] .pd--always { color: var(--ehub-gold); }
 
 @media (max-width: 600px) {
-  .rpt-tbl th { font-size: .63rem; padding: 7px 10px; }
+  .rpt-tbl th { font-size: .72rem; padding: 7px 10px; }
   .rpt-tbl td { padding: 7px 10px; }
   .rpt-perm   { font-size: .75rem; min-width: 110px; }
-  .pd         { width: 20px; height: 20px; font-size: .68rem; }
+  .pd         { width: 20px; height: 20px; font-size: .72rem; }
 }
 </style>

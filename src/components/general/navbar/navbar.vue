@@ -136,7 +136,7 @@ onBeforeUnmount(() => {
 <template>
   <nav class="ehub-navbar">
     <!-- Logo -->
-    <router-link to="/" class="nav-mark">
+    <router-link to="/" class="nav-mark" :aria-label="$t('common.ui.home')">
       <EhubLogo />
     </router-link>
 
@@ -162,7 +162,7 @@ onBeforeUnmount(() => {
     <template v-if="isLogged">
       <!-- Notifications -->
       <div class="dropdown">
-        <button class="nav-icon-btn position-relative" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="nav-icon-btn position-relative" data-bs-toggle="dropdown" aria-expanded="false" :aria-label="$t('common.ui.notifications')" :title="$t('common.ui.notifications')">
           <font-awesome-icon :icon="['fas', 'bell']" />
           <span v-if="hasUnread" class="notif-badge"></span>
         </button>
@@ -246,7 +246,7 @@ onBeforeUnmount(() => {
     </button>
 
     <!-- Hamburger (mobile only) -->
-    <button class="nav-icon-btn d-md-none" @click="drawerOpen = true" aria-label="Menu">
+    <button class="nav-icon-btn d-md-none" @click="drawerOpen = true" :aria-label="$t('common.ui.menu')">
       <font-awesome-icon :icon="['fas', 'bars']" />
     </button>
   </nav>
@@ -365,6 +365,8 @@ onBeforeUnmount(() => {
   border: none;
   cursor: pointer;
   padding: 7px 9px;
+  min-width: 40px;
+  min-height: 40px;
   border-radius: 8px;
   color: var(--ehub-muted);
   font-size: 1rem;
@@ -422,7 +424,7 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 .nav-avatar-initial {
-  background: var(--ehub-primary);
+  background: var(--ehub-primary-strong);
   color: #fff;
   font-size: .8rem;
   font-weight: 700;
@@ -490,9 +492,9 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
   margin-top: 5px;
 }
-.notif-dot.unread { background: var(--ehub-primary); }
+.notif-dot.unread { background: var(--ehub-primary-strong); }
 .notif-text { font-size: .8rem; line-height: 1.35; color: var(--ehub-ink); }
-.notif-time { font-size: .7rem; color: var(--ehub-muted); margin-top: 2px; }
+.notif-time { font-size: .72rem; color: var(--ehub-muted); margin-top: 2px; }
 .notif-del {
   background: none; border: none; color: var(--ehub-muted);
   cursor: pointer; font-size: 1rem; padding: 0 2px; line-height: 1;
@@ -576,7 +578,7 @@ onBeforeUnmount(() => {
   border: 2px solid var(--ehub-line);
 }
 .dpc-avatar-initial {
-  background: var(--ehub-primary);
+  background: var(--ehub-primary-strong);
   color: #fff;
   font-size: 1rem;
   font-weight: 700;
@@ -592,7 +594,7 @@ onBeforeUnmount(() => {
 /* Sections */
 .drawer-section { display: flex; flex-direction: column; gap: 2px; }
 .drawer-section-label {
-  font-size: .68rem;
+  font-size: .72rem;
   font-weight: 700;
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -622,7 +624,7 @@ onBeforeUnmount(() => {
 .drawer-item:hover { background: var(--ehub-card); }
 .drawer-item.router-link-active {
   background: var(--ehub-primary-tint);
-  color: var(--ehub-primary);
+  color: var(--ehub-primary-text);
 }
 .di-icon {
   width: 36px; height: 36px;
@@ -639,7 +641,7 @@ onBeforeUnmount(() => {
 .drawer-item.router-link-active .di-icon {
   background: var(--ehub-primary-tint);
   border-color: var(--ehub-primary);
-  color: var(--ehub-primary);
+  color: var(--ehub-primary-text);
 }
 .di-icon.danger { color: #e05454; }
 .drawer-logout { color: #e05454; }

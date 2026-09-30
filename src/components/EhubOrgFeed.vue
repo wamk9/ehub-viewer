@@ -177,7 +177,7 @@ async function handleFollow(org) {
 }
 
 .vc-badge {
-  font-size: .62rem;
+  font-size: .72rem;
   font-weight: 700;
   letter-spacing: .05em;
   text-transform: uppercase;

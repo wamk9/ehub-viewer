@@ -14,7 +14,7 @@ defineProps({ active: Boolean })
   top: 0; left: 0; right: 0;
   height: 3px;
   z-index: 99999;
-  background: var(--ehub-primary);
+  background: var(--ehub-primary-strong);
   overflow: hidden;
 }
 .top-loading-bar::after {

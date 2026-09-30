@@ -230,7 +230,7 @@ export default {
               <label class="form-check-label" for="resAuto">{{ $t('pages.event.manage.res.auto_pts') }}</label>
             </div>
           </div>
-          <div v-if="dupPositions" class="hint" style="margin-top:6px;color:#e23b3b">
+          <div v-if="dupPositions" class="hint" style="margin-top:6px;color:var(--ehub-danger-text)">
             <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />{{ $t('pages.event.manage.res.dup_pos') }}
           </div>
         </div>

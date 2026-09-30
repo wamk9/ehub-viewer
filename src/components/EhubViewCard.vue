@@ -110,10 +110,10 @@ function imgUrl(path) {
         <font-awesome-icon v-if="team.is_verified" :icon="['fas', 'circle-check']" class="vc-ver" />
       </div>
       <div class="vc-chips">
-        <span v-if="team.category" class="cat-chip sub" style="font-size:.7rem;">
+        <span v-if="team.category" class="cat-chip sub" style="font-size:.72rem;">
           {{ $t(`categories.names.${team.category}`) }}
         </span>
-        <span v-if="team.org_name" class="cat-chip" style="display:inline-flex;align-items:center;gap:4px;font-size:.7rem;">
+        <span v-if="team.org_name" class="cat-chip" style="display:inline-flex;align-items:center;gap:4px;font-size:.72rem;">
           <font-awesome-icon :icon="['fas', 'building-flag']" style="opacity:.65;font-size:.65rem;" />
           {{ team.org_name }}
         </span>
@@ -224,7 +224,7 @@ function imgUrl(path) {
   max-width: 65%;
 }
 .vc-badge {
-  font-size: .62rem;
+  font-size: .72rem;
   font-weight: 700;
   letter-spacing: .05em;
   text-transform: uppercase;
@@ -295,7 +295,7 @@ function imgUrl(path) {
   align-items: center;
   gap: 6px;
 }
-.vc-ver { color: var(--ehub-primary); font-size: .8rem; }
+.vc-ver { color: var(--ehub-primary-text); font-size: .8rem; }
 .vc-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
 .vc-desc {
   color: var(--ehub-muted);
@@ -325,7 +325,7 @@ function imgUrl(path) {
 }
 .vc-stat + .vc-stat { border-left: 1px solid var(--ehub-line); }
 .vc-stat .v { font-size: 1rem; font-weight: 700; color: var(--ehub-ink); line-height: 1; }
-.vc-stat .l { font-size: .65rem; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
+.vc-stat .l { font-size: .72rem; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
 
 /* Footer: actions auto-column grid */
 .vc-foot {
@@ -350,7 +350,7 @@ function imgUrl(path) {
   transition: all .15s;
   white-space: nowrap;
 }
-.vc-btn:hover { background: var(--ehub-card); border-color: var(--ehub-primary); color: var(--ehub-primary); }
-.vc-btn.vc-btn-active { background: var(--ehub-primary); border-color: var(--ehub-primary); color: #fff; }
+.vc-btn:hover { background: var(--ehub-card); border-color: var(--ehub-primary); color: var(--ehub-primary-text); }
+.vc-btn.vc-btn-active { background: var(--ehub-primary-strong); border-color: var(--ehub-primary); color: #fff; }
 .vc-btn.vc-btn-active:hover { filter: brightness(1.1); }
 </style>

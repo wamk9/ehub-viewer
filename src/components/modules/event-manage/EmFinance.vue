@@ -79,7 +79,7 @@ export default {
     <div class="fin-2">
       <div class="cc">
         <div class="cc-hd">
-          <h3><font-awesome-icon :icon="['fas', 'receipt']" style="color:var(--ehub-primary)" />{{ $t('pages.event.manage.fin.payments') }}</h3>
+          <h3><font-awesome-icon :icon="['fas', 'receipt']" style="color:var(--ehub-primary-text)" />{{ $t('pages.event.manage.fin.payments') }}</h3>
         </div>
         <div v-if="fee <= 0" class="cc-empty">{{ $t('pages.event.manage.fin.free_event') }}</div>
         <div v-else-if="!payments.length" class="cc-empty">{{ $t('pages.event.manage.fin.empty') }}</div>
@@ -140,7 +140,7 @@ export default {
 .fin-kpi { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 13px; padding: 15px 18px; }
 .fin-kpi .v { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .fin-kpi .l { font-size: .72rem; color: var(--ehub-muted); font-weight: 500; }
-.fin-kpi.hl { background: var(--ehub-primary); border-color: var(--ehub-primary); }
+.fin-kpi.hl { background: var(--ehub-primary-strong); border-color: var(--ehub-primary); }
 .fin-kpi.hl .v, .fin-kpi.hl .l { color: #fff; }
 .fin-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
 .prize-row { display: flex; align-items: center; gap: 12px; padding: 10px 17px; border-bottom: 1px solid var(--ehub-line); }
@@ -151,8 +151,8 @@ export default {
 
 .prize-body { padding: 12px 17px 14px; }
 .prize-hint { font-size: .76rem; color: var(--ehub-muted); margin: 0 0 12px; }
-.split-hd { display: flex; justify-content: space-between; padding: 10px 17px 6px; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); }
-.split-hd .bad { color: #e23b3b; }
+.split-hd { display: flex; justify-content: space-between; padding: 10px 17px 6px; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); }
+.split-hd .bad { color: var(--ehub-danger-text); }
 .split-ft { display: flex; justify-content: flex-end; gap: 8px; padding-top: 12px; flex-wrap: wrap; }
 @media (max-width: 1100px) {
   .fin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

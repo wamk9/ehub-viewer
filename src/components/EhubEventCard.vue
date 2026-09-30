@@ -139,10 +139,10 @@ const slotsBarColor = computed(() => {
     <div class="ec-body">
       <div class="ec-name">{{ event.name }}</div>
       <div class="ec-chips">
-        <span v-if="event.category" class="cat-chip sub" style="font-size:.68rem;">
+        <span v-if="event.category" class="cat-chip sub" style="font-size:.75rem;">
           {{ $t(`categories.names.${event.category}`) }}
         </span>
-        <span v-if="event.subcategory" class="cat-chip" style="font-size:.68rem;">
+        <span v-if="event.subcategory" class="cat-chip" style="font-size:.75rem;">
           {{ $t(`categories.subcategories.${event.subcategory}`, event.subcategory) }}
         </span>
       </div>
@@ -233,7 +233,7 @@ const slotsBarColor = computed(() => {
   gap: 4px;
 }
 .ec-badge {
-  font-size: .6rem;
+  font-size: .72rem;
   font-weight: 700;
   letter-spacing: .05em;
   text-transform: uppercase;
@@ -242,11 +242,11 @@ const slotsBarColor = computed(() => {
   backdrop-filter: blur(8px);
   white-space: nowrap;
 }
-.ec-badge.open     { background: rgba(31,138,91,.9); color: #fff; }
-.ec-badge.active   { background: rgba(0,0,0,.42); color: rgba(255,255,255,.9); }
-.ec-badge.finished { background: rgba(0,0,0,.55); color: rgba(255,255,255,.45); }
-.ec-badge.free     { background: color-mix(in srgb, #1f8a5b 75%, rgba(0,0,0,.3)); color: #d1fae5; }
-.ec-badge.paid     { background: color-mix(in srgb, #f08c00 75%, rgba(0,0,0,.3)); color: #fef9c3; }
+.ec-badge.open     { background: #187a4f; color: #fff; }
+.ec-badge.active   { background: rgba(0,0,0,.6); color: #fff; }
+.ec-badge.finished { background: rgba(0,0,0,.65); color: rgba(255,255,255,.85); }
+.ec-badge.free     { background: #15714a; color: #fff; }
+.ec-badge.paid     { background: #9a5800; color: #fff; }
 
 /* Head: logo overlapping banner */
 .ec-head {

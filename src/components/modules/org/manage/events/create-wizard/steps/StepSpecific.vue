@@ -215,7 +215,7 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
 .spec-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; flex: 0 0 100%; max-width: 100%; }
 @media (max-width: 700px) { .spec-grid { grid-template-columns: minmax(0, 1fr); } }
 .spec-notice { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 18px; border: 1px solid var(--ehub-primary-border, var(--ehub-line)); border-radius: 12px; background: var(--ehub-primary-tint); flex-wrap: wrap; }
-.spec-notice-ico { color: var(--ehub-primary); flex-shrink: 0; }
+.spec-notice-ico { color: var(--ehub-primary-text); flex-shrink: 0; }
 .spec-notice-body { flex: 1; min-width: 220px; font-size: .82rem; color: var(--ehub-ink); line-height: 1.45; }
 .spec-notice-body b { display: block; }
 .spec-notice-body span { color: var(--ehub-muted); }
@@ -225,10 +225,10 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
 .step-title { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 4px; letter-spacing: -.02em; }
 .step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 28px; }
 .last-upd-bar { display: flex; align-items: center; gap: 8px; padding: 9px 14px; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 9px; margin-bottom: 22px; font-size: .82rem; color: var(--ehub-muted); }
-.last-upd-bar svg { color: var(--ehub-primary); }
+.last-upd-bar svg { color: var(--ehub-primary-text); }
 .field-label { font-size: .85rem; font-weight: 600; color: var(--ehub-ink); }
 .empty-friendly { display: flex; gap: 12px; align-items: flex-start; background: color-mix(in srgb, #1f8a5b 10%, transparent); border: 1px solid color-mix(in srgb, #1f8a5b 30%, transparent); border-radius: 12px; padding: 14px 16px; }
-.empty-friendly > svg { color: #1f8a5b; font-size: 1.1rem; margin-top: 2px; }
+.empty-friendly > svg { color: var(--ehub-success-text); font-size: 1.1rem; margin-top: 2px; }
 .empty-friendly strong { display: block; font-size: .9rem; color: var(--ehub-ink); }
 .empty-friendly p { margin: 2px 0 0; font-size: .82rem; color: var(--ehub-muted); }
 .empty-hint { color: var(--ehub-muted); font-size: .88rem; padding: 20px 0; }

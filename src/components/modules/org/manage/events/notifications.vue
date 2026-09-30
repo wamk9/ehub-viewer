@@ -70,7 +70,7 @@ onBeforeUnmount(clearNotifications)
     padding: 1.4rem 1.6rem;
 }
 .gen-section__title {
-    font-size: 0.7rem;
+    font-size: .72rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;

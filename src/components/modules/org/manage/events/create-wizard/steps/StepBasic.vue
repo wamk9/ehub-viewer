@@ -56,6 +56,6 @@ function readFile(file, key) {
 .step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 28px; }
 .form-section { margin-bottom: 26px; }
 .form-label { font-size: .85rem; font-weight: 600; color: var(--ehub-ink); }
-.req-mark { color: #e23b3b; }
+.req-mark { color: var(--ehub-danger-text); }
 .char-count { font-size: .73rem; color: var(--ehub-muted); text-align: right; margin-top: 3px; }
 </style>

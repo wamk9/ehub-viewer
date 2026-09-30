@@ -54,7 +54,7 @@ export default {
 .cc { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); overflow: hidden; display: flex; flex-direction: column; height: 100%; }
 .cc-hd { display: flex; align-items: center; gap: 10px; padding: 13px 17px; border-bottom: 1px solid var(--ehub-line); }
 .cc-hd h3 { font-size: .9rem; font-weight: 700; color: var(--ehub-ink); margin: 0; flex: 1; }
-.cc-link { font-size: .78rem; font-weight: 600; color: var(--ehub-primary); cursor: pointer; background: none; border: 0; padding: 0; }
+.cc-link { font-size: .78rem; font-weight: 600; color: var(--ehub-primary-text); cursor: pointer; background: none; border: 0; padding: 0; }
 .cc-link:hover { text-decoration: underline; }
 .act-loading { flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px; text-align: center; color: var(--ehub-muted); font-size: .83rem; }
 .act-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 15px; border-bottom: 1px solid var(--ehub-line); }

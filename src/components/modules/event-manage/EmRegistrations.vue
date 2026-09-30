@@ -251,7 +251,7 @@ export default {
 .sum-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr)); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); background: var(--ehub-card); margin-bottom: 16px; }
 .sum-cell { padding: 14px 18px; border-right: 1px solid var(--ehub-line); }
 .sum-cell:last-child { border-right: 0; }
-.sum-lbl { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); margin-bottom: 5px; }
+.sum-lbl { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); margin-bottom: 5px; }
 .sum-val { font-size: .95rem; font-weight: 700; color: var(--ehub-ink); }
 @media (max-width: 1100px) {
   .sum-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

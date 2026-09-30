@@ -122,7 +122,7 @@ export default {
     <div v-if="full" class="dash-grid">
       <div class="cc">
         <div class="cc-hd">
-          <h3><font-awesome-icon :icon="['fas', 'list-check']" style="color:var(--ehub-primary)" />{{ $t('pages.event.manage.ov.todo') }}</h3>
+          <h3><font-awesome-icon :icon="['fas', 'list-check']" style="color:var(--ehub-primary-text)" />{{ $t('pages.event.manage.ov.todo') }}</h3>
         </div>
         <div v-for="(c, i) in checklist" :key="i" class="chk" @click="openItem(c)">
           <span class="chk-ico" :class="c.ok ? 'ok' : (c.tip ? 'tip' : 'warn')">
@@ -149,10 +149,10 @@ export default {
 .chk:last-child { border-bottom: 0; }
 .chk:hover { background: color-mix(in srgb, var(--ehub-field-bg) 55%, transparent); }
 .chk-ico { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .62rem; flex-shrink: 0; }
-.chk-ico.ok { background: color-mix(in srgb, #1f8a5b 15%, transparent); color: #1f8a5b; }
-.chk-ico.tip { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.chk-ico.ok { background: color-mix(in srgb, #1f8a5b 15%, transparent); color: var(--ehub-success-text); }
+.chk-ico.tip { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 .chk-ico.warn { background: color-mix(in srgb, var(--ehub-gold) 22%, transparent); color: color-mix(in srgb, var(--ehub-gold), #000 38%); }
 .chk-txt { flex: 1; font-size: .84rem; color: var(--ehub-ink); }
-.chk-go { font-size: .66rem; color: var(--ehub-muted); }
-:deep(.sc-delta.live) { color: #e23b3b; }
+.chk-go { font-size: .72rem; color: var(--ehub-muted); }
+:deep(.sc-delta.live) { color: var(--ehub-danger-text); }
 </style>

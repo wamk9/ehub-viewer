@@ -116,7 +116,7 @@ async function submit() {
           <div class="d-flex align-items-center justify-content-between mb-3">
             <div class="form-check mb-0">
               <input class="form-check-input" type="checkbox" id="rememberMe" v-model="form.remember" />
-              <label class="form-check-label small text-secondary" for="rememberMe">
+              <label class="form-check-label small" style="color: var(--ehub-muted)" for="rememberMe">
                 {{ $t('users.login.remember') }}
               </label>
             </div>

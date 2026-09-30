@@ -111,15 +111,15 @@ export default {
 .rte-toolbar button { background: none; border: 0; color: var(--ehub-muted); width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: .78rem; cursor: pointer; transition: background .12s, color .12s; }
 .rte-toolbar button.txt { font-weight: 800; font-size: .72rem; }
 .rte-toolbar button:hover { background: var(--ehub-card); color: var(--ehub-ink); }
-.rte-toolbar button.active { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.rte-toolbar button.active { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 .rte-content { padding: 10px 14px; color: var(--ehub-ink); font-size: .9rem; }
 .rte-content :deep(.ProseMirror) { outline: none; min-height: var(--rte-min); }
 .rte-content :deep(.ProseMirror p) { margin: 0 0 .5em; }
 .rte-content :deep(.ProseMirror h2) { font-size: 1.15rem; font-weight: 800; margin: .6em 0 .3em; }
 .rte-content :deep(.ProseMirror h3) { font-size: 1rem; font-weight: 700; margin: .6em 0 .3em; }
 .rte-content :deep(.ProseMirror ul), .rte-content :deep(.ProseMirror ol) { padding-left: 1.3em; margin: 0 0 .5em; }
-.rte-content :deep(.ProseMirror a) { color: var(--ehub-primary); text-decoration: underline; }
+.rte-content :deep(.ProseMirror a) { color: var(--ehub-primary-text); text-decoration: underline; }
 .rte-content :deep(.ProseMirror p.is-editor-empty:first-child::before) { content: attr(data-placeholder); color: var(--ehub-muted); opacity: .7; pointer-events: none; float: left; height: 0; }
 .rte-count { font-size: .73rem; color: var(--ehub-muted); text-align: right; padding: 0 10px 6px; }
-.rte.over .rte-count { color: #e23b3b; }
+.rte.over .rte-count { color: var(--ehub-danger-text); }
 </style>

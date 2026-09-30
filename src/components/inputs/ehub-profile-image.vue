@@ -192,7 +192,7 @@ export default {
     align-items: center;
     justify-content: center;
     text-align: center;
-    color: var(--ehub-primary);
+    color: var(--ehub-primary-text);
     font-weight: bold;
     font-size: 16px;
     background: color-mix(in srgb, var(--ehub-card) 85%, transparent);
@@ -262,7 +262,7 @@ p {
 }
 .avatar-upload-btn:hover {
     border-color: var(--ehub-primary);
-    color: var(--ehub-primary);
+    color: var(--ehub-primary-text);
     background: var(--ehub-primary-tint);
 }
 
@@ -283,7 +283,7 @@ input[id$=_file_input] {
 }
 .camera-icon {
     font-size: 1.5rem;
-    color: var(--ehub-primary);
+    color: var(--ehub-primary-text);
 }
 .camera-label {
     font-size: .75rem;

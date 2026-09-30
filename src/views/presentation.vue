@@ -267,7 +267,7 @@ const primaryCta = computed(() => {
 
 <style scoped>
 .hero-free-note { margin: 14px 0 0; font-size: .82rem; color: var(--ehub-muted); }
-.hero-free-note svg { color: #1f8a5b; }
+.hero-free-note svg { color: var(--ehub-success-text); }
 .hero-free-note a { margin-left: 6px; }
 .how-cta { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 28px; }
 .how-cta span { font-size: .82rem; color: var(--ehub-muted); }
@@ -291,12 +291,12 @@ const primaryCta = computed(() => {
   position: relative;
   display: inline-flex; align-items: center; gap: 8px;
   background: var(--ehub-primary-tint); border: 1px solid var(--ehub-primary-border);
-  color: var(--ehub-primary); font-size: .78rem; font-weight: 700;
+  color: var(--ehub-primary-text); font-size: .78rem; font-weight: 700;
   letter-spacing: .06em; text-transform: uppercase;
   padding: 5px 14px; border-radius: 50rem; margin-bottom: 22px;
 }
 .pres-hero h1 { position: relative; font-size: clamp(2.1rem, 4.6vw, 3.2rem); font-weight: 800; letter-spacing: -.025em; color: var(--ehub-ink); margin-bottom: 16px; line-height: 1.12; max-width: 800px; margin-left: auto; margin-right: auto; }
-.pres-hero h1 .accent { color: var(--ehub-primary); }
+.pres-hero h1 .accent { color: var(--ehub-primary-text); }
 .pres-hero p.lead { position: relative; color: var(--ehub-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto 30px; line-height: 1.65; }
 .hero-ctas { position: relative; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
 
@@ -321,7 +321,7 @@ const primaryCta = computed(() => {
 /* ── How it works ── */
 .how-grid { display: flex; align-items: flex-start; gap: 6px; }
 .how-step { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 0 6px; }
-.how-step .step-ico { width: 56px; height: 56px; border-radius: 16px; flex-shrink: 0; background: var(--ehub-primary-tint); border: 1px solid var(--ehub-primary-border); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: var(--ehub-primary); }
+.how-step .step-ico { width: 56px; height: 56px; border-radius: 16px; flex-shrink: 0; background: var(--ehub-primary-tint); border: 1px solid var(--ehub-primary-border); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: var(--ehub-primary-text); }
 .how-step h4 { font-size: 1rem; font-weight: 700; color: var(--ehub-ink); margin: 0; }
 .how-step p { font-size: .88rem; color: var(--ehub-muted); margin: 0; line-height: 1.55; }
 .how-arrow-col { flex: 0 0 auto; display: flex; align-items: flex-start; justify-content: center; padding-top: 18px; color: var(--ehub-line); font-size: 1.1rem; }
@@ -335,7 +335,7 @@ const primaryCta = computed(() => {
 .benefit-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
 .benefit-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 16px; padding: 26px 22px; transition: transform .18s ease, box-shadow .18s ease; }
 .benefit-card:hover { transform: translateY(-3px); box-shadow: var(--ehub-shadow); }
-.benefit-card .b-icon { width: 46px; height: 46px; border-radius: 13px; background: var(--ehub-primary-tint); border: 1px solid var(--ehub-primary-border); color: var(--ehub-primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 16px; }
+.benefit-card .b-icon { width: 46px; height: 46px; border-radius: 13px; background: var(--ehub-primary-tint); border: 1px solid var(--ehub-primary-border); color: var(--ehub-primary-text); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 16px; }
 .benefit-card h3 { font-size: 1rem; font-weight: 700; margin: 0 0 6px; color: var(--ehub-ink); }
 .benefit-card p { font-size: .87rem; color: var(--ehub-muted); line-height: 1.55; margin: 0; }
 @media (max-width: 960px) { .benefit-grid, .benefit-grid.cols-3 { grid-template-columns: repeat(2, 1fr); } }
@@ -344,7 +344,7 @@ const primaryCta = computed(() => {
 /* ── Feature grid ── */
 .feature-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
 .feature-card { flex: 1 1 300px; max-width: calc(33.333% - 11px); display: flex; gap: 14px; padding: 22px; border-radius: 14px; background: var(--ehub-card); border: 1px solid var(--ehub-line); }
-.feature-card .f-icon { width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0; background: var(--ehub-primary-tint); border: 1px solid var(--ehub-primary-border); color: var(--ehub-primary); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+.feature-card .f-icon { width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0; background: var(--ehub-primary-tint); border: 1px solid var(--ehub-primary-border); color: var(--ehub-primary-text); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
 .feature-card h4 { font-size: .93rem; font-weight: 700; margin: 0 0 4px; color: var(--ehub-ink); }
 .feature-card p { font-size: .83rem; color: var(--ehub-muted); line-height: 1.5; margin: 0; }
 @media (max-width: 960px) { .feature-card { max-width: calc(50% - 8px); } }
@@ -365,7 +365,7 @@ html[data-bs-theme="dark"] .pricing-teaser .pt-icon { color: var(--ehub-gold); }
 
 /* ── Final CTA strip ── */
 .cta-strip {
-  background: var(--ehub-primary);
+  background: var(--ehub-primary-strong);
   border-radius: 24px;
   padding: 52px 40px; text-align: center;
   position: relative; overflow: hidden;

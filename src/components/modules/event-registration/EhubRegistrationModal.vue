@@ -80,7 +80,7 @@ export default {
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 1050; padding: 1rem; }
 .modal-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 14px; width: 100%; max-width: 420px; max-height: calc(100vh - 2rem); display: flex; flex-direction: column; overflow: hidden; }
 .modal-card__header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--ehub-line); font-size: 1rem; font-weight: 600; color: var(--ehub-ink); }
-.modal-card__preview { display: flex; align-items: center; gap: 7px; font-size: .75rem; font-weight: 600; color: var(--ehub-primary); background: var(--ehub-primary-tint); padding: .5rem 1.4rem; border-bottom: 1px solid var(--ehub-line); }
+.modal-card__preview { display: flex; align-items: center; gap: 7px; font-size: .75rem; font-weight: 600; color: var(--ehub-primary-text); background: var(--ehub-primary-tint); padding: .5rem 1.4rem; border-bottom: 1px solid var(--ehub-line); }
 .modal-card__body { padding: 1.2rem 1.4rem; overflow-y: auto; }
 .modal-card__intro { font-size: .88rem; color: var(--ehub-ink); margin: 0 0 .9rem; }
 .modal-card__intro strong { color: var(--org-accent, var(--ehub-primary)); }

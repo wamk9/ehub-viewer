@@ -458,23 +458,23 @@ export default {
 .ts-logo img { width: 100%; height: 100%; object-fit: cover; }
 .ts-titleblock { flex: 1; min-width: 240px; padding-bottom: 6px; }
 .ts-org-link { display: inline-flex; align-items: center; gap: 7px; font-size: .85rem; font-weight: 600; color: var(--ehub-muted); margin-bottom: 6px; }
-.ts-org-link svg { color: var(--ehub-primary); }
+.ts-org-link svg { color: var(--ehub-primary-text); }
 .ts-name { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; letter-spacing: -.02em; margin: 0 0 6px; color: var(--ehub-ink); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.ts-ver { color: var(--ehub-primary); font-size: 1.1rem; }
+.ts-ver { color: var(--ehub-primary-text); font-size: 1.1rem; }
 .ts-tag { color: var(--ehub-muted); font-size: 1rem; font-weight: 600; }
 .ts-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .ts-chip { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; font-weight: 500; color: var(--ehub-muted); }
-.ts-chip svg { color: var(--ehub-primary); width: 14px; }
+.ts-chip svg { color: var(--ehub-primary-text); width: 14px; }
 
 /* ── Actions ── */
 .ts-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; padding-bottom: 8px; }
 .ts-btn-follow {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 8px 20px; border-radius: 50rem; font-size: .88rem; font-weight: 600; cursor: pointer;
-  border: 1px solid var(--ehub-primary); background: transparent; color: var(--ehub-primary); transition: all .15s;
+  border: 1px solid var(--ehub-primary); background: transparent; color: var(--ehub-primary-text); transition: all .15s;
 }
 .ts-btn-follow:hover { background: var(--ehub-primary-tint); }
-.ts-btn-follow.following { background: var(--ehub-primary); color: #fff; }
+.ts-btn-follow.following { background: var(--ehub-primary-strong); color: #fff; }
 .ts-btn-follow.following:hover { background: var(--ehub-primary-dark); border-color: var(--ehub-primary-dark); }
 .ts-btn-apply {
   display: inline-flex; align-items: center; gap: 8px;
@@ -501,7 +501,7 @@ export default {
 .ts-stat:last-child { border-right: 0; }
 .ts-stat .v { font-size: 1.5rem; font-weight: 800; color: var(--ehub-ink); letter-spacing: -.02em; line-height: 1; }
 .ts-stat .l { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); }
-.ts-stat.highlight .v { color: var(--ehub-primary); }
+.ts-stat.highlight .v { color: var(--ehub-primary-text); }
 
 /* ── Tabs ── */
 .ts-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--ehub-line); margin-top: 34px; overflow-x: auto; scrollbar-width: none; }
@@ -514,9 +514,9 @@ export default {
   transition: color .15s, border-color .15s;
 }
 .ts-tab:hover { color: var(--ehub-ink); }
-.ts-tab.active { color: var(--ehub-primary); border-bottom-color: var(--ehub-primary); }
+.ts-tab.active { color: var(--ehub-primary-text); border-bottom-color: var(--ehub-primary); }
 .ts-pill { font-size: .72rem; font-weight: 700; background: var(--ehub-field-bg); color: var(--ehub-muted); padding: 1px 8px; border-radius: 50rem; }
-.ts-tab.active .ts-pill { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.ts-tab.active .ts-pill { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 
 /* ── Pane ── */
 .ts-pane { padding-top: 26px; }
@@ -533,14 +533,14 @@ export default {
 .ts-about-body { font-size: .94rem; line-height: 1.65; color: var(--ehub-ink); margin: 0; }
 .ts-info-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
 .ts-info-list li { display: flex; align-items: flex-start; gap: 12px; }
-.ts-info-ico { width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px; background: var(--ehub-primary-tint); color: var(--ehub-primary); display: flex; align-items: center; justify-content: center; font-size: .9rem; }
+.ts-info-ico { width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px; background: var(--ehub-primary-tint); color: var(--ehub-primary-text); display: flex; align-items: center; justify-content: center; font-size: .9rem; }
 .ts-info-meta { display: flex; flex-direction: column; gap: 1px; }
 .ts-info-meta .k { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--ehub-muted); }
 .ts-info-meta .val { font-size: .92rem; font-weight: 600; color: var(--ehub-ink); }
 
 /* ── Back ── */
 .ts-back { display: inline-flex; align-items: center; gap: 7px; font-size: .85rem; font-weight: 600; color: var(--ehub-muted); margin-top: 40px; text-decoration: none; }
-.ts-back:hover { color: var(--ehub-primary); }
+.ts-back:hover { color: var(--ehub-primary-text); }
 
 /* ── Apply modal ── */
 .ts-overlay { position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -560,13 +560,13 @@ export default {
 .ts-textarea.is-invalid { border-color: #e23b3b; }
 .ts-select { width: 100%; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 10px; color: var(--ehub-ink); padding: 10px 12px; font-size: .88rem; cursor: pointer; }
 .ts-select:focus { outline: none; border-color: var(--ehub-primary); }
-.ts-error { font-size: .78rem; color: #e23b3b; margin-top: 2px; }
+.ts-error { font-size: .78rem; color: var(--ehub-danger-text); margin-top: 2px; }
 .ts-apply-note { display: flex; align-items: flex-start; gap: 8px; font-size: .8rem; color: var(--ehub-muted); padding: 11px 14px; background: var(--ehub-field-bg); border-radius: 10px; border: 1px solid var(--ehub-line); line-height: 1.5; }
-.ts-apply-note svg { color: var(--ehub-primary); flex-shrink: 0; margin-top: 1px; }
+.ts-apply-note svg { color: var(--ehub-primary-text); flex-shrink: 0; margin-top: 1px; }
 .ts-modal-ft { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px; border-top: 1px solid var(--ehub-line); }
 .ts-btn-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px; border-radius: 50rem; font-size: .88rem; font-weight: 600; cursor: pointer; background: var(--ehub-field-bg); color: var(--ehub-muted); border: 1px solid var(--ehub-line); }
 .ts-btn-ghost:hover { background: var(--ehub-card); color: var(--ehub-ink); }
-.ts-btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px; border-radius: 50rem; font-size: .88rem; font-weight: 600; cursor: pointer; background: var(--ehub-primary); color: #fff; border: 1px solid var(--ehub-primary); }
+.ts-btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px; border-radius: 50rem; font-size: .88rem; font-weight: 600; cursor: pointer; background: var(--ehub-primary-strong); color: #fff; border: 1px solid var(--ehub-primary); }
 .ts-btn-primary:hover { background: var(--ehub-primary-dark); }
 
 /* ── Modal transition ── */

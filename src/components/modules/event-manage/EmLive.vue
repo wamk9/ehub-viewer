@@ -77,7 +77,7 @@ export default {
 
     <div class="cc">
       <div class="cc-hd">
-        <h3><font-awesome-icon :icon="['fas', 'tower-broadcast']" style="color:var(--ehub-primary)" />{{ $t('pages.event.manage.live.channels') }}</h3>
+        <h3><font-awesome-icon :icon="['fas', 'tower-broadcast']" style="color:var(--ehub-primary-text)" />{{ $t('pages.event.manage.live.channels') }}</h3>
       </div>
       <div v-for="c in channels" :key="c.key" class="ch-row">
         <div class="ch-logo" :style="{ background: c.color }"><font-awesome-icon :icon="['fab', c.icon]" /></div>
@@ -121,5 +121,5 @@ export default {
 .ch-logo { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1rem; flex-shrink: 0; }
 .ch-name { font-weight: 700; font-size: .9rem; color: var(--ehub-ink); text-transform: capitalize; margin-bottom: 2px; }
 .ch-row .input-group { flex: 1; min-width: 200px; max-width: 420px; }
-.sum-lbl { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); margin-bottom: 5px; }
+.sum-lbl { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); margin-bottom: 5px; }
 </style>

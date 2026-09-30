@@ -261,7 +261,7 @@ export default {
 }
 .hero-inner { position: relative; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
 .hero-left h1 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 800; letter-spacing: -.025em; margin: 0 0 6px; color: var(--ehub-ink); }
-.hero-left h1 .accent { color: var(--ehub-primary); }
+.hero-left h1 .accent { color: var(--ehub-primary-text); }
 .hero-left p { color: var(--ehub-muted); font-size: .95rem; margin: 0; }
 
 /* ── Summary pills ── */
@@ -277,7 +277,7 @@ export default {
   display: flex; align-items: center; justify-content: center;
   font-size: .78rem; flex-shrink: 0;
 }
-.sp-icon.primary { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.sp-icon.primary { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 .sp-icon.gold { background: var(--role-owner-bg); color: var(--role-owner); }
 .sp-num { font-size: 1.05rem; font-weight: 800; color: var(--ehub-ink); line-height: 1; }
 .sp-lbl { font-size: .76rem; color: var(--ehub-muted); font-weight: 500; }
@@ -289,7 +289,7 @@ export default {
 /* ── Role badge (slot content inside vc-badges) ── */
 .role-badge {
   display: inline-flex; align-items: center; justify-content: center; gap: 5px;
-  font-size: .62rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
   padding: 4px 9px; border-radius: 6px;
   backdrop-filter: blur(8px); color: #fff;
   white-space: nowrap; width: 100%;
@@ -307,8 +307,8 @@ export default {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   transition: all .15s; white-space: nowrap; text-decoration: none;
 }
-.btn-maction:hover { background: var(--ehub-card); border-color: var(--ehub-primary); color: var(--ehub-primary); }
-.btn-maction.primary-action { background: var(--ehub-primary); border-color: var(--ehub-primary); color: #fff; }
+.btn-maction:hover { background: var(--ehub-card); border-color: var(--ehub-primary); color: var(--ehub-primary-text); }
+.btn-maction.primary-action { background: var(--ehub-primary-strong); border-color: var(--ehub-primary); color: #fff; }
 .btn-maction.primary-action:hover { opacity: .9; color: #fff; }
 
 /* ── New org card ── */
@@ -319,7 +319,7 @@ export default {
   transition: border-color .15s, color .15s, background .15s;
   text-align: center; min-height: 240px; text-decoration: none;
 }
-.new-org-card:hover { border-color: var(--ehub-primary); color: var(--ehub-primary); background: var(--ehub-primary-tint); }
+.new-org-card:hover { border-color: var(--ehub-primary); color: var(--ehub-primary-text); background: var(--ehub-primary-tint); }
 .new-org-card:only-child { grid-column: 1 / -1; }
 .new-ico { width: 52px; height: 52px; border-radius: 50%; border: 2px dashed currentColor; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
 .new-lbl { font-size: .9rem; font-weight: 600; }

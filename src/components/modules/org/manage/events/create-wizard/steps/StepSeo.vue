@@ -81,20 +81,20 @@ const previewCoverStyle = computed(() => props.form.cover_image
 .step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 28px; }
 .form-section { margin-bottom: 26px; }
 .form-label { font-size: .85rem; font-weight: 600; color: var(--ehub-ink); }
-.req-mark { color: #e23b3b; }
-.form-section-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ehub-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.req-mark { color: var(--ehub-danger-text); }
+.form-section-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ehub-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
 .form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--ehub-line); }
 .field-hint { font-size: .78rem; color: var(--ehub-muted); margin: 0; }
 .seo-prefix { font-size: .78rem; white-space: nowrap; }
 .url-preview-bar { display: flex; align-items: center; gap: 9px; margin-top: 8px; padding: 9px 13px; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 8px; font-size: .82rem; color: var(--ehub-ink); word-break: break-all; }
-.url-preview-bar svg { color: var(--ehub-primary); flex-shrink: 0; }
+.url-preview-bar svg { color: var(--ehub-primary-text); flex-shrink: 0; }
 .seo-char-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-top: 5px; }
 .char-count { font-size: .73rem; color: var(--ehub-muted); flex-shrink: 0; }
 
 .social-preview-card { border: 1px solid var(--ehub-line); border-radius: 12px; overflow: hidden; max-width: 460px; background: var(--ehub-card); }
 .spc-cover { height: 90px; }
 .spc-body { padding: 11px 15px 15px; }
-.spc-domain { font-size: .67rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ehub-muted); margin-bottom: 4px; }
+.spc-domain { font-size: .72rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ehub-muted); margin-bottom: 4px; }
 .spc-title { font-size: .92rem; font-weight: 700; color: var(--ehub-ink); margin-bottom: 4px; line-height: 1.3; }
 .spc-desc { font-size: .78rem; color: var(--ehub-muted); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 </style>

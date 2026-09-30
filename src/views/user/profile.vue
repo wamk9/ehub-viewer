@@ -366,7 +366,7 @@ onMounted(() => {
           <p class="set-desc">{{ $t('users.profile.overview.completeness_desc') }}</p>
           <div class="d-flex align-items-center gap-3 mb-3">
             <div class="comp-bar-wrap" style="flex:1"><div class="comp-bar-fill" :style="{ width: completeness + '%' }"></div></div>
-            <span style="font-size:.88rem;font-weight:800;color:var(--ehub-primary);flex-shrink:0">{{ completeness }}%</span>
+            <span style="font-size:.88rem;font-weight:800;color:var(--ehub-primary-text);flex-shrink:0">{{ completeness }}%</span>
           </div>
           <div class="comp-grid">
             <div class="comp-item" :class="profile.image ? 'done' : 'miss'">
@@ -407,7 +407,7 @@ onMounted(() => {
         <!-- Stats -->
         <div class="stat-grid mb-4">
           <div class="stat-card">
-            <div class="sc-ico" style="background:var(--ehub-primary-tint);color:var(--ehub-primary)"><font-awesome-icon :icon="['fas', 'trophy']" /></div>
+            <div class="sc-ico" style="background:var(--ehub-primary-tint);color:var(--ehub-primary-text)"><font-awesome-icon :icon="['fas', 'trophy']" /></div>
             <div class="sc-val">{{ profile.stats.events }}</div>
             <div class="sc-lbl">{{ $t('users.profile.overview.stats.events') }}</div>
           </div>
@@ -417,7 +417,7 @@ onMounted(() => {
             <div class="sc-lbl">{{ $t('users.profile.overview.stats.wins') }}</div>
           </div>
           <div class="stat-card">
-            <div class="sc-ico" style="background:rgba(31,138,91,.13);color:#1f8a5b"><font-awesome-icon :icon="['fas', 'users']" /></div>
+            <div class="sc-ico" style="background:rgba(31,138,91,.13);color:var(--ehub-success-text)"><font-awesome-icon :icon="['fas', 'users']" /></div>
             <div class="sc-val">{{ profile.stats.followers }}</div>
             <div class="sc-lbl">{{ $t('users.profile.overview.stats.followers') }}</div>
           </div>
@@ -788,7 +788,7 @@ onMounted(() => {
               <label class="form-label">{{ $t('users.profile.account.current_mail') }}</label>
               <div class="input-group">
                 <input type="email" class="form-control" :value="profile.mail" disabled />
-                <span v-if="profile.email_verified_at" class="input-group-text" style="color:#1f8a5b">
+                <span v-if="profile.email_verified_at" class="input-group-text" style="color:var(--ehub-success-text)">
                   <font-awesome-icon :icon="['fas', 'circle-check']" />
                 </span>
               </div>
@@ -892,7 +892,7 @@ onMounted(() => {
 }
 .nav-ico { width: 15px; text-align: center; font-size: .8rem; flex-shrink: 0; }
 .nav-item:hover { background: var(--ehub-field-bg); color: var(--ehub-ink); text-decoration: none; }
-.nav-item.active { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.nav-item.active { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 .nav-div { height: 1px; background: var(--ehub-line); margin: 6px 3px; }
 
 /* ── Main ── */
@@ -912,11 +912,11 @@ onMounted(() => {
   font-size: .97rem; font-weight: 700; color: var(--ehub-ink);
   margin: 0 0 3px; display: flex; align-items: center; gap: 8px;
 }
-.set-ico { color: var(--ehub-primary); font-size: .88rem; }
+.set-ico { color: var(--ehub-primary-text); font-size: .88rem; }
 .set-desc { font-size: .83rem; color: var(--ehub-muted); margin: 0 0 18px; line-height: 1.5; }
 .set-card.danger { border-color: color-mix(in srgb, #e23b3b 30%, var(--ehub-line)); }
-.set-card.danger h3 { color: #e23b3b; }
-.set-card.danger .set-ico { color: #e23b3b; }
+.set-card.danger h3 { color: var(--ehub-danger-text); }
+.set-card.danger .set-ico { color: var(--ehub-danger-text); }
 
 /* ── Form grids ── */
 .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -927,7 +927,7 @@ onMounted(() => {
 .comp-bar-fill { height: 100%; border-radius: 50rem; background: linear-gradient(90deg, var(--ehub-primary), #00d4ff); transition: width .5s ease; }
 .comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px; }
 .comp-item { display: flex; align-items: center; gap: 8px; font-size: .82rem; padding: 5px 0; }
-.comp-item.done { color: #1f8a5b; }
+.comp-item.done { color: var(--ehub-success-text); }
 .comp-item.miss { color: var(--ehub-muted); }
 
 /* ── Stats ── */
@@ -935,7 +935,7 @@ onMounted(() => {
 .stat-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 13px; padding: 16px 18px; }
 .sc-ico { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .8rem; margin-bottom: 10px; }
 .sc-val { font-size: 1.65rem; font-weight: 800; color: var(--ehub-ink); letter-spacing: -.03em; line-height: 1; }
-.sc-lbl { font-size: .7rem; color: var(--ehub-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+.sc-lbl { font-size: .72rem; color: var(--ehub-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
 
 /* ── Avatar picker ── */
 .avatar-picker-wrap { display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
@@ -1008,7 +1008,7 @@ onMounted(() => {
 .vis-seg label:last-child { border-right: 0; }
 .vis-seg label svg { font-size: 1rem; }
 .vis-seg input[type="radio"] { display: none; }
-.vis-seg input[type="radio"]:checked + label { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.vis-seg input[type="radio"]:checked + label { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 
 /* ── Toggle rows ── */
 .toggle-row {
@@ -1019,7 +1019,7 @@ onMounted(() => {
 .toggle-row:first-child { padding-top: 0; }
 .toggle-info .ti-label { font-size: .9rem; font-weight: 600; color: var(--ehub-ink); }
 .toggle-info .ti-desc  { font-size: .78rem; color: var(--ehub-muted); margin-top: 2px; }
-.form-check-input:checked { background-color: var(--ehub-primary); border-color: var(--ehub-primary); }
+.form-check-input:checked { background-color: var(--ehub-primary-strong); border-color: var(--ehub-primary); }
 
 /* ── OAuth logo ── */
 .oauth-logo {
@@ -1029,7 +1029,7 @@ onMounted(() => {
 
 /* ── Role chip ── */
 .role-chip { font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 50rem; }
-.role-chip.admin { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.role-chip.admin { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 .role-chip.member { background: var(--ehub-field-bg); color: var(--ehub-muted); }
 
 /* ── Responsive ── */

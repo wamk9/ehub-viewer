@@ -170,7 +170,7 @@ export default {
     padding: 1.4rem 1.6rem;
 }
 .gen-section__title {
-    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+    font-size: .72rem; font-weight: 700; letter-spacing: 0.08em;
     text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 0.75rem;
 }
 .invoice-list { display: flex; flex-direction: column; gap: 0.25rem; }

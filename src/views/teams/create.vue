@@ -67,12 +67,12 @@
             <!-- Name + Tag -->
             <div class="row g-3 mb-3">
               <div class="col-8">
-                <label class="form-label">{{ $t('pages.teams.create.s1.name') }} <span style="color:#e23b3b">*</span></label>
+                <label class="form-label">{{ $t('pages.teams.create.s1.name') }} <span style="color:var(--ehub-danger-text)">*</span></label>
                 <input v-model="form.name" type="text" class="form-control" :placeholder="$t('pages.teams.create.s1.name_ph')" maxlength="60" />
                 <div class="char-count"><span>{{ form.name.length }}</span>/60</div>
               </div>
               <div class="col-4">
-                <label class="form-label">{{ $t('pages.teams.create.s1.tag') }} <span style="color:#e23b3b">*</span></label>
+                <label class="form-label">{{ $t('pages.teams.create.s1.tag') }} <span style="color:var(--ehub-danger-text)">*</span></label>
                 <div class="input-group">
                   <span class="input-group-text tag-prefix">#</span>
                   <input v-model="form.tag" type="text" class="form-control" :placeholder="$t('pages.teams.create.s1.tag_ph')" maxlength="5" @input="form.tag = form.tag.toUpperCase()" />
@@ -184,7 +184,7 @@
                   <div class="cat-sel-name">{{ $t(`categories.names.${form.category}`) }}</div>
                   <div class="cat-sel-hint">{{ $t('pages.teams.create.s2.cat_selected') }}</div>
                 </div>
-                <font-awesome-icon icon="circle-check" style="color:var(--ehub-primary);font-size:1.1rem;margin-left:auto" />
+                <font-awesome-icon icon="circle-check" style="color:var(--ehub-primary-text);font-size:1.1rem;margin-left:auto" />
                 <button class="cat-change-btn" @click="form.category = ''">{{ $t('pages.teams.create.s2.cat_change') }}</button>
               </div>
             </div>
@@ -649,7 +649,7 @@ export default {
 .v-step { display: flex; gap: 13px; position: relative; cursor: pointer; }
 .v-step:not(:last-child) { padding-bottom: 6px; }
 .v-step:not(:last-child)::after { content: ''; position: absolute; left: 13px; top: 30px; width: 2px; bottom: 0; background: var(--ehub-line); z-index: 0; }
-.v-step.done:not(:last-child)::after { background: var(--ehub-primary); }
+.v-step.done:not(:last-child)::after { background: var(--ehub-primary-strong); }
 .v-dot {
   width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; position: relative; z-index: 1;
   border: 2px solid var(--ehub-line); background: var(--ehub-card);
@@ -657,17 +657,17 @@ export default {
   font-size: .74rem; font-weight: 700; color: var(--ehub-muted);
   transition: all .2s; margin-top: 2px;
 }
-.v-step.active .v-dot { border-color: var(--ehub-primary); color: var(--ehub-primary); background: var(--ehub-primary-tint); }
-.v-step.done .v-dot { border-color: var(--ehub-primary); background: var(--ehub-primary); color: #fff; }
+.v-step.active .v-dot { border-color: var(--ehub-primary); color: var(--ehub-primary-text); background: var(--ehub-primary-tint); }
+.v-step.done .v-dot { border-color: var(--ehub-primary); background: var(--ehub-primary-strong); color: #fff; }
 .v-label { padding-bottom: 22px; }
 .v-step-name { font-size: .85rem; font-weight: 700; color: var(--ehub-muted); line-height: 1.2; transition: color .15s; }
 .v-step-hint { font-size: .73rem; color: var(--ehub-muted); opacity: .65; margin-top: 2px; }
-.v-step.active .v-step-name { color: var(--ehub-primary); }
+.v-step.active .v-step-name { color: var(--ehub-primary-text); }
 .v-step.done .v-step-name { color: var(--ehub-ink); }
 
 /* Sidebar preview */
 .sb-preview { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--ehub-line); }
-.sb-preview-label { font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ehub-muted); margin-bottom: 10px; }
+.sb-preview-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ehub-muted); margin-bottom: 10px; }
 .sb-preview-card { border: 1px solid var(--ehub-line); border-radius: 12px; overflow: hidden; background: var(--ehub-card); }
 .sb-prev-banner { height: 44px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
 .stripe { position: absolute; inset: 0; background-image: repeating-linear-gradient(118deg,transparent 0 28px,rgba(255,255,255,.07) 28px 30px); }
@@ -681,7 +681,7 @@ export default {
 .sb-prev-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .sb-prev-info { flex: 1; min-width: 0; padding-top: 4px; }
 .sb-prev-name { font-size: .82rem; font-weight: 700; color: var(--ehub-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sb-prev-tag { font-size: .7rem; color: var(--ehub-muted); }
+.sb-prev-tag { font-size: .72rem; color: var(--ehub-muted); }
 
 /* ── Main content ── */
 .wiz-main { display: flex; flex-direction: column; min-height: calc(100vh - 60px); }
@@ -692,7 +692,7 @@ export default {
 /* ── Form helpers ── */
 .form-section { margin-bottom: 26px; }
 .form-section-label {
-  font-size: .7rem; font-weight: 700; text-transform: uppercase;
+  font-size: .72rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: .07em; color: var(--ehub-muted); margin-bottom: 10px;
   display: flex; align-items: center; gap: 8px;
 }
@@ -734,10 +734,10 @@ export default {
 
 /* ── Category selected badge ── */
 .cat-sel-badge { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-radius: 12px; background: var(--ehub-primary-tint); border: 1.5px solid var(--ehub-primary-border); }
-.cat-sel-ico { width: 38px; height: 38px; border-radius: 10px; background: var(--ehub-primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #fff; flex-shrink: 0; }
+.cat-sel-ico { width: 38px; height: 38px; border-radius: 10px; background: var(--ehub-primary-strong); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #fff; flex-shrink: 0; }
 .cat-sel-name { font-size: .92rem; font-weight: 700; color: var(--ehub-ink); }
 .cat-sel-hint { font-size: .73rem; color: var(--ehub-muted); }
-.cat-change-btn { font-size: .78rem; font-weight: 600; cursor: pointer; color: var(--ehub-primary); background: none; border: 1px solid var(--ehub-primary-border); border-radius: 8px; padding: 4px 12px; transition: background .12s; white-space: nowrap; }
+.cat-change-btn { font-size: .78rem; font-weight: 600; cursor: pointer; color: var(--ehub-primary-text); background: none; border: 1px solid var(--ehub-primary-border); border-radius: 8px; padding: 4px 12px; transition: background .12s; white-space: nowrap; }
 .cat-change-btn:hover { background: var(--ehub-primary-tint); }
 @keyframes badgeReveal { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: scale(1); } }
 .badge-reveal { animation: badgeReveal .2s ease both; }
@@ -748,13 +748,13 @@ export default {
 .vis-card:hover { border-color: var(--ehub-primary); }
 .vis-card.sel { border-color: var(--ehub-primary); background: var(--ehub-primary-tint); }
 .vi { font-size: 1.1rem; color: var(--ehub-muted); margin-bottom: 7px; }
-.vis-card.sel .vi { color: var(--ehub-primary); }
+.vis-card.sel .vi { color: var(--ehub-primary-text); }
 .vn { font-size: .88rem; font-weight: 700; color: var(--ehub-ink); margin-bottom: 2px; }
 .vd { font-size: .76rem; color: var(--ehub-muted); line-height: 1.4; }
 
 /* ── Toggle ── */
 .ehub-toggle { -webkit-appearance: none; appearance: none; width: 36px; height: 20px; border-radius: 10px; background: var(--ehub-line); cursor: pointer; position: relative; transition: background .15s; flex-shrink: 0; }
-.ehub-toggle:checked { background: var(--ehub-primary); }
+.ehub-toggle:checked { background: var(--ehub-primary-strong); }
 .ehub-toggle::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: transform .15s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
 .ehub-toggle:checked::after { transform: translateX(16px); }
 
@@ -788,8 +788,8 @@ export default {
 .rev-body { padding: 8px 16px 14px; }
 .rev-name { font-size: 1rem; font-weight: 700; color: var(--ehub-ink); margin: 6px 0 4px; }
 .rev-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-.rev-chip { font-size: .7rem; font-weight: 600; padding: 3px 9px; border-radius: 50rem; background: var(--ehub-field-bg); color: var(--ehub-muted); border: 1px solid var(--ehub-line); }
-.rev-chip.primary { background: var(--ehub-primary-tint); color: var(--ehub-primary); border-color: var(--ehub-primary-border); }
+.rev-chip { font-size: .72rem; font-weight: 600; padding: 3px 9px; border-radius: 50rem; background: var(--ehub-field-bg); color: var(--ehub-muted); border: 1px solid var(--ehub-line); }
+.rev-chip.primary { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); border-color: var(--ehub-primary-border); }
 
 /* ── Summary fields ── */
 .review-fields { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); overflow: hidden; }
@@ -805,7 +805,7 @@ export default {
 .pub-card:hover { border-color: var(--ehub-primary); }
 .pub-card.sel { border-color: var(--ehub-primary); background: var(--ehub-primary-tint); }
 .pi { font-size: 1.1rem; color: var(--ehub-muted); margin-bottom: 6px; }
-.pub-card.sel .pi { color: var(--ehub-primary); }
+.pub-card.sel .pi { color: var(--ehub-primary-text); }
 .pn { font-size: .88rem; font-weight: 700; color: var(--ehub-ink); margin-bottom: 2px; }
 .pd { font-size: .76rem; color: var(--ehub-muted); line-height: 1.4; }
 
@@ -833,10 +833,10 @@ export default {
   .v-step { flex-direction: column; align-items: center; flex: 1 0 62px; gap: 5px; padding-bottom: 0; }
   .v-step::after { display: none !important; }
   .v-step:not(:last-child)::before { content: ''; position: absolute; top: 15px; left: calc(50% + 15px); right: calc(-50% + 15px); height: 2px; background: var(--ehub-line); z-index: 0; }
-  .v-step.done:not(:last-child)::before { background: var(--ehub-primary); }
+  .v-step.done:not(:last-child)::before { background: var(--ehub-primary-strong); }
   .v-dot { position: relative; z-index: 1; }
   .v-label { padding-bottom: 0; text-align: center; }
-  .v-step-name { font-size: .67rem; font-weight: 600; line-height: 1.3; }
+  .v-step-name { font-size: .72rem; font-weight: 600; line-height: 1.3; }
   .v-step-hint { display: none; }
   .sb-team-row, .sb-preview { display: none; }
   .wiz-content { padding: 20px 16px; }

@@ -19,7 +19,7 @@
   line-height: 1.8;
 }
 .ehub-footer a {
-  color: var(--ehub-primary);
+  color: var(--ehub-primary-text);
   text-decoration: none;
 }
 .ehub-footer a:hover {

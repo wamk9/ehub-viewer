@@ -1,4 +1,5 @@
 import { createI18n } from 'vue-i18n'
+import { watch } from 'vue'
 
 // --- AUTO LOAD ALL LOCALES ---
 const messages = {}
@@ -76,5 +77,9 @@ const i18n = createI18n({
     },
   },
 })
+
+// Screen readers and browsers read the page in the language shown on screen.
+document.documentElement.lang = i18n.global.locale.value
+watch(i18n.global.locale, (value) => { document.documentElement.lang = value })
 
 export default i18n

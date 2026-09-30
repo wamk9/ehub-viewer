@@ -110,7 +110,7 @@ const summary = computed(() => {
 <style scoped>
 .step-title { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 4px; letter-spacing: -.02em; }
 .step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 28px; }
-.form-section-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ehub-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.form-section-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ehub-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
 .form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--ehub-line); }
 
 .review-event-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); overflow: hidden; max-width: 360px; }
@@ -120,8 +120,8 @@ const summary = computed(() => {
 .rev-logo img { width: 100%; height: 100%; object-fit: cover; }
 .rev-title { font-size: 1rem; font-weight: 700; color: var(--ehub-ink); margin: 0 0 6px; }
 .rev-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-.rev-chip { font-size: .7rem; font-weight: 600; padding: 3px 9px; border-radius: 50rem; background: var(--ehub-field-bg); color: var(--ehub-muted); border: 1px solid var(--ehub-line); }
-.rev-chip.primary { background: var(--ehub-primary-tint); color: var(--ehub-primary); border-color: var(--ehub-primary-border); }
+.rev-chip { font-size: .72rem; font-weight: 600; padding: 3px 9px; border-radius: 50rem; background: var(--ehub-field-bg); color: var(--ehub-muted); border: 1px solid var(--ehub-line); }
+.rev-chip.primary { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); border-color: var(--ehub-primary-border); }
 
 .review-fields { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); overflow: hidden; }
 .rf { display: flex; padding: 12px 16px; border-bottom: 1px solid var(--ehub-line); gap: 12px; align-items: flex-start; }
@@ -134,7 +134,7 @@ const summary = computed(() => {
 .pub-card:hover { border-color: var(--ehub-primary); }
 .pub-card.sel { border-color: var(--ehub-primary); background: var(--ehub-primary-tint); }
 .pub-card .pi { font-size: 1.1rem; color: var(--ehub-muted); margin-bottom: 6px; }
-.pub-card.sel .pi { color: var(--ehub-primary); }
+.pub-card.sel .pi { color: var(--ehub-primary-text); }
 .pub-card .pn { font-size: .88rem; font-weight: 700; color: var(--ehub-ink); margin-bottom: 2px; }
 .pub-card .pd { font-size: .76rem; color: var(--ehub-muted); line-height: 1.4; }
 

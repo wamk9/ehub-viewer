@@ -230,7 +230,7 @@ onMounted(() => fetchEvents(1))
   margin-bottom: 12px;
   color: var(--ehub-ink);
 }
-.home-hero h1 .accent { color: var(--ehub-primary); }
+.home-hero h1 .accent { color: var(--ehub-primary-text); }
 .home-hero p {
   position: relative;
   color: var(--ehub-muted);

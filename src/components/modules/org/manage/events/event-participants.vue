@@ -169,7 +169,7 @@ export default {
 .reg-row--header {
     background: rgba(255,255,255,0.06);
     color: rgba(255,255,255,0.4);
-    font-size: 0.7rem;
+    font-size: .72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -202,7 +202,7 @@ export default {
     display: flex; align-items: center; justify-content: center;
 }
 .reg-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.reg-avatar__initials { font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.6); }
+.reg-avatar__initials { font-size: .72rem; font-weight: 700; color: rgba(255,255,255,0.6); }
 .reg-user__info { display: flex; flex-direction: column; min-width: 0; }
 .reg-user__name { font-weight: 500; color: rgba(255,255,255,0.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .reg-user__username { font-size: 0.72rem; color: rgba(255,255,255,0.35); }
@@ -210,7 +210,7 @@ export default {
 .reg-date { color: rgba(255,255,255,0.45); white-space: nowrap; }
 .reg-gateway { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.reg-extra__label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.3); margin-bottom: 0.4rem; }
+.reg-extra__label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.3); margin-bottom: 0.4rem; }
 .reg-extra__grid { display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem; }
 .reg-extra__item { display: flex; gap: 0.4rem; font-size: 0.8rem; }
 .reg-extra__key { color: rgba(255,255,255,0.4); }

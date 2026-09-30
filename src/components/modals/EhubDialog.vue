@@ -74,9 +74,9 @@ export default {
 .ehub-dialog__hd h5 { font-size: 1rem; font-weight: 800; margin: 0; }
 .ehub-dialog__bd { padding: 20px 22px; overflow-y: auto; }
 .ehub-dialog__ico { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 14px; }
-.ehub-dialog__ico--danger { background: color-mix(in srgb, #e23b3b 12%, transparent); color: #e23b3b; }
+.ehub-dialog__ico--danger { background: color-mix(in srgb, #e23b3b 12%, transparent); color: var(--ehub-danger-text); }
 .ehub-dialog__ico--muted { background: var(--ehub-field-bg); color: var(--ehub-muted); }
-.ehub-dialog__ico--primary { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.ehub-dialog__ico--primary { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 .ehub-dialog__ft { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 22px; border-top: 1px solid var(--ehub-line); flex-wrap: wrap; }
 /* ── Centered (confirmation) variant ── */
 .ehub-dialog--centered { position: relative; text-align: center; }

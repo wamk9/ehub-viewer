@@ -77,5 +77,5 @@ export default {
 .cnd-input { position: relative; }
 .cnd-input .form-control { padding-right: 38px; transition: border-color .15s, box-shadow .15s; }
 .cnd-input.ok .form-control, .cnd-input.ok .form-control:focus { border-color: #1f8a5b; box-shadow: 0 0 0 3px color-mix(in srgb, #1f8a5b 15%, transparent); }
-.cnd-check { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #1f8a5b; }
+.cnd-check { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--ehub-success-text); }
 </style>

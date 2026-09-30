@@ -105,8 +105,8 @@ export default {
 .euc-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
 .euc-legend { display: flex; gap: 16px; font-size: .74rem; color: var(--ehub-muted); }
 .euc-cur { display: inline-flex; border: 1px solid var(--ehub-line); border-radius: 8px; overflow: hidden; }
-.euc-cur button { border: 0; background: transparent; color: var(--ehub-muted); font-size: .7rem; font-weight: 700; padding: 3px 10px; cursor: pointer; }
-.euc-cur button.on { background: var(--ehub-primary); color: #fff; }
+.euc-cur button { border: 0; background: transparent; color: var(--ehub-muted); font-size: .72rem; font-weight: 700; padding: 3px 10px; cursor: pointer; }
+.euc-cur button.on { background: var(--ehub-primary-strong); color: #fff; }
 .euc-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
 .sw.rev { background: var(--c-rev); }
@@ -114,7 +114,7 @@ export default {
 .euc-plot { position: relative; height: 170px; padding-left: 34px; }
 .euc-grid { position: absolute; inset: 0 0 22px 34px; pointer-events: none; border-bottom: 1px solid var(--ehub-line); }
 .euc-gl { position: absolute; left: 0; right: 0; border-top: 1px dashed color-mix(in srgb, var(--ehub-line) 80%, transparent); }
-.euc-gl span { position: absolute; right: calc(100% + 6px); top: -7px; font-size: .64rem; color: var(--ehub-muted); font-variant-numeric: tabular-nums; }
+.euc-gl span { position: absolute; right: calc(100% + 6px); top: -7px; font-size: .72rem; color: var(--ehub-muted); font-variant-numeric: tabular-nums; }
 .euc-cols { position: absolute; inset: 0 0 0 34px; display: flex; }
 .euc-col { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; outline: none; cursor: default; border-radius: 8px; }
 .euc-col.on { background: color-mix(in srgb, var(--ehub-field-bg) 70%, transparent); }
@@ -123,12 +123,12 @@ export default {
 .bar.rev { background: var(--c-rev); }
 .bar.fee { background: var(--c-fee); }
 .euc-col.partial .bar { opacity: .55; }
-.euc-x { position: absolute; bottom: 2px; font-size: .68rem; color: var(--ehub-muted); text-transform: capitalize; }
+.euc-x { position: absolute; bottom: 2px; font-size: .72rem; color: var(--ehub-muted); text-transform: capitalize; }
 .euc-tip { position: absolute; top: 4px; left: calc(50% + 14px); z-index: 5; min-width: 190px; background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 10px; box-shadow: 0 10px 24px rgba(0,0,0,.18); padding: 9px 11px; font-size: .74rem; color: var(--ehub-ink); pointer-events: none; }
 .euc-tip.left { left: auto; right: calc(50% + 14px); }
 .euc-tip .t { font-weight: 700; margin-bottom: 5px; }
 .euc-tip .r { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
 .euc-tip .r b { margin-left: auto; font-variant-numeric: tabular-nums; }
 .euc-tip .muted { color: var(--ehub-muted); }
-.euc-note { font-size: .68rem; color: var(--ehub-muted); margin: 6px 0 0; }
+.euc-note { font-size: .72rem; color: var(--ehub-muted); margin: 6px 0 0; }
 </style>

@@ -396,7 +396,7 @@ export default {
 
 .input-group:focus-within .input-group-text {
   border-color: var(--ehub-primary);
-  color: var(--ehub-primary);
+  color: var(--ehub-primary-text);
 }
 
 .input-group:has(.form-control.is-valid) .input-group-text {

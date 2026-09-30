@@ -122,7 +122,7 @@ export default {
 <style scoped>
 .epe-cols, .epe-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 38px; gap: 8px; align-items: center; }
 .epe-cols.cash, .epe-row.cash { grid-template-columns: minmax(0, 1fr) 280px minmax(0, 1.3fr) 38px; }
-.epe-cols { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); margin-bottom: 5px; }
+.epe-cols { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); margin-bottom: 5px; }
 .epe-row { margin-bottom: 8px; }
 .epe-ctl { height: 38px; font-size: .85rem; }
 .epe-cash { display: flex; align-items: center; gap: 8px; }
@@ -131,16 +131,16 @@ export default {
 .epe-cash .input-group-text { font-size: .8rem; }
 .epe-cash-hd { display: flex; align-items: center; gap: 8px; }
 .epe-mode { display: inline-flex; border: 1px solid var(--ehub-line); border-radius: 6px; overflow: hidden; }
-.epe-mode button { border: 0; background: transparent; color: var(--ehub-muted); font-size: .66rem; font-weight: 700; padding: 1px 8px; cursor: pointer; }
-.epe-mode button.on { background: var(--ehub-primary); color: #fff; }
+.epe-mode button { border: 0; background: transparent; color: var(--ehub-muted); font-size: .72rem; font-weight: 700; padding: 1px 8px; cursor: pointer; }
+.epe-mode button.on { background: var(--ehub-primary-strong); color: #fff; }
 .epe-amt { font-size: .8rem; font-weight: 700; color: var(--ehub-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.epe-del { width: 38px; height: 38px; border-radius: 8px; border: 1px solid color-mix(in srgb,#e23b3b 30%,transparent); background: color-mix(in srgb,#e23b3b 6%,transparent); color: #e23b3b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .85rem; }
+.epe-del { width: 38px; height: 38px; border-radius: 8px; border: 1px solid color-mix(in srgb,#e23b3b 30%,transparent); background: color-mix(in srgb,#e23b3b 6%,transparent); color: var(--ehub-danger-text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .85rem; }
 .epe-del:hover { background: color-mix(in srgb,#e23b3b 14%,transparent); }
 .epe-empty { font-size: .8rem; color: var(--ehub-muted); margin: 0 0 10px; }
 .epe-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
 .epe-sum { font-size: .76rem; color: var(--ehub-muted); font-weight: 600; }
 .epe-sum.ok { color: #2f9e44; }
-.epe-sum.bad { color: #e23b3b; }
+.epe-sum.bad { color: var(--ehub-danger-text); }
 @media (max-width: 640px) {
   .epe-cols { display: none; }
   .epe-row, .epe-row.cash { grid-template-columns: minmax(0, 1fr) 38px; padding-bottom: 8px; border-bottom: 1px solid var(--ehub-line); }

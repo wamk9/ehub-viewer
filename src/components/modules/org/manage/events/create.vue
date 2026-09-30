@@ -344,7 +344,7 @@ async function submit(publication) {
 .wiz-content { flex: 1; padding: 36px 44px; }
 /* Actions sit at the end of the content (not stuck to the viewport). */
 .wiz-restore { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--ehub-primary-tint); border: 1px solid color-mix(in srgb, var(--ehub-primary) 30%, transparent); border-radius: 12px; padding: 12px 14px; margin-bottom: 24px; }
-.wiz-restore__ico { color: var(--ehub-primary); font-size: 1.1rem; }
+.wiz-restore__ico { color: var(--ehub-primary-text); font-size: 1.1rem; }
 .wiz-restore__txt { flex: 1; min-width: 200px; display: flex; flex-direction: column; font-size: .82rem; color: var(--ehub-muted); }
 .wiz-restore__txt strong { color: var(--ehub-ink); font-size: .88rem; }
 .wiz-actions { border-top: 1px solid var(--ehub-line); margin: 0 44px; padding: 18px 0 32px; display: flex; align-items: center; gap: 10px; }

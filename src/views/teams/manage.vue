@@ -434,7 +434,7 @@
           <p class="set-desc">{{ $t('pages.teams.manage.settings.danger_desc') }}</p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
             <button class="btn round px-4"
-              style="background:color-mix(in srgb,#e23b3b 12%,transparent);color:#e23b3b;border:1px solid color-mix(in srgb,#e23b3b 35%,transparent)"
+              style="background:color-mix(in srgb,#e23b3b 12%,transparent);color:var(--ehub-danger-text);border:1px solid color-mix(in srgb,#e23b3b 35%,transparent)"
               @click="openModal('delete')">
               <font-awesome-icon icon="trash" class="me-2" />
               {{ $t('pages.teams.manage.settings.delete') }}
@@ -1063,7 +1063,7 @@ export default {
 
 <style scoped>
 .mgmt-state { display: flex; align-items: center; justify-content: center; min-height: 40vh; }
-.cc-link { font-size: .78rem; font-weight: 600; color: var(--ehub-primary); cursor: pointer; background: none; border: 0; padding: 0; }
+.cc-link { font-size: .78rem; font-weight: 600; color: var(--ehub-primary-text); cursor: pointer; background: none; border: 0; padding: 0; }
 .cc-link:hover { text-decoration: underline; }
 .td-name  { font-weight: 600; }
 .set-desc { margin-bottom: 18px; }
@@ -1072,7 +1072,7 @@ export default {
 .act-pag-nav { display: flex; gap: 4px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
 .pag-btn { min-width: 32px; height: 32px; padding: 0 8px; border-radius: 8px; border: 1px solid var(--ehub-line) !important; background: var(--ehub-card) !important; color: var(--ehub-ink) !important; font-size: .82rem; cursor: pointer; transition: all .15s; appearance: none; outline: none; display: inline-flex; align-items: center; justify-content: center; }
 .pag-btn:hover:not(:disabled) { background: var(--ehub-field-bg) !important; }
-.pag-btn.active { background: var(--ehub-primary) !important; color: #fff !important; border-color: var(--ehub-primary) !important; }
+.pag-btn.active { background: var(--ehub-primary-strong) !important; color: #fff !important; border-color: var(--ehub-primary) !important; }
 .pag-btn:disabled { opacity: .4; cursor: default; }
 .act-cal-group { margin-bottom: 18px; }
 .act-cal-date { font-size: .78rem; font-weight: 700; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .04em; padding: 0 2px 8px; }
@@ -1083,17 +1083,17 @@ export default {
 .act-text { font-size: .82rem; color: var(--ehub-ink); line-height: 1.4; }
 .act-text :deep(strong) { font-weight: 700; }
 .act-time { font-size: .72rem; color: var(--ehub-muted); margin-top: 2px; }
-.act-btn.up:hover  { background: var(--ehub-primary-tint); color: var(--ehub-primary); border-color: var(--ehub-primary-border); }
+.act-btn.up:hover  { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); border-color: var(--ehub-primary-border); }
 
 /* Team avatars are rounded squares (org/event use circles). */
 section .m-av { border-radius: 8px; }
 section .m-av-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 
-.role-chip { font-size: .7rem; font-weight: 700; padding: 3px 9px; border-radius: 50rem; display: inline-block; }
-.role-select { font-size: .7rem; font-weight: 700; padding: 3px 8px; border-radius: 50rem; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); color: var(--ehub-ink); cursor: pointer; }
+.role-chip { font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 50rem; display: inline-block; }
+.role-select { font-size: .72rem; font-weight: 700; padding: 3px 8px; border-radius: 50rem; border: 1px solid var(--ehub-line); background: var(--ehub-field-bg); color: var(--ehub-ink); cursor: pointer; }
 .role-chip.captain { background: color-mix(in srgb,var(--ehub-gold) 20%,transparent); color: color-mix(in srgb,var(--ehub-gold),#000 28%); }
-.role-chip.vice    { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
-.role-chip.starter { background: color-mix(in srgb,#1f8a5b 14%,transparent); color: #1f8a5b; }
+.role-chip.vice    { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
+.role-chip.starter { background: color-mix(in srgb,#1f8a5b 14%,transparent); color: var(--ehub-success-text); }
 .role-chip.reserve { background: var(--ehub-field-bg); color: var(--ehub-muted); }
 .role-chip.coach   { background: color-mix(in srgb,#7C3AED 14%,transparent); color: #7C3AED; }
 .role-chip.member  { background: var(--ehub-field-bg); color: var(--ehub-muted); }
@@ -1132,7 +1132,7 @@ section .m-av-img { position: absolute; inset: 0; width: 100%; height: 100%; obj
 }
 .mob-mm-remove {
   background: color-mix(in srgb,#e23b3b 12%,transparent);
-  color: #e23b3b; border: 1px solid color-mix(in srgb,#e23b3b 35%,transparent);
+  color: var(--ehub-danger-text); border: 1px solid color-mix(in srgb,#e23b3b 35%,transparent);
   white-space: nowrap;
 }
 .mob-mm-slide-enter-active { transition: transform .22s ease; }
@@ -1146,11 +1146,11 @@ section .m-av-img { position: absolute; inset: 0; width: 100%; height: 100%; obj
 
 .app-row { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; border-bottom: 1px solid var(--ehub-line); }
 .app-row:last-child { border-bottom: 0; }
-.app-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--ehub-primary); color: #fff; font-size: .85rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.app-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--ehub-primary-strong); color: #fff; font-size: .85rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .app-info { flex: 1; min-width: 0; }
 .app-name { font-weight: 700; color: var(--ehub-ink); font-size: .95rem; }
 .app-handle { font-weight: 400; color: var(--ehub-muted); font-size: .85rem; margin-left: 4px; }
-.app-role { font-size: .78rem; color: var(--ehub-primary); font-weight: 600; margin-top: 2px; text-transform: capitalize; }
+.app-role { font-size: .78rem; color: var(--ehub-primary-text); font-weight: 600; margin-top: 2px; text-transform: capitalize; }
 .app-msg { font-size: .88rem; color: var(--ehub-muted); margin-top: 6px; line-height: 1.5; }
 .app-actions { display: flex; flex-direction: column; flex-shrink: 0; }
 

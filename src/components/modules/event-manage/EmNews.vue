@@ -96,7 +96,7 @@ export default {
         </div>
         <div v-if="!em.notices.length" class="cc-empty">{{ $t('pages.event.manage.news.history_empty') }}</div>
         <div v-for="n in em.notices" :key="n.id" class="act-item">
-          <div class="act-dot" style="background:var(--ehub-primary-tint);color:var(--ehub-primary)"><font-awesome-icon :icon="['fas', 'envelope']" /></div>
+          <div class="act-dot" style="background:var(--ehub-primary-tint);color:var(--ehub-primary-text)"><font-awesome-icon :icon="['fas', 'envelope']" /></div>
           <div style="min-width:0">
             <p class="act-text"><b>{{ n.subject }}</b></p>
             <p v-if="n.message" class="act-msg">{{ n.message }}</p>

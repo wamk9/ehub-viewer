@@ -271,7 +271,7 @@ function goToTeam(team) {
       <div class="ehub-card p-5" style="max-width:420px;width:90%;">
         <div style="text-align:center;margin-bottom:24px;">
           <div class="modal-icon-wrap">
-            <font-awesome-icon :icon="['fas', 'shield-halved']" style="font-size:1.4rem;color:var(--ehub-primary);" />
+            <font-awesome-icon :icon="['fas', 'shield-halved']" style="font-size:1.4rem;color:var(--ehub-primary-text);" />
           </div>
           <h5 style="font-weight:800;margin-bottom:6px;">{{ $t('pages.teams.mine.modal.title') }}</h5>
           <p style="color:var(--ehub-muted);font-size:.88rem;margin:0;">{{ $t('pages.teams.mine.modal.subtitle') }}</p>
@@ -340,7 +340,7 @@ function goToTeam(team) {
   font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 800;
   letter-spacing: -.025em; margin: 0 0 6px; color: var(--ehub-ink);
 }
-.hero-left h1 .accent { color: var(--ehub-primary); }
+.hero-left h1 .accent { color: var(--ehub-primary-text); }
 .hero-left p { color: var(--ehub-muted); font-size: .95rem; margin: 0; }
 
 /* ── Summary pills ── */
@@ -356,7 +356,7 @@ function goToTeam(team) {
   display: flex; align-items: center; justify-content: center;
   font-size: .78rem; flex-shrink: 0;
 }
-.sp-icon.primary { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.sp-icon.primary { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 .sp-icon.gold    { background: var(--role-captain-bg);   color: var(--role-captain); }
 .sp-icon.violet  { background: var(--role-player-bg);    color: var(--role-player); }
 .sp-num { font-size: 1.05rem; font-weight: 800; color: var(--ehub-ink); line-height: 1; }
@@ -376,7 +376,7 @@ function goToTeam(team) {
 /* ── Role badge (slot content inside vc-badges) ── */
 .role-badge {
   display: inline-flex; align-items: center; justify-content: center; gap: 5px;
-  font-size: .62rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
   padding: 4px 9px; border-radius: 6px;
   backdrop-filter: blur(8px); color: #fff;
   white-space: nowrap; width: 100%;
@@ -394,8 +394,8 @@ function goToTeam(team) {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   transition: all .15s; white-space: nowrap;
 }
-.btn-maction:hover { background: var(--ehub-card); border-color: var(--ehub-primary); color: var(--ehub-primary); }
-.btn-maction.primary-action { background: var(--ehub-primary); border-color: var(--ehub-primary); color: #fff; }
+.btn-maction:hover { background: var(--ehub-card); border-color: var(--ehub-primary); color: var(--ehub-primary-text); }
+.btn-maction.primary-action { background: var(--ehub-primary-strong); border-color: var(--ehub-primary); color: #fff; }
 .btn-maction.primary-action:hover { filter: brightness(1.1); }
 
 /* ── New team card ── */
@@ -406,7 +406,7 @@ function goToTeam(team) {
   transition: border-color .15s, color .15s, background .15s;
   text-align: center; min-height: 240px;
 }
-.new-team-card:hover { border-color: var(--ehub-primary); color: var(--ehub-primary); background: var(--ehub-primary-tint2); }
+.new-team-card:hover { border-color: var(--ehub-primary); color: var(--ehub-primary-text); background: var(--ehub-primary-tint2); }
 .new-team-card:only-child { grid-column: 1 / -1; }
 .new-ico {
   width: 52px; height: 52px; border-radius: 50%; border: 2px dashed currentColor;
@@ -438,8 +438,8 @@ function goToTeam(team) {
   color: var(--ehub-muted); display: flex; align-items: center; gap: 8px; margin: 0 0 12px;
 }
 .invites-badge {
-  background: var(--ehub-primary); color: #fff;
-  font-size: .7rem; font-weight: 700; border-radius: 20px; padding: 2px 7px;
+  background: var(--ehub-primary-strong); color: #fff;
+  font-size: .72rem; font-weight: 700; border-radius: 20px; padding: 2px 7px;
 }
 .invites-list { display: flex; flex-direction: column; gap: 10px; }
 .invite-card {
@@ -452,7 +452,7 @@ function goToTeam(team) {
   width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
   background: var(--ehub-primary-tint); border: 1px solid var(--ehub-line);
   display: flex; align-items: center; justify-content: center;
-  color: var(--ehub-primary); font-size: 1.1rem; overflow: hidden;
+  color: var(--ehub-primary-text); font-size: 1.1rem; overflow: hidden;
 }
 .invite-logo img { width: 100%; height: 100%; object-fit: cover; }
 .invite-logo-initials { font-size: .85rem; font-weight: 700; color: #fff; line-height: 1; }
@@ -467,7 +467,7 @@ function goToTeam(team) {
 }
 .inv-btn:disabled { opacity: .5; cursor: not-allowed; }
 .inv-btn.accept {
-  background: var(--ehub-primary); border-color: var(--ehub-primary); color: #fff;
+  background: var(--ehub-primary-strong); border-color: var(--ehub-primary); color: #fff;
 }
 .inv-btn.accept:hover:not(:disabled) { opacity: .88; }
 .inv-btn.reject {

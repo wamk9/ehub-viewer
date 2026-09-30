@@ -150,9 +150,9 @@ export default {
 .efd-grid label { font-size: .72rem; font-weight: 700; color: var(--ehub-ink); }
 .efd-grid .form-control { height: 38px; font-size: .85rem; }
 .s1 { grid-column: span 1; } .s2 { grid-column: span 2; } .s3 { grid-column: span 3; } .s4 { grid-column: span 4; }
-.bad { color: #e23b3b; font-size: .72rem; }
-.efd-cep-spin { position: absolute; right: 10px; top: 11px; color: var(--ehub-primary); }
-.efd-error { display: flex; gap: 7px; font-size: .8rem; color: #e23b3b; margin: 12px 0 0; }
+.bad { color: var(--ehub-danger-text); font-size: .72rem; }
+.efd-cep-spin { position: absolute; right: 10px; top: 11px; color: var(--ehub-primary-text); }
+.efd-error { display: flex; gap: 7px; font-size: .8rem; color: var(--ehub-danger-text); margin: 12px 0 0; }
 @media (max-width: 560px) {
   .efd-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .s1, .s2 { grid-column: span 1; } .s3, .s4 { grid-column: span 2; }

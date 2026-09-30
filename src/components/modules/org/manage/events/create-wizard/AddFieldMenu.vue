@@ -43,10 +43,10 @@ onBeforeUnmount(() => { document.removeEventListener('mousedown', onDoc); docume
 
 <style scoped>
 .afm { position: relative; display: inline-block; }
-.afm-caret { font-size: .6rem; margin-left: 8px; opacity: .7; }
+.afm-caret { font-size: .72rem; margin-left: 8px; opacity: .7; }
 .afm-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; min-width: 230px; max-height: 300px; overflow-y: auto; background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,.25); padding: 6px; }
 .afm-item { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; color: var(--ehub-ink); font-size: .82rem; font-weight: 500; text-align: left; padding: 7px 10px; border-radius: 8px; cursor: pointer; }
-.afm-item svg { width: 14px; color: var(--ehub-primary); font-size: .78rem; }
+.afm-item svg { width: 14px; color: var(--ehub-primary-text); font-size: .78rem; }
 .afm-item:hover { background: var(--ehub-primary-tint); }
-.afm-sep { font-size: .64rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 8px 10px 4px; border-top: 1px solid var(--ehub-line); margin-top: 4px; }
+.afm-sep { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ehub-muted); padding: 8px 10px 4px; border-top: 1px solid var(--ehub-line); margin-top: 4px; }
 </style>

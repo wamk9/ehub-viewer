@@ -238,7 +238,7 @@ watch(() => props.event, newEvent => {
 }
 .gen-section--danger { border-color: rgba(220,53,69,0.3); }
 .gen-section__title {
-    font-size: 0.7rem;
+    font-size: .72rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;

@@ -44,12 +44,12 @@ export default {
 .stat-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 13px; padding: 17px 19px; }
 .sc-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px; }
 .sc-ico { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .82rem; }
-.sc-ico.primary { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
+.sc-ico.primary { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
 .sc-ico.gold { background: color-mix(in srgb, var(--ehub-gold) 18%, transparent); color: color-mix(in srgb, var(--ehub-gold), #000 28%); }
 .sc-ico.purple { background: color-mix(in srgb, #7C3AED 14%, transparent); color: #7C3AED; }
-.sc-ico.green { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: #1f8a5b; }
+.sc-ico.green { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: var(--ehub-success-text); }
 .sc-delta { font-size: .72rem; font-weight: 700; color: var(--ehub-muted); display: flex; align-items: center; gap: 3px; }
-.sc-delta.up { color: #1f8a5b; }
+.sc-delta.up { color: var(--ehub-success-text); }
 .sc-val { font-size: 1.75rem; font-weight: 800; color: var(--ehub-ink); letter-spacing: -.03em; line-height: 1; }
 .sc-lbl { font-size: .72rem; color: var(--ehub-muted); margin-top: 3px; font-weight: 500; }
 </style>

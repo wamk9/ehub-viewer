@@ -98,15 +98,15 @@ function removeExtra(form, i) {
 .step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 28px; }
 .form-section { margin-bottom: 26px; }
 .form-label { font-size: .85rem; font-weight: 600; color: var(--ehub-ink); }
-.req-mark { color: #e23b3b; }
+.req-mark { color: var(--ehub-danger-text); }
 .char-count { font-size: .73rem; color: var(--ehub-muted); text-align: right; margin-top: 3px; }
-.form-section-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ehub-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.form-section-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ehub-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
 .form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--ehub-line); }
 .field-hint { font-size: .78rem; color: var(--ehub-muted); }
 
 .pts-table-wrap { max-height: 320px; overflow-y: auto; border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); }
 .pts-table { width: 100%; border-collapse: collapse; }
-.pts-table th { position: sticky; top: 0; background: var(--ehub-field-bg); font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); padding: 8px 12px; border-bottom: 1px solid var(--ehub-line); text-align: left; }
+.pts-table th { position: sticky; top: 0; background: var(--ehub-field-bg); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); padding: 8px 12px; border-bottom: 1px solid var(--ehub-line); text-align: left; }
 .pts-table td { padding: 6px 12px; border-bottom: 1px solid var(--ehub-line); }
 .pts-table tbody tr:last-child td { border-bottom: 0; }
 .pos-lbl { font-size: .88rem; font-weight: 600; color: var(--ehub-ink); }
@@ -116,5 +116,5 @@ function removeExtra(form, i) {
 .extra-pts-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
 .extra-pts-row input.form-control-sm { flex: 1; }
 .stage-del { width: 26px; height: 26px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: var(--ehub-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .75rem; flex-shrink: 0; }
-.stage-del:hover { border-color: color-mix(in srgb,#e23b3b 35%,transparent); background: color-mix(in srgb,#e23b3b 10%,transparent); color: #e23b3b; }
+.stage-del:hover { border-color: color-mix(in srgb,#e23b3b 35%,transparent); background: color-mix(in srgb,#e23b3b 10%,transparent); color: var(--ehub-danger-text); }
 </style>

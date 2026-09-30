@@ -46,6 +46,6 @@ function select(icon) {
 .ipm-close:hover { background: var(--ehub-field-bg); }
 .ipm-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
 .ipm-opt { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 0; background: transparent; border-radius: 7px; cursor: pointer; font-size: .95rem; color: var(--ehub-muted); transition: all .1s; }
-.ipm-opt:hover { background: var(--ehub-primary-tint); color: var(--ehub-primary); }
-.ipm-opt.sel { background: var(--ehub-primary); color: #fff; }
+.ipm-opt:hover { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
+.ipm-opt.sel { background: var(--ehub-primary-strong); color: #fff; }
 </style>

@@ -116,9 +116,9 @@ function apply() {
 .gam-btns { display: flex; gap: 6px; flex-wrap: wrap; }
 .gam-btn { min-width: 40px; padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--ehub-line); background: var(--ehub-card); color: var(--ehub-ink); font-weight: 700; font-size: .85rem; cursor: pointer; }
 .gam-btn:hover { border-color: var(--ehub-primary); }
-.gam-btn.sel { border-color: var(--ehub-primary); background: var(--ehub-primary); color: #fff; }
+.gam-btn.sel { border-color: var(--ehub-primary); background: var(--ehub-primary-strong); color: #fff; }
 .gam-summary { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0 4px; }
 .gam-chip { display: inline-flex; align-items: center; font-size: .74rem; font-weight: 600; padding: 3px 10px; border-radius: 50rem; background: var(--ehub-field-bg); color: var(--ehub-muted); border: 1px solid var(--ehub-line); }
-.gam-chip.hi { background: var(--ehub-primary-tint); color: var(--ehub-primary); border-color: var(--ehub-primary-border); }
+.gam-chip.hi { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); border-color: var(--ehub-primary-border); }
 .gam-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
 </style>
