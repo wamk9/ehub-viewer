@@ -67,6 +67,7 @@ export default {
       showGatewayModal: false,
       registerError: null,
       cancelOpen: false,
+      focusStage: null,
       cancelling: false,
       articles: [],
       articlesLoading: false,
@@ -142,17 +143,39 @@ export default {
       this.finishedStages.forEach((stage, si) => {
         stage.results.forEach(result => {
           const key = result.registration_id;
-          if (!map[key]) map[key] = { user: result.user, stageScores: {}, total: 0 };
+          if (!map[key]) map[key] = { registration_id: key, user: result.user, stageScores: {}, stagePos: {}, total: 0, wins: 0 };
           const score = result.score ?? 0;
           map[key].stageScores[si] = score;
+          map[key].stagePos[si] = result.position ?? null;
           map[key].total += score;
+          if (result.position === 1) map[key].wins += 1;
         });
       });
-      return Object.values(map)
-        .sort((a, b) => b.total - a.total)
-        .map((e, i) => ({ ...e, position: i + 1 }));
+      // Points first, then stage wins; entries still level share the position.
+      const sorted = Object.values(map).sort((a, b) => b.total - a.total || b.wins - a.wins);
+      let prev = null;
+      return sorted.map((e, i) => {
+        const tied = prev && prev.total === e.total && prev.wins === e.wins;
+        const position = tied ? prev.position : i + 1;
+        prev = { ...e, position };
+        return prev;
+      });
     },
-    leaderEntry() { return this.standings[0] || null; },
+    hasTies() {
+      const seen = new Set();
+      return this.standings.some((e) => (seen.has(e.position) ? true : (seen.add(e.position), false)));
+    },
+    leaders() { return this.standings.filter((e) => e.position === 1); },
+    leaderEntry() { return this.leaders[0] || null; },
+    myRegId() { return this.event?.user_registration?.id || null; },
+    // The signed-in participant's own numbers, so they do not have to hunt for their name.
+    myStanding() { return this.myRegId ? this.standings.find((e) => e.registration_id === this.myRegId) || null : null; },
+    myStageResults() {
+      if (!this.myRegId) return [];
+      return (this.event?.stages || [])
+        .map((st) => ({ stage: st, r: (st.results || []).find((x) => x.registration_id === this.myRegId) }))
+        .filter((x) => x.r);
+    },
     nextStage() { return (this.event?.stages || []).find(s => !s.finished) || null; },
     regulationCards() { return this.$tm(`events.show.regulation.${this.eventFormat}`) || []; },
     eventGrad() {
@@ -277,6 +300,10 @@ export default {
       if (this.$store.getters.getToken && this.regOpen && !this.event?.user_registration) this.handleRegister();
     }
     const tab = this.$route.query.tab;
+    if (this.$route.query.stage) {
+      this.openStage(String(this.$route.query.stage));
+      return;
+    }
     if (tab === 'participants') this.loadParticipants();
     else if (tab === 'news') this.loadArticles();
     else if (tab) this.activeTab = tab;
@@ -295,6 +322,13 @@ export default {
       const date = d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
       if (!d.getHours() && !d.getMinutes()) return date;
       return date + ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    },
+    // Open the Stages tab on one stage (from a notification or "my results").
+    openStage(route) {
+      this.activeTab = 'stages';
+      this.focusStage = route;
+      this.$router.replace({ query: { ...this.$route.query, tab: 'stages', stage: route } });
+      this.$nextTick(() => document.getElementById('stage-' + route)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
     },
     async shareEvent() {
       const url = window.location.origin + this.$route.path;
@@ -634,19 +668,31 @@ export default {
           </div>
 
           <!-- Highlight row: leader + next stage -->
-          <div v-if="leaderEntry || nextStage" class="highlight-row">
+          <div v-if="leaderEntry || nextStage || myStanding" class="highlight-row">
+            <div v-if="myStanding" class="hl-card me">
+              <div class="hl-ico"><font-awesome-icon :icon="['fas', 'user']" /></div>
+              <div class="hl-me">
+                <div class="k">{{ $t('events.show.me.title') }}</div>
+                <div class="v">{{ $t('events.show.me.position', { p: myStanding.position, n: standings.length }) }}<template v-if="standings.filter((e) => e.position === myStanding.position).length > 1">{{ ' (' + $t('events.show.me.tie') + ')' }}</template> · {{ myStanding.total }} {{ $t('events.show.highlights.pts') }}</div>
+                <div class="hl-me__stages">
+                  <button v-for="x in myStageResults" :key="x.stage.id" type="button" class="hl-me__chip" @click="openStage(x.stage.route)">
+                    {{ x.stage.name }}: <b>{{ x.r.position }}º</b> · {{ x.r.score ?? 0 }} {{ $t('events.show.highlights.pts') }}
+                  </button>
+                </div>
+              </div>
+            </div>
             <div v-if="leaderEntry" class="hl-card leader">
               <div class="hl-ico"><font-awesome-icon :icon="['fas', 'trophy']" /></div>
               <div>
                 <div class="k">{{ event.finished ? $t('events.show.highlights.champion') : $t('events.show.highlights.leader') }}</div>
-                <router-link
-                  v-if="leaderEntry.user?.username"
-                  :to="`/profile/${leaderEntry.user.username}`"
-                  class="v"
-                  style="text-decoration:none;color:inherit;"
-                >{{ leaderEntry.user?.name || '—' }}</router-link>
-                <div v-else class="v">{{ leaderEntry.user?.name || '—' }}</div>
-                <div class="s">{{ leaderEntry.total }} {{ $t('events.show.highlights.pts') }}</div>
+                <div class="v">
+                  <template v-for="(l, li) in leaders" :key="l.registration_id">
+                    <span v-if="li">{{ li === leaders.length - 1 ? ' ' + $t('events.show.me.and') + ' ' : ', ' }}</span>
+                    <router-link v-if="l.user?.username" :to="`/profile/${l.user.username}`" style="text-decoration:none;color:inherit;">{{ l.user?.name || '—' }}</router-link>
+                    <span v-else>{{ l.user?.name || '—' }}</span>
+                  </template>
+                </div>
+                <div class="s">{{ leaderEntry.total }} {{ $t('events.show.highlights.pts') }}<template v-if="leaders.length > 1"> · {{ $t('events.show.me.tied') }}</template></div>
               </div>
             </div>
             <div v-if="nextStage" class="hl-card next">
@@ -805,7 +851,7 @@ export default {
             <p class="mb-0 mt-2">{{ $t('events.show.stages.empty') }}</p>
           </div>
           <div v-else class="stage-list">
-            <div v-for="(stage, idx) in event.stages" :key="stage.id" class="stage-item">
+            <div v-for="(stage, idx) in event.stages" :key="stage.id" :id="'stage-' + stage.route" class="stage-item" :class="{ focus: focusStage === stage.route }">
               <div class="stage-head" role="button">
                 <div class="lhs">
                   <div class="stage-flag">
@@ -838,29 +884,25 @@ export default {
                   <table class="ev-table">
                     <thead>
                       <tr>
+                        <th class="l" style="width:64px">{{ $t('events.show.standings.pos') }}</th>
                         <th class="l">{{ $t('events.show.stages.results.participant') }}</th>
-                        <th>{{ $t('events.show.stages.results.score') }}</th>
-                        <th>{{ $t('events.show.stages.results.qualified') }}</th>
+                        <th class="c">{{ $t('events.show.stages.results.score') }}</th>
+                        <th v-if="stage.results.some((x) => x.qualified)" class="c">{{ $t('events.show.stages.results.qualified_full') }}</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="result in stage.results" :key="result.position">
-                        <td class="l driver-cell">
-                          <router-link
-                            v-if="result.user?.username"
-                            :to="`/profile/${result.user.username}`"
-                            style="text-decoration:none;color:inherit;"
-                          >
-                            <div class="nm">{{ result.user?.name || '—' }}</div>
-                            <div v-if="result.position" class="sub">#{{ result.position }}</div>
-                          </router-link>
-                          <template v-else>
-                            <div class="nm">{{ result.user?.name || '—' }}</div>
-                            <div v-if="result.position" class="sub">#{{ result.position }}</div>
-                          </template>
+                      <tr v-for="result in stage.results" :key="result.registration_id || result.position" :class="{ mine: result.registration_id === myRegId }">
+                        <td class="l">
+                          <span class="pos-badge" :class="{ 1: 'p1', 2: 'p2', 3: 'p3' }[result.position] || ''">{{ result.position ?? '—' }}</span>
                         </td>
-                        <td class="pts-cell">{{ result.score ?? '—' }}</td>
-                        <td>
+                        <td class="l driver-cell">
+                          <router-link v-if="result.user?.username" :to="`/profile/${result.user.username}`" style="text-decoration:none;color:inherit;">
+                            <div class="nm">{{ result.user?.name || '—' }}<span v-if="result.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
+                          </router-link>
+                          <div v-else class="nm">{{ result.user?.name || '—' }}<span v-if="result.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
+                        </td>
+                        <td class="c pts-cell">{{ result.score ?? '—' }}</td>
+                        <td v-if="stage.results.some((x) => x.qualified)" class="c">
                           <font-awesome-icon v-if="result.qualified" :icon="['fas', 'circle-check']" class="qualified-ico" />
                         </td>
                       </tr>
@@ -931,14 +973,14 @@ export default {
                 <tr>
                   <th class="l" style="width:46px">{{ $t('events.show.standings.pos') }}</th>
                   <th class="l">{{ $t('events.show.standings.participant') }}</th>
-                  <th v-for="(stage, si) in finishedStages" :key="stage.id">
-                    {{ $t('events.show.standings.stage_abbr') }}{{ si + 1 }}
+                  <th v-for="(stage, si) in finishedStages" :key="stage.id" class="c" :title="stage.name">
+                    {{ $t('events.show.standings.stage_n', { n: si + 1 }) }}
                   </th>
-                  <th class="r">{{ $t('events.show.standings.total') }}</th>
+                  <th class="c">{{ $t('events.show.standings.total') }}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="entry in standings" :key="entry.registration_id">
+                <tr v-for="entry in standings" :key="entry.registration_id" :class="{ mine: entry.registration_id === myRegId }">
                   <td class="l">
                     <span class="pos-badge" :class="entry.position === 1 ? 'p1' : entry.position === 2 ? 'p2' : entry.position === 3 ? 'p3' : ''">
                       {{ entry.position }}
@@ -950,18 +992,21 @@ export default {
                       :to="`/profile/${entry.user.username}`"
                       style="text-decoration:none;color:inherit;"
                     >
-                      <div class="nm">{{ entry.user?.name || '—' }}</div>
+                      <div class="nm">{{ entry.user?.name || '—' }}<span v-if="entry.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
                       <div class="sub">@{{ entry.user.username }}</div>
                     </router-link>
                     <div v-else class="nm">{{ entry.user?.name || '—' }}</div>
                   </td>
-                  <td v-for="(stage, si) in finishedStages" :key="stage.id" class="pts-cell" :class="entry.stageScores[si] != null ? 'top' : ''">
+                  <td v-for="(stage, si) in finishedStages" :key="stage.id" class="c pts-cell" :class="entry.stageScores[si] != null ? 'top' : ''">
                     {{ entry.stageScores[si] ?? '—' }}
                   </td>
-                  <td class="r pts-total">{{ entry.total }}</td>
+                  <td class="c pts-total">{{ entry.total }}</td>
                 </tr>
               </tbody>
             </table>
+            <p class="standings-note">
+              <font-awesome-icon :icon="['fas', 'circle-info']" />{{ $t('events.show.standings.note') }}<template v-if="hasTies">{{ ' ' + $t('events.show.standings.tie_note') }}</template>
+            </p>
           </div>
         </section>
 
@@ -1097,6 +1142,20 @@ export default {
 </template>
 
 <style scoped>
+.hl-card.me { background: color-mix(in srgb, var(--ehub-primary) 7%, var(--ehub-card)); border-color: var(--ehub-primary-border); }
+.hl-card.me .hl-ico { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
+.hl-card.me .k { color: var(--ehub-primary-text); }
+.hl-me { min-width: 0; }
+.hl-me__stages { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.hl-me__chip { border: 1px solid var(--ehub-line); background: var(--ehub-card); color: var(--ehub-ink); font-size: .78rem; padding: 4px 10px; border-radius: 50rem; min-height: 30px; }
+.hl-me__chip:hover { border-color: var(--ehub-primary); }
+.you-chip { display: inline-block; margin-left: 8px; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ehub-primary-text); background: var(--ehub-primary-tint); padding: 1px 8px; border-radius: 50rem; vertical-align: middle; }
+table.ev-table tr.mine td { background: color-mix(in srgb, var(--ehub-primary) 6%, transparent); }
+table.ev-table th.c, table.ev-table td.c { text-align: center; }
+.standings-note { display: flex; gap: 6px; align-items: flex-start; font-size: .8rem; color: var(--ehub-muted); margin: 10px 4px 0; }
+.standings-note svg { margin-top: 3px; }
+.stage-item.focus { box-shadow: 0 0 0 2px var(--ehub-primary); }
+
 .ev-orgbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 16px; padding: 10px 14px; border-radius: 12px; background: var(--ehub-primary-tint); border: 1px solid var(--ehub-primary-border); }
 .ev-orgbar__ico { color: var(--ehub-primary-text); }
 .ev-orgbar__txt { flex: 1; min-width: 180px; font-size: .88rem; font-weight: 600; color: var(--ehub-ink); }

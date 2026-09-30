@@ -64,6 +64,7 @@ export default {
     regulation: 'Reglamento',
     news: 'Noticias',
   },
+  me: { tie: 'empate', title: 'Tu desempeño', position: '{p}º de {n} en la clasificación', you: 'Tú', tied: 'empatados', and: 'y' },
   orgbar: { text: 'Organizas este evento.', cta: 'Gestionar evento' },
   highlights: {
     live_stage: 'Etapa en curso',
@@ -73,6 +74,9 @@ export default {
     pts: 'pts',
   },
   standings: {
+    stage_n: 'Etapa {n}',
+    note: 'Puntos sumados de todas las etapas finalizadas. Abre la pestaña Etapas para ver cada resultado completo.',
+    tie_note: 'Los participantes con los mismos puntos y la misma cantidad de victorias comparten la posición; el desempate final sigue el reglamento.',
     empty: 'Resultados disponibles tras la primera etapa completada.',
     pos: 'Pos',
     participant: 'Participante',
@@ -138,6 +142,7 @@ export default {
       participant: 'Participante',
       score: 'Puntuación',
       qualified: 'C',
+      qualified_full: 'Clasificado',
     },
   },
   participants: {

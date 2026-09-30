@@ -64,6 +64,7 @@ export default {
     regulation: 'Rules',
     news: 'News',
   },
+  me: { tie: 'tie', title: 'Your performance', position: '{p} of {n} in the standings', you: 'You', tied: 'tied', and: 'and' },
   orgbar: { text: 'You organize this event.', cta: 'Manage event' },
   highlights: {
     live_stage: 'Stage in progress',
@@ -73,6 +74,9 @@ export default {
     pts: 'pts',
   },
   standings: {
+    stage_n: 'Stage {n}',
+    note: 'Points added up from every finished stage. Open the Stages tab to see each full result.',
+    tie_note: 'Participants with the same points and the same number of wins share the position; the final tie-break follows the rules.',
     empty: 'Results available after the first completed stage.',
     pos: 'Pos',
     participant: 'Participant',
@@ -138,6 +142,7 @@ export default {
       participant: 'Participant',
       score: 'Score',
       qualified: 'Q',
+      qualified_full: 'Qualified',
     },
   },
   participants: {
