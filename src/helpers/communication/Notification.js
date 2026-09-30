@@ -5,6 +5,10 @@ const Notification = {
         const result = await Api.getAsync('/notification')
         return { code: result.code, data: result.response?.message }
     },
+    async markAllRead() {
+        const result = await Api.patchAsync('/notification')
+        return { code: result.code }
+    },
     async markRead(id) {
         const result = await Api.patchAsync('/notification/' + id)
         return { code: result.code }

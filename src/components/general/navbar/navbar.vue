@@ -59,6 +59,45 @@ async function loadProfile() {
 // ── Notifications ──────────────────────────────────────────────────
 const notifications = ref([])
 const hasUnread = computed(() => notifications.value.some(n => !n.read_at))
+const unreadCount = computed(() => notifications.value.filter(n => !n.read_at).length)
+const notifToggle = ref(null)
+
+// Short headline + icon per kind, so each notice reads at a glance.
+const NOTIF_KINDS = [
+  { match: /results_published/, kind: 'results', icon: 'trophy', tone: 'gold' },
+  { match: /stage_started/, kind: 'stage', icon: 'flag-checkered', tone: 'live' },
+  { match: /registration_(confirmed)/, kind: 'registration', icon: 'circle-check', tone: 'ok' },
+  { match: /refunded/, kind: 'refund', icon: 'rotate-left', tone: 'ok' },
+  { match: /registration_removed/, kind: 'removed', icon: 'user-minus', tone: 'bad' },
+  { match: /event_notice/, kind: 'notice', icon: 'bullhorn', tone: 'primary' },
+  { match: /article_published|event_article/, kind: 'news', icon: 'newspaper', tone: 'primary' },
+  { match: /event_created/, kind: 'event', icon: 'calendar-plus', tone: 'primary' },
+  { match: /billing_(blocked|failed|error|no_card|fiscal|nfse_failed)|no_gateway/, kind: 'attention', icon: 'triangle-exclamation', tone: 'bad' },
+  { match: /billing|nfse/, kind: 'billing', icon: 'file-invoice-dollar', tone: 'primary' },
+  { match: /team_/, kind: 'team', icon: 'users', tone: 'primary' },
+  { match: /member_added|invite_accepted/, kind: 'org', icon: 'building', tone: 'primary' },
+]
+function notifKind(notif) {
+  const k = NOTIF_KINDS.find(x => x.match.test(notif.title || ''))
+  return k || { kind: 'generic', icon: 'bell', tone: 'primary' }
+}
+async function markAllRead() {
+  notifications.value.forEach(n => { if (!n.read_at) n.read_at = new Date().toISOString() })
+  await Notification.markAllRead()
+}
+// Full-screen panel on phones/tablets: the page behind must not scroll.
+const lockScroll = () => { if (window.innerWidth < 992) document.body.style.overflow = 'hidden' }
+const unlockScroll = () => { document.body.style.overflow = '' }
+watch(notifToggle, (el, old) => {
+  old?.removeEventListener('shown.bs.dropdown', lockScroll)
+  old?.removeEventListener('hidden.bs.dropdown', unlockScroll)
+  el?.addEventListener('shown.bs.dropdown', lockScroll)
+  el?.addEventListener('hidden.bs.dropdown', unlockScroll)
+})
+function closeNotifs() {
+  const el = notifToggle.value
+  if (el && window.bootstrap?.Dropdown) window.bootstrap.Dropdown.getOrCreateInstance(el).hide()
+}
 let notifSSE = null
 
 function notifText(notif) {
@@ -84,6 +123,7 @@ function timeAgo(dateStr) {
   return t('notification.time.days_ago', { n: Math.floor(diff / 86400) })
 }
 async function handleNotifClick(notif) {
+  closeNotifs()
   if (!notif.read_at) {
     notif.read_at = new Date().toISOString()
     await Notification.markRead(notif.id)
@@ -162,32 +202,55 @@ onBeforeUnmount(() => {
     <template v-if="isLogged">
       <!-- Notifications -->
       <div class="dropdown">
-        <button class="nav-icon-btn position-relative" data-bs-toggle="dropdown" aria-expanded="false" :aria-label="$t('common.ui.notifications')" :title="$t('common.ui.notifications')">
+        <button ref="notifToggle" class="nav-icon-btn position-relative" data-bs-toggle="dropdown" data-bs-display="static" data-bs-auto-close="outside" aria-expanded="false"
+          :aria-label="unreadCount ? $t('notification.bell_unread', { n: unreadCount }, unreadCount) : $t('common.ui.notifications')"
+          :title="$t('common.ui.notifications')">
           <font-awesome-icon :icon="['fas', 'bell']" />
-          <span v-if="hasUnread" class="notif-badge"></span>
+          <span v-if="unreadCount" class="notif-count">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
         </button>
-        <div class="dropdown-menu dropdown-menu-end nav-dropdown notif-panel">
-          <div class="nav-dropdown-header d-flex align-items-center justify-content-between">
-            <span class="fw-semibold" style="font-size:.875rem">{{ $t('navbar.user.logged.notifications.title') }}</span>
-            <button v-if="notifications.length" class="clear-btn" @click="handleClearAll">
-              {{ $t('notification.clear_all') }}
+        <div class="dropdown-menu dropdown-menu-end nav-dropdown notif-panel" role="dialog" :aria-label="$t('navbar.user.logged.notifications.title')">
+          <div class="notif-head">
+            <div class="notif-head__title">
+              <span>{{ $t('navbar.user.logged.notifications.title') }}</span>
+              <span v-if="unreadCount" class="notif-head__count">{{ $t('notification.unread_n', { n: unreadCount }, unreadCount) }}</span>
+            </div>
+            <button type="button" class="notif-close" :aria-label="$t('common.ui.close')" @click="closeNotifs">
+              <font-awesome-icon :icon="['fas', 'xmark']" />
             </button>
           </div>
-          <hr class="nav-dropdown-divider" />
+          <div v-if="notifications.length" class="notif-actions">
+            <button v-if="unreadCount" type="button" class="notif-action" @click="markAllRead">
+              <font-awesome-icon :icon="['fas', 'check-double']" />{{ $t('notification.mark_all_read') }}
+            </button>
+            <button type="button" class="notif-action muted" @click="handleClearAll">
+              <font-awesome-icon :icon="['fas', 'trash']" />{{ $t('notification.clear_all') }}
+            </button>
+          </div>
           <!-- Header stays put; long lists scroll inside the panel. -->
           <div class="notif-list">
-          <div v-for="notif in notifications" :key="notif.id" class="notif-item" @click="handleNotifClick(notif)">
-            <span class="notif-dot" :class="{ unread: !notif.read_at }"></span>
-            <div class="flex-grow-1 overflow-hidden">
-              <div class="notif-text" :class="notif.read_at ? 'text-muted' : ''">{{ notifText(notif) }}</div>
-              <div class="notif-time">{{ timeAgo(notif.created_at) }}</div>
+            <div
+              v-for="notif in notifications" :key="notif.id"
+              class="notif-item" :class="{ unread: !notif.read_at }"
+              role="button" tabindex="0"
+              @click="handleNotifClick(notif)" @keyup.enter="handleNotifClick(notif)"
+            >
+              <span class="notif-ico" :class="notifKind(notif).tone">
+                <font-awesome-icon :icon="['fas', notifKind(notif).icon]" />
+              </span>
+              <div class="notif-body">
+                <div class="notif-kind">{{ $t('notification.kind.' + notifKind(notif).kind) }}</div>
+                <div class="notif-text">{{ notifText(notif) }}</div>
+                <div class="notif-time">{{ timeAgo(notif.created_at) }}</div>
+              </div>
+              <button class="notif-del" :aria-label="$t('notification.remove')" :title="$t('notification.remove')" @click.stop="handleDeleteNotif(notif.id)">
+                <font-awesome-icon :icon="['fas', 'xmark']" />
+              </button>
             </div>
-            <button class="notif-del" @click.stop="handleDeleteNotif(notif.id)">×</button>
-          </div>
-          <div v-if="!notifications.length" class="notif-empty">
-            <font-awesome-icon :icon="['fas', 'bell']" class="opacity-25 me-2" />
-            {{ $t('notification.empty') }}
-          </div>
+            <div v-if="!notifications.length" class="notif-empty">
+              <span class="notif-empty__ico"><font-awesome-icon :icon="['fas', 'bell']" /></span>
+              <strong>{{ $t('notification.empty') }}</strong>
+              <span>{{ $t('notification.empty_hint') }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -394,14 +457,17 @@ onBeforeUnmount(() => {
 }
 .theme-btn:hover { background: var(--ehub-field-bg); color: var(--ehub-ink); }
 
-/* ── Notification badge ── */
-.notif-badge {
+/* ── Notification badge (unread count) ── */
+.notif-count {
   position: absolute;
-  top: 5px; right: 5px;
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: #e05454;
-  border: 1px solid var(--ehub-card);
+  top: 2px; right: 0;
+  min-width: 18px; height: 18px;
+  padding: 0 5px;
+  border-radius: 50rem;
+  background: #c42b2b;
+  color: #fff;
+  font-size: .68rem; font-weight: 800; line-height: 18px; text-align: center;
+  border: 2px solid var(--ehub-card);
 }
 
 /* ── Profile button ── */
@@ -474,34 +540,51 @@ onBeforeUnmount(() => {
 .logout-item:hover { background: rgba(224,84,84,.08); }
 
 /* ── Notification panel ── */
-.notif-panel { min-width: 300px; max-width: 340px; }
-.notif-list { max-height: min(420px, calc(100vh - 140px)); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.notif-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 9px 14px;
-  cursor: pointer;
-  transition: background .15s;
-}
+.notif-panel { width: 380px; max-width: calc(100vw - 24px); padding: 0; overflow: hidden; right: 0; left: auto; top: calc(100% + 8px); }
+.notif-head { display: flex; align-items: center; gap: 10px; padding: 14px 12px 10px 16px; }
+.notif-head__title { flex: 1; display: flex; align-items: baseline; gap: 8px; color: var(--ehub-ink); }
+.notif-head__title > span:first-child { font-weight: 800; font-size: 1rem; }
+.notif-head__count { font-size: .75rem; font-weight: 700; color: var(--ehub-primary-text); }
+.notif-close { border: 0; background: transparent; color: var(--ehub-muted); width: 36px; height: 36px; border-radius: 8px; display: none; align-items: center; justify-content: center; }
+.notif-close:hover { background: var(--ehub-field-bg); color: var(--ehub-ink); }
+.notif-actions { display: flex; gap: 6px; padding: 0 12px 10px 12px; border-bottom: 1px solid var(--ehub-line); }
+.notif-action { border: 1px solid var(--ehub-line); background: var(--ehub-card); color: var(--ehub-primary-text); font-size: .76rem; font-weight: 700; padding: 5px 10px; border-radius: 50rem; display: inline-flex; align-items: center; gap: 6px; min-height: 30px; }
+.notif-action.muted { color: var(--ehub-muted); }
+.notif-action:hover { border-color: var(--ehub-primary); }
+.notif-list { max-height: min(460px, calc(100vh - 160px)); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.notif-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 12px 12px 16px; cursor: pointer; border-bottom: 1px solid var(--ehub-line); transition: background .15s; position: relative; }
+.notif-item:last-child { border-bottom: 0; }
 .notif-item:hover { background: var(--ehub-field-bg); }
-.notif-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: transparent;
-  flex-shrink: 0;
-  margin-top: 5px;
+.notif-item.unread { background: color-mix(in srgb, var(--ehub-primary) 6%, var(--ehub-card)); }
+.notif-item.unread::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--ehub-primary-strong); }
+.notif-ico { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: .9rem; }
+.notif-ico.primary { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
+.notif-ico.gold { background: color-mix(in srgb, var(--ehub-gold) 22%, transparent); color: var(--ehub-warn-text); }
+.notif-ico.live { background: color-mix(in srgb, #e23b3b 14%, transparent); color: var(--ehub-danger-text); }
+.notif-ico.ok { background: color-mix(in srgb, #1f8a5b 14%, transparent); color: var(--ehub-success-text); }
+.notif-ico.bad { background: color-mix(in srgb, #e23b3b 14%, transparent); color: var(--ehub-danger-text); }
+.notif-body { flex: 1; min-width: 0; }
+.notif-kind { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); }
+.notif-item.unread .notif-kind { color: var(--ehub-primary-text); }
+.notif-text { font-size: .86rem; line-height: 1.4; color: var(--ehub-ink); margin-top: 1px; }
+.notif-item:not(.unread) .notif-text { color: var(--ehub-muted); }
+.notif-time { font-size: .74rem; color: var(--ehub-muted); margin-top: 3px; }
+.notif-del { background: none; border: none; color: var(--ehub-muted); cursor: pointer; width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; opacity: .6; }
+.notif-del:hover { color: var(--ehub-danger-text); opacity: 1; background: var(--ehub-card); }
+.notif-empty { padding: 32px 20px; font-size: .85rem; color: var(--ehub-muted); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.notif-empty strong { color: var(--ehub-ink); font-size: .92rem; }
+.notif-empty__ico { width: 48px; height: 48px; border-radius: 50%; background: var(--ehub-field-bg); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 4px; }
+
+/* Phones and tablets: the panel takes the whole screen, with a close button. */
+@media (max-width: 991.98px) {
+  .notif-panel.show { position: fixed !important; inset: 0 !important; width: 100vw; max-width: none; height: 100dvh; margin: 0 !important; border: 0; border-radius: 0; transform: none !important; display: flex !important; flex-direction: column; z-index: 1080; }
+  .notif-panel .notif-close { display: inline-flex; }
+  .notif-head { padding: 14px 12px 12px 18px; border-bottom: 1px solid var(--ehub-line); }
+  .notif-head__title { font-size: 1.15rem; }
+  .notif-actions { padding: 10px 12px; }
+  .notif-list { max-height: none; flex: 1; }
+  .notif-item { padding: 14px 14px 14px 18px; }
 }
-.notif-dot.unread { background: var(--ehub-primary-strong); }
-.notif-text { font-size: .8rem; line-height: 1.35; color: var(--ehub-ink); }
-.notif-time { font-size: .72rem; color: var(--ehub-muted); margin-top: 2px; }
-.notif-del {
-  background: none; border: none; color: var(--ehub-muted);
-  cursor: pointer; font-size: 1rem; padding: 0 2px; line-height: 1;
-  transition: color .15s; flex-shrink: 0;
-}
-.notif-del:hover { color: #e05454; }
-.notif-empty { padding: 20px 14px; font-size: .85rem; color: var(--ehub-muted); text-align: center; }
 .clear-btn {
   background: none; border: none; cursor: pointer;
   font-size: .78rem; color: var(--ehub-muted); padding: 0;
