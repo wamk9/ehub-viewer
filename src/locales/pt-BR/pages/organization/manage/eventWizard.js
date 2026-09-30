@@ -94,6 +94,7 @@ export default {
   },
   s7: { title: 'Revisão & Publicação', sub: 'Confirme os dados e escolha como publicar o evento.', preview: 'Pré-visualização', summary: 'Resumo', pubLabel: 'Publicação' },
   optional: 'opcional',
+  refund: { label: 'Permitir cancelamento com reembolso automático', hint: 'Até o início do evento, o participante pode cancelar e recebe o valor de volta no mesmo meio de pagamento. A taxa eHub dessa inscrição também é devolvida a você.' },
   restore: {
     title: 'Você tem um evento em andamento',
     text: '"{name}", salvo automaticamente em {when}.',

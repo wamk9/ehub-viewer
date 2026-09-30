@@ -94,6 +94,7 @@ export default {
   },
   s7: { title: 'Review & Publish', sub: 'Confirm the details and choose how to publish the event.', preview: 'Preview', summary: 'Summary', pubLabel: 'Publication' },
   optional: 'optional',
+  refund: { label: 'Allow cancellation with automatic refund', hint: 'Until the event starts, participants can cancel and get the money back on the same payment method. The eHub fee for that registration is returned to you as well.' },
   restore: {
     title: 'You have an event in progress',
     text: '"{name}", saved automatically on {when}.',

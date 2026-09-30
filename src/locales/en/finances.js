@@ -48,6 +48,9 @@ export default {
     type: {
       registration_paid: 'Paid event fee (2%, min R$1)',
       registration_free: 'Free event fee (R$1 fixed)',
+      refund_credit: 'Credit: cancelled/refunded registration fee',
+      credit_carry: 'Credit from previous month',
+      credit_carry_out: 'Balance moved to next month',
     },
   },
 }

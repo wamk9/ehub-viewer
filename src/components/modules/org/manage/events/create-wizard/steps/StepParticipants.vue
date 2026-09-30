@@ -118,6 +118,14 @@ watch(() => props.form.format, (fmt) => {
         </div>
       </div>
 
+      <label v-if="feeMode === 'paid'" class="refund-opt mt-3">
+        <input type="checkbox" class="form-check-input" v-model="form.self_refund" />
+        <span>
+          <strong>{{ $t('pages.organization.manage.eventWizard.refund.label') }}</strong>
+          <small>{{ $t('pages.organization.manage.eventWizard.refund.hint') }}</small>
+        </span>
+      </label>
+
       <div v-if="feeMode === 'paid' && !hasGateway" class="gw-alert-banner mt-3">
         <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="gw-alert-ico" />
         <div>
@@ -162,6 +170,11 @@ watch(() => props.form.format, (fmt) => {
 </template>
 
 <style scoped>
+.refund-opt { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--ehub-line); border-radius: 10px; padding: 11px 13px; cursor: pointer; }
+.refund-opt input { margin-top: 3px; flex-shrink: 0; }
+.refund-opt strong { display: block; font-size: .85rem; color: var(--ehub-ink); }
+.refund-opt small { display: block; font-size: .76rem; color: var(--ehub-muted); line-height: 1.4; }
+
 .step-title { font-size: 1.3rem; font-weight: 800; color: var(--ehub-ink); margin: 0 0 4px; letter-spacing: -.02em; }
 .step-sub { font-size: .88rem; color: var(--ehub-muted); margin: 0 0 28px; }
 .form-section { margin-bottom: 26px; }

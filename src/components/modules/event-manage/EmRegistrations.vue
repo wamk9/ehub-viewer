@@ -76,14 +76,24 @@ export default {
         toast.success(this.$t('pages.event.manage.toast.confirmed'));
       } else toast.error(apiError(this, res.data));
     },
+    // Paid through a gateway: removing gives the money back to the participant.
+    willRefund(r) {
+      return r.payment_status === 'confirmed' && Number(this.ev?.fee) > 0 && r.gateway !== 'manual' && !!r.gateway_payment_id;
+    },
     async remove(r) {
-      const ok = await this.em.ask(this.$t('pages.event.manage.reg.remove_q', { n: userName(r) }), this.$t('pages.event.manage.reg.remove'), true);
+      const refund = this.willRefund(r);
+      const amount = (this.ev?.currency || 'BRL').toUpperCase() + ' ' + Number(this.ev?.fee || 0).toFixed(2);
+      const ok = await this.em.ask(
+        this.$t(refund ? 'pages.event.manage.reg.refund_q' : 'pages.event.manage.reg.remove_q', { n: userName(r), amount }),
+        this.$t(refund ? 'pages.event.manage.reg.refund' : 'pages.event.manage.reg.remove'),
+        true,
+      );
       if (!ok) return;
       const res = await OrganizationEventRegistration.manageRemove(this.em.orgRoute, this.em.eventRoute, r.id);
       if (res.code === 200) {
         this.em.regs = this.em.regs.filter((x) => x.id !== r.id);
         this.sheet = null;
-        toast.success(this.$t('pages.event.manage.toast.removed'));
+        toast.success(this.$t(res.refunded ? 'pages.event.manage.toast.refunded' : 'pages.event.manage.toast.removed'));
       } else toast.error(apiError(this, res.data));
     },
     exportCsv() {

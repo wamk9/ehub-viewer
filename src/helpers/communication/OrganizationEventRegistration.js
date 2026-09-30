@@ -15,7 +15,7 @@ const OrganizationEventRegistration = {
     },
     async manageRemove(orgRoute, eventRoute, registrationId) {
         const result = await Api.deleteAsync(`/org/${orgRoute}/event/${eventRoute}/manage/participants/${registrationId}`);
-        return { code: result.code, data: result.response?.message };
+        return { code: result.code, data: result.response?.message, refunded: !!result.response?.data?.refunded };
     },
     async store(orgRoute, eventRoute, data) {
         const result = await Api.postAsync(`/org/${orgRoute}/event/${eventRoute}/register`, data);
@@ -24,7 +24,7 @@ const OrganizationEventRegistration = {
     },
     async destroy(orgRoute, eventRoute) {
         const result = await Api.deleteAsync(`/org/${orgRoute}/event/${eventRoute}/register`);
-        return { code: result.code };
+        return { code: result.code, message: result.response?.message, refunded: !!result.response?.data?.refunded };
     },
     async checkPayment(orgRoute, eventRoute) {
         const result = await Api.getAsync(`/org/${orgRoute}/event/${eventRoute}/register/payment-check`);

@@ -33,6 +33,11 @@ export default {
     share: 'Share',
     share_long: 'Invite friends to the event',
     link_copied: 'Event link copied!',
+    policy_full: 'Cancel with a full refund until the event starts.',
+    policy_none: 'Refunds are arranged directly with the organizer.',
+    refund_text: 'You will get {amount} back on the same payment method. How long it takes depends on your bank or card (usually 5 to 10 business days).',
+    cancel_refund_confirm: 'Cancel and get refunded',
+    refunded: 'Registration cancelled. The refund was requested from the payment provider.',
     closed: {
       reg_closed: 'The registration deadline has passed.',
       full: 'All spots have been taken.',
@@ -40,6 +45,10 @@ export default {
       finished: 'This event has ended. See the final standings.',
     },
     err: {
+      refund_failed: 'We could not refund right now. Your registration is still active; try again or contact the organizer.',
+      self_refund_disabled: 'This event does not allow cancelling online. Contact the organizer.',
+      manual_refund: 'Your payment was made outside eHub. Contact the organizer to cancel.',
+      registrations_closed: 'The event has already started; cancelling is no longer possible.',
       event_full: 'The spots just sold out.',
       registrations_closed: 'Registration for this event is closed.',
       registration_deadline_passed: 'The registration deadline has passed.',

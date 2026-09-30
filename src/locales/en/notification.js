@@ -25,6 +25,8 @@ export default {
     event_stage_started: 'Stage "{stage}" of {event} has started!',
     event_results_published: 'Results for "{stage}" published in {event}',
     event_registration_confirmed: 'Your registration in {event} was confirmed',
+    event_registration_refunded: 'Your registration for {event} was cancelled and {amount} will be refunded to the same payment method.',
+    event_registration_refunded_org: 'A participant cancelled their registration for {event} and was refunded {amount}.',
     event_registration_removed: 'Your registration in {event} was removed by the organization',
     event_notice: '{event}: {subject}',
     empty:              'No notifications',

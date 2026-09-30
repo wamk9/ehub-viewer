@@ -33,6 +33,11 @@ export default {
     share: 'Compartilhar',
     share_long: 'Chamar amigos para o evento',
     link_copied: 'Link do evento copiado!',
+    policy_full: 'Cancelamento com reembolso integral até o início do evento.',
+    policy_none: 'Reembolsos são combinados diretamente com a organização.',
+    refund_text: 'Você receberá {amount} de volta no mesmo meio de pagamento. O prazo para aparecer depende do banco ou cartão (normalmente de 5 a 10 dias úteis).',
+    cancel_refund_confirm: 'Cancelar e receber reembolso',
+    refunded: 'Inscrição cancelada. O reembolso foi solicitado ao meio de pagamento.',
     closed: {
       reg_closed: 'O prazo de inscrição terminou.',
       full: 'Todas as vagas foram preenchidas.',
@@ -40,6 +45,10 @@ export default {
       finished: 'Este evento foi encerrado. Veja a classificação final.',
     },
     err: {
+      refund_failed: 'Não conseguimos fazer o reembolso agora. Sua inscrição continua ativa; tente de novo ou fale com a organização.',
+      self_refund_disabled: 'Este evento não permite cancelar pelo site. Fale com a organização.',
+      manual_refund: 'Seu pagamento foi feito fora do eHub. Fale com a organização para cancelar.',
+      registrations_closed: 'O evento já começou; não é mais possível cancelar.',
       event_full: 'As vagas acabaram de esgotar.',
       registrations_closed: 'As inscrições deste evento estão encerradas.',
       registration_deadline_passed: 'O prazo de inscrição terminou.',

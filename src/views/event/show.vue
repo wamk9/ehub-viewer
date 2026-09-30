@@ -213,10 +213,21 @@ export default {
       const loc = String(this.event?.location || '').trim();
       return loc ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(loc) : '';
     },
+    // Paid and confirmed: refunded automatically when the organizer allows it and
+    // the payment went through eHub (manual payments are settled with the organizer).
+    paidConfirmed() {
+      const r = this.event?.user_registration;
+      return !!r && r.payment_status === 'confirmed' && Number(this.event.fee) > 0;
+    },
     canCancel() {
       const r = this.event?.user_registration;
       if (!r || this.event.initialized || this.event.finished) return false;
-      return !(r.payment_status === 'confirmed' && Number(this.event.fee) > 0);
+      if (!this.paidConfirmed) return true;
+      return this.event.self_refund !== false && !!r.refundable;
+    },
+    refundPolicyKey() {
+      if (!(Number(this.event?.fee) > 0)) return '';
+      return this.event.self_refund === false ? 'policy_none' : 'policy_full';
     },
     streams() {
       const out = [];
@@ -288,12 +299,14 @@ export default {
       this.cancelling = false;
       this.cancelOpen = false;
       if (res.code === 200) {
+        const wasCounted = ['free', 'confirmed'].includes(this.event.user_registration?.payment_status);
         this.event.user_registration = null;
-        this.event.registrations_count = Math.max(0, (this.event.registrations_count || 1) - 1);
+        if (wasCounted) this.event.registrations_count = Math.max(0, (this.event.registrations_count || 1) - 1);
         this.participantsLoaded = false;
-        toast.success(this.$t('events.show.join.cancelled'));
+        toast.success(this.$t(res.refunded ? 'events.show.join.refunded' : 'events.show.join.cancelled'));
       } else {
-        toast.error(this.$t('events.show.join.cancel_error'));
+        const known = ['refund_failed', 'self_refund_disabled', 'manual_refund', 'registrations_closed'];
+        toast.error(this.$t('events.show.join.' + (known.includes(res.message) ? 'err.' + res.message : 'cancel_error')));
       }
     },
     initials(name) {
@@ -734,6 +747,10 @@ export default {
                 {{ $store.getters.getToken ? $t('events.show.join.cta') : $t('events.show.join.cta_guest') }}
               </button>
               <p class="ev-join__note">{{ event.fee == 0 ? $t('events.show.join.note_free') : $t('events.show.join.note_paid') }}</p>
+              <p v-if="refundPolicyKey" class="ev-join__policy">
+                <font-awesome-icon :icon="['fas', refundPolicyKey === 'policy_full' ? 'rotate-left' : 'circle-info']" />
+                {{ $t('events.show.join.' + refundPolicyKey) }}
+              </p>
             </template>
             <!-- Closed -->
             <div v-else class="ev-join__state closed">
@@ -1060,11 +1077,15 @@ export default {
         </div>
         <div class="modal-card__body">
           <p class="mb-0">{{ $t('events.show.join.cancel_text', { event: event?.name }) }}</p>
+          <p v-if="paidConfirmed" class="ev-refund-note mb-0 mt-2">
+            <font-awesome-icon :icon="['fas', 'rotate-left']" />
+            {{ $t('events.show.join.refund_text', { amount: fmtFee(event) }) }}
+          </p>
         </div>
         <div class="modal-card__footer">
           <button class="btn btn-outline-secondary btn-sm" @click="cancelOpen = false">{{ $t('events.show.join.keep') }}</button>
           <button class="btn btn-danger btn-sm" :disabled="cancelling" @click="doCancelRegistration">
-            <span v-if="cancelling" class="spinner-border spinner-border-sm me-1"></span>{{ $t('events.show.join.cancel_confirm') }}
+            <span v-if="cancelling" class="spinner-border spinner-border-sm me-1"></span>{{ $t(paidConfirmed ? 'events.show.join.cancel_refund_confirm' : 'events.show.join.cancel_confirm') }}
           </button>
         </div>
       </div>
@@ -1074,6 +1095,10 @@ export default {
 </template>
 
 <style scoped>
+.ev-join__policy { display: flex; gap: 6px; justify-content: center; align-items: center; font-size: .72rem; color: var(--ehub-muted); margin: 6px 0 0; text-align: center; }
+.ev-refund-note { display: flex; gap: 8px; align-items: flex-start; font-size: .84rem; background: color-mix(in srgb, #1f8a5b 10%, transparent); color: var(--ehub-ink); border-radius: 8px; padding: 9px 11px; }
+.ev-refund-note svg { color: #1f8a5b; margin-top: 3px; }
+
 /* ── Skeleton ── */
 .ev-skel-page { background: var(--ehub-page); min-height: 100vh; }
 

@@ -48,6 +48,9 @@ export default {
     type: {
       registration_paid: 'Taxa evento pago (2%, mín R$1)',
       registration_free: 'Taxa evento gratuito (R$1 fixo)',
+      refund_credit: 'Crédito: taxa de inscrição cancelada/reembolsada',
+      credit_carry: 'Crédito do mês anterior',
+      credit_carry_out: 'Saldo transferido para o próximo mês',
     },
   },
 }
