@@ -18,7 +18,7 @@
                 <div class="modal-body" ref="body">
                     <div class="row" v-if="onFullScreen">
                         <div class="col-12 d-flex justify-content-between mb-5">
-                            <img class="desktop-navbar-logo" src="/src/assets/images/ehub-logo.png" />
+                            <img class="desktop-navbar-logo" src="/brand/ehub-logo-white.png" alt="eHub" />
                             <button class="btn btn-primary" v-if="onFullScreen"
                                 @click="() => { fullScreen(false); }">Exit
                                 FullScreen</button>
