@@ -57,7 +57,7 @@ export default {
   },
   s3: { beforeStart: 'This stage starts before the event start date.', slotsCount: '{n} slots',
     title: 'Schedule', sub: 'Event dates and competition stages.',
-    datesLabel: 'Dates', regDeadline: 'Registration deadline', start: 'Event start', end: 'Expected end',
+    datesLabel: 'Dates', regDeadline: 'Registration deadline', start: 'Event start', startTime: 'Start time', end: 'Expected end',
     stagesLabel: 'Stages / Phases', stagesHint: 'Add the competition phases. Per-stage info (Form step) appears below each one.',
     addStage: 'Add stage', timezone: 'Timezone',
     groupsSchedLabel: 'Groups Schedule', autoFill: 'Auto-fill groups',
@@ -116,7 +116,7 @@ export default {
   rev: { name: 'Name', category: 'Category', mode: 'Mode', format: 'Format', start: 'Start', slots: 'Slots', fee: 'Entry fee', free: 'Free', unlimited: 'Unlimited', url: 'Event URL' },
   stagePh: 'Stage name (e.g. Qualifier, Final…)',
   toast: { draft: 'Draft saved', updated: 'Event updated!', created: 'Event created successfully!' },
-  err: { location: 'Tell where the event takes place (address or venue name).', startPast: 'The start date has already passed. Choose today or a future date.', deadlineAfterStart: 'The registration deadline must be on or before the event start date.', endBeforeStart: 'The end cannot be before the start.', descLong: 'The description is longer than {n} characters.', rules: 'Fill in the general rules.', name: 'Enter the event name.', start: 'Enter the start date.', cat: 'Select a category.', fmt: 'Select a competition format.', slug: 'Set the event URL.' },
+  err: { startTime: 'Tell the start time (e.g. 07:00).', location: 'Tell where the event takes place (address or venue name).', startPast: 'The start date has already passed. Choose today or a future date.', deadlineAfterStart: 'The registration deadline must be on or before the event start date.', endBeforeStart: 'The end cannot be before the start.', descLong: 'The description is longer than {n} characters.', rules: 'Fill in the general rules.', name: 'Enter the event name.', start: 'Enter the start date.', cat: 'Select a category.', fmt: 'Select a competition format.', slug: 'Set the event URL.' },
   gw: {
     alertTitle: 'Payouts are not set up yet',
     alertDesc: 'To charge registrations, connect a Mercado Pago (BRL) or Stripe (BRL, USD, EUR) account. That is where registration money goes.',

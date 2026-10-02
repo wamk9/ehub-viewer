@@ -39,7 +39,7 @@ const startLabel = computed(() => {
     <p class="step-sub">{{ $t('pages.organization.manage.eventWizard.s6.sub') }}</p>
 
     <div class="form-section">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s6.slugLabel') }} <span class="req-mark">*</span></label>
+      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s6.slugLabel') }}</label>
       <div class="input-group">
         <span class="input-group-text seo-prefix">ehubapp.com/org/{{ route.params.orgRoute }}/event/</span>
         <input type="text" class="form-control" v-model="form.route" @input="onSlugInput" />

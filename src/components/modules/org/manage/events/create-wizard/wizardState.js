@@ -58,6 +58,7 @@ export function createWizardForm() {
     // Step 6 — Cronograma
     registration_deadline: '',
     start_at: '',
+    start_time: '', // HH:MM, required
     end_at: '',
     timezone: defaultTimezone(),
     stages: [], // local only — [{ id, name, route, stage_type, start_at, config }]
@@ -123,6 +124,9 @@ export function populateFormFromEvent(form, event, baseUrl) {
   if (form.currency) form.currency = String(form.currency).toUpperCase()
   if (form.prize_pool_currency) form.prize_pool_currency = String(form.prize_pool_currency).toUpperCase()
   // The wizard uses <input type="date">: API timestamps must become YYYY-MM-DD.
+  // Keep the hour typed before ("2026-10-25T09:00:00" → "09:00"); midnight means "not set".
+  const hm = String(event.start_at || '').match(/[T ](\d{2}:\d{2})/)
+  form.start_time = hm && hm[1] !== '00:00' ? hm[1] : ''
   for (const key of ['start_at', 'end_at', 'registration_deadline']) {
     form[key] = toDateInput(form[key])
   }
@@ -180,7 +184,7 @@ export function buildEventPayload(form) {
     prize_pool_currency: form.prize_pool_amount ? form.prize_pool_currency : null,
     requirements: form.requirements.trim() || null,
     registration_deadline: form.registration_deadline || null,
-    start_at: form.start_at || null,
+    start_at: form.start_at ? (form.start_time ? `${form.start_at} ${form.start_time}:00` : form.start_at) : null,
     end_at: form.end_at || null,
     timezone: form.timezone,
     rules: form.rules.trim() || null,

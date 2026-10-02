@@ -1,4 +1,5 @@
 export default {
+  removed_participant: 'Removed participant',
     manage: 'Manage',
   in_progress: 'In progress',
   status: {

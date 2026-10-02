@@ -58,7 +58,7 @@ export default {
       {
         title: 'How long we keep it',
         items: [
-          'Account data: while the account exists. When you delete it we erase your profile, photos, registrations, results, notifications and teams where you were the only member.',
+          'Account data: while the account exists. When you delete it we erase your profile, photos, registration answers, notifications and teams where you were the only member. Your registrations and results become anonymous ("Removed participant") so other people\'s standings do not change.',
           'Payment and organization billing records: for the period required by tax law.',
           'Access records: 6 months, as required by the Marco Civil da Internet.',
           'Codes sent by e-mail: 10 to 15 minutes.',

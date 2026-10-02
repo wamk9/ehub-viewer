@@ -65,7 +65,10 @@ function beforeStart(stage) {
         </div>
         <div class="col-md-4">
           <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s3.start') }} <span class="req-mark">*</span></label>
-          <input type="date" class="form-control" v-model="form.start_at" />
+          <div class="d-flex gap-2">
+            <input type="date" class="form-control" v-model="form.start_at" :aria-label="$t('pages.organization.manage.eventWizard.s3.start')" />
+            <input type="time" class="form-control start-time" v-model="form.start_time" required :aria-label="$t('pages.organization.manage.eventWizard.s3.startTime')" />
+          </div>
         </div>
         <div class="col-md-4">
           <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s3.end') }}</label>
@@ -178,4 +181,5 @@ function beforeStart(stage) {
 .stage-del { width: 26px; height: 26px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: var(--ehub-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .75rem; flex-shrink: 0; }
 .stage-del:hover { border-color: color-mix(in srgb,#e23b3b 35%,transparent); background: color-mix(in srgb,#e23b3b 10%,transparent); color: var(--ehub-danger-text); }
 .empty-state { text-align: center; padding: 24px; border: 1px dashed var(--ehub-line); border-radius: 12px; }
+.start-time { max-width: 120px; }
 </style>

@@ -698,8 +698,8 @@ export default {
                 <div class="v">
                   <template v-for="(l, li) in leaders" :key="l.registration_id">
                     <span v-if="li">{{ li === leaders.length - 1 ? ' ' + $t('events.show.me.and') + ' ' : ', ' }}</span>
-                    <router-link v-if="l.user?.username" :to="`/profile/${l.user.username}`" style="text-decoration:none;color:inherit;">{{ l.user?.name || '—' }}</router-link>
-                    <span v-else>{{ l.user?.name || '—' }}</span>
+                    <router-link v-if="l.user?.username" :to="`/profile/${l.user.username}`" style="text-decoration:none;color:inherit;">{{ l.user?.name || $t('events.show.removed_participant') }}</router-link>
+                    <span v-else>{{ l.user?.name || $t('events.show.removed_participant') }}</span>
                   </template>
                 </div>
                 <div class="s">{{ leaderEntry.total }} {{ $t('events.show.highlights.pts') }}<template v-if="leaders.length > 1"> · {{ $t('events.show.me.tied') }}</template></div>
@@ -907,9 +907,9 @@ export default {
                         </td>
                         <td class="l driver-cell">
                           <router-link v-if="result.user?.username" :to="`/profile/${result.user.username}`" style="text-decoration:none;color:inherit;">
-                            <div class="nm">{{ result.user?.name || '—' }}<span v-if="result.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
+                            <div class="nm">{{ result.user?.name || $t('events.show.removed_participant') }}<span v-if="result.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
                           </router-link>
-                          <div v-else class="nm">{{ result.user?.name || '—' }}<span v-if="result.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
+                          <div v-else class="nm">{{ result.user?.name || $t('events.show.removed_participant') }}<span v-if="result.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
                         </td>
                         <td class="c pts-cell">{{ result.score ?? '—' }}</td>
                         <td v-if="stage.results.some((x) => x.qualified)" class="c">
@@ -960,7 +960,7 @@ export default {
                   <template v-else>{{ initials(p.user?.name) }}</template>
                 </div>
                 <div class="part-info">
-                  <div class="part-name">{{ p.user?.name || '—' }}</div>
+                  <div class="part-name">{{ p.user?.name || $t('events.show.removed_participant') }}</div>
                   <div v-if="p.user?.username" class="part-team">@{{ p.user.username }}</div>
                 </div>
                 <span class="part-seed">
@@ -1002,10 +1002,10 @@ export default {
                       :to="`/profile/${entry.user.username}`"
                       style="text-decoration:none;color:inherit;"
                     >
-                      <div class="nm">{{ entry.user?.name || '—' }}<span v-if="entry.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
+                      <div class="nm">{{ entry.user?.name || $t('events.show.removed_participant') }}<span v-if="entry.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
                       <div class="sub">@{{ entry.user.username }}</div>
                     </router-link>
-                    <div v-else class="nm">{{ entry.user?.name || '—' }}</div>
+                    <div v-else class="nm">{{ entry.user?.name || $t('events.show.removed_participant') }}</div>
                   </td>
                   <td v-for="(stage, si) in finishedStages" :key="stage.id" class="c pts-cell" :class="entry.stageScores[si] != null ? 'top' : ''">
                     {{ entry.stageScores[si] ?? '—' }}

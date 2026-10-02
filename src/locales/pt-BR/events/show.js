@@ -1,4 +1,5 @@
 export default {
+  removed_participant: 'Participante removido',
     manage: 'Gerenciar',
   in_progress: 'Em andamento',
   status: {

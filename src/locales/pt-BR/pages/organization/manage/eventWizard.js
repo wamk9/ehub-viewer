@@ -57,7 +57,7 @@ export default {
   },
   s3: { beforeStart: 'Esta etapa começa antes do início do evento.', slotsCount: '{n} vagas',
     title: 'Cronograma', sub: 'Datas do evento e etapas da competição.',
-    datesLabel: 'Datas', regDeadline: 'Prazo de inscrição', start: 'Início do evento', end: 'Término previsto',
+    datesLabel: 'Datas', regDeadline: 'Prazo de inscrição', start: 'Início do evento', startTime: 'Horário de início', end: 'Término previsto',
     stagesLabel: 'Etapas / Fases', stagesHint: 'Adicione as fases da competição. As informações por etapa (passo Formulário) aparecem abaixo de cada uma.',
     addStage: 'Adicionar etapa', timezone: 'Fuso horário',
     groupsSchedLabel: 'Cronograma de Grupos', autoFill: 'Auto-preencher grupos',
@@ -116,7 +116,7 @@ export default {
   rev: { name: 'Nome', category: 'Categoria', mode: 'Modalidade', format: 'Formato', start: 'Início', slots: 'Vagas', fee: 'Inscrição', free: 'Gratuita', unlimited: 'Ilimitado', url: 'URL do Evento' },
   stagePh: 'Nome da etapa (ex: Classificatória, Final…)',
   toast: { draft: 'Rascunho salvo', updated: 'Evento atualizado!', created: 'Evento criado com sucesso!' },
-  err: { location: 'Informe onde o evento acontece (endereço ou nome do local).', startPast: 'A data de início já passou. Escolha hoje ou uma data futura.', deadlineAfterStart: 'O prazo de inscrição precisa ser no máximo no dia do início do evento.', endBeforeStart: 'O término não pode ser antes do início.', descLong: 'A descrição passou de {n} caracteres.', rules: 'Preencha o regulamento geral.', name: 'Informe o nome do evento.', start: 'Informe a data de início.', cat: 'Selecione uma categoria.', fmt: 'Selecione um formato de competição.', slug: 'Defina a URL do evento.' },
+  err: { startTime: 'Informe o horário de início (ex.: 07:00).', location: 'Informe onde o evento acontece (endereço ou nome do local).', startPast: 'A data de início já passou. Escolha hoje ou uma data futura.', deadlineAfterStart: 'O prazo de inscrição precisa ser no máximo no dia do início do evento.', endBeforeStart: 'O término não pode ser antes do início.', descLong: 'A descrição passou de {n} caracteres.', rules: 'Preencha o regulamento geral.', name: 'Informe o nome do evento.', start: 'Informe a data de início.', cat: 'Selecione uma categoria.', fmt: 'Selecione um formato de competição.', slug: 'Defina a URL do evento.' },
   gw: {
     alertTitle: 'Falta configurar o recebimento dos pagamentos',
     alertDesc: 'Para cobrar inscrições, conecte uma conta Mercado Pago (BRL) ou Stripe (BRL, USD, EUR). É lá que o dinheiro das inscrições vai cair.',

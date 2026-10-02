@@ -58,7 +58,7 @@ export default {
       {
         title: 'Cuánto tiempo los guardamos',
         items: [
-          'Datos de la cuenta: mientras exista. Al eliminarla borramos tu perfil, fotos, inscripciones, resultados, avisos y equipos en los que estabas solo.',
+          'Datos de la cuenta: mientras exista. Al eliminarla borramos tu perfil, fotos, respuestas de inscripción, avisos y equipos en los que estabas solo. Tus inscripciones y resultados quedan anónimos ("Participante eliminado") para no cambiar la clasificación de los demás.',
           'Registros de pago y de cobro de organizaciones: el plazo que exige la ley fiscal.',
           'Registros de acceso: 6 meses, como exige el Marco Civil da Internet.',
           'Códigos enviados por e-mail: de 10 a 15 minutos.',

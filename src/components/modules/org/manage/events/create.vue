@@ -182,6 +182,10 @@ function validateStep(n) {
     toast.error(t('pages.organization.manage.eventWizard.err.start'))
     return false
   }
+  if (n === 6 && !form.start_time) {
+    toast.error(t('pages.organization.manage.eventWizard.err.startTime'))
+    return false
+  }
   // Dates are YYYY-MM-DD strings, so plain comparison works.
   const today = new Date().toLocaleDateString('en-CA')
   if (n === 6 && !isEditMode.value && form.start_at < today) {
