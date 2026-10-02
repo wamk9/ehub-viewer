@@ -27,7 +27,7 @@ export default {
     identity:    'Identity',
     identityDesc:'Name, username and car number as they appear on your profile.',
     details:     'Details',
-    detailsDesc: 'Additional driver information.',
+    detailsDesc: 'Additional competitor information.',
     success:     'Profile updated successfully!',
     submit:      'Save Changes',
     form: {

@@ -80,7 +80,7 @@ export default {
     r_start: 'Start', r_finish: 'Finish', r_remove: 'Remove session',
     move_up: 'Move up', move_down: 'Move down',
     m_name: 'Stage name', m_type: 'Type', m_date: 'Date and time', m_desc: 'Description',
-    m_sessions: 'Sessions', m_sessions_hint: 'One per line. E.g. Practice, Qualifying, Race.',
+    m_sessions: 'Sessions', m_sessions_hint: 'One per line. E.g. Qualifier, Semifinal, Final.',
     m_preset: 'Use Practice / Qualifying / Race',
     preset: ['Practice', 'Qualifying', 'Race'],
     create: 'Create stage', edit: 'Edit stage', type_locked: 'The type can\'t change after the stage started.',

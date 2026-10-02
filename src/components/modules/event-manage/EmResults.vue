@@ -30,6 +30,8 @@ export default {
     isBracket() { return this.stage?.stage_type === 'bracket'; },
     isGroup() { return this.stage?.stage_type === 'group'; },
     isTime() { return this.stage?.stage_type === 'time'; },
+    // Lap columns only make sense where people drive/ride/fly laps.
+    hasLaps() { return ['simracing', 'racingcars', 'rally', 'motorsport', 'motorbike', 'drone-racing'].includes(this.ev?.category); },
     // Live order while typing: finishers by time, then DNF/DSQ.
     timeRows() {
       return [...this.rows].map((r) => ({ r, ms: r.status === 'ok' ? parseTime(r.time) : null }))
@@ -402,8 +404,8 @@ export default {
                     <th>{{ $t('pages.event.manage.res.pos') }}</th>
                     <th>{{ $t('pages.event.manage.res.part') }}</th>
                     <th>{{ $t('pages.event.manage.res.score') }}</th>
-                    <th>{{ $t('pages.event.manage.res.best') }}</th>
-                    <th>{{ $t('pages.event.manage.res.laps') }}</th>
+                    <th v-if="hasLaps">{{ $t('pages.event.manage.res.best') }}</th>
+                    <th v-if="hasLaps">{{ $t('pages.event.manage.res.laps') }}</th>
                     <th>{{ $t('pages.event.manage.res.pen') }}</th>
                     <th>{{ $t('pages.event.manage.res.qual') }}</th>
                     <th></th>
@@ -419,8 +421,8 @@ export default {
                       </div>
                     </td>
                     <td><input v-model.number="row.score" type="number" step="any" class="form-control res-in sm" :disabled="readonly" @input="dirty = true" /></td>
-                    <td><input v-model="row.best" class="form-control res-in" placeholder="0:00.000" maxlength="20" :disabled="readonly" @input="dirty = true" /></td>
-                    <td><input v-model.number="row.laps" type="number" min="0" class="form-control res-in sm" :disabled="readonly" @input="dirty = true" /></td>
+                    <td v-if="hasLaps"><input v-model="row.best" class="form-control res-in" placeholder="0:00.000" maxlength="20" :disabled="readonly" @input="dirty = true" /></td>
+                    <td v-if="hasLaps"><input v-model.number="row.laps" type="number" min="0" class="form-control res-in sm" :disabled="readonly" @input="dirty = true" /></td>
                     <td><input v-model="row.pen" class="form-control res-in sm" placeholder="—" maxlength="20" :disabled="readonly" @input="dirty = true" /></td>
                     <td><div class="form-check form-switch m-0"><input v-model="row.qualified" class="form-check-input" type="checkbox" :disabled="readonly" @change="dirty = true" /></div></td>
                     <td><button v-if="!readonly" class="act-btn del" :title="$t('pages.event.manage.res.remove_row')" @click="removeRow(row)"><font-awesome-icon :icon="['fas', 'xmark']" /></button></td>

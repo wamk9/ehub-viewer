@@ -80,7 +80,7 @@ export default {
     r_start: 'Iniciar', r_finish: 'Finalizar', r_remove: 'Eliminar sesión',
     move_up: 'Subir', move_down: 'Bajar',
     m_name: 'Nombre de la etapa', m_type: 'Tipo', m_date: 'Fecha y hora', m_desc: 'Descripción',
-    m_sessions: 'Sesiones', m_sessions_hint: 'Una por línea. Ej.: Práctica libre, Clasificación, Carrera.',
+    m_sessions: 'Sesiones', m_sessions_hint: 'Una por línea. Ej.: Clasificatoria, Semifinal, Final.',
     m_preset: 'Usar Práctica libre / Clasificación / Carrera',
     preset: ['Práctica libre', 'Clasificación', 'Carrera'],
     create: 'Crear etapa', edit: 'Editar etapa', type_locked: 'El tipo no puede cambiar después de iniciar la etapa.',

@@ -26,6 +26,8 @@ export default {
     };
   },
   computed: {
+    // Practice / Qualifying / Race preset is a motorsport thing.
+    hasLaps() { return ['simracing', 'racingcars', 'rally', 'motorsport', 'motorbike', 'drone-racing'].includes(this.ev?.category); },
     ev() { return this.em.event; },
     /** Marketing sees stages read-only. */
     canRun() { return this.em.can('event.manage'); },
@@ -301,7 +303,7 @@ export default {
         <div v-if="!editing" class="col-12">
           <div class="d-flex align-items-center justify-content-between mb-1 gap-2 flex-wrap">
             <label class="form-label m-0">{{ $t('pages.event.manage.stg.m_sessions') }}</label>
-            <button type="button" class="btn btn-link btn-sm p-0" @click="usePreset">{{ $t('pages.event.manage.stg.m_preset') }}</button>
+            <button v-if="hasLaps" type="button" class="btn btn-link btn-sm p-0" @click="usePreset">{{ $t('pages.event.manage.stg.m_preset') }}</button>
           </div>
           <textarea v-model="form.sessions" class="form-control" rows="3" style="resize:vertical"></textarea>
           <div class="form-text">{{ $t('pages.event.manage.stg.m_sessions_hint') }}</div>

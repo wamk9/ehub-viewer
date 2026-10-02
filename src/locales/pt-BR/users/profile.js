@@ -27,7 +27,7 @@ export default {
     identity:    'Identidade',
     identityDesc:'Nome, username e número do carro como aparecerão no seu perfil.',
     details:     'Detalhes',
-    detailsDesc: 'Informações complementares do piloto.',
+    detailsDesc: 'Informações complementares do competidor.',
     success:     'Perfil atualizado com sucesso!',
     submit:      'Salvar Alterações',
     form: {

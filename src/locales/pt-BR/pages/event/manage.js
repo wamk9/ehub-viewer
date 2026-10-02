@@ -80,7 +80,7 @@ export default {
     r_start: 'Iniciar', r_finish: 'Finalizar', r_remove: 'Remover sessão',
     move_up: 'Mover para cima', move_down: 'Mover para baixo',
     m_name: 'Nome da etapa', m_type: 'Tipo', m_date: 'Data e hora', m_desc: 'Descrição',
-    m_sessions: 'Sessões', m_sessions_hint: 'Uma por linha. Ex.: Treino livre, Classificação, Corrida.',
+    m_sessions: 'Sessões', m_sessions_hint: 'Uma por linha. Ex.: Classificatória, Semifinal, Final.',
     m_preset: 'Usar Treino livre / Classificação / Corrida',
     preset: ['Treino livre', 'Classificação', 'Corrida'],
     create: 'Criar etapa', edit: 'Editar etapa', type_locked: 'O tipo não pode mudar depois que a etapa começou.',
