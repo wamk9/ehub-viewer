@@ -22,8 +22,8 @@ const OrganizationEventStage = {
         const result = await Api.postAsync(`/org/${orgRoute}/event/${eventRoute}/stage/${stageRoute}/results`, body);
         return { code: result.code, data: result.response?.message };
     },
-    async generateBracket(orgRoute, eventRoute, stageRoute, mode, seeds = null) {
-        const result = await Api.postAsync(`/org/${orgRoute}/event/${eventRoute}/stage/${stageRoute}/bracket`, seeds ? { mode, seeds } : { mode });
+    async generateBracket(orgRoute, eventRoute, stageRoute, mode, seeds = null, thirdPlace = false) {
+        const result = await Api.postAsync(`/org/${orgRoute}/event/${eventRoute}/stage/${stageRoute}/bracket`, { mode, seeds: seeds || undefined, third_place: thirdPlace });
         return { code: result.code, data: result.response?.message };
     },
     async drawGroups(orgRoute, eventRoute, mode) {

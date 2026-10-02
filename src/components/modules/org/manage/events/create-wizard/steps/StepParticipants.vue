@@ -51,10 +51,10 @@ watch(() => props.form.format, (fmt) => {
     </div>
 
     <div class="form-section" v-if="form.entry_type === 'team'">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s4.teamSize') }}</label>
+      <label class="form-label" for="wz-participants-1">{{ $t('pages.organization.manage.eventWizard.s4.teamSize') }}</label>
       <div class="input-group" style="max-width:200px">
         <span class="input-group-text"><font-awesome-icon :icon="['fas', 'users']" /></span>
-        <input type="number" class="form-control" v-model.number="form.team_size" min="2" max="100" />
+        <input id="wz-participants-1" type="number" class="form-control" v-model.number="form.team_size" min="2" max="100" />
         <span class="input-group-text">{{ $t('pages.organization.manage.eventWizard.s4.players') }}</span>
       </div>
     </div>
@@ -64,13 +64,13 @@ watch(() => props.form.format, (fmt) => {
 
       <div v-if="form.format !== 'bracket'" class="row g-3">
         <div class="col-12">
-          <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s4.maxSlots') }}</label>
-          <input type="number" class="form-control" v-model="form.max_registrations" min="2" max="1024" placeholder="0" />
+          <label class="form-label" for="wz-participants-2">{{ $t('pages.organization.manage.eventWizard.s4.maxSlots') }}</label>
+          <input id="wz-participants-2" type="number" class="form-control" v-model="form.max_registrations" min="2" max="1024" placeholder="0" />
           <p class="field-hint">{{ $t(form.format === 'groups' ? 'pages.organization.manage.eventWizard.s4.slotsHintGroups' : 'pages.organization.manage.eventWizard.s4.slotsHint') }}</p>
         </div>
         <div class="col-sm-6">
-          <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s4.minSlots') }}</label>
-          <input type="number" class="form-control" v-model="form.min_registrations" min="0" placeholder="0" />
+          <label class="form-label" for="wz-participants-3">{{ $t('pages.organization.manage.eventWizard.s4.minSlots') }}</label>
+          <input id="wz-participants-3" type="number" class="form-control" v-model="form.min_registrations" min="0" placeholder="0" />
           <p class="field-hint">{{ $t('pages.organization.manage.eventWizard.s4.minSlotsHint') }}</p>
         </div>
       </div>
@@ -140,10 +140,10 @@ watch(() => props.form.format, (fmt) => {
     </div>
 
     <div class="form-section">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s4.prize') }}</label>
+      <label class="form-label" for="wz-participants-4">{{ $t('pages.organization.manage.eventWizard.s4.prize') }}</label>
       <div class="row g-2">
         <div class="col-auto">
-          <select class="form-select" v-model="form.prize_pool_currency" style="width:auto">
+          <select id="wz-participants-4" class="form-select" v-model="form.prize_pool_currency" style="width:auto">
             <option value="BRL">R$ (BRL)</option>
             <option value="USD">US$ (USD)</option>
             <option value="EUR">€ (EUR)</option>
@@ -163,8 +163,8 @@ watch(() => props.form.format, (fmt) => {
     </div>
 
     <div class="form-section">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s4.requirements') }}</label>
-      <textarea class="form-control" rows="3" style="resize:vertical" v-model="form.requirements" :placeholder="$t('pages.organization.manage.eventWizard.s4.requirementsPh')"></textarea>
+      <label class="form-label" for="wz-participants-5">{{ $t('pages.organization.manage.eventWizard.s4.requirements') }}</label>
+      <textarea id="wz-participants-5" class="form-control" rows="3" style="resize:vertical" v-model="form.requirements" :placeholder="$t('pages.organization.manage.eventWizard.s4.requirementsPh')"></textarea>
     </div>
   </div>
 </template>

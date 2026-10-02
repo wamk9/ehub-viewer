@@ -694,17 +694,8 @@ onMounted(() => {
         </div>
 
         <div class="set-card mb-4">
-          <h3><font-awesome-icon :icon="['fas', 'sliders']" class="set-ico" />{{ $t('users.profile.privacy.interactions.title') }}</h3>
-          <p class="set-desc">{{ $t('users.profile.privacy.interactions.desc') }}</p>
-          <div v-for="key in ['show_email', 'show_phone', 'show_birthdate', 'show_followers']" :key="key" class="toggle-row">
-            <div class="toggle-info">
-              <div class="ti-label">{{ $t('users.profile.privacy.toggles.' + key + '.label') }}</div>
-              <div class="ti-desc">{{ $t('users.profile.privacy.toggles.' + key + '.desc') }}</div>
-            </div>
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" :id="'t-' + key" v-model="fPrivacy[key]" style="width:2.6em;height:1.4em;cursor:pointer" />
-            </div>
-          </div>
+          <h3><font-awesome-icon :icon="['fas', 'shield-halved']" class="set-ico" />{{ $t('users.profile.privacy.contact_title') }}</h3>
+          <p class="set-desc mb-0">{{ $t('users.profile.privacy.contact_desc') }}</p>
         </div>
 
         <div class="d-flex gap-2 mb-4">

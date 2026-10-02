@@ -57,7 +57,9 @@ function label(p, m) {
       <div v-for="col in rounds" :key="col.round" class="bk-col">
         <div class="bk-col__hd">{{ roundName(col.round) }}</div>
         <div class="bk-col__list">
-          <div v-for="m in col.matches" :key="m.id" class="bk-match" :class="{ bye: m.status === 'bye', done: m.status === 'done', busy: busyId === m.id }">
+          <template v-for="m in col.matches" :key="m.id">
+          <div v-if="col.round === total && m.slot === 2" class="bk-third-lbl">{{ $t('competition.bracket.third_place') }}</div>
+          <div class="bk-match" :class="{ bye: m.status === 'bye', done: m.status === 'done', busy: busyId === m.id }">
             <template v-for="side in ['a', 'b']" :key="side">
               <div class="bk-row"
                 :class="{ win: m.winner === side, lose: m.winner && m.winner !== side && m.status === 'done', me: highlight && m[side]?.registration_id === highlight, empty: !m[side], click: canPick(m) }"
@@ -73,6 +75,7 @@ function label(p, m) {
               </div>
             </template>
           </div>
+          </template>
         </div>
       </div>
     </div>
@@ -99,5 +102,6 @@ function label(p, m) {
 .bk-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ehub-ink); }
 .bk-score { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ehub-ink); }
 .bk-score-in { width: 42px; padding: 2px 6px; font-size: .8rem; border: 1px solid var(--ehub-line); border-radius: 6px; background: var(--ehub-field-bg); color: var(--ehub-ink); text-align: center; }
+.bk-third-lbl { font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ehub-muted); text-align: center; margin-top: 6px; }
 .bk-tick { color: var(--ehub-success-text); }
 </style>

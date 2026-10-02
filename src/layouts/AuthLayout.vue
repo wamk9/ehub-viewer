@@ -52,7 +52,7 @@ onUnmounted(() => {
         <button :class="{ active: locale === 'en' }"    @click="setLang('en')">EN</button>
         <button :class="{ active: locale === 'es' }"    @click="setLang('es')">ES</button>
       </div>
-      <button class="theme-btn" @click="toggleTheme">
+      <button class="theme-btn" @click="toggleTheme" :aria-label="$t(isDark ? 'common.theme.to_light' : 'common.theme.to_dark')" :title="$t(isDark ? 'common.theme.to_light' : 'common.theme.to_dark')">
         <font-awesome-icon :icon="['fas', isDark ? 'sun' : 'moon']" />
       </button>
     </div>

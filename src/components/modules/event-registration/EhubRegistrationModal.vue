@@ -26,6 +26,20 @@
             {{ $t('events.show.registration.modal.rules_hint') }}
             <a href="#" @click.prevent="$emit('open-rules')">{{ $t('events.show.registration.modal.rules_link') }}</a>
           </p>
+          <div v-if="teamMode && !preview" class="modal-card__team">
+            <label class="form-label small fw-semibold" for="reg-team">{{ $t('events.show.registration.team.label') }} <span class="text-danger">*</span></label>
+            <select v-if="teams.length" id="reg-team" class="form-select form-select-sm" :value="teamId" @change="$emit('update:teamId', $event.target.value)">
+              <option value="" disabled>{{ $t('events.show.registration.team.choose') }}</option>
+              <option v-for="t in teams" :key="t.id" :value="t.id" :disabled="!t.can_register || (teamSize > 1 && t.members_count < teamSize)">
+                {{ t.name }}{{ !t.can_register ? ' — ' + $t('events.show.registration.team.only_captain') : (teamSize > 1 && t.members_count < teamSize ? ' — ' + $t('events.show.registration.team.too_small', { n: teamSize }) : '') }}
+              </option>
+            </select>
+            <p v-else class="small mb-0">
+              {{ $t('events.show.registration.team.none') }}
+              <router-link to="/create-team">{{ $t('events.show.registration.team.create') }}</router-link>
+            </p>
+            <p v-if="teamSize > 1" class="small text-muted mt-1 mb-0">{{ $t('events.show.registration.team.size', { n: teamSize }) }}</p>
+          </div>
           <EhubRegistrationFields v-if="fields.length" :fields="fields" :model-value="modelValue" :errors="errors" @update:model-value="$emit('update:modelValue', $event)" />
           <p v-else class="mb-0 small">{{ $t('events.show.registration.modal.confirm_text') }}</p>
           <p v-if="!preview" class="modal-card__privacy">
@@ -41,7 +55,7 @@
           <button class="btn btn-outline-secondary btn-sm" @click="$emit('close')">
             {{ $t('events.show.registration.modal.cancel') }}
           </button>
-          <button class="btn btn-primary btn-sm" :disabled="loading" @click="$emit('confirm')">
+          <button class="btn btn-primary btn-sm" :disabled="loading || (teamMode && !preview && !teamId)" @click="$emit('confirm')">
             <span v-if="loading" class="spinner-border spinner-border-sm me-1"></span>
             {{ $t('events.show.registration.modal.confirm') }}
           </button>
@@ -74,13 +88,19 @@ export default {
     loading: { type: Boolean, default: false },
     preview: { type: Boolean, default: false },
     previewOk: { type: Boolean, default: false },
+    // Team events: the captain picks which team signs up.
+    teamMode: { type: Boolean, default: false },
+    teams: { type: Array, default: () => [] },
+    teamId: { type: String, default: '' },
+    teamSize: { type: Number, default: 0 },
   },
-  emits: ['close', 'confirm', 'update:modelValue', 'open-rules'],
+  emits: ['close', 'confirm', 'update:modelValue', 'update:teamId', 'open-rules'],
 };
 </script>
 
 <style scoped>
 .modal-card__rules { font-size: .8rem; color: var(--ehub-muted); margin: 0 0 12px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.modal-card__team { margin: 0 0 12px; }
 .modal-card__privacy { font-size: .74rem; color: var(--ehub-muted); margin: 12px 0 0; display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap; }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 1050; padding: 1rem; }

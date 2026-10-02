@@ -13,7 +13,7 @@ export default {
   components: { InitialsAvatar, EhubBracket, EhubGroupTable, EhubGroupMatches },
   inject: ['em'],
   data() {
-    return { stageId: null, rows: [], auto: true, dirty: false, saving: false, addId: '', busyMatch: null };
+    return { stageId: null, rows: [], auto: true, dirty: false, saving: false, addId: '', busyMatch: null, thirdPlace: false };
   },
   computed: {
     ev() { return this.em.event; },
@@ -177,7 +177,7 @@ export default {
         if (!ok) return;
       }
       this.saving = true;
-      const res = await OrganizationEventStage.generateBracket(this.em.orgRoute, this.em.eventRoute, this.stage.route, mode);
+      const res = await OrganizationEventStage.generateBracket(this.em.orgRoute, this.em.eventRoute, this.stage.route, mode, null, this.thirdPlace);
       this.saving = false;
       if (res.code === 200) {
         this.em.putStage(res.data);
@@ -333,6 +333,10 @@ export default {
                   <button class="btn btn-outline-secondary round px-3" :disabled="saving || bracketPreview.n < 2" @click="drawBracket('registration')">
                     <font-awesome-icon :icon="['fas', 'list-ol']" class="me-2" />{{ $t('competition.bracket.draw_order') }}
                   </button>
+                </div>
+                <div v-if="!readonly && bracketPreview.size >= 4" class="form-check form-switch d-inline-flex gap-2 mt-3">
+                  <input id="thirdPlace" v-model="thirdPlace" class="form-check-input" type="checkbox" />
+                  <label class="form-check-label small" for="thirdPlace">{{ $t('competition.bracket.third_place_opt') }}</label>
                 </div>
                 <p v-if="bracketPreview.n < 2" class="small mt-2 mb-0">{{ $t('competition.bracket.need_two') }}</p>
                 <p v-if="groupStages.length && !groupsDone" class="small mt-2 mb-0">{{ $t('competition.bracket.groups_pending') }}</p>

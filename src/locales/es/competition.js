@@ -45,6 +45,8 @@ export default {
     hint_not_started: 'Inicia la fase de grupos (en Etapas) para cargar marcadores. Todos los grupos empiezan juntos.',
   },
   bracket: {
+    third_place_opt: 'Partido por el 3.er lugar entre los perdedores de semifinal',
+    third_place: 'Partido por el 3.er lugar',
     preview_groups: '{n} clasificados de los grupos → llave de {size}.',
     draw_groups: 'Armar con los clasificados de los grupos',
     groups_pending: 'Finaliza todos los grupos para armar la llave con los clasificados.',

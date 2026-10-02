@@ -98,17 +98,17 @@ function setGroupPoint(k, v) {
     </div>
 
     <div class="form-section">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s5.techReqs') }}</label>
-      <textarea class="form-control" rows="4" style="resize:vertical" v-model="form.tech_requirements" :placeholder="$t('pages.organization.manage.eventWizard.s5.techReqsPh')"></textarea>
+      <label class="form-label" for="wz-rules-1">{{ $t('pages.organization.manage.eventWizard.s5.techReqs') }}</label>
+      <textarea id="wz-rules-1" class="form-control" rows="4" style="resize:vertical" v-model="form.tech_requirements" :placeholder="$t('pages.organization.manage.eventWizard.s5.techReqsPh')"></textarea>
     </div>
 
     <div class="form-section">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s5.streaming') }} <span class="field-hint">({{ $t('pages.organization.manage.eventWizard.optional') }})</span></label>
+      <label class="form-label" for="wz-rules-2">{{ $t('pages.organization.manage.eventWizard.s5.streaming') }} <span class="field-hint">({{ $t('pages.organization.manage.eventWizard.optional') }})</span></label>
       <div class="row g-2">
         <div class="col">
           <div class="input-group">
             <span class="input-group-text"><font-awesome-icon :icon="['fab', 'twitch']" /></span>
-            <input type="text" class="form-control" v-model="form.streaming_twitch" placeholder="twitch.tv/canal" />
+            <input id="wz-rules-2" type="text" class="form-control" v-model="form.streaming_twitch" placeholder="twitch.tv/canal" />
           </div>
         </div>
         <div class="col">

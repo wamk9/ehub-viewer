@@ -14,7 +14,7 @@ export default {
   ],
   s1: {
     title: 'Informações Básicas', sub: 'Nome, descrição e capa visual do evento.',
-    name: 'Nome do evento', namePh: 'ex: GT3 Championship #3',
+    name: 'Nome do evento', namePh: 'ex.: Copa de Verão 2026',
     desc: 'Descrição', descPh: 'Descreva o evento: objetivos, público-alvo, destaques…',
     cover: 'Capa do evento', logo: 'Logo do evento', color: 'Cor de destaque',
   },

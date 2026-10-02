@@ -2,6 +2,7 @@
 import { sanitizeHtml } from '@/helpers/General/sanitizeHtml.js';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import OrganizationEventRegistration from '@/helpers/communication/OrganizationEventRegistration.js';
+import Teams from '@/helpers/communication/Teams.js';
 import OrganizationEventArticle from '@/helpers/communication/OrganizationEventArticle.js';
 import SystemVars from '@/helpers/General/SystemVars';
 import { toast } from '@/helpers/toast.js';
@@ -62,6 +63,8 @@ export default {
       participantsLoaded: false,
       registering: false,
       showRegisterModal: false,
+      myTeams: [],
+      regTeamId: '',
       formData: {},
       formErrors: {},
       checkingPayment: false,
@@ -154,7 +157,7 @@ export default {
         const map = {};
         this.finishedStages.forEach((stage, si) => {
           stage.results.forEach((r) => {
-            const e = map[r.registration_id] ||= { registration_id: r.registration_id, user: r.user, stageScores: {}, stagePos: {}, ms: 0, done: 0, wins: 0 };
+            const e = map[r.registration_id] ||= { registration_id: r.registration_id, user: r.user, team: r.team, stageScores: {}, stagePos: {}, ms: 0, done: 0, wins: 0 };
             const ms = r.result_data?.time_ms;
             e.stageScores[si] = ms != null ? formatMs(ms) : (r.result_data?.status || 'dnf').toUpperCase();
             if (ms != null) { e.ms += ms; e.done += 1; }
@@ -169,7 +172,7 @@ export default {
       if (!lastBracket && ['bracket', 'groups'].includes(this.event?.format)) return [];
       if (lastBracket && ['bracket', 'groups'].includes(this.event?.format)) {
         return [...lastBracket.results].sort((a, b) => a.position - b.position).map((r) => ({
-          registration_id: r.registration_id, user: r.user, position: r.position,
+          registration_id: r.registration_id, user: r.user, team: r.team, position: r.position,
           total: r.score ?? 0, wins: r.position === 1 ? 1 : 0,
           stageScores: Object.fromEntries(this.finishedStages.map((st, si) => [si, st.id === lastBracket.id ? (r.score ?? 0) : null])),
           stagePos: {},
@@ -179,7 +182,7 @@ export default {
       this.finishedStages.forEach((stage, si) => {
         stage.results.forEach(result => {
           const key = result.registration_id;
-          if (!map[key]) map[key] = { registration_id: key, user: result.user, stageScores: {}, stagePos: {}, total: 0, wins: 0 };
+          if (!map[key]) map[key] = { registration_id: key, user: result.user, team: result.team, stageScores: {}, stagePos: {}, total: 0, wins: 0 };
           const score = result.score ?? 0;
           map[key].stageScores[si] = score;
           map[key].stagePos[si] = result.position ?? null;
@@ -452,7 +455,7 @@ export default {
         .filter(f => f?.key && String(values[f.key] ?? '').trim())
         .map(f => ({ ...f, value: values[f.key] }));
     },
-    handleRegister() {
+    async handleRegister() {
       if (!this.$store.getters.getToken) {
         const back = this.$router.resolve(this.eventPath('join')).fullPath;
         this.$router.push({ name: 'user-login', query: { redirect: back } });
@@ -461,6 +464,12 @@ export default {
       this.formData = initialValues(this.regTemplate);
       this.formErrors = {};
       this.showRegisterModal = true;
+      if (this.event?.entry_type === 'team') {
+        const r = await Teams.myTeams();
+        this.myTeams = r.code === 200 ? r.data : [];
+        const first = this.myTeams.find((t) => t.can_register);
+        this.regTeamId = first ? first.id : '';
+      }
     },
     async confirmRegister() {
       if (this.registering) return; // double tap
@@ -470,7 +479,7 @@ export default {
       this.registering = true;
       const result = await OrganizationEventRegistration.store(
         this.orgRoute, this.eventRoute,
-        { form_data: this.regTemplate.length ? { ...this.formData } : null }
+        { form_data: this.regTemplate.length ? { ...this.formData } : null, team_id: this.event?.entry_type === 'team' ? this.regTeamId : undefined }
       );
       this.registering = false;
       this.showRegisterModal = false;
@@ -479,7 +488,7 @@ export default {
         return;
       }
       if (!result.registered) {
-        const known = ['event_full', 'registrations_closed', 'registration_deadline_passed', 'already_registered'];
+        const known = ['event_full', 'registrations_closed', 'registration_deadline_passed', 'already_registered', 'team_required', 'team_not_captain', 'team_already_registered', 'team_too_small'];
         toast.error(this.$t('events.show.join.err.' + (known.includes(result.message) ? result.message : 'generic')));
         return;
       }
@@ -661,6 +670,13 @@ export default {
                     {{ paymentCheckMessage === 'confirmed' ? $t('events.show.registration.payment_now_confirmed') : $t('events.show.registration.payment_still_pending') }}
                   </span>
                 </div>
+                <div v-else class="reg-done" role="status">
+                  <font-awesome-icon :icon="['fas', 'circle-check']" class="reg-done__ico" />
+                  <span>
+                    <strong>{{ $t('events.show.registration.you_are_in') }}</strong>
+                    <small>{{ $t('events.show.registration.you_are_in_hint') }}</small>
+                  </span>
+                </div>
               </template>
 
               <!-- Can register -->
@@ -747,8 +763,8 @@ export default {
                 <div class="v">
                   <template v-for="(l, li) in leaders" :key="l.registration_id">
                     <span v-if="li">{{ li === leaders.length - 1 ? ' ' + $t('events.show.me.and') + ' ' : ', ' }}</span>
-                    <router-link v-if="l.user?.username" :to="`/profile/${l.user.username}`" style="text-decoration:none;color:inherit;">{{ l.user?.name || $t('events.show.removed_participant') }}</router-link>
-                    <span v-else>{{ l.user?.name || $t('events.show.removed_participant') }}</span>
+                    <router-link v-if="l.user?.username" :to="`/profile/${l.user.username}`" style="text-decoration:none;color:inherit;">{{ l.team?.name || l.user?.name || $t('events.show.removed_participant') }}</router-link>
+                    <span v-else>{{ l.team?.name || l.user?.name || $t('events.show.removed_participant') }}</span>
                   </template>
                 </div>
                 <div class="s">{{ leaderEntry.total }}<template v-if="event.format !== 'time'"> {{ $t('events.show.highlights.pts') }}</template><template v-if="leaders.length > 1"> · {{ $t('events.show.me.tied') }}</template></div>
@@ -974,9 +990,9 @@ export default {
                         </td>
                         <td class="l driver-cell">
                           <router-link v-if="result.user?.username" :to="`/profile/${result.user.username}`" style="text-decoration:none;color:inherit;">
-                            <div class="nm">{{ result.user?.name || $t('events.show.removed_participant') }}<span v-if="result.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
+                            <div class="nm">{{ result.team?.name || result.user?.name || $t('events.show.removed_participant') }}<span v-if="result.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
                           </router-link>
-                          <div v-else class="nm">{{ result.user?.name || $t('events.show.removed_participant') }}<span v-if="result.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
+                          <div v-else class="nm">{{ result.team?.name || result.user?.name || $t('events.show.removed_participant') }}<span v-if="result.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
                         </td>
                         <td v-if="stage.stage_type === 'time'" class="c pts-cell">{{ result.result_data?.time || (result.result_data?.status || '—').toUpperCase() }}</td>
                         <td v-else class="c pts-cell">{{ result.score ?? '—' }}</td>
@@ -1028,7 +1044,7 @@ export default {
                   <template v-else>{{ initials(p.user?.name) }}</template>
                 </div>
                 <div class="part-info">
-                  <div class="part-name">{{ p.user?.name || $t('events.show.removed_participant') }}</div>
+                  <div class="part-name">{{ p.team?.name || p.user?.name || $t('events.show.removed_participant') }}</div>
                   <div v-if="p.user?.username" class="part-team">@{{ p.user.username }}</div>
                 </div>
                 <span class="part-seed">
@@ -1070,10 +1086,10 @@ export default {
                       :to="`/profile/${entry.user.username}`"
                       style="text-decoration:none;color:inherit;"
                     >
-                      <div class="nm">{{ entry.user?.name || $t('events.show.removed_participant') }}<span v-if="entry.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
+                      <div class="nm">{{ entry.team?.name || entry.user?.name || $t('events.show.removed_participant') }}<span v-if="entry.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
                       <div class="sub">@{{ entry.user.username }}</div>
                     </router-link>
-                    <div v-else class="nm">{{ entry.user?.name || $t('events.show.removed_participant') }}</div>
+                    <div v-else class="nm">{{ entry.team?.name || entry.user?.name || $t('events.show.removed_participant') }}</div>
                   </td>
                   <td v-for="(stage, si) in finishedStages" :key="stage.id" class="c pts-cell" :class="entry.stageScores[si] != null ? 'top' : ''">
                     {{ entry.stageScores[si] ?? '—' }}
@@ -1188,6 +1204,10 @@ export default {
       :errors="formErrors"
       :loading="registering"
       :rules-available="!!event?.rules"
+      :team-mode="event?.entry_type === 'team'"
+      :teams="myTeams"
+      v-model:team-id="regTeamId"
+      :team-size="Number(event?.team_size) || 0"
       @close="showRegisterModal = false"
       @confirm="confirmRegister"
       @open-rules="showRegisterModal = false; goTab('regulation')"
@@ -1466,4 +1486,8 @@ a.ev-extra__val { color: var(--org-accent-text); }
 .my-match { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 14px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--org-accent, var(--ehub-primary)) 40%, transparent); background: color-mix(in srgb, var(--org-accent, var(--ehub-primary)) 10%, var(--ehub-card)); }
 .my-match__ico { font-size: 1.2rem; color: var(--org-accent, var(--ehub-primary)); }
 .my-match__lbl { font-size: .74rem; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+.reg-done { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 12px; background: color-mix(in srgb, #1f8a5b 14%, var(--ehub-card)); border: 1px solid color-mix(in srgb, #1f8a5b 45%, transparent); color: var(--ehub-ink); }
+.reg-done__ico { font-size: 1.5rem; color: var(--ehub-success-text); }
+.reg-done span { display: flex; flex-direction: column; line-height: 1.25; }
+.reg-done small { color: var(--ehub-muted); font-size: .76rem; }
 </style>

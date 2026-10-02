@@ -152,10 +152,10 @@ watch(() => props.form.runmode, (val) => {
     </div>
 
     <div class="form-section" v-if="form.runmode === 'irl'">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s2.location') }} <span class="text-danger">*</span></label>
+      <label class="form-label" for="wz-categoryformat-1">{{ $t('pages.organization.manage.eventWizard.s2.location') }} <span class="text-danger">*</span></label>
       <div class="input-group">
         <span class="input-group-text"><font-awesome-icon :icon="['fas', 'location-dot']" /></span>
-        <input type="text" class="form-control" v-model="form.location" :placeholder="$t('pages.organization.manage.eventWizard.s2.locationPh')" />
+        <input id="wz-categoryformat-1" type="text" class="form-control" v-model="form.location" :placeholder="$t('pages.organization.manage.eventWizard.s2.locationPh')" />
       </div>
     </div>
 

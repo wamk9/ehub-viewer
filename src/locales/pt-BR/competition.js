@@ -45,6 +45,8 @@ export default {
     hint_not_started: 'Inicie a fase de grupos (em Etapas) para lançar os placares. Todos os grupos começam juntos.',
   },
   bracket: {
+    third_place_opt: 'Disputa de 3º lugar entre quem perder a semifinal',
+    third_place: 'Disputa de 3º lugar',
     preview_groups: '{n} classificados dos grupos → chave de {size}.',
     draw_groups: 'Montar com os classificados dos grupos',
     groups_pending: 'Finalize todos os grupos para montar a chave com os classificados.',

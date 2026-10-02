@@ -42,7 +42,7 @@ const summary = computed(() => {
     { k: t(wz + 'category'), v: categoryLabel.value },
     { k: t(wz + 'mode'), v: runmodeLabel.value },
     { k: t(wz + 'format'), v: props.form.format ? t(`pages.organization.manage.eventWizard.fmt.${props.form.format}`) : '—' },
-    { k: t(wz + 'start'), v: fmtDate(props.form.start_at) },
+    { k: t(wz + 'start'), v: fmtDate(props.form.start_at) + (props.form.start_time ? ' · ' + props.form.start_time : '') },
     { k: t(wz + 'slots'), v: props.form.max_registrations || t(wz + 'unlimited') },
     { k: t(wz + 'fee'), v: (+props.form.fee > 0) ? money(props.form.fee, props.form.currency) : t(wz + 'free') },
     { k: t(wz + 'url'), v: props.form.route || '—' },

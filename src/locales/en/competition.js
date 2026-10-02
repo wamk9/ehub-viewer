@@ -45,6 +45,8 @@ export default {
     hint_not_started: 'Start the group phase (in Stages) to enter scores. All groups start together.',
   },
   bracket: {
+    third_place_opt: '3rd-place match between semifinal losers',
+    third_place: '3rd-place match',
     preview_groups: '{n} group qualifiers → bracket of {size}.',
     draw_groups: 'Build from group qualifiers',
     groups_pending: 'Finish every group to build the bracket with the qualifiers.',

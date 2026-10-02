@@ -99,11 +99,13 @@ export default {
     sub:     'Control who can see and interact with your profile.',
     success: 'Privacy updated!',
     submit:  'Save Privacy',
+    contact_title: 'Your contact details stay private',
+    contact_desc: 'E-mail, phone and birth date never appear on your public profile or to organizers. They only see your name, username and the answers you give when registering.',
     visibility: {
       label:    'Profile Visibility',
       desc:     'Set who can view your information, results and stats.',
       public:   'Public',
-      followers:'Followers',
+      followers:'Team and organization',
       private:  'Private',
     },
     interactions: {

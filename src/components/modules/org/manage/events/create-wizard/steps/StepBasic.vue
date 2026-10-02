@@ -25,8 +25,8 @@ function readFile(file, key) {
     <p class="step-sub">{{ $t('pages.organization.manage.eventWizard.s1.sub') }}</p>
 
     <div class="form-section">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s1.name') }} <span class="req-mark">*</span></label>
-      <input type="text" class="form-control" v-model="form.name" maxlength="80" :placeholder="$t('pages.organization.manage.eventWizard.s1.namePh')" />
+      <label class="form-label" for="wz-basic-1">{{ $t('pages.organization.manage.eventWizard.s1.name') }} <span class="req-mark">*</span></label>
+      <input id="wz-basic-1" type="text" class="form-control" v-model="form.name" maxlength="80" :placeholder="$t('pages.organization.manage.eventWizard.s1.namePh')" />
       <div class="char-count">{{ form.name.length }}/80</div>
     </div>
 

@@ -15,7 +15,7 @@ const rows = computed(() => [...props.results].sort((a, b) => a.position - b.pos
   return {
     ...r, p: d.p ?? 0, w: d.w ?? 0, d: d.d ?? 0, l: d.l ?? 0, gf: d.gf ?? 0, ga: d.ga ?? 0,
     sg: (d.gf ?? 0) - (d.ga ?? 0),
-    name: r.user?.name || r.user?.username || props.nameOf?.(r.registration_id) || t('events.show.removed_participant'),
+    name: r.team?.name || r.user?.name || r.user?.username || props.nameOf?.(r.registration_id) || t('events.show.removed_participant'),
   }
 }))
 const num = (v) => (Number.isInteger(Number(v)) ? Number(v) : Number(v).toFixed(1))

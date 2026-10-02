@@ -14,7 +14,7 @@ export default {
   ],
   s1: {
     title: 'Basic Info', sub: 'Name, description and event cover.',
-    name: 'Event name', namePh: 'e.g. GT3 Championship #3',
+    name: 'Event name', namePh: 'e.g. Summer Cup 2026',
     desc: 'Description', descPh: 'Describe the event: goals, audience, highlights…',
     cover: 'Event cover', logo: 'Event logo', color: 'Accent color',
   },

@@ -36,6 +36,8 @@ export function lifecycleIndex(status) {
 }
 
 export function userName(reg) {
+  // Team events: the team is the participant.
+  if (reg?.team?.name) return reg.team.name;
   return reg?.user?.name || reg?.user?.username || '—';
 }
 

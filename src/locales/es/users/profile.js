@@ -99,11 +99,13 @@ export default {
     sub:     'Controla quién puede ver e interactuar con tu perfil.',
     success: '¡Privacidad actualizada!',
     submit:  'Guardar Privacidad',
+    contact_title: 'Tus datos de contacto están protegidos',
+    contact_desc: 'E-mail, teléfono y fecha de nacimiento nunca aparecen en tu perfil público ni para los organizadores. Solo ven tu nombre, usuario y las respuestas que des al inscribirte.',
     visibility: {
       label:    'Visibilidad del Perfil',
       desc:     'Define quién puede ver tu información, resultados y estadísticas.',
       public:   'Público',
-      followers:'Seguidores',
+      followers:'Equipo y organización',
       private:  'Privado',
     },
     interactions: {

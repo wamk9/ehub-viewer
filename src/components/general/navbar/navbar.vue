@@ -8,6 +8,7 @@ import Api from '@/helpers/communication/Connection'
 import Notification from '@/helpers/communication/Notification.js'
 import { createSSE } from '@/helpers/communication/useLiveSSE.js'
 import EhubLogo from '@/components/general/EhubLogo.vue'
+import { saveAccountPref, applyAccountPrefs } from '@/helpers/General/userPrefs.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -17,9 +18,10 @@ const store = useStore()
 const isLogged = computed(() => !!store.getters.getToken)
 
 // ── Language ───────────────────────────────────────────────────────
-function setLang(lang) {
+function setLang(lang, save = true) {
   locale.value = lang
   localStorage.setItem('lang', lang)
+  if (save) saveAccountPref('locale', lang)
 }
 
 // ── Theme ──────────────────────────────────────────────────────────
@@ -31,6 +33,7 @@ function applyTheme(val) {
 function toggleTheme() {
   theme.value = theme.value === 'dark' ? 'light' : 'dark'
   applyTheme(theme.value)
+  saveAccountPref('theme', theme.value)
 }
 
 // ── Drawer ─────────────────────────────────────────────────────────
@@ -52,6 +55,13 @@ async function loadProfile() {
       profileName.value = `${d.name || ''} ${d.surname || ''}`.trim()
       profileUsername.value = d.username || ''
       profileImage.value = d.image || ''
+      // The account's language/theme win over this browser's; first time, keep the current ones.
+      applyAccountPrefs(d, {
+        setLocale: (l) => setLang(l, false),
+        setTheme: (th) => { theme.value = th; applyTheme(th) },
+      })
+      if (!d.locale) saveAccountPref('locale', locale.value)
+      if (!d.theme) saveAccountPref('theme', theme.value)
     }
   } catch { /* keep placeholder */ }
 }
@@ -304,7 +314,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Theme toggle -->
-    <button class="theme-btn" @click="toggleTheme" :title="theme === 'dark' ? 'Modo claro' : 'Modo escuro'">
+    <button class="theme-btn" @click="toggleTheme" :title="$t(theme === 'dark' ? 'common.theme.to_light' : 'common.theme.to_dark')" :aria-label="$t(theme === 'dark' ? 'common.theme.to_light' : 'common.theme.to_dark')">
       <font-awesome-icon :icon="['fas', theme === 'dark' ? 'sun' : 'moon']" />
     </button>
 
@@ -412,7 +422,7 @@ onBeforeUnmount(() => {
           <button :class="{ active: locale === 'en' }"    @click="setLang('en')">EN</button>
           <button :class="{ active: locale === 'es' }"    @click="setLang('es')">ES</button>
         </div>
-        <button class="theme-btn" @click="toggleTheme" :title="theme === 'dark' ? 'Modo claro' : 'Modo escuro'">
+        <button class="theme-btn" @click="toggleTheme" :title="$t(theme === 'dark' ? 'common.theme.to_light' : 'common.theme.to_dark')" :aria-label="$t(theme === 'dark' ? 'common.theme.to_light' : 'common.theme.to_dark')">
           <font-awesome-icon :icon="['fas', theme === 'dark' ? 'sun' : 'moon']" />
         </button>
       </div>
