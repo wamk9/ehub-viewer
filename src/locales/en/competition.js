@@ -1,4 +1,16 @@
 export default {
+  time: {
+    time: 'Time',
+    status: 'Status',
+    ok: 'Finished',
+    dnf: 'Did not finish (DNF)',
+    dsq: 'Disqualified (DSQ)',
+    time_of: 'Time of {name}',
+    invalid: 'Invalid time. Use minutes:seconds (25:13) or hours:minutes:seconds (1:02:03).',
+    hint: 'Type each time (e.g. 25:13 or 1:02:03.4). Positions follow the fastest time; non-finishers go last.',
+    rules_label: 'Ranked by time',
+    rules_tip: 'Fastest time wins each stage. With several stages, the overall ranking is the sum of times; missing a stage counts as DNF.',
+  },
   group: {
     to_final: '{n} qualifiers go to the knockout final',
     team: 'Player',

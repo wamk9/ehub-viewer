@@ -65,7 +65,7 @@ export default {
       this.editing = stage;
       this.form = {
         name: stage.name,
-        stage_type: ['bracket', 'group'].includes(stage.stage_type) ? stage.stage_type : 'points',
+        stage_type: ['bracket', 'group', 'time'].includes(stage.stage_type) ? stage.stage_type : 'points',
         start_at: stage.start_at ? this.toLocalInput(stage.start_at) : '',
         description: stage.description || '',
         sessions: '',
@@ -93,7 +93,8 @@ export default {
       const payload = {
         name: this.form.name.trim(),
         description: this.form.description || null,
-        start_at: this.form.start_at ? new Date(this.form.start_at).toISOString() : null,
+        // Dates are stored as typed (local, no time zone): never convert to UTC.
+        start_at: this.form.start_at ? this.form.start_at.replace('T', ' ') : null,
       };
       let res;
       if (this.editing) {
@@ -224,7 +225,7 @@ export default {
           </div>
           <div class="stg-meta">
             <font-awesome-icon :icon="['fas', 'calendar-days']" class="me-1" />{{ fmtDT(s.start_at) }}
-            · {{ $t('pages.event.manage.stg.type.' + (['bracket', 'group'].includes(s.stage_type) ? s.stage_type : 'points')) }}
+            · {{ $t('pages.event.manage.stg.type.' + (['bracket', 'group', 'time'].includes(s.stage_type) ? s.stage_type : 'points')) }}
           </div>
         </div>
         <div class="stg-acts">
@@ -285,6 +286,7 @@ export default {
             <option value="points">{{ $t('pages.event.manage.stg.type.points') }}</option>
             <option value="bracket">{{ $t('pages.event.manage.stg.type.bracket') }}</option>
             <option value="group">{{ $t('pages.event.manage.stg.type.group') }}</option>
+            <option value="time">{{ $t('pages.event.manage.stg.type.time') }}</option>
           </select>
           <div v-if="editing?.initialized" class="form-text">{{ $t('pages.event.manage.stg.type_locked') }}</div>
         </div>

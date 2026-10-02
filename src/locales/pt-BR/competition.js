@@ -1,4 +1,16 @@
 export default {
+  time: {
+    time: 'Tempo',
+    status: 'Situação',
+    ok: 'Completou',
+    dnf: 'Não completou (DNF)',
+    dsq: 'Desclassificado (DSQ)',
+    time_of: 'Tempo de {name}',
+    invalid: 'Tempo inválido. Use minutos:segundos (25:13) ou horas:minutos:segundos (1:02:03).',
+    hint: 'Digite o tempo de cada um (ex.: 25:13 ou 1:02:03.4). A posição se ajusta sozinha pelo menor tempo; quem não completou fica no fim.',
+    rules_label: 'Classificação por tempo',
+    rules_tip: 'Vence o menor tempo em cada etapa. Com várias etapas, a classificação geral é a soma dos tempos; quem não completar alguma etapa fica como DNF.',
+  },
   group: {
     to_final: '{n} classificados vão para a fase final (mata-mata)',
     team: 'Participante',

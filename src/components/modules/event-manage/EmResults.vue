@@ -1,6 +1,7 @@
 <script>
 import InitialsAvatar from '@/components/general/InitialsAvatar.vue';
 import EhubBracket from '@/components/modules/competition/EhubBracket.vue';
+import { parseTime, formatMs } from '@/components/modules/competition/time.js';
 import EhubGroupTable from '@/components/modules/competition/EhubGroupTable.vue';
 import EhubGroupMatches from '@/components/modules/competition/EhubGroupMatches.vue';
 import OrganizationEventStage from '@/helpers/communication/OrganizationEventStage.js';
@@ -28,6 +29,14 @@ export default {
     sortedRows() { return [...this.rows].sort((a, b) => (a.position || 999) - (b.position || 999)); },
     isBracket() { return this.stage?.stage_type === 'bracket'; },
     isGroup() { return this.stage?.stage_type === 'group'; },
+    isTime() { return this.stage?.stage_type === 'time'; },
+    // Live order while typing: finishers by time, then DNF/DSQ.
+    timeRows() {
+      return [...this.rows].map((r) => ({ r, ms: r.status === 'ok' ? parseTime(r.time) : null }))
+        .sort((x, y) => ((x.ms == null || Number.isNaN(x.ms)) - (y.ms == null || Number.isNaN(y.ms))) || (x.ms ?? 0) - (y.ms ?? 0))
+        .map((x, i) => ({ ...x, pos: i + 1 }));
+    },
+    badTimes() { return this.isTime && this.rows.some((r) => r.status === 'ok' && Number.isNaN(parseTime(r.time))); },
     groupStages() { return this.stages.filter((s) => s.stage_type === 'group'); },
     groupMatches() { return (this.stage?.matches || []).filter((m) => m.kind === 'group'); },
     groupsDone() { return this.groupStages.length > 0 && this.groupStages.every((s) => s.finished); },
@@ -51,7 +60,7 @@ export default {
     },
     dupPositions() {
       // Shared places (two semifinal losers are both 3rd) are normal in a bracket.
-      if (this.isBracket || this.isGroup) return false;
+      if (this.isBracket || this.isGroup || this.isTime) return false;
       const seen = new Set();
       return this.rows.some((r) => { if (seen.has(r.position)) return true; seen.add(r.position); return false; });
     },
@@ -99,18 +108,20 @@ export default {
         best: r.result_data?.best ?? '',
         laps: r.result_data?.laps ?? '',
         pen: r.result_data?.pen ?? '',
+        time: r.result_data?.time_ms != null ? formatMs(r.result_data.time_ms) : '',
+        status: r.result_data?.status || 'ok',
       }));
       this.dirty = false;
       this.addId = '';
     },
     fill() {
-      this.rows = this.eligible.map((r, i) => ({ registration_id: r.id, position: i + 1, score: POINTS[i] ?? 0, qualified: false, best: '', laps: '', pen: '' }));
+      this.rows = this.eligible.map((r, i) => ({ registration_id: r.id, position: i + 1, score: this.isTime ? null : (POINTS[i] ?? 0), qualified: false, best: '', laps: '', pen: '', time: '', status: 'ok' }));
       this.dirty = true;
     },
     addRow() {
       if (!this.addId) return;
       const pos = this.rows.reduce((m, r) => Math.max(m, r.position || 0), 0) + 1;
-      this.rows.push({ registration_id: this.addId, position: pos, score: this.auto ? (POINTS[pos - 1] ?? 0) : 0, qualified: false, best: '', laps: '', pen: '' });
+      this.rows.push({ registration_id: this.addId, position: pos, score: this.auto ? (POINTS[pos - 1] ?? 0) : 0, qualified: false, best: '', laps: '', pen: '', time: '', status: 'ok' });
       this.addId = '';
       this.dirty = true;
     },
@@ -123,6 +134,12 @@ export default {
       this.dirty = true;
     },
     payload() {
+      if (this.isTime) {
+        return this.timeRows.map(({ r, pos }) => ({
+          registration_id: r.registration_id, position: pos, score: null, qualified: !!r.qualified,
+          result_data: { time: r.status === 'ok' ? String(r.time || '') : '', status: r.status },
+        }));
+      }
       return this.rows.map((r) => {
         const data = {};
         if (r.best !== '' && r.best !== null) data.best = String(r.best);
@@ -198,7 +215,8 @@ export default {
     },
     async save(publish) {
       if (!this.stage || this.saving) return;
-      if (this.rows.some((r) => !r.position || r.position < 1)) return;
+      if (!this.isTime && this.rows.some((r) => !r.position || r.position < 1)) return;
+      if (this.badTimes) { toast.error(this.$t('competition.time.invalid')); return; }
       this.saving = true;
       const res = await OrganizationEventStage.setResults(this.em.orgRoute, this.em.eventRoute, this.stage.route, this.payload(), publish);
       this.saving = false;
@@ -340,6 +358,43 @@ export default {
                 <font-awesome-icon :icon="['fas', 'list-ol']" class="me-2" />{{ $t('pages.event.manage.res.fill') }}
               </button>
             </div>
+            <div v-else-if="isTime" class="tbl-wrap">
+              <table class="mgmt-tbl">
+                <thead>
+                  <tr>
+                    <th>{{ $t('pages.event.manage.res.pos') }}</th>
+                    <th>{{ $t('pages.event.manage.res.part') }}</th>
+                    <th>{{ $t('competition.time.time') }}</th>
+                    <th>{{ $t('competition.time.status') }}</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="{ r: row, pos, ms } in timeRows" :key="row.registration_id">
+                    <td class="pos-cell"><b>{{ ms != null && !Number.isNaN(ms) ? pos : '—' }}</b></td>
+                    <td>
+                      <div class="who">
+                        <InitialsAvatar :name="nameOf(row.registration_id)" :image="avatarOf(row.registration_id)" :size="26" />
+                        <b>{{ nameOf(row.registration_id) }}</b>
+                      </div>
+                    </td>
+                    <td>
+                      <input v-model="row.time" class="form-control res-in" :class="{ 'is-invalid': row.status === 'ok' && Number.isNaN(ms) }" placeholder="25:13" maxlength="14"
+                        :disabled="readonly || row.status !== 'ok'" :aria-label="$t('competition.time.time_of', { name: nameOf(row.registration_id) })" @input="dirty = true" />
+                    </td>
+                    <td>
+                      <select v-model="row.status" class="form-select form-select-sm" style="width:auto" :disabled="readonly" @change="dirty = true">
+                        <option value="ok">{{ $t('competition.time.ok') }}</option>
+                        <option value="dnf">{{ $t('competition.time.dnf') }}</option>
+                        <option value="dsq">{{ $t('competition.time.dsq') }}</option>
+                      </select>
+                    </td>
+                    <td><button v-if="!readonly" class="act-btn del" :title="$t('pages.event.manage.res.remove_row')" @click="removeRow(row)"><font-awesome-icon :icon="['fas', 'xmark']" /></button></td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="hint m-0" style="padding:10px 15px"><font-awesome-icon :icon="['fas', 'circle-info']" />{{ $t('competition.time.hint') }}</p>
+            </div>
             <div v-else class="tbl-wrap">
               <table class="mgmt-tbl">
                 <thead>
@@ -383,7 +438,7 @@ export default {
               </button>
             </div>
           </div>
-          <div v-if="!isBracket && !isGroup && stage?.initialized && rows.length && !readonly" class="hint" style="margin-top:10px">
+          <div v-if="!isBracket && !isGroup && !isTime && stage?.initialized && rows.length && !readonly" class="hint" style="margin-top:10px">
             <div class="form-check form-switch m-0">
               <input id="resAuto" v-model="auto" class="form-check-input" type="checkbox" />
               <label class="form-check-label" for="resAuto">{{ $t('pages.event.manage.res.auto_pts') }}</label>

@@ -11,7 +11,8 @@ const props = defineProps({
 const showGroupsModal = ref(false)
 
 function stageTypeForFormat() {
-  return props.form.format === 'bracket' ? 'bracket' : 'points'
+  if (props.form.format === 'bracket') return 'bracket'
+  return props.form.format === 'time' ? 'time' : 'points'
 }
 
 function addStage() {
@@ -22,7 +23,7 @@ function addStage() {
     route: '',
     stage_type: stageType,
     start_at: '',
-    config: stageType === 'points'
+    config: stageType !== 'bracket'
       ? { points: props.form.default_points.map(p => ({ ...p })), extra_points: props.form.default_extra_points.map(p => ({ ...p })) }
       : { variant: 'random', reference_stage_id: null },
   })

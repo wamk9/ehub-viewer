@@ -61,6 +61,11 @@ function setGroupPoint(k, v) {
       </div>
     </div>
 
+    <div class="form-section" v-if="form.format === 'time'">
+      <div class="form-section-label">{{ $t('competition.time.rules_label') }}</div>
+      <p class="field-hint mb-0">{{ $t('competition.time.rules_tip') }}</p>
+    </div>
+
     <div class="form-section" v-if="form.format === 'points'">
       <div class="form-section-label">{{ $t('pages.organization.manage.eventWizard.s5.ptsLabel') }}</div>
       <p class="field-hint mb-3">{{ $t('pages.organization.manage.eventWizard.s5.ptsTip') }}</p>

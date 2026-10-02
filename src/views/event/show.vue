@@ -10,6 +10,7 @@ import EhubPrizeList from '@/components/modules/event-prizes/EhubPrizeList.vue';
 import { normalizePrizes } from '@/components/modules/event-prizes/prizes.js';
 import EhubLivePlayer from '@/components/modules/event-live/EhubLivePlayer.vue';
 import EhubBracket from '@/components/modules/competition/EhubBracket.vue';
+import { formatMs } from '@/components/modules/competition/time.js';
 import EhubGroupTable from '@/components/modules/competition/EhubGroupTable.vue';
 import EhubGroupMatches from '@/components/modules/competition/EhubGroupMatches.vue';
 import { watchUrl } from '@/helpers/General/liveStream.js';
@@ -148,6 +149,22 @@ export default {
       if (!this.finishedStages.length) return [];
       // Knockout formats: the final bracket decides the places, not a sum of points.
       const lastBracket = [...this.finishedStages].reverse().find((st) => st.stage_type === 'bracket');
+      // Timed events: total time over the finished stages (lowest first); missing a stage = DNF.
+      if (this.event?.format === 'time') {
+        const map = {};
+        this.finishedStages.forEach((stage, si) => {
+          stage.results.forEach((r) => {
+            const e = map[r.registration_id] ||= { registration_id: r.registration_id, user: r.user, stageScores: {}, stagePos: {}, ms: 0, done: 0, wins: 0 };
+            const ms = r.result_data?.time_ms;
+            e.stageScores[si] = ms != null ? formatMs(ms) : (r.result_data?.status || 'dnf').toUpperCase();
+            if (ms != null) { e.ms += ms; e.done += 1; }
+            if (r.position === 1) e.wins += 1;
+          });
+        });
+        const n = this.finishedStages.length;
+        const list = Object.values(map).sort((a, b) => (b.done === n) - (a.done === n) || a.ms - b.ms);
+        return list.map((e, i) => ({ ...e, position: i + 1, total: e.done === n ? formatMs(e.ms) : 'DNF' }));
+      }
       // Before the knockout ends there is no overall leader (group points don't add up across groups).
       if (!lastBracket && ['bracket', 'groups'].includes(this.event?.format)) return [];
       if (lastBracket && ['bracket', 'groups'].includes(this.event?.format)) {
@@ -715,7 +732,7 @@ export default {
               <div class="hl-ico"><font-awesome-icon :icon="['fas', 'user']" /></div>
               <div class="hl-me">
                 <div class="k">{{ $t('events.show.me.title') }}</div>
-                <div class="v">{{ $t('events.show.me.position', { p: myStanding.position, n: standings.length }) }}<template v-if="standings.filter((e) => e.position === myStanding.position).length > 1">{{ ' (' + $t('events.show.me.tie') + ')' }}</template> · {{ myStanding.total }} {{ $t('events.show.highlights.pts') }}</div>
+                <div class="v">{{ $t('events.show.me.position', { p: myStanding.position, n: standings.length }) }}<template v-if="standings.filter((e) => e.position === myStanding.position).length > 1">{{ ' (' + $t('events.show.me.tie') + ')' }}</template> · {{ myStanding.total }}<template v-if="event.format !== 'time'"> {{ $t('events.show.highlights.pts') }}</template></div>
                 <div class="hl-me__stages">
                   <button v-for="x in myStageResults" :key="x.stage.id" type="button" class="hl-me__chip" @click="openStage(x.stage.route)">
                     {{ x.stage.name }}: <b>{{ x.r.position }}º</b> · {{ x.r.score ?? 0 }} {{ $t('events.show.highlights.pts') }}
@@ -734,7 +751,7 @@ export default {
                     <span v-else>{{ l.user?.name || $t('events.show.removed_participant') }}</span>
                   </template>
                 </div>
-                <div class="s">{{ leaderEntry.total }} {{ $t('events.show.highlights.pts') }}<template v-if="leaders.length > 1"> · {{ $t('events.show.me.tied') }}</template></div>
+                <div class="s">{{ leaderEntry.total }}<template v-if="event.format !== 'time'"> {{ $t('events.show.highlights.pts') }}</template><template v-if="leaders.length > 1"> · {{ $t('events.show.me.tied') }}</template></div>
               </div>
             </div>
             <div v-if="nextStage" class="hl-card next">
@@ -946,7 +963,7 @@ export default {
                       <tr>
                         <th class="l" style="width:64px">{{ $t('events.show.standings.pos') }}</th>
                         <th class="l">{{ $t('events.show.stages.results.participant') }}</th>
-                        <th class="c">{{ $t('events.show.stages.results.score') }}</th>
+                        <th class="c">{{ $t(stage.stage_type === 'time' ? 'competition.time.time' : 'events.show.stages.results.score') }}</th>
                         <th v-if="stage.results.some((x) => x.qualified)" class="c">{{ $t('events.show.stages.results.qualified_full') }}</th>
                       </tr>
                     </thead>
@@ -961,7 +978,8 @@ export default {
                           </router-link>
                           <div v-else class="nm">{{ result.user?.name || $t('events.show.removed_participant') }}<span v-if="result.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
                         </td>
-                        <td class="c pts-cell">{{ result.score ?? '—' }}</td>
+                        <td v-if="stage.stage_type === 'time'" class="c pts-cell">{{ result.result_data?.time || (result.result_data?.status || '—').toUpperCase() }}</td>
+                        <td v-else class="c pts-cell">{{ result.score ?? '—' }}</td>
                         <td v-if="stage.results.some((x) => x.qualified)" class="c">
                           <font-awesome-icon v-if="result.qualified" :icon="['fas', 'circle-check']" class="qualified-ico" />
                         </td>
