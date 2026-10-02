@@ -23,10 +23,10 @@ function select(icon) {
       <div class="ipm-panel">
         <div class="ipm-header">
           <span class="ipm-title">{{ $t('pages.organization.manage.eventWizard.s4x.chooseIcon') }}</span>
-          <button class="ipm-close" @click="$emit('close')"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
+          <button :aria-label="$t('a11y.close')" :title="$t('a11y.close')" class="ipm-close" @click="$emit('close')"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
         </div>
         <div class="ipm-grid">
-          <button
+          <button :aria-label="icon"
             v-for="icon in ICONS" :key="icon"
             type="button" class="ipm-opt" :class="{ sel: icon === modelValue }"
             @click="select(icon)"

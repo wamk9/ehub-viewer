@@ -55,6 +55,12 @@ const router = createRouter({
       component: () => import('@/views/legal.vue'),
     },
     {
+      // "Stop these e-mails" link from the footer of eHub e-mails.
+      path: '/unsubscribe/:token',
+      name: 'unsubscribe',
+      component: () => import('@/views/user/unsubscribe.vue'),
+    },
+    {
       path: '/forgot-password',
       name: 'user-forgot-password',
       component: () => import('@/views/user/forgot-password.vue'),
@@ -68,7 +74,7 @@ const router = createRouter({
     },
     {
       // Own profile: each panel is a path. These names are reserved usernames (API).
-      path: '/profile/:panel(personal|appearance|social|privacy|notifications|account)?',
+      path: '/profile/:panel(personal|appearance|social|privacy|notifications|account)?/:status(google-linked|google-mismatch|google-failed)?',
       name: 'user-profile',
       component: () => import('@/views/user/profile.vue'),
       meta: { requiresAuth: true, viewKey: () => '/profile' }

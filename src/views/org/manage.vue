@@ -104,7 +104,7 @@ export default {
       inviteSending: false,
 
       // settings panel
-      settingsForm: { name: '', description: '', founded_at: '', instagram: '', facebook: '', x_twitter: '', website: '', color: '' },
+      settingsForm: { name: '', description: '', founded_at: '', instagram: '', facebook: '', x_twitter: '', website: '', color: '', contact_email: '', phone: '' },
       settingsSaving: false,
       visualSaving: false,
       logoFile: null,
@@ -346,6 +346,8 @@ export default {
         this.settingsForm.facebook = result.data.facebook || '';
         this.settingsForm.x_twitter = result.data.x_twitter || '';
         this.settingsForm.website = result.data.website || '';
+        this.settingsForm.contact_email = result.data.contact_email || '';
+        this.settingsForm.phone = result.data.phone || '';
         this.settingsForm.color = result.data.color || '';
       }
     },
@@ -1558,7 +1560,7 @@ export default {
                   <td class="td-muted">{{ $t('pages.organization.manage.reports.per' + r.period.replace('d', '')) }}</td>
                   <td>
                     <div class="act-row">
-                      <button class="act-btn del" @click="repDeleteReport(r.id)">
+                      <button :aria-label="$t('a11y.delete')" :title="$t('a11y.delete')" class="act-btn del" @click="repDeleteReport(r.id)">
                         <font-awesome-icon :icon="['fas', 'trash']" />
                       </button>
                     </div>
@@ -1636,6 +1638,28 @@ export default {
               </button>
             </div>
 
+          </div>
+        </div>
+
+        <!-- Contact: replies from participants go to this address -->
+        <div class="set-card mb-4">
+          <h3>{{ $t('pages.organization.manage.settings.contact') }}</h3>
+          <p class="set-desc">{{ $t('pages.organization.manage.settings.contact_desc') }}</p>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label set-label" for="org-contact-mail">{{ $t('pages.organization.manage.settings.contact_email') }}</label>
+              <div class="input-group"><span class="input-group-text"><font-awesome-icon :icon="['fas', 'envelope']" /></span><input id="org-contact-mail" type="email" class="form-control" v-model="settingsForm.contact_email" placeholder="contato@..." autocomplete="email" /></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label set-label" for="org-contact-phone">{{ $t('pages.organization.manage.settings.contact_phone') }}</label>
+              <div class="input-group"><span class="input-group-text"><font-awesome-icon :icon="['fas', 'phone']" /></span><input id="org-contact-phone" type="tel" class="form-control" v-model="settingsForm.phone" placeholder="(11) 99999-9999" autocomplete="tel" /></div>
+            </div>
+            <div class="col-12 d-flex justify-content-end">
+              <button class="btn btn-primary round px-4" :disabled="settingsSaving" @click="saveSettings">
+                <span v-if="settingsSaving" class="spinner-border spinner-border-sm me-2"></span>
+                {{ $t('pages.organization.manage.settings.save') }}
+              </button>
+            </div>
           </div>
         </div>
 

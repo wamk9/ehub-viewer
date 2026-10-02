@@ -257,7 +257,7 @@ function onIconPicked(icon) { if (iconTarget.value) iconTarget.value.icon = icon
                 <div class="chips-input">
                   <span v-for="(o, oi) in f.values" :key="o" class="opt-chip">
                     <span v-if="f.type === 'color'" class="opt-swatch" :style="{ background: o }"></span>{{ o }}
-                    <button type="button" @click="f.values.splice(oi, 1)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
+                    <button :aria-label="$t('a11y.remove')" :title="$t('a11y.remove')" type="button" @click="f.values.splice(oi, 1)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
                   </span>
                   <input type="text" v-model="optDraft" :placeholder="$t(K + (f.type === 'select' ? 'optsPh' : 'colorsPh'))" @keydown="onOptKey($event, f)" @blur="addOption(f)" />
                 </div>

@@ -89,7 +89,7 @@ function setGroupPoint(k, v) {
         <div v-for="(ep, i) in form.default_extra_points" :key="i" class="extra-pts-row">
           <input type="text" class="form-control form-control-sm" v-model="ep.name" :placeholder="$t('pages.organization.manage.eventWizard.s5.bonusPh')" />
           <input type="number" class="pts-input" v-model.number="ep.value" />
-          <button type="button" class="stage-del" @click="removeExtra(form, i)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
+          <button :aria-label="$t('a11y.remove')" :title="$t('a11y.remove')" type="button" class="stage-del" @click="removeExtra(form, i)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
         </div>
         <button type="button" class="btn btn-sm btn-outline-secondary round px-3 mt-2" @click="addExtra(form)">
           <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />{{ $t('pages.organization.manage.eventWizard.s5.bonusAdd') }}

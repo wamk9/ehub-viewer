@@ -202,7 +202,7 @@
                   <div class="ts-apply-sub">{{ $t('pages.teams.show.apply.sub') }}</div>
                 </div>
               </div>
-              <button class="ts-modal-close" @click="closeApplyModal">
+              <button :aria-label="$t('a11y.close')" class="ts-modal-close" @click="closeApplyModal">
                 <font-awesome-icon icon="xmark" />
               </button>
             </div>

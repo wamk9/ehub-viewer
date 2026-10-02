@@ -246,7 +246,7 @@ export default {
             <font-awesome-icon :icon="['fas', 'flag']" class="me-1" />{{ $t('pages.event.manage.stg.finish') }}
           </button>
           <button v-if="canRun && !ev.finished" class="act-btn" :title="$t('pages.event.manage.stg.edit')" @click="openEdit(s)"><font-awesome-icon :icon="['fas', 'pen']" /></button>
-          <button v-if="canRun && !s.initialized" class="act-btn del" @click="remove(s)"><font-awesome-icon :icon="['fas', 'trash']" /></button>
+          <button :aria-label="$t('a11y.delete')" :title="$t('a11y.delete')" v-if="canRun && !s.initialized" class="act-btn del" @click="remove(s)"><font-awesome-icon :icon="['fas', 'trash']" /></button>
         </div>
       </div>
 

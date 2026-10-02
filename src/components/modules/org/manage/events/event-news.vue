@@ -67,10 +67,10 @@ import SystemVars from '@/helpers/General/SystemVars';
                         </p>
                     </div>
                     <div class="article-row__actions">
-                        <button class="btn btn-sm btn-outline-light" @click="openEdit(article)">
+                        <button :aria-label="$t('a11y.edit')" :title="$t('a11y.edit')" class="btn btn-sm btn-outline-light" @click="openEdit(article)">
                             <font-awesome-icon :icon="['fas', 'pen']" />
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(article)">
+                        <button :aria-label="$t('a11y.delete')" :title="$t('a11y.delete')" class="btn btn-sm btn-outline-danger" @click="confirmDelete(article)">
                             <font-awesome-icon :icon="['fas', 'trash']" />
                         </button>
                     </div>
@@ -126,30 +126,30 @@ import SystemVars from '@/helpers/General/SystemVars';
                 </div>
                 <div class="toolbar-sep"></div>
                 <div class="toolbar-group">
-                    <button :class="{ active: editor.isActive({ textAlign: 'left' }) }"   @click="editor.chain().focus().setTextAlign('left').run()"><font-awesome-icon :icon="['fas', 'align-left']" /></button>
-                    <button :class="{ active: editor.isActive({ textAlign: 'center' }) }" @click="editor.chain().focus().setTextAlign('center').run()"><font-awesome-icon :icon="['fas', 'align-center']" /></button>
-                    <button :class="{ active: editor.isActive({ textAlign: 'right' }) }"  @click="editor.chain().focus().setTextAlign('right').run()"><font-awesome-icon :icon="['fas', 'align-right']" /></button>
+                    <button :aria-label="$t('a11y.align_left')" :title="$t('a11y.align_left')" :class="{ active: editor.isActive({ textAlign: 'left' }) }"   @click="editor.chain().focus().setTextAlign('left').run()"><font-awesome-icon :icon="['fas', 'align-left']" /></button>
+                    <button :aria-label="$t('a11y.align_center')" :title="$t('a11y.align_center')" :class="{ active: editor.isActive({ textAlign: 'center' }) }" @click="editor.chain().focus().setTextAlign('center').run()"><font-awesome-icon :icon="['fas', 'align-center']" /></button>
+                    <button :aria-label="$t('a11y.align_right')" :title="$t('a11y.align_right')" :class="{ active: editor.isActive({ textAlign: 'right' }) }"  @click="editor.chain().focus().setTextAlign('right').run()"><font-awesome-icon :icon="['fas', 'align-right']" /></button>
                 </div>
                 <div class="toolbar-sep"></div>
                 <div class="toolbar-group">
-                    <button :class="{ active: editor.isActive('bulletList') }"  @click="editor.chain().focus().toggleBulletList().run()"><font-awesome-icon :icon="['fas', 'list-ul']" /></button>
-                    <button :class="{ active: editor.isActive('orderedList') }" @click="editor.chain().focus().toggleOrderedList().run()"><font-awesome-icon :icon="['fas', 'list-ol']" /></button>
-                    <button :class="{ active: editor.isActive('blockquote') }"  @click="editor.chain().focus().toggleBlockquote().run()"><font-awesome-icon :icon="['fas', 'quote-left']" /></button>
-                    <button :class="{ active: editor.isActive('codeBlock') }"   @click="editor.chain().focus().toggleCodeBlock().run()"><font-awesome-icon :icon="['fas', 'code']" /></button>
+                    <button :aria-label="$t('a11y.bullets')" :title="$t('a11y.bullets')" :class="{ active: editor.isActive('bulletList') }"  @click="editor.chain().focus().toggleBulletList().run()"><font-awesome-icon :icon="['fas', 'list-ul']" /></button>
+                    <button :aria-label="$t('a11y.numbered')" :title="$t('a11y.numbered')" :class="{ active: editor.isActive('orderedList') }" @click="editor.chain().focus().toggleOrderedList().run()"><font-awesome-icon :icon="['fas', 'list-ol']" /></button>
+                    <button :aria-label="$t('a11y.quote')" :title="$t('a11y.quote')" :class="{ active: editor.isActive('blockquote') }"  @click="editor.chain().focus().toggleBlockquote().run()"><font-awesome-icon :icon="['fas', 'quote-left']" /></button>
+                    <button :aria-label="$t('a11y.code')" :title="$t('a11y.code')" :class="{ active: editor.isActive('codeBlock') }"   @click="editor.chain().focus().toggleCodeBlock().run()"><font-awesome-icon :icon="['fas', 'code']" /></button>
                 </div>
                 <div class="toolbar-sep"></div>
                 <div class="toolbar-group">
-                    <button @click="addLink"><font-awesome-icon :icon="['fas', 'link']" /></button>
+                    <button :aria-label="$t('a11y.link')" :title="$t('a11y.link')" @click="addLink"><font-awesome-icon :icon="['fas', 'link']" /></button>
                     <button @click="$refs.imgInput.click()" :disabled="uploadingImage">
                         <font-awesome-icon v-if="!uploadingImage" :icon="['fas', 'image']" />
                         <span v-else class="spinner-border spinner-border-sm"></span>
                     </button>
-                    <button @click="addYoutube"><font-awesome-icon :icon="['fab', 'youtube']" /></button>
+                    <button :aria-label="$t('a11y.video')" :title="$t('a11y.video')" @click="addYoutube"><font-awesome-icon :icon="['fab', 'youtube']" /></button>
                 </div>
                 <div class="toolbar-sep"></div>
                 <div class="toolbar-group">
-                    <button @click="editor.chain().focus().undo().run()" :disabled="!editor.can().undo()"><font-awesome-icon :icon="['fas', 'rotate-left']" /></button>
-                    <button @click="editor.chain().focus().redo().run()" :disabled="!editor.can().redo()"><font-awesome-icon :icon="['fas', 'rotate-right']" /></button>
+                    <button :aria-label="$t('a11y.undo')" :title="$t('a11y.undo')" @click="editor.chain().focus().undo().run()" :disabled="!editor.can().undo()"><font-awesome-icon :icon="['fas', 'rotate-left']" /></button>
+                    <button :aria-label="$t('a11y.redo')" :title="$t('a11y.redo')" @click="editor.chain().focus().redo().run()" :disabled="!editor.can().redo()"><font-awesome-icon :icon="['fas', 'rotate-right']" /></button>
                 </div>
             </div>
 

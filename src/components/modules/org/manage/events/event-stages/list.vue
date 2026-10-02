@@ -38,7 +38,7 @@
                         <p v-if="stage.description" class="text-muted small mb-0 mt-1 stage-row__desc">{{ stage.description }}</p>
                     </div>
                     <div class="stage-row__actions">
-                        <button v-if="stage.finished" class="btn btn-sm btn-outline-light" disabled>
+                        <button :aria-label="$t('a11y.finished')" :title="$t('a11y.finished')" v-if="stage.finished" class="btn btn-sm btn-outline-light" disabled>
                             <font-awesome-icon :icon="['fas', 'trophy']" />
                         </button>
                         <button v-else-if="canManage(index)"
@@ -48,10 +48,10 @@
                             <font-awesome-icon :icon="stage.in_progress ? ['fas', 'cog'] : ['fas', 'play']" class="me-1" />
                             {{ stage.in_progress ? $t('events.manage.menu.stages.manage.manage_view.manage_btn') : $t('events.manage.menu.stages.manage.manage_view.start_btn') }}
                         </button>
-                        <button v-if="canEdit(stage)" class="btn btn-sm btn-outline-light" @click="openEdit(stage)">
+                        <button :aria-label="$t('a11y.edit')" :title="$t('a11y.edit')" v-if="canEdit(stage)" class="btn btn-sm btn-outline-light" @click="openEdit(stage)">
                             <font-awesome-icon :icon="['fas', 'pen']" />
                         </button>
-                        <button v-if="canDelete(stage)" class="btn btn-sm btn-outline-danger" @click="confirmDelete(stage)">
+                        <button :aria-label="$t('a11y.delete')" :title="$t('a11y.delete')" v-if="canDelete(stage)" class="btn btn-sm btn-outline-danger" @click="confirmDelete(stage)">
                             <font-awesome-icon :icon="['fas', 'trash']" />
                         </button>
                     </div>
@@ -152,7 +152,7 @@
                         <div class="col-12 col-md-6">
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <p class="text-muted small mb-0">{{ $t('events.manage.menu.stages.manage.form.extra_points') }}</p>
-                                <button class="btn btn-sm btn-outline-light" @click="addExtraPoint">
+                                <button :aria-label="$t('a11y.add')" :title="$t('a11y.add')" class="btn btn-sm btn-outline-light" @click="addExtraPoint">
                                     <font-awesome-icon :icon="['fas', 'plus']" />
                                 </button>
                             </div>
@@ -167,7 +167,7 @@
                                     class="form-control form-control-sm form-control-dark"
                                     style="width: 80px"
                                     :class="{ 'text-danger': ep.value < 0 }" />
-                                <button class="btn btn-sm btn-outline-danger ms-2" @click="removeExtraPoint(i)">
+                                <button :aria-label="$t('a11y.remove')" :title="$t('a11y.remove')" class="btn btn-sm btn-outline-danger ms-2" @click="removeExtraPoint(i)">
                                     <font-awesome-icon :icon="['fas', 'times']" />
                                 </button>
                             </div>

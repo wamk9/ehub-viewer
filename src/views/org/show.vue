@@ -406,13 +406,13 @@ onBeforeUnmount(() => {
               <span class="meta">
                 <span class="k">{{ $t('pages.organization.show.about.social') }}</span>
                 <span class="val d-flex gap-3 mt-1">
-                  <a v-if="org.instagram" :href="`https://instagram.com/${org.instagram.replace('@','')}`" target="_blank" rel="noopener">
+                  <a aria-label="Instagram" v-if="org.instagram" :href="`https://instagram.com/${org.instagram.replace('@','')}`" target="_blank" rel="noopener">
                     <font-awesome-icon :icon="['fab', 'instagram']" />
                   </a>
-                  <a v-if="org.facebook" :href="`https://facebook.com/${org.facebook}`" target="_blank" rel="noopener">
+                  <a aria-label="Facebook" v-if="org.facebook" :href="`https://facebook.com/${org.facebook}`" target="_blank" rel="noopener">
                     <font-awesome-icon :icon="['fab', 'facebook']" />
                   </a>
-                  <a v-if="org.x_twitter" :href="`https://x.com/${org.x_twitter.replace('@','')}`" target="_blank" rel="noopener">
+                  <a aria-label="X (Twitter)" v-if="org.x_twitter" :href="`https://x.com/${org.x_twitter.replace('@','')}`" target="_blank" rel="noopener">
                     <font-awesome-icon :icon="['fab', 'x-twitter']" />
                   </a>
                 </span>

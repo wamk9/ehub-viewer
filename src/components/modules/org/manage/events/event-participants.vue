@@ -10,7 +10,7 @@
                 <p class="text-muted mb-0 small">
                     {{ $t('events.manage.menu.participants.manage.total', { n: registrations.length }) }}
                 </p>
-                <button class="btn btn-sm btn-outline-light" @click="load">
+                <button :aria-label="$t('a11y.refresh')" :title="$t('a11y.refresh')" class="btn btn-sm btn-outline-light" @click="load">
                     <font-awesome-icon :icon="['fas', 'rotate-right']" />
                 </button>
             </div>

@@ -347,13 +347,13 @@
           </div>
 
           <div class="act-pag-nav" v-if="allActivitiesPages > 1">
-            <button class="pag-btn" :disabled="allActivitiesPage <= 1" @click="changeActivityPage(allActivitiesPage - 1)">
+            <button :aria-label="$t('a11y.previous')" class="pag-btn" :disabled="allActivitiesPage <= 1" @click="changeActivityPage(allActivitiesPage - 1)">
               <font-awesome-icon icon="chevron-left" />
             </button>
             <button v-for="p in allActivitiesPages" :key="p" class="pag-btn" :class="{ active: p === allActivitiesPage }" @click="changeActivityPage(p)">
               {{ p }}
             </button>
-            <button class="pag-btn" :disabled="allActivitiesPage >= allActivitiesPages" @click="changeActivityPage(allActivitiesPage + 1)">
+            <button :aria-label="$t('a11y.next')" class="pag-btn" :disabled="allActivitiesPage >= allActivitiesPages" @click="changeActivityPage(allActivitiesPage + 1)">
               <font-awesome-icon icon="chevron-right" />
             </button>
           </div>
@@ -486,7 +486,7 @@
                 <div style="font-weight:700;color:var(--ehub-ink);font-size:.97rem">{{ mobileMemberModal.name }}</div>
                 <div style="font-size:.8rem;color:var(--ehub-muted)">@{{ mobileMemberModal.username }}</div>
               </div>
-              <button class="mob-mm-close" @click="closeMemberModal">
+              <button :aria-label="$t('a11y.close')" class="mob-mm-close" @click="closeMemberModal">
                 <font-awesome-icon icon="xmark" />
               </button>
             </div>

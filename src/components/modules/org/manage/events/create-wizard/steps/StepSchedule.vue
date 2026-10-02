@@ -91,7 +91,7 @@ function beforeStart(stage) {
             @input="onStageNameInput(stage)"
           />
           <input type="date" class="stage-date-inp" :class="{ warn: beforeStart(stage) }" v-model="stage.start_at" />
-          <button type="button" class="stage-del" @click="removeStage(i)"><font-awesome-icon :icon="['fas', 'trash']" /></button>
+          <button :aria-label="$t('a11y.delete')" :title="$t('a11y.delete')" type="button" class="stage-del" @click="removeStage(i)"><font-awesome-icon :icon="['fas', 'trash']" /></button>
           <div v-if="beforeStart(stage)" class="stage-warn">
             <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />{{ $t('pages.organization.manage.eventWizard.s3.beforeStart') }}
           </div>

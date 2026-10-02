@@ -439,7 +439,7 @@ export default {
                 <option value="" disabled>{{ $t('pages.event.manage.res.add_row') }}</option>
                 <option v-for="r in addable" :key="r.id" :value="r.id">{{ userName(r) }}</option>
               </select>
-              <button class="btn btn-sm btn-outline-secondary round px-3" :disabled="!addId" @click="addRow">
+              <button :aria-label="$t('a11y.add')" :title="$t('a11y.add')" class="btn btn-sm btn-outline-secondary round px-3" :disabled="!addId" @click="addRow">
                 <font-awesome-icon :icon="['fas', 'plus']" />
               </button>
             </div>

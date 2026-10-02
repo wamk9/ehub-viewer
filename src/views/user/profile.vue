@@ -6,6 +6,7 @@ import AvatarUpload from '@/components/inputs/AvatarUpload.vue'
 import Api          from '@/helpers/communication/Connection'
 import store        from '@/store'
 import { toast }   from '@/helpers/toast.js'
+import SystemVars   from '@/helpers/General/SystemVars'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -32,7 +33,7 @@ const profile = reactive({
   favorite_category: '', motto: '',
   discord: '', youtube: '', twitch: '', x_twitter: '', linkedin: '', website: '',
   profile_color: '#0098D8', profile_visibility: 'public', notification_prefs: null,
-  auth_provider: null,
+  auth_provider: null, google_linked: false,
   image: null, cover: null,
   email_verified_at: null, created_at: null,
   stats: { events: 0, wins: 0, podiums: 0 },
@@ -74,6 +75,56 @@ const deletePassword = ref('')
 const deleteConfirm  = ref(false)
 const deleteBlockers = ref(null)
 const exporting = ref(false)
+
+// ── Change e-mail: password → code sent to the new address → done ──
+const mailChange = reactive({ step: 'idle', mail: '', password: '', code: '', busy: false })
+function resetMailChange() { Object.assign(mailChange, { step: 'idle', mail: '', password: '', code: '', busy: false }) }
+async function sendMailCode() {
+  if (!mailChange.mail.trim() || !mailChange.password) { toast.error(t('users.profile.account.change_mail.fill')); return }
+  mailChange.busy = true
+  try {
+    const r = await Api.postAsync('/user/email/send-code', { mail: mailChange.mail.trim(), password: mailChange.password })
+    if (r.code === 200) { mailChange.step = 'code'; toast.success(t('users.profile.account.change_mail.code_sent', { mail: mailChange.mail.trim() })) }
+    else if (r.code === 403) toast.error(t('users.profile.privacy.password.error.wrong'))
+    else if (r.code === 429) toast.error(t('users.profile.account.change_mail.too_many'))
+    else if (r.response?.message === 'same_mail') toast.error(t('users.profile.account.change_mail.same'))
+    else toast.error(Object.values(r.response?.errors || {})[0]?.[0] || t('users.profile.error.generic'))
+  } finally { mailChange.busy = false }
+}
+async function confirmMailCode() {
+  mailChange.busy = true
+  try {
+    const r = await Api.postAsync('/user/email/confirm', { code: mailChange.code.trim() })
+    if (r.code === 200) {
+      profile.mail = r.response.mail
+      profile.email_verified_at = new Date().toISOString()
+      toast.success(t('users.profile.account.change_mail.done'))
+      resetMailChange()
+    } else if (r.response?.message === 'code_expired' || r.code === 429) {
+      toast.error(t('users.profile.account.change_mail.expired')); mailChange.step = 'form'; mailChange.code = ''
+    } else toast.error(t('users.profile.account.change_mail.wrong_code'))
+  } finally { mailChange.busy = false }
+}
+
+// ── Google sign-in for e-mail accounts ──
+const unlinking = ref(false)
+function linkGoogle() { window.location.href = SystemVars.baseUrl + 'auth/social/google/link' }
+async function unlinkGoogle() {
+  unlinking.value = true
+  try {
+    const r = await Api.deleteAsync('/user/social/google')
+    if (r.code === 200) { profile.google_linked = false; toast.success(t('users.profile.account.oauth.unlinked')) }
+    else toast.error(t('users.profile.error.generic'))
+  } finally { unlinking.value = false }
+}
+// Coming back from Google: /profile/account/google-linked (or -mismatch / -failed).
+function readLinkStatus(status) {
+  if (!status) return
+  if (status === 'google-linked') toast.success(t('users.profile.account.oauth.linked'))
+  else if (status === 'google-mismatch') toast.error(t('users.profile.account.oauth.mismatch'))
+  else toast.error(t('users.profile.account.oauth.failed'))
+  router.replace({ name: 'user-profile', params: { panel: 'account' } })
+}
 
 // LGPD art. 18: the person downloads everything eHub keeps about them.
 async function exportData() {
@@ -306,7 +357,10 @@ const panelIcons = {
   social: 'earth-americas', privacy: 'shield-halved', notifications: 'bell', account: 'gear',
 }
 
+watch(() => route.params.status, readLinkStatus)
+
 onMounted(() => {
+  readLinkStatus(route.params.status)
   fetchProfile()
 })
 </script>
@@ -803,6 +857,42 @@ onMounted(() => {
               <input type="text" class="form-control" :value="profile.created_at ? new Date(profile.created_at).toLocaleDateString() : '—'" disabled />
             </div>
           </div>
+
+          <p v-if="profile.auth_provider" class="set-desc mt-3 mb-0">{{ $t('users.profile.account.change_mail.google') }}</p>
+          <template v-else>
+            <button v-if="mailChange.step === 'idle'" type="button" class="btn btn-outline-secondary round px-4 mt-3" @click="mailChange.step = 'form'">
+              <font-awesome-icon :icon="['fas', 'pen']" class="me-2" />{{ $t('users.profile.account.change_mail.open') }}
+            </button>
+            <form v-else-if="mailChange.step === 'form'" class="mail-change mt-3" @submit.prevent="sendMailCode">
+              <div class="form-grid-2">
+                <div>
+                  <label class="form-label" for="mc-mail">{{ $t('users.profile.account.change_mail.new') }}</label>
+                  <input id="mc-mail" v-model="mailChange.mail" type="email" class="form-control" autocomplete="email" required />
+                </div>
+                <div>
+                  <label class="form-label" for="mc-pass">{{ $t('users.profile.account.change_mail.password') }}</label>
+                  <input id="mc-pass" v-model="mailChange.password" type="password" class="form-control" autocomplete="current-password" required />
+                </div>
+              </div>
+              <p class="set-desc mt-2 mb-2">{{ $t('users.profile.account.change_mail.hint') }}</p>
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary round px-4" :disabled="mailChange.busy">
+                  <font-awesome-icon :icon="['fas', mailChange.busy ? 'spinner' : 'paper-plane']" :spin="mailChange.busy" class="me-2" />{{ $t('users.profile.account.change_mail.send') }}
+                </button>
+                <button type="button" class="btn btn-ghost round" @click="resetMailChange">{{ $t('users.profile.account.danger.cancel') }}</button>
+              </div>
+            </form>
+            <form v-else class="mail-change mt-3" @submit.prevent="confirmMailCode">
+              <label class="form-label" for="mc-code">{{ $t('users.profile.account.change_mail.code', { mail: mailChange.mail }) }}</label>
+              <input id="mc-code" v-model="mailChange.code" type="text" inputmode="numeric" maxlength="6" class="form-control mc-code" autocomplete="one-time-code" required />
+              <div class="d-flex gap-2 mt-2">
+                <button type="submit" class="btn btn-primary round px-4" :disabled="mailChange.busy || mailChange.code.trim().length !== 6">
+                  {{ $t('users.profile.account.change_mail.confirm') }}
+                </button>
+                <button type="button" class="btn btn-ghost round" @click="resetMailChange">{{ $t('users.profile.account.danger.cancel') }}</button>
+              </div>
+            </form>
+          </template>
         </div>
 
         <div class="set-card mb-4">
@@ -814,7 +904,7 @@ onMounted(() => {
         </div>
 
         <div class="set-card mb-4">
-          <h3><font-awesome-icon :icon="['fas', 'link-slash']" class="set-ico" />{{ $t('users.profile.account.oauth.title') }}</h3>
+          <h3><font-awesome-icon :icon="['fas', 'link']" class="set-ico" />{{ $t('users.profile.account.oauth.title') }}</h3>
           <p class="set-desc">{{ $t('users.profile.account.oauth.desc') }}</p>
           <div class="toggle-row">
             <div class="toggle-info d-flex align-items-center gap-3">
@@ -823,12 +913,16 @@ onMounted(() => {
               </div>
               <div>
                 <div class="ti-label">Google</div>
-                <div class="ti-desc">{{ profile.auth_provider === 'google' ? $t('users.profile.account.oauth.connected') : $t('users.profile.account.oauth.not_connected') }}</div>
+                <div class="ti-desc">{{ profile.auth_provider === 'google' ? $t('users.profile.account.oauth.main') : (profile.google_linked ? $t('users.profile.account.oauth.connected_desc') : $t('users.profile.account.oauth.not_connected_desc')) }}</div>
               </div>
             </div>
-            <span class="role-chip" :class="profile.auth_provider === 'google' ? 'admin' : 'member'">
-              {{ profile.auth_provider === 'google' ? $t('users.profile.account.oauth.connected') : $t('users.profile.account.oauth.not_connected') }}
-            </span>
+            <span v-if="profile.auth_provider === 'google'" class="role-chip admin">{{ $t('users.profile.account.oauth.connected') }}</span>
+            <button v-else-if="profile.google_linked" type="button" class="btn btn-outline-secondary btn-sm round" :disabled="unlinking" @click="unlinkGoogle">
+              {{ $t('users.profile.account.oauth.unlink') }}
+            </button>
+            <button v-else type="button" class="btn btn-outline-primary btn-sm round" @click="linkGoogle">
+              {{ $t('users.profile.account.oauth.link') }}
+            </button>
           </div>
         </div>
 
@@ -1069,4 +1163,6 @@ onMounted(() => {
 @media (max-width: 560px) { .nt-head, .nt-row { grid-template-columns: minmax(0, 1fr) 64px 64px; } }
 button.comp-item { border: 0; background: none; text-align: left; padding: 0; cursor: pointer; font: inherit; color: inherit; }
 button.comp-item.miss:hover span { text-decoration: underline; }
+.mail-change { border-top: 1px solid var(--ehub-line); padding-top: 1rem; }
+.mc-code { max-width: 180px; letter-spacing: .3em; font-weight: 700; font-size: 1.1rem; }
 </style>

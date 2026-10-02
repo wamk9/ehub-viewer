@@ -48,7 +48,7 @@ function clear(m) {
         <span v-else class="gm-score">{{ m.status === 'done' ? `${m.score_a} × ${m.score_b}` : '× ' }}</span>
         <span class="gm-name b" :class="{ win: m.winner === 'b' }">{{ name(m.b) }}</span>
         <template v-if="editable">
-          <button class="btn btn-sm round px-2" :class="complete(m) && changed(m) ? 'btn-primary' : 'btn-outline-secondary'" :disabled="!complete(m) || !changed(m) || busyId === m.id" @click="save(m)">
+          <button :aria-label="$t('a11y.confirm')" :title="$t('a11y.confirm')" class="btn btn-sm round px-2" :class="complete(m) && changed(m) ? 'btn-primary' : 'btn-outline-secondary'" :disabled="!complete(m) || !changed(m) || busyId === m.id" @click="save(m)">
             <font-awesome-icon :icon="['fas', 'check']" />
           </button>
           <button v-if="m.status === 'done'" class="btn btn-sm btn-link px-1" :title="$t('competition.group.clear')" :aria-label="$t('competition.group.clear')" :disabled="busyId === m.id" @click="clear(m)">

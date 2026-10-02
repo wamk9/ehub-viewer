@@ -68,7 +68,7 @@ function apply() {
       <div class="gam-panel">
         <div class="gam-header">
           <span class="gam-title">{{ $t('pages.organization.manage.eventWizard.groups.title') }}</span>
-          <button class="gam-close" @click="$emit('close')"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
+          <button :aria-label="$t('a11y.close')" :title="$t('a11y.close')" class="gam-close" @click="$emit('close')"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
         </div>
         <p class="gam-sub">{{ $t('pages.organization.manage.eventWizard.groups.sub') }}</p>
 

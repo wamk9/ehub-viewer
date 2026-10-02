@@ -62,6 +62,7 @@ export function createEventManageStore(orgRoute, eventRoute) {
     regs: [],
     articles: [],
     notices: [],
+    replyToSet: true, // organization has a contact e-mail for replies
     gateways: null, // null = unknown (no permission / not loaded)
     loading: true,
     notFound: false,
@@ -107,7 +108,7 @@ export function createEventManageStore(orgRoute, eventRoute) {
 
   s.loadNotices = async () => {
     const res = await OrganizationEventNotice.index(s.orgRoute, s.eventRoute);
-    if (res.code === 200) s.notices = res.data || [];
+    if (res.code === 200) { s.notices = res.data || []; s.replyToSet = res.replyToSet; }
   };
 
   s.loadGateways = async () => {

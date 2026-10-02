@@ -4,19 +4,25 @@ import OrganizationEventNotice from '@/helpers/communication/OrganizationEventNo
 import { toast } from '@/helpers/toast.js';
 import { apiError } from './store.js';
 
-const AUDIENCE_STATUSES = { all: ['free', 'confirmed', 'pending'], confirmed: ['free', 'confirmed'], pending: ['pending'] };
+const ANY = ['free', 'confirmed', 'pending'];
+const AUDIENCES = {
+  all: (r) => ANY.includes(r.payment_status),
+  confirmed: (r) => ['free', 'confirmed'].includes(r.payment_status),
+  pending: (r) => r.payment_status === 'pending',
+  checked_in: (r) => ANY.includes(r.payment_status) && r.checked_in,
+  not_checked_in: (r) => ANY.includes(r.payment_status) && !r.checked_in,
+};
 
 export default {
   name: 'EmNews',
   components: { EventNews },
   inject: ['em'],
   data() {
-    return { form: { audience: 'confirmed', subject: '', message: '' }, sending: false };
+    return { form: { audience: 'confirmed', subject: '', message: '' }, sending: false, audiences: AUDIENCES };
   },
   computed: {
     recipients() {
-      const ok = AUDIENCE_STATUSES[this.form.audience];
-      return this.em.regs.filter((r) => ok.includes(r.payment_status)).length;
+      return this.em.regs.filter(AUDIENCES[this.form.audience]).length;
     },
   },
   beforeUnmount() {
@@ -63,11 +69,15 @@ export default {
         </div>
         <div class="cc-bd">
           <p class="set-desc" style="margin-bottom:14px">{{ $t('pages.event.manage.news.notice_hint') }}</p>
+          <p v-if="!em.replyToSet" class="small" style="color:var(--ehub-warning-text, #8a5a00);margin-bottom:14px">
+            <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />{{ $t('pages.event.manage.reg.no_reply_to') }}
+            <router-link :to="`/org/${em.orgRoute}/manage/settings`">{{ $t('pages.event.manage.reg.no_reply_to_link') }}</router-link>
+          </p>
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label">{{ $t('pages.event.manage.news.to') }}</label>
               <select v-model="form.audience" class="form-select">
-                <option v-for="k in ['all', 'confirmed', 'pending']" :key="k" :value="k">{{ $t('pages.event.manage.news.to_' + k) }}</option>
+                <option v-for="k in Object.keys(audiences)" :key="k" :value="k">{{ $t('pages.event.manage.news.to_' + k) }}</option>
               </select>
             </div>
             <div class="col-md-6 d-flex align-items-end">

@@ -23,6 +23,9 @@ const PANELS = [
   { key: 'advanced', icon: 'sliders', comp: 'EmAdvanced' },
 ];
 
+// Names people (and old links) use for a panel → its real key.
+const PANEL_ALIASES = { registrations: 'regs', participants: 'regs', inscricoes: 'regs', articles: 'news', notices: 'news', transmission: 'live', billing: 'finance', settings: 'advanced' };
+
 export default {
   name: 'EventManage',
   components: { EhubMgmtLayout, EhubDialog, EmOverview, EmRegistrations, EmStages, EmResults, EmNews, EmLive, EmFinance, EmAdvanced },
@@ -41,7 +44,7 @@ export default {
       return PANELS.filter((x) => this.em.canPanel(x.key));
     },
     panel() {
-      const p = this.$route.params.panel;
+      const p = PANEL_ALIASES[this.$route.params.panel] || this.$route.params.panel;
       const allowed = this.visiblePanels;
       if (allowed.some((x) => x.key === p)) return p;
       return allowed[0]?.key || 'overview';
@@ -91,13 +94,25 @@ export default {
   watch: {
     '$route.params.panel'() {
       window.scrollTo(0, 0);
+      this.fixPanelUrl();
     },
   },
   async mounted() {
     await this.em.loadAll();
     if (this.event) document.title = 'eHub — ' + this.event.name;
+    this.fixPanelUrl();
   },
   methods: {
+    /** Unknown or forbidden panel in the URL → replace it with the panel actually shown. */
+    fixPanelUrl() {
+      const p = this.$route.params.panel;
+      if (!p || !this.event) return;
+      const wanted = PANEL_ALIASES[p] || p;
+      const target = this.visiblePanels.some((x) => x.key === wanted) ? wanted : this.panel;
+      if (target !== p) {
+        this.$router.replace({ name: 'manage-event', params: { ...this.$route.params, panel: target === 'overview' ? undefined : target, sub: undefined } });
+      }
+    },
     go(key) {
       this.$router.push({ name: 'manage-event', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute, panel: key === 'overview' ? undefined : key } });
     },

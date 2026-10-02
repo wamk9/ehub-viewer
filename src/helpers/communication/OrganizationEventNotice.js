@@ -3,7 +3,7 @@ import Api from '@/helpers/communication/Connection.js';
 const OrganizationEventNotice = {
     async index(orgRoute, eventRoute) {
         const result = await Api.getAsync(`/org/${orgRoute}/event/${eventRoute}/notices`);
-        return { code: result.code, data: result.response?.message };
+        return { code: result.code, data: result.response?.message, replyToSet: result.response?.reply_to_set !== false };
     },
     async send(orgRoute, eventRoute, data) {
         const result = await Api.postAsync(`/org/${orgRoute}/event/${eventRoute}/notices`, data);

@@ -11,7 +11,7 @@ export default {
   components: { InitialsAvatar, EhubDialog },
   inject: ['em'],
   data() {
-    return { filter: 'all', q: '', sheet: null, busyId: null, msg: { subject: '', message: '' }, msgOpen: false, sending: false };
+    return { filter: 'all', q: '', sheet: null, busyId: null, msg: { subject: '', message: '' }, msgOpen: false, sending: false, history: [], historyLoading: false, replyToSet: true };
   },
   computed: {
     ev() { return this.em.event; },
@@ -51,7 +51,19 @@ export default {
       if (!d) return '';
       return 'https://wa.me/' + (d.length <= 11 ? '55' + d : d);
     },
-    openSheet(r) { this.sheet = r; this.msgOpen = false; this.msg = { subject: '', message: '' }; },
+    openSheet(r) {
+      this.sheet = r; this.msgOpen = false; this.msg = { subject: '', message: '' }; this.history = [];
+      if (this.em.canPanel('news') && r.user) this.loadHistory(r.id);
+    },
+    async loadHistory(id) {
+      this.historyLoading = true;
+      const res = await Api.getAsync(`/org/${this.em.orgRoute}/event/${this.em.eventRoute}/manage/participants/${id}/messages`);
+      this.historyLoading = false;
+      if (res.code === 200 && this.sheet?.id === id) {
+        this.history = res.response.message || [];
+        this.replyToSet = res.response.reply_to_set !== false;
+      }
+    },
     async sendMessage() {
       if (!this.sheet || this.sending || !this.msg.subject.trim() || !this.msg.message.trim()) return;
       this.sending = true;
@@ -63,6 +75,7 @@ export default {
         toast.success(this.$t('pages.event.manage.reg.msg_sent', { name: userName(this.sheet) }));
         this.msgOpen = false;
         this.msg = { subject: '', message: '' };
+        this.loadHistory(this.sheet.id);
       } else toast.error(this.$t('pages.event.manage.c.error'));
     },
     userName,
@@ -275,6 +288,10 @@ export default {
             <label class="form-label small fw-semibold" for="msg-body">{{ $t('pages.event.manage.reg.msg_text') }}</label>
             <textarea id="msg-body" v-model="msg.message" class="form-control form-control-sm mb-2" rows="4" maxlength="2000"></textarea>
             <p class="small text-muted mb-2">{{ $t('pages.event.manage.reg.msg_hint') }}</p>
+            <p v-if="!replyToSet" class="small msg-warn mb-2">
+              <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />{{ $t('pages.event.manage.reg.no_reply_to') }}
+              <router-link :to="`/org/${em.orgRoute}/manage/settings`">{{ $t('pages.event.manage.reg.no_reply_to_link') }}</router-link>
+            </p>
             <div class="d-flex gap-2">
               <button class="btn btn-sm btn-primary round px-3" :disabled="sending || !msg.subject.trim() || !msg.message.trim()" @click="sendMessage">
                 <span v-if="sending" class="spinner-border spinner-border-sm me-1"></span>{{ $t('pages.event.manage.reg.msg_send') }}
@@ -282,6 +299,22 @@ export default {
               <button class="btn btn-sm btn-outline-secondary round px-3" @click="msgOpen = false">{{ $t('pages.event.manage.c.cancel') }}</button>
             </div>
           </div>
+          <div v-if="history.length" class="msg-history mt-3">
+            <div class="kv-title">{{ $t('pages.event.manage.reg.history') }}</div>
+            <ul class="list-unstyled mb-0">
+              <li v-for="h in history" :key="h.id" class="msg-item">
+                <div class="d-flex justify-content-between gap-2">
+                  <strong class="small">{{ h.subject }}</strong>
+                  <span class="small text-muted text-nowrap">{{ fmtDate(h.created_at, true) }}</span>
+                </div>
+                <div class="small text-muted">
+                  {{ $t('pages.event.manage.reg.history_' + h.kind) }}<template v-if="h.author"> · {{ h.author.name }}</template>
+                </div>
+                <p v-if="h.message" class="small mb-0 msg-text">{{ h.message }}</p>
+              </li>
+            </ul>
+          </div>
+          <p v-else-if="!historyLoading" class="small text-muted mt-2 mb-0">{{ $t('pages.event.manage.reg.history_empty') }}</p>
         </div>
         <template v-if="canFormData">
           <div class="kv-title">{{ $t('pages.event.manage.reg.form_data') }}</div>
@@ -320,4 +353,9 @@ export default {
   .sum-cell:nth-child(-n+2) { border-bottom: 1px solid var(--ehub-line); }
 }
 .msg-box { border: 1px solid var(--ehub-line); border-radius: 10px; padding: 12px; background: var(--ehub-field-bg); }
+.msg-warn { color: var(--ehub-warning-text, #8a5a00); }
+.msg-history { border-top: 1px solid var(--ehub-line); padding-top: .75rem; }
+.msg-item { padding: .5rem 0; border-bottom: 1px dashed var(--ehub-line); }
+.msg-item:last-child { border-bottom: 0; }
+.msg-text { white-space: pre-line; margin-top: .25rem; }
 </style>
