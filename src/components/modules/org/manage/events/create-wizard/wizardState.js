@@ -127,6 +127,8 @@ export function populateFormFromEvent(form, event, baseUrl) {
     form[key] = toDateInput(form[key])
   }
   form.route_manually_edited = true
+  // Published events: changing the URL breaks links already shared or indexed.
+  form._original_route = event.publication !== 'draft' ? event.route : ''
   form.timezone = normalizeTimezone(form.timezone)
   form.prizes = normalizePrizes(event.event_data)
   if (event.logo_image) form._existing_logo_url = baseUrl + 'storage/' + event.logo_image

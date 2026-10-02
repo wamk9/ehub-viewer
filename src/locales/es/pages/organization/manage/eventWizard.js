@@ -86,6 +86,8 @@ export default {
   s6: {
     title: 'Enlace y difusión', sub: 'Opcional: ajusta la dirección del evento. eHub genera el título, la descripción y la imagen para compartir.',
     slugLabel: 'URL del evento', slugHint: 'Solo letras minúsculas, números y guiones. Generado automáticamente a partir del nombre.',
+    routeChanged: 'Este evento ya está publicado. Cambiar la URL rompe los enlaces ya compartidos y hace que Google pierda la página actual.',
+    routeRestore: 'Mantener la URL actual',
     autoTitle: 'eHub se encarga de Google y las redes sociales',
     autoHint: 'El título, el resumen y la imagen para compartir se crean a partir del nombre, la fecha, el lugar y la organización, y se actualizan cuando editas el evento.',
     socialPreview: 'Vista previa al compartir',

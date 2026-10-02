@@ -18,6 +18,8 @@ function onSlugInput() {
   props.form.route = slugify(props.form.route)
 }
 
+const routeChanged = computed(() => !!props.form._original_route && props.form.route !== props.form._original_route)
+
 const urlFull = computed(() => `https://ehubapp.com/org/${route.params.orgRoute}/event/${props.form.route || '…'}`)
 
 // Mirrors the share image eHub generates: event colour, logo, name, organization and start date.
@@ -47,6 +49,11 @@ const startLabel = computed(() => {
         <span>{{ urlFull }}</span>
       </div>
       <p class="field-hint mt-2">{{ $t('pages.organization.manage.eventWizard.s6.slugHint') }}</p>
+      <div v-if="routeChanged" class="route-warning" role="alert">
+        <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />
+        <span>{{ $t('pages.organization.manage.eventWizard.s6.routeChanged') }}</span>
+        <button type="button" class="btn btn-link btn-sm p-0" @click="form.route = form._original_route">{{ $t('pages.organization.manage.eventWizard.s6.routeRestore') }}</button>
+      </div>
     </div>
 
     <div class="form-section">
@@ -85,6 +92,9 @@ const startLabel = computed(() => {
 .url-preview-bar { display: flex; align-items: center; gap: 9px; margin-top: 8px; padding: 9px 13px; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 8px; font-size: .82rem; color: var(--ehub-ink); word-break: break-all; }
 .url-preview-bar svg { color: var(--ehub-primary-text); flex-shrink: 0; }
 
+.route-warning { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; padding: 10px 13px; border-radius: 8px; background: var(--ehub-warning-bg, rgba(251, 191, 17, .12)); border: 1px solid var(--ehub-warning-border, rgba(251, 191, 17, .45)); font-size: .8rem; color: var(--ehub-ink); }
+.route-warning svg { color: var(--ehub-warning-text, #b7791f); }
+.route-warning span { flex: 1; min-width: 200px; }
 .auto-note { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--ehub-line); border-radius: 10px; background: var(--ehub-field-bg); margin-bottom: 14px; }
 .auto-note svg { color: var(--ehub-primary-text); margin-top: 3px; flex-shrink: 0; }
 .auto-note strong { font-size: .86rem; color: var(--ehub-ink); }

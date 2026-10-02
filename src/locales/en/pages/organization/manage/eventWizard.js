@@ -86,6 +86,8 @@ export default {
   s6: {
     title: 'Link & sharing', sub: 'Optional: adjust the event address. eHub creates the title, description and share image for you.',
     slugLabel: 'Event URL', slugHint: 'Lowercase letters, numbers and hyphens only. Auto-generated from the name.',
+    routeChanged: 'This event is already published. Changing the URL breaks links already shared and makes Google lose the current page.',
+    routeRestore: 'Keep the current URL',
     autoTitle: 'eHub takes care of Google and social media',
     autoHint: 'The title, summary and share image are built from the name, date, venue and organization, and stay up to date when you edit the event.',
     socialPreview: 'Share preview',
