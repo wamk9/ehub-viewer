@@ -14,6 +14,8 @@ const store = useStore()
 
 const loading = ref(true)
 const notFound = ref(false)
+// Account exists but its owner limited who sees it: { username, visibility }.
+const privateProfile = ref(null)
 const profile = ref(null)
 const myUsername = ref(null)
 
@@ -34,10 +36,13 @@ const isOwnProfile = computed(() => myUsername.value && profile.value && myUsern
 async function loadProfile() {
   loading.value = true
   notFound.value = false
+  privateProfile.value = null
   const res = await Api.getAsync('/profile/' + route.params.username)
   loading.value = false
   if (res.code === 200) {
     profile.value = res.response?.message
+  } else if (res.code === 403 && res.response?.message === 'profile_private') {
+    privateProfile.value = { username: res.response.username, visibility: res.response.visibility }
   } else {
     notFound.value = true
   }
@@ -196,6 +201,17 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
           <div class="skel" style="height:200px;border-radius:14px"></div>
         </div>
       </div>
+    </div>
+
+    <!-- Exists, but private -->
+    <div v-else-if="privateProfile" class="pub-notfound">
+      <font-awesome-icon :icon="['fas', 'lock']" class="pub-notfound-icon" />
+      <h1 class="pub-private-title">{{ $t('pages.user.public.private.title') }}</h1>
+      <p class="pub-private-user">@{{ privateProfile.username }}</p>
+      <p>{{ $t('pages.user.public.private.' + (privateProfile.visibility === 'followers' ? 'followers' : 'private')) }}</p>
+      <router-link v-if="privateProfile.visibility === 'followers' && !store.getters.isLoggedIn" :to="{ name: 'user-login', query: { redirect: route.fullPath } }" class="btn btn-primary round">
+        {{ $t('pages.user.public.private.login') }}
+      </router-link>
     </div>
 
     <!-- Not found -->
@@ -544,6 +560,8 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
   padding: 80px 24px; gap: 16px; color: var(--ehub-muted); text-align: center;
 }
 .pub-notfound-icon { font-size: 3rem; opacity: .4; }
+.pub-private-title { font-size: 1.25rem; font-weight: 800; margin: .75rem 0 0; color: var(--ehub-ink); }
+.pub-private-user { color: var(--ehub-muted); margin: 0; }
 
 /* Cover */
 .pub-cover {

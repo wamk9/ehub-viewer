@@ -1,5 +1,6 @@
 export default {
-  not_found: 'Perfil não encontrado ou privado.',
+  not_found: "Perfil não encontrado.",
+  private: { title: "Este perfil é privado", private: "A pessoa escolheu não mostrar o perfil publicamente.", followers: "Só quem participa de uma equipe ou organização com essa pessoa pode ver o perfil.", login: "Entrar" },
   member_since: 'Membro desde',
   followers: 'seguidores',
   following: 'seguindo',
