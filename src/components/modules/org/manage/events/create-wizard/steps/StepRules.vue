@@ -18,6 +18,19 @@ function addExtra(form) {
 function removeExtra(form, i) {
   form.default_extra_points.splice(i, 1)
 }
+
+// Group games score win / draw / loss (default 3 / 1 / 0) on every group stage.
+const GP_DEFAULT = { win: 3, draw: 1, loss: 0 }
+function groupPoint(k) {
+  const g = (props.form.stages || []).find((st) => st.stage_type === 'group')
+  return g?.config?.['points_' + k] ?? GP_DEFAULT[k]
+}
+function setGroupPoint(k, v) {
+  const n = v === '' ? GP_DEFAULT[k] : Number(v)
+  ;(props.form.stages || []).filter((st) => st.stage_type === 'group').forEach((st) => {
+    st.config = { ...(st.config || {}), ['points_' + k]: n }
+  })
+}
 </script>
 
 <template>
@@ -37,7 +50,18 @@ function removeExtra(form, i) {
       <div class="char-count">{{ form.rules.length }}/3000</div>
     </div>
 
-    <div class="form-section" v-if="form.format === 'points' || form.format === 'groups'">
+    <div class="form-section" v-if="form.format === 'groups'">
+      <div class="form-section-label">{{ $t('pages.organization.manage.eventWizard.s5.groupPtsLabel') }}</div>
+      <p class="field-hint mb-3">{{ $t('pages.organization.manage.eventWizard.s5.groupPtsTip') }}</p>
+      <div class="d-flex gap-3 flex-wrap">
+        <label v-for="k in ['win', 'draw', 'loss']" :key="k" class="gp-field">
+          <span>{{ $t('pages.organization.manage.eventWizard.s5.gp_' + k) }}</span>
+          <input type="number" min="0" class="pts-input" :value="groupPoint(k)" @input="setGroupPoint(k, $event.target.value)" />
+        </label>
+      </div>
+    </div>
+
+    <div class="form-section" v-if="form.format === 'points'">
       <div class="form-section-label">{{ $t('pages.organization.manage.eventWizard.s5.ptsLabel') }}</div>
       <p class="field-hint mb-3">{{ $t('pages.organization.manage.eventWizard.s5.ptsTip') }}</p>
       <div class="pts-table-wrap">
@@ -117,4 +141,5 @@ function removeExtra(form, i) {
 .extra-pts-row input.form-control-sm { flex: 1; }
 .stage-del { width: 26px; height: 26px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: var(--ehub-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .75rem; flex-shrink: 0; }
 .stage-del:hover { border-color: color-mix(in srgb,#e23b3b 35%,transparent); background: color-mix(in srgb,#e23b3b 10%,transparent); color: var(--ehub-danger-text); }
+.gp-field { display: flex; flex-direction: column; gap: 4px; font-size: .8rem; font-weight: 600; color: var(--ehub-ink); }
 </style>

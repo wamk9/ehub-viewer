@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { slugify, DEFAULT_POINTS } from './wizardState.js'
+import { slugify } from './wizardState.js'
 
 const props = defineProps({
   form: { type: Object, required: true },
@@ -30,11 +30,15 @@ function apply() {
       id: `g-${Date.now()}-${i}`,
       name,
       route: slugify(name),
-      stage_type: 'points',
+      stage_type: 'group',
       start_at: '',
+      // Round robin: win / draw / loss points; the top "advance" go to the final.
       config: {
-        points: DEFAULT_POINTS.slice(0, perGroup.value).map(p => ({ ...p })),
-        extra_points: [],
+        group: GROUP_LETTERS[i],
+        advance: advance.value,
+        points_win: 3,
+        points_draw: 1,
+        points_loss: 0,
         slots: Array.from({ length: perGroup.value }, (_, j) => `Vaga ${j + 1}`),
       },
     })
@@ -91,7 +95,7 @@ function apply() {
 
         <div class="gam-summary">
           <span class="gam-chip">{{ groupsCount }} × {{ perGroup }} = {{ total }} {{ $t('pages.organization.manage.eventWizard.groups.total') }}</span>
-          <span class="gam-chip hi">{{ finalists }} {{ $t('pages.organization.manage.eventWizard.rev.slots') }} → {{ finalVariant }}</span>
+          <span class="gam-chip hi">{{ $t('competition.group.to_final', { n: finalists }) }}</span>
         </div>
 
         <div class="gam-footer">

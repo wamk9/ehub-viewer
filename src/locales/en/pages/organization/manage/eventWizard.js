@@ -72,6 +72,7 @@ export default {
     requirements: 'Participation requirements', requirementsPh: 'e.g. Category B license; minimum iRating 2000; must reside in Brazil…',
   },
   s5: {
+    groupPtsLabel: 'Points per group game', groupPtsTip: 'Each group is a round robin. Set what a win, draw and loss are worth (football standard: 3, 1, 0).', gp_win: 'Win', gp_draw: 'Draw', gp_loss: 'Loss',
     useTemplate: 'Use a ready template',
     templateHint: 'Not sure what to write? Start from the template and adapt it to your event.',
     bonusPh: 'e.g. Fastest lap',

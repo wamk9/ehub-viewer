@@ -72,6 +72,7 @@ export default {
     requirements: 'Requisitos de participación', requirementsPh: 'ej: Licencia categoría B; iRating mínimo 2000; residir en Brasil…',
   },
   s5: {
+    groupPtsLabel: 'Puntos por partido en los grupos', groupPtsTip: 'Cada grupo es todos contra todos. Define cuánto vale ganar, empatar y perder (estándar del fútbol: 3, 1 y 0).', gp_win: 'Victoria', gp_draw: 'Empate', gp_loss: 'Derrota',
     useTemplate: 'Usar plantilla',
     templateHint: '¿No sabes qué escribir? Empieza con la plantilla y ajústala a tu evento.',
     bonusPh: 'ej: Vuelta más rápida',

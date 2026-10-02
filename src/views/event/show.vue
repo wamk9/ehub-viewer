@@ -9,6 +9,9 @@ import EhubRegistrationModal from '@/components/modules/event-registration/EhubR
 import EhubPrizeList from '@/components/modules/event-prizes/EhubPrizeList.vue';
 import { normalizePrizes } from '@/components/modules/event-prizes/prizes.js';
 import EhubLivePlayer from '@/components/modules/event-live/EhubLivePlayer.vue';
+import EhubBracket from '@/components/modules/competition/EhubBracket.vue';
+import EhubGroupTable from '@/components/modules/competition/EhubGroupTable.vue';
+import EhubGroupMatches from '@/components/modules/competition/EhubGroupMatches.vue';
 import { watchUrl } from '@/helpers/General/liveStream.js';
 import { initialValues, validateAnswers } from '@/components/modules/event-registration/regForm.js';
 
@@ -47,7 +50,7 @@ const CAT_ICON = {
 }
 
 export default {
-  components: { EhubRegistrationModal, EhubPrizeList, EhubLivePlayer },
+  components: { EhubRegistrationModal, EhubPrizeList, EhubLivePlayer, EhubBracket, EhubGroupTable, EhubGroupMatches },
   data() {
     return {
       event: null,
@@ -143,6 +146,18 @@ export default {
     },
     standings() {
       if (!this.finishedStages.length) return [];
+      // Knockout formats: the final bracket decides the places, not a sum of points.
+      const lastBracket = [...this.finishedStages].reverse().find((st) => st.stage_type === 'bracket');
+      // Before the knockout ends there is no overall leader (group points don't add up across groups).
+      if (!lastBracket && ['bracket', 'groups'].includes(this.event?.format)) return [];
+      if (lastBracket && ['bracket', 'groups'].includes(this.event?.format)) {
+        return [...lastBracket.results].sort((a, b) => a.position - b.position).map((r) => ({
+          registration_id: r.registration_id, user: r.user, position: r.position,
+          total: r.score ?? 0, wins: r.position === 1 ? 1 : 0,
+          stageScores: Object.fromEntries(this.finishedStages.map((st, si) => [si, st.id === lastBracket.id ? (r.score ?? 0) : null])),
+          stagePos: {},
+        }));
+      }
       const map = {};
       this.finishedStages.forEach((stage, si) => {
         stage.results.forEach(result => {
@@ -179,6 +194,19 @@ export default {
       return (this.event?.stages || [])
         .map((st) => ({ stage: st, r: (st.results || []).find((x) => x.registration_id === this.myRegId) }))
         .filter((x) => x.r);
+    },
+    // Participant's pending head-to-head with both players known.
+    myNextMatch() {
+      if (!this.myRegId) return null;
+      for (const st of this.event?.stages || []) {
+        const m = (st.matches || []).find((x) => x.status === 'pending' && x.a && x.b
+          && (x.a.registration_id === this.myRegId || x.b.registration_id === this.myRegId));
+        if (m) {
+          const rival = m.a.registration_id === this.myRegId ? m.b : m.a;
+          return { stage: st, match: m, rival };
+        }
+      }
+      return null;
     },
     nextStage() { return (this.event?.stages || []).find(s => !s.finished) || null; },
     regulationCards() { return this.$tm(`events.show.regulation.${this.eventFormat}`) || []; },
@@ -864,7 +892,14 @@ export default {
             <font-awesome-icon :icon="['fas', 'layer-group']" />
             <p class="mb-0 mt-2">{{ $t('events.show.stages.empty') }}</p>
           </div>
-          <div v-else class="stage-list">
+          <div v-if="myNextMatch" class="my-match">
+            <font-awesome-icon :icon="['fas', 'bolt']" class="my-match__ico" />
+            <div>
+              <div class="my-match__lbl">{{ $t('competition.bracket.next_match') }} · {{ myNextMatch.stage.name }}</div>
+              <strong>{{ $t('competition.bracket.vs') }} {{ myNextMatch.rival.name || myNextMatch.rival.username || $t('events.show.removed_participant') }}</strong>
+            </div>
+          </div>
+          <div v-if="event.stages?.length" class="stage-list">
             <div v-for="(stage, idx) in event.stages" :key="stage.id" :id="'stage-' + stage.route" class="stage-item" :class="{ focus: focusStage === stage.route }">
               <div class="stage-head" role="button">
                 <div class="lhs">
@@ -892,8 +927,19 @@ export default {
                 </div>
               </div>
 
+              <!-- Knockout bracket (live) -->
+              <div v-if="stage.stage_type === 'bracket' && stage.matches?.some((m) => m.kind === 'bracket')" class="stage-body">
+                <EhubBracket :matches="stage.matches" :highlight="myRegId" />
+              </div>
+
+              <!-- Group: live table and games -->
+              <div v-if="stage.stage_type === 'group' && stage.matches?.some((m) => m.kind === 'group')" class="stage-body">
+                <EhubGroupTable :results="stage.results || []" :highlight="myRegId" />
+                <EhubGroupMatches :matches="stage.matches" :highlight="myRegId" class="mt-3" />
+              </div>
+
               <!-- Stage results -->
-              <div v-if="stage.finished && stage.results?.length" class="stage-body">
+              <div v-if="stage.finished && stage.results?.length && stage.stage_type !== 'group'" class="stage-body">
                 <div class="table-wrap">
                   <table class="ev-table">
                     <thead>
@@ -1399,4 +1445,7 @@ a.ev-extra__val { color: var(--org-accent-text); }
 .gateway-btn { display: flex; align-items: center; width: 100%; padding: .9rem 1.2rem; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 10px; color: var(--ehub-ink); font-size: .95rem; font-weight: 500; cursor: pointer; transition: background .15s, border-color .15s; text-align: left; }
 .gateway-btn:hover:not(:disabled) { border-color: var(--org-accent, var(--ehub-primary)); }
 .gateway-btn:disabled { opacity: .6; cursor: not-allowed; }
+.my-match { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 14px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--org-accent, var(--ehub-primary)) 40%, transparent); background: color-mix(in srgb, var(--org-accent, var(--ehub-primary)) 10%, var(--ehub-card)); }
+.my-match__ico { font-size: 1.2rem; color: var(--org-accent, var(--ehub-primary)); }
+.my-match__lbl { font-size: .74rem; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
 </style>

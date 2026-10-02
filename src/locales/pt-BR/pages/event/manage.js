@@ -72,7 +72,7 @@ export default {
   },
   stg: {
     title: 'Etapas', sub: 'Controle o andamento de cada etapa e suas sessões', new: 'Nova etapa',
-    type: { points: 'Pontos', bracket: 'Chaveamento' },
+    type: { points: 'Pontos', bracket: 'Chaveamento', group: 'Grupo' },
     state: { pending: 'Não iniciada', live: 'Em andamento', done: 'Finalizada' },
     start: 'Iniciar etapa', finish: 'Finalizar etapa', results: 'Lançar resultados', view_results: 'Ver resultados',
     sessions: 'Sessões', no_sessions: 'Sem sessões — a etapa é conduzida como um bloco único.',
@@ -160,7 +160,7 @@ export default {
     ev_finished: 'Evento encerrado', pub: 'Evento publicado', unpub: 'Evento voltou para rascunho', dup: 'Rascunho criado',
     ev_deleted: 'Evento excluído', round_started: 'Sessão iniciada', round_finished: 'Sessão finalizada',
   },
-  err: {
+  err: { groups_need_two_each: 'É preciso ter pelo menos 2 inscritos por grupo.', groups_already_played: 'Já há jogos com placar. Apague os placares antes de sortear de novo.', groups_not_finished: 'Finalize todos os grupos antes de montar a chave final.', score_must_be_number: 'Use apenas números no placar.', no_group_stages: 'Este evento não tem etapas de grupo.', bracket_needs_two: 'É preciso ter pelo menos 2 inscritos confirmados.', bracket_already_played: 'A chave já tem resultados. Desfaça os confrontos antes de sortear de novo.', next_match_decided: 'O confronto seguinte já tem vencedor. Desfaça-o primeiro.', match_waiting_players: 'Este confronto ainda espera os dois jogadores.', match_is_bye: 'Folga não tem vencedor para escolher.', stage_not_bracket: 'Esta etapa não é de chaveamento.',
     event_in_progress: 'Eventos em andamento não podem ser excluídos.',
     event_already_published: 'Evento publicado não pode voltar para rascunho.',
     stage_already_started: 'Essa etapa já começou.',

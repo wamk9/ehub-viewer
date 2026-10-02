@@ -42,7 +42,10 @@ export default {
       return new Intl.DateTimeFormat(this.$i18n.locale, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(d));
     },
     canStart(i) {
-      return stageState(this.stages[i]) === 'pending' && this.stages.slice(0, i).every((s) => s.finished) && !this.ev.finished;
+      // Groups are played side by side: earlier groups don't block a group.
+      const st = this.stages[i];
+      return stageState(st) === 'pending' && !this.ev.finished
+        && this.stages.slice(0, i).every((s) => s.finished || (st.stage_type === 'group' && s.stage_type === 'group'));
     },
     canMove(i, dir) {
       const j = i + dir;
@@ -62,7 +65,7 @@ export default {
       this.editing = stage;
       this.form = {
         name: stage.name,
-        stage_type: stage.stage_type === 'bracket' ? 'bracket' : 'points',
+        stage_type: ['bracket', 'group'].includes(stage.stage_type) ? stage.stage_type : 'points',
         start_at: stage.start_at ? this.toLocalInput(stage.start_at) : '',
         description: stage.description || '',
         sessions: '',
@@ -135,7 +138,8 @@ export default {
       let msg = this.$t(`pages.event.manage.stg.${action}_q`, { s: stage.name });
       if (action === 'start' && !this.ev.initialized) msg = this.$t('pages.event.manage.stg.start_first_q');
       // Finishing without published results leaves the standings empty: say so plainly.
-      const noResults = action === 'finish' && !stage.results_published;
+      // A group table is always public: nothing to publish there.
+      const noResults = action === 'finish' && !stage.results_published && stage.stage_type !== 'group';
       if (noResults) msg = this.$t('pages.event.manage.stg.finish_no_results_q', { s: stage.name });
       const ok = await this.em.ask(msg, this.$t(noResults ? 'pages.event.manage.stg.finish_anyway' : 'pages.event.manage.stg.' + action), noResults);
       if (!ok) return;
@@ -145,6 +149,8 @@ export default {
       if (res.code === 200) {
         this.em.putStage(res.data);
         if (action === 'start') this.ev.initialized = true;
+        // Starting one group starts every group: refresh them all.
+        if (action === 'start' && stage.stage_type === 'group') await this.em.loadEvent();
         toast.success(this.$t('pages.event.manage.toast.' + (action === 'start' ? 'started' : 'finished')));
       } else toast.error(apiError(this, res.data));
     },
@@ -218,12 +224,15 @@ export default {
           </div>
           <div class="stg-meta">
             <font-awesome-icon :icon="['fas', 'calendar-days']" class="me-1" />{{ fmtDT(s.start_at) }}
-            · {{ $t('pages.event.manage.stg.type.' + (s.stage_type === 'bracket' ? 'bracket' : 'points')) }}
+            · {{ $t('pages.event.manage.stg.type.' + (['bracket', 'group'].includes(s.stage_type) ? s.stage_type : 'points')) }}
           </div>
         </div>
         <div class="stg-acts">
           <button v-if="canRun && canStart(i)" class="btn btn-sm btn-primary round px-3" :disabled="busy === s.id" @click="control(s, 'start')">
             <font-awesome-icon :icon="['fas', 'play']" class="me-1" />{{ $t('pages.event.manage.stg.start') }}
+          </button>
+          <button v-if="s.stage_type === 'bracket' && stageState(s) === 'pending' && em.canPanel('results')" class="btn btn-sm btn-outline-secondary round px-3" @click="goResults(s)">
+            <font-awesome-icon :icon="['fas', 'sitemap']" class="me-1" />{{ $t((s.matches || []).length ? 'competition.bracket.view' : 'competition.bracket.build') }}
           </button>
           <template v-if="stageState(s) !== 'pending' && em.canPanel('results')">
             <button class="btn btn-sm round px-3" :class="stageState(s) === 'live' && !s.results_published ? 'btn-primary' : 'btn-outline-secondary'" @click="goResults(s)">
@@ -275,6 +284,7 @@ export default {
           <select v-model="form.stage_type" class="form-select" :disabled="editing?.initialized">
             <option value="points">{{ $t('pages.event.manage.stg.type.points') }}</option>
             <option value="bracket">{{ $t('pages.event.manage.stg.type.bracket') }}</option>
+            <option value="group">{{ $t('pages.event.manage.stg.type.group') }}</option>
           </select>
           <div v-if="editing?.initialized" class="form-text">{{ $t('pages.event.manage.stg.type_locked') }}</div>
         </div>

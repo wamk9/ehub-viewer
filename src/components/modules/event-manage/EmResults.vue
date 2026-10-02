@@ -1,15 +1,18 @@
 <script>
 import InitialsAvatar from '@/components/general/InitialsAvatar.vue';
+import EhubBracket from '@/components/modules/competition/EhubBracket.vue';
+import EhubGroupTable from '@/components/modules/competition/EhubGroupTable.vue';
+import EhubGroupMatches from '@/components/modules/competition/EhubGroupMatches.vue';
 import OrganizationEventStage from '@/helpers/communication/OrganizationEventStage.js';
 import { toast } from '@/helpers/toast.js';
 import { POINTS, stageState, userName, apiError } from './store.js';
 
 export default {
   name: 'EmResults',
-  components: { InitialsAvatar },
+  components: { InitialsAvatar, EhubBracket, EhubGroupTable, EhubGroupMatches },
   inject: ['em'],
   data() {
-    return { stageId: null, rows: [], auto: true, dirty: false, saving: false, addId: '' };
+    return { stageId: null, rows: [], auto: true, dirty: false, saving: false, addId: '', busyMatch: null };
   },
   computed: {
     ev() { return this.em.event; },
@@ -23,7 +26,32 @@ export default {
       return this.eligible.filter((r) => !used.has(r.id));
     },
     sortedRows() { return [...this.rows].sort((a, b) => (a.position || 999) - (b.position || 999)); },
+    isBracket() { return this.stage?.stage_type === 'bracket'; },
+    isGroup() { return this.stage?.stage_type === 'group'; },
+    groupStages() { return this.stages.filter((s) => s.stage_type === 'group'); },
+    groupMatches() { return (this.stage?.matches || []).filter((m) => m.kind === 'group'); },
+    groupsDone() { return this.groupStages.length > 0 && this.groupStages.every((s) => s.finished); },
+    bracketMatches() { return (this.stage?.matches || []).filter((m) => m.kind === 'bracket'); },
+    // Final decided: the champion is known.
+    bracketDone() {
+      const ms = this.bracketMatches;
+      const last = Math.max(0, ...ms.map((m) => m.round));
+      return ms.some((m) => m.round === last && m.status === 'done');
+    },
+    bracketPlayed() { return this.bracketMatches.some((m) => m.status === 'done'); },
+    // "8 confirmed → bracket of 8" / "5 confirmed → bracket of 8 with 3 byes"
+    bracketPreview() {
+      // After a group phase only the qualifiers play the final.
+      const n = this.groupStages.length
+        ? this.groupStages.reduce((sum, g) => sum + Number(g.config?.advance ?? 2), 0)
+        : this.eligible.length;
+      let size = 2;
+      while (size < n) size *= 2;
+      return { n, size, byes: Math.max(0, size - n) };
+    },
     dupPositions() {
+      // Shared places (two semifinal losers are both 3rd) are normal in a bracket.
+      if (this.isBracket || this.isGroup) return false;
       const seen = new Set();
       return this.rows.some((r) => { if (seen.has(r.position)) return true; seen.add(r.position); return false; });
     },
@@ -123,6 +151,51 @@ export default {
         toast.success(this.$t('pages.event.manage.toast.finished'));
       } else toast.error(apiError(this, res.data));
     },
+    async drawBracket(mode) {
+      if (!this.stage || this.saving) return;
+      if (this.bracketMatches.length) {
+        const ok = await this.em.ask(this.$t('competition.bracket.redraw_q'), this.$t('competition.bracket.redraw'));
+        if (!ok) return;
+      }
+      this.saving = true;
+      const res = await OrganizationEventStage.generateBracket(this.em.orgRoute, this.em.eventRoute, this.stage.route, mode);
+      this.saving = false;
+      if (res.code === 200) {
+        this.em.putStage(res.data);
+        this.load();
+        toast.success(this.$t('competition.bracket.drawn'));
+      } else toast.error(apiError(this, res.data));
+    },
+    async drawGroups(mode) {
+      if (this.saving) return;
+      if (this.groupStages.some((g) => (g.matches || []).length)) {
+        const ok = await this.em.ask(this.$t('competition.group.redraw_q'), this.$t('competition.group.redraw'));
+        if (!ok) return;
+      }
+      this.saving = true;
+      const res = await OrganizationEventStage.drawGroups(this.em.orgRoute, this.em.eventRoute, mode);
+      this.saving = false;
+      if (res.code === 200 && Array.isArray(res.data)) {
+        res.data.forEach((st) => this.em.putStage(st));
+        this.load();
+        toast.success(this.$t('competition.group.drawn'));
+      } else toast.error(apiError(this, res.data));
+    },
+    async saveGame({ match, score_a, score_b }) {
+      return this.decide({ match, winner: null, score_a, score_b });
+    },
+    async decide({ match, winner, score_a, score_b }) {
+      if (!this.stage || this.busyMatch) return;
+      this.busyMatch = match.id;
+      const res = await OrganizationEventStage.decideMatch(this.em.orgRoute, this.em.eventRoute, this.stage.route, match.id, {
+        winner, score_a: score_a === '' ? null : score_a, score_b: score_b === '' ? null : score_b,
+      });
+      this.busyMatch = null;
+      if (res.code === 200) {
+        this.em.putStage(res.data);
+        this.load();
+      } else toast.error(apiError(this, res.data));
+    },
     async save(publish) {
       if (!this.stage || this.saving) return;
       if (this.rows.some((r) => !r.position || r.position < 1)) return;
@@ -167,7 +240,7 @@ export default {
       </div>
     </div>
 
-    <div v-if="stage && stage.results_published && stageState(stage) === 'live' && !dirty && em.can('event.manage')" class="next-step">
+    <div v-if="stage && stage.results_published && stageState(stage) === 'live' && !dirty && em.can('event.manage') && (!isBracket || bracketDone)" class="next-step">
       <font-awesome-icon :icon="['fas', 'circle-check']" class="next-step__ico" />
       <div class="next-step__txt">
         <strong>{{ $t('pages.event.manage.res.next_title') }}</strong>
@@ -196,7 +269,68 @@ export default {
       <div class="res-grid">
         <div>
           <div class="cc">
-            <div v-if="!stage?.initialized" class="cc-empty">
+            <template v-if="isGroup">
+              <div v-if="!groupMatches.length" class="cc-empty">
+                <font-awesome-icon :icon="['fas', 'layer-group']" class="ico" />
+                <p class="mb-1"><strong>{{ $t('competition.group.empty_title') }}</strong></p>
+                <p class="mb-3 small">{{ $t('competition.group.preview', { n: eligible.length, g: groupStages.length }) }}</p>
+                <div v-if="!readonly" class="d-flex gap-2 justify-content-center flex-wrap">
+                  <button class="btn btn-primary round px-3" :disabled="saving || eligible.length < groupStages.length * 2" @click="drawGroups('random')">
+                    <font-awesome-icon :icon="['fas', 'shuffle']" class="me-2" />{{ $t('competition.group.draw_random') }}
+                  </button>
+                  <button class="btn btn-outline-secondary round px-3" :disabled="saving || eligible.length < groupStages.length * 2" @click="drawGroups('registration')">
+                    <font-awesome-icon :icon="['fas', 'list-ol']" class="me-2" />{{ $t('competition.group.draw_order') }}
+                  </button>
+                </div>
+                <p v-if="eligible.length < groupStages.length * 2" class="small mt-2 mb-0">{{ $t('competition.group.need_two', { n: groupStages.length * 2 }) }}</p>
+              </div>
+              <div v-else class="bk-wrap">
+                <p class="hint mb-2">
+                  <font-awesome-icon :icon="['fas', 'circle-info']" />
+                  {{ $t(!stage.initialized ? 'competition.group.hint_not_started' : (readonly ? 'competition.bracket.hint_readonly' : 'competition.group.hint')) }}
+                </p>
+                <EhubGroupTable :results="stage.results || []" :name-of="nameOf" class="mb-3" />
+                <EhubGroupMatches :matches="groupMatches" :editable="!readonly && stage.initialized && !stage.finished" :busy-id="busyMatch" @save="saveGame" />
+                <div v-if="!readonly && !groupStages.some((g) => (g.matches || []).some((m) => m.status === 'done')) && !stage.finished" class="mt-3">
+                  <button class="btn btn-sm btn-outline-secondary round px-3" :disabled="saving" @click="drawGroups('random')">
+                    <font-awesome-icon :icon="['fas', 'shuffle']" class="me-2" />{{ $t('competition.group.redraw') }}
+                  </button>
+                </div>
+              </div>
+            </template>
+            <template v-else-if="isBracket">
+              <div v-if="!bracketMatches.length" class="cc-empty">
+                <font-awesome-icon :icon="['fas', 'sitemap']" class="ico" />
+                <p class="mb-1"><strong>{{ $t('competition.bracket.empty_title') }}</strong></p>
+                <p class="mb-3 small">{{ $t(groupStages.length ? 'competition.bracket.preview_groups' : (bracketPreview.byes ? 'competition.bracket.preview_byes' : 'competition.bracket.preview'), bracketPreview) }}</p>
+                <div v-if="!readonly" class="d-flex gap-2 justify-content-center flex-wrap">
+                  <button v-if="groupStages.length" class="btn btn-primary round px-3" :disabled="saving || !groupsDone" @click="drawBracket('groups')">
+                    <font-awesome-icon :icon="['fas', 'sitemap']" class="me-2" />{{ $t('competition.bracket.draw_groups') }}
+                  </button>
+                  <button class="btn round px-3" :class="groupStages.length ? 'btn-outline-secondary' : 'btn-primary'" :disabled="saving || bracketPreview.n < 2" @click="drawBracket('random')">
+                    <font-awesome-icon :icon="['fas', 'shuffle']" class="me-2" />{{ $t('competition.bracket.draw_random') }}
+                  </button>
+                  <button class="btn btn-outline-secondary round px-3" :disabled="saving || bracketPreview.n < 2" @click="drawBracket('registration')">
+                    <font-awesome-icon :icon="['fas', 'list-ol']" class="me-2" />{{ $t('competition.bracket.draw_order') }}
+                  </button>
+                </div>
+                <p v-if="bracketPreview.n < 2" class="small mt-2 mb-0">{{ $t('competition.bracket.need_two') }}</p>
+                <p v-if="groupStages.length && !groupsDone" class="small mt-2 mb-0">{{ $t('competition.bracket.groups_pending') }}</p>
+              </div>
+              <div v-else class="bk-wrap">
+                <p class="hint mb-2">
+                  <font-awesome-icon :icon="['fas', 'circle-info']" />
+                  {{ $t(!stage.initialized ? 'competition.bracket.hint_not_started' : (readonly ? 'competition.bracket.hint_readonly' : 'competition.bracket.hint')) }}
+                </p>
+                <EhubBracket :matches="bracketMatches" :editable="!readonly && stage.initialized && !stage.finished" :busy-id="busyMatch" @decide="decide" />
+                <div v-if="!readonly && !bracketPlayed && !stage.finished" class="mt-3">
+                  <button class="btn btn-sm btn-outline-secondary round px-3" :disabled="saving" @click="drawBracket('random')">
+                    <font-awesome-icon :icon="['fas', 'shuffle']" class="me-2" />{{ $t('competition.bracket.redraw') }}
+                  </button>
+                </div>
+              </div>
+            </template>
+            <div v-else-if="!stage?.initialized" class="cc-empty">
               <font-awesome-icon :icon="['fas', 'clock']" class="ico" />{{ $t('pages.event.manage.res.not_started') }}
             </div>
             <div v-else-if="!rows.length" class="cc-empty">
@@ -239,7 +373,7 @@ export default {
                 </tbody>
               </table>
             </div>
-            <div v-if="stage?.initialized && rows.length && !readonly && addable.length" class="add-row">
+            <div v-if="!isBracket && !isGroup && stage?.initialized && rows.length && !readonly && addable.length" class="add-row">
               <select v-model="addId" class="form-select form-select-sm" style="max-width:260px">
                 <option value="" disabled>{{ $t('pages.event.manage.res.add_row') }}</option>
                 <option v-for="r in addable" :key="r.id" :value="r.id">{{ userName(r) }}</option>
@@ -249,7 +383,7 @@ export default {
               </button>
             </div>
           </div>
-          <div v-if="stage?.initialized && rows.length && !readonly" class="hint" style="margin-top:10px">
+          <div v-if="!isBracket && !isGroup && stage?.initialized && rows.length && !readonly" class="hint" style="margin-top:10px">
             <div class="form-check form-switch m-0">
               <input id="resAuto" v-model="auto" class="form-check-input" type="checkbox" />
               <label class="form-check-label" for="resAuto">{{ $t('pages.event.manage.res.auto_pts') }}</label>
@@ -287,6 +421,7 @@ export default {
 .res-in { width: 84px; padding: 4px 8px; font-size: .82rem; border-radius: 7px; }
 .res-in.sm { width: 62px; }
 .pos-cell { width: 70px; }
+.bk-wrap { padding: 14px 16px; }
 .add-row { display: flex; gap: 8px; padding: 10px 15px; border-top: 1px solid var(--ehub-line); }
 .std-row { display: flex; align-items: center; gap: 10px; padding: 8px 17px; border-bottom: 1px solid var(--ehub-line); font-size: .83rem; }
 .std-row:last-child { border-bottom: 0; }

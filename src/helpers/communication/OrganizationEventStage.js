@@ -22,6 +22,18 @@ const OrganizationEventStage = {
         const result = await Api.postAsync(`/org/${orgRoute}/event/${eventRoute}/stage/${stageRoute}/results`, body);
         return { code: result.code, data: result.response?.message };
     },
+    async generateBracket(orgRoute, eventRoute, stageRoute, mode, seeds = null) {
+        const result = await Api.postAsync(`/org/${orgRoute}/event/${eventRoute}/stage/${stageRoute}/bracket`, seeds ? { mode, seeds } : { mode });
+        return { code: result.code, data: result.response?.message };
+    },
+    async drawGroups(orgRoute, eventRoute, mode) {
+        const result = await Api.postAsync(`/org/${orgRoute}/event/${eventRoute}/groups/draw`, { mode });
+        return { code: result.code, data: result.response?.message };
+    },
+    async decideMatch(orgRoute, eventRoute, stageRoute, matchId, data) {
+        const result = await Api.patchAsync(`/org/${orgRoute}/event/${eventRoute}/stage/${stageRoute}/match/${matchId}`, data);
+        return { code: result.code, data: result.response?.message };
+    },
     async reorder(orgRoute, eventRoute, order) {
         const result = await Api.postAsync(`/org/${orgRoute}/event/${eventRoute}/stages/reorder`, { order });
         return { code: result.code, data: result.response?.message };

@@ -72,7 +72,7 @@ export default {
   },
   stg: {
     title: 'Stages', sub: 'Control each stage and its sessions', new: 'New stage',
-    type: { points: 'Points', bracket: 'Bracket' },
+    type: { points: 'Points', bracket: 'Bracket', group: 'Group' },
     state: { pending: 'Not started', live: 'In progress', done: 'Finished' },
     start: 'Start stage', finish: 'Finish stage', results: 'Submit results', view_results: 'View results',
     sessions: 'Sessions', no_sessions: 'No sessions — the stage runs as a single block.',
@@ -160,7 +160,7 @@ export default {
     ev_finished: 'Event finished', pub: 'Event published', unpub: 'Event moved back to draft', dup: 'Draft created',
     ev_deleted: 'Event deleted', round_started: 'Session started', round_finished: 'Session finished',
   },
-  err: {
+  err: { groups_need_two_each: 'At least 2 players per group are needed.', groups_already_played: 'Some games have scores. Clear them before drawing again.', groups_not_finished: 'Finish every group before building the final bracket.', score_must_be_number: 'Use numbers only in the score.', no_group_stages: 'This event has no group stages.', bracket_needs_two: 'At least 2 confirmed players are needed.', bracket_already_played: 'The bracket already has results. Undo the matches before drawing again.', next_match_decided: 'The next match already has a winner. Undo it first.', match_waiting_players: 'This match is still waiting for both players.', match_is_bye: 'A bye has no winner to choose.', stage_not_bracket: 'This stage is not a bracket.',
     event_in_progress: 'Events in progress cannot be deleted.',
     event_already_published: 'A published event cannot go back to draft.',
     stage_already_started: 'This stage has already started.',

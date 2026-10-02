@@ -72,7 +72,7 @@ export default {
   },
   stg: {
     title: 'Etapas', sub: 'Controla cada etapa y sus sesiones', new: 'Nueva etapa',
-    type: { points: 'Puntos', bracket: 'Llaves' },
+    type: { points: 'Puntos', bracket: 'Llaves', group: 'Grupo' },
     state: { pending: 'No iniciada', live: 'En curso', done: 'Finalizada' },
     start: 'Iniciar etapa', finish: 'Finalizar etapa', results: 'Cargar resultados', view_results: 'Ver resultados',
     sessions: 'Sesiones', no_sessions: 'Sin sesiones — la etapa se conduce como un bloque único.',
@@ -160,7 +160,7 @@ export default {
     ev_finished: 'Evento finalizado', pub: 'Evento publicado', unpub: 'El evento volvió a borrador', dup: 'Borrador creado',
     ev_deleted: 'Evento eliminado', round_started: 'Sesión iniciada', round_finished: 'Sesión finalizada',
   },
-  err: {
+  err: { groups_need_two_each: 'Se necesitan al menos 2 inscritos por grupo.', groups_already_played: 'Ya hay partidos con marcador. Bórralos antes de sortear de nuevo.', groups_not_finished: 'Finaliza todos los grupos antes de armar la llave final.', score_must_be_number: 'Usa solo números en el marcador.', no_group_stages: 'Este evento no tiene etapas de grupo.', bracket_needs_two: 'Se necesitan al menos 2 inscritos confirmados.', bracket_already_played: 'La llave ya tiene resultados. Deshaz los enfrentamientos antes de sortear de nuevo.', next_match_decided: 'El siguiente enfrentamiento ya tiene ganador. Deshazlo primero.', match_waiting_players: 'Este enfrentamiento aún espera a los dos jugadores.', match_is_bye: 'Un pase directo no tiene ganador que elegir.', stage_not_bracket: 'Esta etapa no es de llave.',
     event_in_progress: 'Los eventos en curso no se pueden eliminar.',
     event_already_published: 'Un evento publicado no puede volver a borrador.',
     stage_already_started: 'Esta etapa ya comenzó.',
