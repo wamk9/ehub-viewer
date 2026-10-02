@@ -32,7 +32,7 @@ export default {
         items: [
           'Your profile is public by default. Change it to "Followers" or "Private" in Profile > Privacy. People\'s profiles are not shown on Google.',
           'In events, other people see your name, username and results in the participant list and standings.',
-          'The event organizer sees your registration, your answers to their form and payment status. They do not see your e-mail, phone or password.',
+          'The event organizer sees your registration, your answers to their form, payment status and your e-mail and phone (if given), to contact you about the event. They never see your password.',
           'Event, organization, team and news pages are public and may appear in search engines.',
         ],
       },

@@ -14,7 +14,7 @@ const route = useRoute()
 const step = ref(1)
 const loading = ref(false)
 const error = ref('')
-const form = reactive({ mail: String(route.query.mail || ''), code: '', password: '', password_confirmation: '' })
+const form = reactive({ mail: String(window.history.state?.mail || ''), code: '', password: '', password_confirmation: '' })
 const showPassword = ref(false)
 
 const passwordTooShort = computed(() => form.password.length > 0 && form.password.length < 8)

@@ -3,6 +3,7 @@ export default {
   member_since: 'Membro desde',
   followers: 'seguidores',
   following: 'seguindo',
+  visibility_note: { private: "Só você vê este perfil (privado)", followers: "Visível só para quem divide equipe ou organização com você" },
   edit_profile: 'Editar Perfil',
   share: 'Compartilhar',
   tabs: {

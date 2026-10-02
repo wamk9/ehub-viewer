@@ -66,8 +66,8 @@ onMounted(async () => {
       populateFormFromEvent(form, eventResult.data, SystemVars.baseUrl)
       initialPayload = buildEventPayload(form)
       loadedPublication.value = form.publication
-      // Deep link to a step, e.g. ?step=7 opens "Regulamento".
-      const step = parseInt(route.query.step, 10)
+      // Opened at a given step (e.g. 7 = "Regulamento"): passed in history state, not the URL.
+      const step = parseInt(window.history.state?.step, 10)
       if (step >= 1 && step <= TOTAL_STEPS) currentStep.value = step
     } else {
       toast.error(t('pages.organization.manage.eventWizard.err.slug'))
@@ -221,7 +221,7 @@ function goToStep(n) {
 
 function goToEventsList(eventRoute = route.params.eventRoute) {
   // Opened from the event manage screen → go back there.
-  if (route.query.return === 'manage' && eventRoute) {
+  if (window.history.state?.returnTo === 'manage' && eventRoute) {
     router.push({ name: 'manage-event', params: { orgRoute: route.params.orgRoute, eventRoute } })
     return
   }

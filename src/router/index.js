@@ -67,15 +67,17 @@ const router = createRouter({
       meta: { authPage: true }
     },
     {
-      path: '/profile',
+      // Own profile: each panel is a path. These names are reserved usernames (API).
+      path: '/profile/:panel(personal|appearance|social|privacy|notifications|account)?',
       name: 'user-profile',
       component: () => import('@/views/user/profile.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, viewKey: () => '/profile' }
     },
     {
-      path: '/profile/:username',
+      path: '/profile/:username/:tab(results|teams|orgs)?',
       name: 'public-profile',
-      component: () => import('@/views/user/public-profile.vue')
+      component: () => import('@/views/user/public-profile.vue'),
+      meta: { viewKey: (r) => `/profile/${r.params.username}` }
     },
     {
       path: '/orgs',
@@ -100,9 +102,11 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/team/:teamRoute',
+      // /apply opens the application form (also used as the return after sign-in).
+      path: '/team/:teamRoute/:tab(results|roster|apply)?',
       name: 'team-show',
-      component: () => import('@/views/teams/show.vue')
+      component: () => import('@/views/teams/show.vue'),
+      meta: { viewKey: (r) => `/team/${r.params.teamRoute}` }
     },
     {
       path: '/team/:teamRoute/manage/:tab?',

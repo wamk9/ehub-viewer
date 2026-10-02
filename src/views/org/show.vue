@@ -221,11 +221,6 @@ async function toggleFollow() {
 
 // ── Init ────────────────────────────────────────────────────────────
 onMounted(async () => {
-  if (route.query.created === 'true') {
-    toast.success(t('pages.organization.show.created_alert'))
-    router.replace({ query: {} })
-  }
-
   const result = await Organization.show(route.params.orgRoute)
   loading.value = false
   if (result.code === 200) {

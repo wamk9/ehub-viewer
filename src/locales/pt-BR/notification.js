@@ -28,6 +28,7 @@ export default {
     event_registration_refunded: 'Sua inscrição em {event} foi cancelada e {amount} será devolvido no mesmo meio de pagamento.',
     event_registration_refunded_org: 'Um participante cancelou a inscrição em {event} e recebeu {amount} de reembolso.',
     event_registration_removed: 'Sua inscrição em {event} foi removida pela organização',
+    event_message: 'Mensagem da organização de {event}: {subject}',
     event_notice: '{event}: {subject}',
     bell_unread: 'Notificações: {n} não lida | Notificações: {n} não lidas',
     unread_n: '{n} não lida | {n} não lidas',

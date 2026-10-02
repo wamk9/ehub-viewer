@@ -16,12 +16,12 @@ const panels = ['overview', 'personal', 'appearance', 'social', 'privacy', 'noti
 
 function switchPanel(panel) {
   activePanel.value = panel
-  router.replace({ query: { ...route.query, panel } })
+  router.replace({ name: 'user-profile', params: { panel: panel === 'overview' ? '' : panel } })
 }
 
-watch(() => route.query.panel, (p) => {
-  if (p && panels.includes(p)) activePanel.value = p
-})
+watch(() => route.params.panel, (p) => {
+  activePanel.value = p && panels.includes(p) ? p : 'overview'
+}, { immediate: true })
 
 const loading = ref(true)
 const isSaving = ref(false)
@@ -35,7 +35,7 @@ const profile = reactive({
   auth_provider: null,
   image: null, cover: null,
   email_verified_at: null, created_at: null,
-  stats: { events: 0, wins: 0, followers: 0 },
+  stats: { events: 0, wins: 0, podiums: 0 },
 })
 
 const fPersonal = reactive({
@@ -59,11 +59,15 @@ const fPrivacy = reactive({
   show_email: false, show_phone: false, show_birthdate: false, show_followers: true,
 })
 
-const fNotifications = reactive({
-  championship: { event_start: true, stage_update: true, results: true },
-  social:       { new_follower: true, org_invitation: true },
-  email:        { event_start: false, results: false },
-})
+// Notification choices: one row per type, "in eHub" and "by e-mail" (mirrors NotificationService::DEFAULTS).
+const NOTIF_TYPES = ['registration', 'event_start', 'results', 'notices', 'news', 'teams', 'org', 'org_admin']
+const NOTIF_DEFAULTS = {
+  registration: { app: true, email: true }, event_start: { app: true, email: true }, results: { app: true, email: true },
+  notices: { app: true, email: true }, news: { app: true, email: false }, teams: { app: true, email: true },
+  org: { app: true, email: true }, org_admin: { app: true, email: true },
+}
+const NOTIF_LOCKED = ['registration']   // about the person's own registration/account: always sent
+const fChannels = reactive(JSON.parse(JSON.stringify(NOTIF_DEFAULTS)))
 
 const pwd = reactive({ current_password: '', password: '', password_confirmation: '' })
 const deletePassword = ref('')
@@ -152,7 +156,7 @@ function applyProfile(d) {
     ...d,
     image: withCache(d.image),
     cover: withCache(d.cover),
-    stats: d.stats ?? { events: 0, wins: 0, followers: 0 },
+    stats: d.stats ?? { events: 0, wins: 0, podiums: 0 },
     notification_prefs: d.notification_prefs ?? defaultPrefs(),
   })
   Object.assign(fPersonal, {
@@ -174,9 +178,7 @@ function applyProfile(d) {
   fPrivacy.show_phone     = prefs.privacy?.show_phone     ?? false
   fPrivacy.show_birthdate = prefs.privacy?.show_birthdate ?? false
   fPrivacy.show_followers = prefs.privacy?.show_followers ?? true
-  Object.assign(fNotifications.championship, prefs.championship ?? {})
-  Object.assign(fNotifications.social,       prefs.social       ?? {})
-  Object.assign(fNotifications.email,        prefs.email        ?? {})
+  NOTIF_TYPES.forEach((k) => { fChannels[k] = { ...NOTIF_DEFAULTS[k], ...(prefs.channels?.[k] || {}) } })
   coverPreview.value = null
   coverRemoved.value = false
 }
@@ -259,12 +261,9 @@ async function savePrivacy() {
 
 async function saveNotifications() {
   isSaving.value = true
-  const prefs = {
-    ...(profile.notification_prefs ?? defaultPrefs()),
-    championship: { ...fNotifications.championship },
-    social:       { ...fNotifications.social },
-    email:        { ...fNotifications.email },
-  }
+  const channels = {}
+  NOTIF_TYPES.forEach((k) => { channels[k] = { app: !!fChannels[k].app, email: !!fChannels[k].email } })
+  const prefs = { ...(profile.notification_prefs ?? defaultPrefs()), channels }
   try {
     const result = await Api.patchAsync('/user/profile', { notification_prefs: prefs })
     if (result.code === 200) { toast.success(t('users.profile.notifications.success')); await fetchProfile() }
@@ -308,8 +307,6 @@ const panelIcons = {
 }
 
 onMounted(() => {
-  const p = route.query.panel
-  if (p && panels.includes(p)) activePanel.value = p
   fetchProfile()
 })
 </script>
@@ -352,15 +349,17 @@ onMounted(() => {
         </div>
       </div>
       <nav class="sb-nav">
-        <button
+        <router-link
           v-for="p in panels" :key="p"
           class="nav-item"
           :class="{ active: activePanel === p }"
-          @click="switchPanel(p)"
+          :to="{ name: 'user-profile', params: { panel: p === 'overview' ? '' : p } }"
+          :aria-current="activePanel === p ? 'page' : undefined"
+          replace
         >
           <font-awesome-icon :icon="['fas', panelIcons[p]]" class="nav-ico" />
           <span>{{ $t('users.profile.nav.' + p) }}</span>
-        </button>
+        </router-link>
         <div class="nav-div"></div>
         <router-link class="nav-item" :to="'/profile/' + profile.username">
           <font-awesome-icon :icon="['fas', 'arrow-up-right-from-square']" class="nav-ico" />
@@ -390,38 +389,38 @@ onMounted(() => {
             <span style="font-size:.88rem;font-weight:800;color:var(--ehub-primary-text);flex-shrink:0">{{ completeness }}%</span>
           </div>
           <div class="comp-grid">
-            <div class="comp-item" :class="profile.image ? 'done' : 'miss'">
+            <button type="button" class="comp-item" :class="profile.image ? 'done' : 'miss'" @click="switchPanel('appearance')">
               <font-awesome-icon :icon="['fas', profile.image ? 'check' : 'circle']" />
               <span>{{ $t('users.profile.appearance.avatar.title') }}</span>
-            </div>
-            <div class="comp-item" :class="profile.bio ? 'done' : 'miss'">
+            </button>
+            <button type="button" class="comp-item" :class="profile.bio ? 'done' : 'miss'" @click="switchPanel('personal')">
               <font-awesome-icon :icon="['fas', profile.bio ? 'check' : 'circle']" />
               <span>{{ $t('users.profile.personal.form.bio.label') }}</span>
-            </div>
-            <div class="comp-item" :class="profile.location ? 'done' : 'miss'">
+            </button>
+            <button type="button" class="comp-item" :class="profile.location ? 'done' : 'miss'" @click="switchPanel('personal')">
               <font-awesome-icon :icon="['fas', profile.location ? 'check' : 'circle']" />
               <span>{{ $t('users.profile.personal.form.location.label') }}</span>
-            </div>
-            <div class="comp-item" :class="profile.car_number ? 'done' : 'miss'">
+            </button>
+            <button type="button" class="comp-item" :class="profile.car_number ? 'done' : 'miss'" @click="switchPanel('personal')">
               <font-awesome-icon :icon="['fas', profile.car_number ? 'check' : 'circle']" />
               <span>{{ $t('users.profile.personal.form.car_number.label') }}</span>
-            </div>
-            <div class="comp-item" :class="profile.driving_style ? 'done' : 'miss'">
+            </button>
+            <button type="button" class="comp-item" :class="profile.driving_style ? 'done' : 'miss'" @click="switchPanel('personal')">
               <font-awesome-icon :icon="['fas', profile.driving_style ? 'check' : 'circle']" />
               <span>{{ $t('users.profile.personal.form.driving_style.label') }}</span>
-            </div>
-            <div class="comp-item" :class="profile.favorite_category ? 'done' : 'miss'">
+            </button>
+            <button type="button" class="comp-item" :class="profile.favorite_category ? 'done' : 'miss'" @click="switchPanel('personal')">
               <font-awesome-icon :icon="['fas', profile.favorite_category ? 'check' : 'circle']" />
               <span>{{ $t('users.profile.personal.form.favorite_category.label') }}</span>
-            </div>
-            <div class="comp-item" :class="profile.cover ? 'done' : 'miss'">
+            </button>
+            <button type="button" class="comp-item" :class="profile.cover ? 'done' : 'miss'" @click="switchPanel('appearance')">
               <font-awesome-icon :icon="['fas', profile.cover ? 'check' : 'circle']" />
               <span>{{ $t('users.profile.appearance.cover.title') }}</span>
-            </div>
-            <div class="comp-item" :class="(profile.discord || profile.youtube || profile.twitch) ? 'done' : 'miss'">
+            </button>
+            <button type="button" class="comp-item" :class="(profile.discord || profile.youtube || profile.twitch) ? 'done' : 'miss'" @click="switchPanel('social')">
               <font-awesome-icon :icon="['fas', (profile.discord || profile.youtube || profile.twitch) ? 'check' : 'circle']" />
               <span>{{ $t('users.profile.nav.social') }}</span>
-            </div>
+            </button>
           </div>
         </div>
 
@@ -438,9 +437,9 @@ onMounted(() => {
             <div class="sc-lbl">{{ $t('users.profile.overview.stats.wins') }}</div>
           </div>
           <div class="stat-card">
-            <div class="sc-ico" style="background:rgba(31,138,91,.13);color:var(--ehub-success-text)"><font-awesome-icon :icon="['fas', 'users']" /></div>
-            <div class="sc-val">{{ profile.stats.followers }}</div>
-            <div class="sc-lbl">{{ $t('users.profile.overview.stats.followers') }}</div>
+            <div class="sc-ico" style="background:rgba(31,138,91,.13);color:var(--ehub-success-text)"><font-awesome-icon :icon="['fas', 'medal']" /></div>
+            <div class="sc-val">{{ profile.stats.podiums ?? 0 }}</div>
+            <div class="sc-lbl">{{ $t('users.profile.overview.stats.podiums') }}</div>
           </div>
         </div>
       </section>
@@ -457,29 +456,35 @@ onMounted(() => {
         <div class="set-card mb-4">
           <h3><font-awesome-icon :icon="['fas', 'id-card']" class="set-ico" />{{ $t('users.profile.personal.identity') }}</h3>
           <p class="set-desc">{{ $t('users.profile.personal.identityDesc') }}</p>
-          <div class="mb-3">
-            <label class="form-label">{{ $t('users.profile.personal.form.name.label') }}</label>
-            <input v-model="fPersonal.name" type="text" class="form-control" maxlength="180" />
+          <div class="form-grid-2 mb-3">
+            <div>
+              <label class="form-label" for="pf-name">{{ $t('users.profile.personal.form.first_name') }}</label>
+              <input id="pf-name" v-model="fPersonal.name" type="text" class="form-control" maxlength="180" autocomplete="given-name" />
+            </div>
+            <div>
+              <label class="form-label" for="pf-surname">{{ $t('users.profile.personal.form.surname') }}</label>
+              <input id="pf-surname" v-model="fPersonal.surname" type="text" class="form-control" maxlength="180" autocomplete="family-name" />
+            </div>
           </div>
           <div class="form-grid-2 mb-3">
             <div>
-              <label class="form-label">{{ $t('users.profile.personal.form.username.label') }}</label>
+              <label class="form-label" for="pf-username">{{ $t('users.profile.personal.form.username.label') }}</label>
               <div class="input-group">
                 <span class="input-group-text">@</span>
-                <input v-model="fPersonal.username" type="text" class="form-control" />
+                <input id="pf-username" v-model="fPersonal.username" type="text" class="form-control" />
               </div>
             </div>
             <div>
-              <label class="form-label">{{ $t('users.profile.personal.form.car_number.label') }}</label>
+              <label class="form-label" for="pf-number">{{ $t('users.profile.personal.form.car_number.label') }}</label>
               <div class="input-group">
                 <span class="input-group-text">#</span>
-                <input v-model="fPersonal.car_number" type="text" class="form-control" maxlength="20" />
+                <input id="pf-number" v-model="fPersonal.car_number" type="text" class="form-control" maxlength="20" />
               </div>
             </div>
           </div>
           <div>
-            <label class="form-label">{{ $t('users.profile.personal.form.bio.label') }}</label>
-            <textarea v-model="fPersonal.bio" class="form-control" rows="3" maxlength="500" style="resize:vertical"></textarea>
+            <label class="form-label" for="pf-bio">{{ $t('users.profile.personal.form.bio.label') }}</label>
+            <textarea id="pf-bio" v-model="fPersonal.bio" class="form-control" rows="3" maxlength="500" style="resize:vertical"></textarea>
             <div style="font-size:.74rem;color:var(--ehub-muted);margin-top:5px">
               {{ Math.max(0, 500 - (fPersonal.bio?.length ?? 0)) }} {{ $t('users.profile.personal.form.bio.chars_left') }}
             </div>
@@ -491,18 +496,23 @@ onMounted(() => {
           <p class="set-desc">{{ $t('users.profile.personal.detailsDesc') }}</p>
           <div class="form-grid-2 mb-3">
             <div>
-              <label class="form-label">{{ $t('users.profile.personal.form.location.label') }}</label>
-              <input v-model="fPersonal.location" type="text" class="form-control" maxlength="180" />
+              <label class="form-label" for="pf-location">{{ $t('users.profile.personal.form.location.label') }}</label>
+              <input id="pf-location" v-model="fPersonal.location" type="text" class="form-control" maxlength="180" />
             </div>
             <div>
-              <label class="form-label">{{ $t('users.profile.personal.form.birthdate.label') }}</label>
-              <input v-model="fPersonal.birthdate" type="date" class="form-control" />
+              <label class="form-label" for="pf-birth">{{ $t('users.profile.personal.form.birthdate.label') }}</label>
+              <input id="pf-birth" v-model="fPersonal.birthdate" type="date" class="form-control" />
             </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="pf-phone">{{ $t('users.profile.personal.form.phone') }}</label>
+            <input id="pf-phone" v-model="fPersonal.phone" type="tel" inputmode="tel" class="form-control" maxlength="20" autocomplete="tel" placeholder="(11) 99999-0000" />
+            <p class="small text-muted mt-1 mb-0">{{ $t('users.profile.personal.form.phone_hint') }}</p>
           </div>
           <div class="form-grid-2 mb-3">
             <div>
-              <label class="form-label">{{ $t('users.profile.personal.form.driving_style.label') }}</label>
-              <select v-model="fPersonal.driving_style" class="form-select">
+              <label class="form-label" for="pf-style">{{ $t('users.profile.personal.form.driving_style.label') }}</label>
+              <select id="pf-style" v-model="fPersonal.driving_style" class="form-select">
                 <option value="">—</option>
                 <option value="aggressive">{{ $t('users.profile.personal.driving_styles.aggressive') }}</option>
                 <option value="smooth">{{ $t('users.profile.personal.driving_styles.smooth') }}</option>
@@ -512,13 +522,13 @@ onMounted(() => {
               </select>
             </div>
             <div>
-              <label class="form-label">{{ $t('users.profile.personal.form.favorite_category.label') }}</label>
-              <input v-model="fPersonal.favorite_category" type="text" class="form-control" maxlength="80" />
+              <label class="form-label" for="pf-fav">{{ $t('users.profile.personal.form.favorite_category.label') }}</label>
+              <input id="pf-fav" v-model="fPersonal.favorite_category" type="text" class="form-control" maxlength="80" />
             </div>
           </div>
           <div>
-            <label class="form-label">{{ $t('users.profile.personal.form.motto.label') }}</label>
-            <input v-model="fPersonal.motto" type="text" class="form-control" maxlength="160" />
+            <label class="form-label" for="pf-motto">{{ $t('users.profile.personal.form.motto.label') }}</label>
+            <input id="pf-motto" v-model="fPersonal.motto" type="text" class="form-control" maxlength="160" />
           </div>
         </div>
 
@@ -737,45 +747,28 @@ onMounted(() => {
         </div>
 
         <div class="set-card mb-4">
-          <h3><font-awesome-icon :icon="['fas', 'trophy']" class="set-ico" />{{ $t('users.profile.notifications.championship.title') }}</h3>
-          <p class="set-desc">{{ $t('users.profile.notifications.championship.desc') }}</p>
-          <div v-for="key in ['event_start', 'stage_update', 'results']" :key="'ch-' + key" class="toggle-row">
+          <div class="nt-head">
+            <span></span>
+            <span class="nt-col"><font-awesome-icon :icon="['fas', 'bell']" /> {{ $t('users.profile.notifications.ch_app') }}</span>
+            <span class="nt-col"><font-awesome-icon :icon="['fas', 'envelope']" /> {{ $t('users.profile.notifications.ch_email') }}</span>
+          </div>
+          <div v-for="key in NOTIF_TYPES" :key="'nt-' + key" class="nt-row">
             <div class="toggle-info">
-              <div class="ti-label">{{ $t('users.profile.notifications.championship.' + key + '.label') }}</div>
-              <div class="ti-desc">{{ $t('users.profile.notifications.championship.' + key + '.desc') }}</div>
+              <div class="ti-label">
+                {{ $t('users.profile.notifications.types.' + key + '.label') }}
+                <font-awesome-icon v-if="NOTIF_LOCKED.includes(key)" :icon="['fas', 'lock']" class="ms-1 text-muted" :title="$t('users.profile.notifications.locked')" />
+              </div>
+              <div class="ti-desc">{{ $t('users.profile.notifications.types.' + key + '.desc') }}</div>
             </div>
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" v-model="fNotifications.championship[key]" style="width:2.6em;height:1.4em;cursor:pointer" />
+            <div v-for="ch in ['app', 'email']" :key="ch" class="nt-col">
+              <div class="form-check form-switch mb-0">
+                <input :id="'nt-' + key + '-' + ch" v-model="fChannels[key][ch]" class="form-check-input" type="checkbox" :disabled="NOTIF_LOCKED.includes(key)"
+                  :aria-label="$t('users.profile.notifications.types.' + key + '.label') + ' — ' + $t('users.profile.notifications.ch_' + ch)"
+                  style="width:2.6em;height:1.4em;cursor:pointer" />
+              </div>
             </div>
           </div>
-        </div>
-
-        <div class="set-card mb-4">
-          <h3><font-awesome-icon :icon="['fas', 'users']" class="set-ico" />{{ $t('users.profile.notifications.social.title') }}</h3>
-          <p class="set-desc">{{ $t('users.profile.notifications.social.desc') }}</p>
-          <div v-for="key in ['new_follower', 'org_invitation']" :key="'soc-' + key" class="toggle-row">
-            <div class="toggle-info">
-              <div class="ti-label">{{ $t('users.profile.notifications.social.' + key + '.label') }}</div>
-              <div class="ti-desc">{{ $t('users.profile.notifications.social.' + key + '.desc') }}</div>
-            </div>
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" v-model="fNotifications.social[key]" style="width:2.6em;height:1.4em;cursor:pointer" />
-            </div>
-          </div>
-        </div>
-
-        <div class="set-card mb-4">
-          <h3><font-awesome-icon :icon="['fas', 'envelope']" class="set-ico" />{{ $t('users.profile.notifications.email.title') }}</h3>
-          <p class="set-desc">{{ $t('users.profile.notifications.email.desc') }}</p>
-          <div v-for="key in ['event_start', 'results']" :key="'em-' + key" class="toggle-row">
-            <div class="toggle-info">
-              <div class="ti-label">{{ $t('users.profile.notifications.email.' + key + '.label') }}</div>
-              <div class="ti-desc">{{ $t('users.profile.notifications.email.' + key + '.desc') }}</div>
-            </div>
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" v-model="fNotifications.email[key]" style="width:2.6em;height:1.4em;cursor:pointer" />
-            </div>
-          </div>
+          <p class="set-desc mt-3 mb-0"><font-awesome-icon :icon="['fas', 'circle-info']" class="me-1" />{{ $t('users.profile.notifications.email_to', { mail: profile.mail || '' }) }}</p>
         </div>
 
         <button class="btn btn-primary round px-4" :disabled="isSaving" @click="saveNotifications">
@@ -1068,4 +1061,12 @@ onMounted(() => {
   .stat-grid { grid-template-columns: 1fr 1fr; }
   .comp-grid { grid-template-columns: 1fr; }
 }
+.nt-head, .nt-row { display: grid; grid-template-columns: minmax(0, 1fr) 90px 90px; align-items: center; gap: 8px; }
+.nt-head { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); padding-bottom: 8px; border-bottom: 1px solid var(--ehub-line); }
+.nt-row { padding: 12px 0; border-bottom: 1px solid var(--ehub-line); }
+.nt-row:last-of-type { border-bottom: 0; }
+.nt-col { display: flex; justify-content: center; align-items: center; gap: 5px; text-align: center; }
+@media (max-width: 560px) { .nt-head, .nt-row { grid-template-columns: minmax(0, 1fr) 64px 64px; } }
+button.comp-item { border: 0; background: none; text-align: left; padding: 0; cursor: pointer; font: inherit; color: inherit; }
+button.comp-item.miss:hover span { text-decoration: underline; }
 </style>

@@ -79,7 +79,7 @@ const NOTIF_KINDS = [
   { match: /registration_(confirmed)/, kind: 'registration', icon: 'circle-check', tone: 'ok' },
   { match: /refunded/, kind: 'refund', icon: 'rotate-left', tone: 'ok' },
   { match: /registration_removed/, kind: 'removed', icon: 'user-minus', tone: 'bad' },
-  { match: /event_notice/, kind: 'notice', icon: 'bullhorn', tone: 'primary' },
+  { match: /event_notice|event_message/, kind: 'notice', icon: 'bullhorn', tone: 'primary' },
   { match: /article_published|event_article/, kind: 'news', icon: 'newspaper', tone: 'primary' },
   { match: /event_created/, kind: 'event', icon: 'calendar-plus', tone: 'primary' },
   { match: /billing_(blocked|failed|error|no_card|fiscal|nfse_failed)|no_gateway/, kind: 'attention', icon: 'triangle-exclamation', tone: 'bad' },

@@ -139,7 +139,7 @@ export default {
     openItem(c) {
       if (c.go) this.go(c.go);
       else if (c.href) this.$router.push(c.href);
-      else if (c.step) this.$router.push({ name: 'manage-organization-events-create', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute }, query: { step: c.step, return: 'manage' } });
+      else if (c.step) this.$router.push({ name: 'manage-organization-events-create', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute }, state: { step: c.step, returnTo: 'manage' } });
     },
   },
 };

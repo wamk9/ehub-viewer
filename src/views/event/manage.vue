@@ -77,7 +77,7 @@ export default {
     navLinks() {
       const links = [];
       if (this.event && !this.event.initialized && this.em.can('event.manage')) {
-        links.push({ to: { name: 'manage-organization-events-create', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute }, query: { return: 'manage' } }, icon: 'pen', label: this.$t('pages.event.manage.nav.edit') });
+        links.push({ to: { name: 'manage-organization-events-create', params: { orgRoute: this.em.orgRoute, eventRoute: this.em.eventRoute }, state: { returnTo: 'manage' } }, icon: 'pen', label: this.$t('pages.event.manage.nav.edit') });
       }
       links.push({ to: `/org/${this.em.orgRoute}/event/${this.em.eventRoute}`, icon: 'arrow-up-right-from-square', label: this.$t('pages.event.manage.nav.public') });
       links.push({ to: `/org/${this.em.orgRoute}/manage`, icon: 'arrow-left', label: this.$t('pages.event.manage.nav.back') });

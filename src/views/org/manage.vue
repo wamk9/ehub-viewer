@@ -357,10 +357,9 @@ export default {
         fromCreate = sessionStorage.getItem('ehub_org_welcome') === this.orgRoute;
         if (fromCreate) sessionStorage.removeItem('ehub_org_welcome');
       } catch (e) { /* storage unavailable */ }
-      if (this.$route.query.welcome || fromCreate) {
+      if (fromCreate) {
         this.welcome = true;
         this.onbDismissed = false;
-        if (this.$route.query.welcome) this.$router.replace({ query: {} });
       }
       if (this.onbDismissed) return;
       OrganizationBilling.getGateways(this.orgRoute).then((res) => {

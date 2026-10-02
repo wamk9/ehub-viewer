@@ -28,6 +28,7 @@ export default {
     event_registration_refunded: 'Your registration for {event} was cancelled and {amount} will be refunded to the same payment method.',
     event_registration_refunded_org: 'A participant cancelled their registration for {event} and was refunded {amount}.',
     event_registration_removed: 'Your registration in {event} was removed by the organization',
+    event_message: 'Message from the {event} organizers: {subject}',
     event_notice: '{event}: {subject}',
     bell_unread: 'Notifications: {n} unread | Notifications: {n} unread',
     unread_n: '{n} unread | {n} unread',

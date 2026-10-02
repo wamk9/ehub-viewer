@@ -123,7 +123,7 @@ async function submit() {
                 {{ $t('users.login.remember') }}
               </label>
             </div>
-            <router-link :to="{ name: 'user-forgot-password', query: form.mail ? { mail: form.mail } : {} }" class="small fw-medium">
+            <router-link :to="{ name: 'user-forgot-password', state: form.mail ? { mail: form.mail } : {} }" class="small fw-medium">
               {{ $t('users.login.forgot') }}
             </router-link>
           </div>

@@ -3,6 +3,7 @@ import InitialsAvatar from '@/components/general/InitialsAvatar.vue';
 import EhubDialog from '@/components/modals/EhubDialog.vue';
 import OrganizationEventRegistration from '@/helpers/communication/OrganizationEventRegistration.js';
 import { toast } from '@/helpers/toast.js';
+import Api from '@/helpers/communication/Connection.js';
 import { userName, apiError } from './store.js';
 
 export default {
@@ -10,7 +11,7 @@ export default {
   components: { InitialsAvatar, EhubDialog },
   inject: ['em'],
   data() {
-    return { filter: 'all', q: '', sheet: null, busyId: null };
+    return { filter: 'all', q: '', sheet: null, busyId: null, msg: { subject: '', message: '' }, msgOpen: false, sending: false };
   },
   computed: {
     ev() { return this.em.event; },
@@ -38,6 +39,32 @@ export default {
     },
   },
   methods: {
+    // Brazilian numbers read as (11) 97777-6666; anything else stays as typed.
+    formatPhone(phone) {
+      const d = String(phone).replace(/\D/g, '');
+      const m = d.match(/^(\d{2})(\d{4,5})(\d{4})$/);
+      return m && !String(phone).startsWith('+') ? `(${m[1]}) ${m[2]}-${m[3]}` : phone;
+    },
+    // WhatsApp link for Brazilian-style numbers (adds 55 when no country code was typed).
+    waLink(phone) {
+      const d = String(phone || '').replace(/\D/g, '');
+      if (!d) return '';
+      return 'https://wa.me/' + (d.length <= 11 ? '55' + d : d);
+    },
+    openSheet(r) { this.sheet = r; this.msgOpen = false; this.msg = { subject: '', message: '' }; },
+    async sendMessage() {
+      if (!this.sheet || this.sending || !this.msg.subject.trim() || !this.msg.message.trim()) return;
+      this.sending = true;
+      const res = await Api.postAsync(`/org/${this.em.orgRoute}/event/${this.em.eventRoute}/manage/participants/${this.sheet.id}/message`, {
+        subject: this.msg.subject.trim(), message: this.msg.message.trim(),
+      });
+      this.sending = false;
+      if (res.code === 200) {
+        toast.success(this.$t('pages.event.manage.reg.msg_sent', { name: userName(this.sheet) }));
+        this.msgOpen = false;
+        this.msg = { subject: '', message: '' };
+      } else toast.error(this.$t('pages.event.manage.c.error'));
+    },
     userName,
     fmtDate(d, withTime = false) {
       if (!d) return '—';
@@ -204,7 +231,7 @@ export default {
               </td>
               <td>
                 <div class="act-row">
-                  <button class="act-btn" :title="$t('pages.event.manage.reg.view')" @click="sheet = r"><font-awesome-icon :icon="['fas', 'eye']" /></button>
+                  <button class="act-btn" :title="$t('pages.event.manage.reg.view')" @click="openSheet(r)"><font-awesome-icon :icon="['fas', 'eye']" /></button>
                   <button v-if="canConfirm && r.payment_status === 'pending'" class="act-btn ok" :title="$t('pages.event.manage.reg.confirm_manual')" @click="confirmPay(r)"><font-awesome-icon :icon="['fas', 'check']" /></button>
                   <button v-if="canRun" class="act-btn del" :title="$t('pages.event.manage.reg.remove')" @click="remove(r)"><font-awesome-icon :icon="['fas', 'user-minus']" /></button>
                 </div>
@@ -221,6 +248,40 @@ export default {
         <div class="who" style="margin-bottom:18px;display:flex;align-items:center;gap:10px">
           <InitialsAvatar :name="userName(sheet)" :image="sheet.user?.avatar || ''" :size="44" />
           <div style="flex:1"><b style="font-size:1rem;display:block">{{ userName(sheet) }}</b><span class="text-muted small">@{{ sheet.user?.username }}</span></div>
+        </div>
+        <template v-if="sheet.contact">
+          <div class="kv-title">{{ $t('pages.event.manage.reg.contact') }}</div>
+          <dl class="kv">
+            <dt>{{ $t('pages.event.manage.reg.contact_mail') }}</dt>
+            <dd><a v-if="sheet.contact.mail" :href="'mailto:' + sheet.contact.mail">{{ sheet.contact.mail }}</a><span v-else>—</span></dd>
+            <dt>{{ $t('pages.event.manage.reg.contact_phone') }}</dt>
+            <dd>
+              <template v-if="sheet.contact.phone">
+                <a :href="'tel:' + sheet.contact.phone">{{ formatPhone(sheet.contact.phone) }}</a>
+                <a :href="waLink(sheet.contact.phone)" target="_blank" rel="noopener noreferrer" class="ms-2">WhatsApp</a>
+              </template>
+              <span v-else>{{ $t('pages.event.manage.reg.contact_no_phone') }}</span>
+            </dd>
+          </dl>
+          <p class="small text-muted mb-2">{{ $t('pages.event.manage.reg.contact_lgpd') }}</p>
+        </template>
+        <div v-if="em.canPanel('news') && sheet.user" class="mb-3">
+          <button v-if="!msgOpen" class="btn btn-sm btn-outline-secondary round px-3" @click="msgOpen = true">
+            <font-awesome-icon :icon="['fas', 'paper-plane']" class="me-2" />{{ $t('pages.event.manage.reg.msg_btn') }}
+          </button>
+          <div v-else class="msg-box">
+            <label class="form-label small fw-semibold" for="msg-subj">{{ $t('pages.event.manage.reg.msg_subject') }}</label>
+            <input id="msg-subj" v-model="msg.subject" class="form-control form-control-sm mb-2" maxlength="160" />
+            <label class="form-label small fw-semibold" for="msg-body">{{ $t('pages.event.manage.reg.msg_text') }}</label>
+            <textarea id="msg-body" v-model="msg.message" class="form-control form-control-sm mb-2" rows="4" maxlength="2000"></textarea>
+            <p class="small text-muted mb-2">{{ $t('pages.event.manage.reg.msg_hint') }}</p>
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-primary round px-3" :disabled="sending || !msg.subject.trim() || !msg.message.trim()" @click="sendMessage">
+                <span v-if="sending" class="spinner-border spinner-border-sm me-1"></span>{{ $t('pages.event.manage.reg.msg_send') }}
+              </button>
+              <button class="btn btn-sm btn-outline-secondary round px-3" @click="msgOpen = false">{{ $t('pages.event.manage.c.cancel') }}</button>
+            </div>
+          </div>
         </div>
         <template v-if="canFormData">
           <div class="kv-title">{{ $t('pages.event.manage.reg.form_data') }}</div>
@@ -258,4 +319,5 @@ export default {
   .sum-cell:nth-child(2) { border-right: 0; }
   .sum-cell:nth-child(-n+2) { border-bottom: 1px solid var(--ehub-line); }
 }
+.msg-box { border: 1px solid var(--ehub-line); border-radius: 10px; padding: 12px; background: var(--ehub-field-bg); }
 </style>

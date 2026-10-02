@@ -175,7 +175,7 @@ export default {
       free_notice: 'Inscrição gratuita: sua inscrição será confirmada automaticamente.',
       fee_warning: 'Este evento requer pagamento de {fee} após a inscrição.',
       confirm_text: 'Deseja se inscrever neste evento?',
-      privacy: 'O organizador verá seu nome, usuário e as respostas acima. Seu e-mail e telefone não são compartilhados.',
+      privacy: "O organizador verá seu nome, usuário, e-mail, telefone (se informado) e as respostas acima, para falar com você sobre este evento.",
       confirm: 'Confirmar inscrição',
       cancel: 'Cancelar',
       field_required: 'Campo obrigatório.',

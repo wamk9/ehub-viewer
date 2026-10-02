@@ -272,7 +272,7 @@ export default {
       applyForm: { message: '', role: '' },
       applyErrors: { message: false },
       coverVersion: Date.now(),
-      activeTab: this.$route.query.tab || 'about',
+      activeTab: ['results', 'roster'].includes(this.$route.params.tab) ? this.$route.params.tab : 'about',
     }
   },
 
@@ -319,10 +319,16 @@ export default {
     },
   },
 
+  watch: {
+    '$route.params.tab'(tab) {
+      this.activeTab = ['results', 'roster'].includes(tab) ? tab : 'about'
+    },
+  },
+
   methods: {
     setTab(tab) {
       this.activeTab = tab
-      this.$router.replace({ query: { ...this.$route.query, tab } })
+      this.$router.replace({ name: 'team-show', params: { teamRoute: this.$route.params.teamRoute, tab: tab === 'about' ? '' : tab } })
     },
 
     async loadTeam() {
@@ -330,7 +336,7 @@ export default {
       const { code, data } = await Teams.getPublic(this.$route.params.teamRoute)
       if (code === 200) {
         this.team = data
-        if (this.$route.query.openApply && this.team.is_open && this.$store.getters.isLoggedIn && !this.team.is_member) {
+        if (this.$route.params.tab === 'apply' && this.team.is_open && this.$store.getters.isLoggedIn && !this.team.is_member) {
           this.$nextTick(() => this.openApplyModal())
         }
       }
@@ -371,8 +377,7 @@ export default {
       if (!this.$store.getters.isLoggedIn) {
         localStorage.setItem('lastKnowRoute', JSON.stringify({
           name: 'team-show',
-          params: { teamRoute: this.$route.params.teamRoute },
-          query: { openApply: '1' }
+          params: { teamRoute: this.$route.params.teamRoute, tab: 'apply' }
         }))
         this.$router.push({ name: 'user-login' })
         return

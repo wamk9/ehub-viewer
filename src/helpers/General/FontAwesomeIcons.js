@@ -205,6 +205,7 @@ import {
   faYoutube,
   faDiscord,
   faTwitch,
+  faLinkedin,
 } from "@fortawesome/free-brands-svg-icons";
 
 //import { faBell } from "@fortawesome/free-regular-svg-icons";
@@ -362,6 +363,7 @@ library.add(
   faHelmetSafety,
   faUserClock,
   faDiscord,
+  faLinkedin,
   faGamepad,
   faMedal,
   faGraduationCap,

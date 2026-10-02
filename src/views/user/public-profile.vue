@@ -20,13 +20,13 @@ const myUsername = ref(null)
 const tabs = ['overview', 'results', 'teams', 'orgs']
 const activeTab = ref('overview')
 
-watch(() => route.query.tab, (tab) => {
-  if (tab && tabs.includes(tab)) activeTab.value = tab
+watch(() => route.params.tab, (tab) => {
+  activeTab.value = tab && tabs.includes(tab) ? tab : 'overview'
 }, { immediate: true })
 
 function switchTab(tab) {
   activeTab.value = tab
-  router.replace({ query: { ...route.query, tab } })
+  router.replace({ name: 'public-profile', params: { username: route.params.username, tab: tab === 'overview' ? '' : tab } })
 }
 
 const isOwnProfile = computed(() => myUsername.value && profile.value && myUsername.value === profile.value.username)
@@ -281,6 +281,10 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
 
             <!-- Actions -->
             <div class="pub-actions">
+              <router-link v-if="isOwnProfile && profile.visibility && profile.visibility !== 'public'" to="/profile/privacy" class="pub-vis-note">
+                <font-awesome-icon :icon="['fas', 'lock']" />
+                {{ $t('pages.user.public.visibility_note.' + profile.visibility) }}
+              </router-link>
               <router-link v-if="isOwnProfile" to="/profile" class="btn btn-ghost round">
                 <font-awesome-icon :icon="['fas', 'pen-to-square']" />
                 {{ $t('pages.user.public.edit_profile') }}
@@ -772,4 +776,6 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
 }
 .pub-empty p { font-size: .9rem; margin: 0; }
 .pub-empty-small { padding: 20px; font-size: .88rem; color: var(--ehub-muted); text-align: center; }
+.pub-vis-note { display: inline-flex; align-items: center; gap: .4rem; font-size: .8rem; padding: .35rem .7rem; border-radius: 999px; background: var(--ehub-surface-2, rgba(0,0,0,.05)); color: var(--ehub-text-2, inherit); text-decoration: none; }
+.pub-vis-note:hover { text-decoration: underline; }
 </style>

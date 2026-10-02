@@ -32,7 +32,7 @@ export default {
         items: [
           'Seu perfil é público por padrão. Você pode mudar para "Seguidores" ou "Privado" em Perfil > Privacidade. Perfis de pessoas não aparecem no Google.',
           'Nos eventos, outras pessoas veem seu nome, nome de usuário e resultados na lista de participantes e na classificação.',
-          'O organizador do evento vê sua inscrição, as respostas ao formulário dele e a situação do pagamento. Ele não vê seu e-mail, telefone nem senha.',
+          'O organizador do evento vê sua inscrição, as respostas ao formulário dele, a situação do pagamento e seu e-mail e telefone (se informado), para falar com você sobre o evento. Ele nunca vê sua senha.',
           'Páginas de eventos, organizações, equipes e notícias são públicas e podem aparecer em buscadores.',
         ],
       },

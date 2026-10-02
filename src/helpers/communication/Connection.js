@@ -16,6 +16,15 @@ axios.defaults.withXSRFToken = (config) => {
   }
 };
 
+// The API answers (validation messages, e-mails) in the language the person is using.
+axios.interceptors.request.use((config) => {
+  try {
+    const lang = localStorage.getItem('lang');
+    if (lang) config.headers['Accept-Language'] = lang;
+  } catch { /* storage unavailable */ }
+  return config;
+});
+
 // 419 = expired/missing CSRF token: fetch a fresh one and retry once.
 axios.interceptors.response.use(undefined, async (error) => {
   const config = error.config;

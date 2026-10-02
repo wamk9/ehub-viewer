@@ -3,6 +3,7 @@ export default {
   member_since: 'Member since',
   followers: 'followers',
   following: 'following',
+  visibility_note: { private: "Only you can see this profile (private)", followers: "Visible only to people who share a team or organization with you" },
   edit_profile: 'Edit Profile',
   share: 'Share',
   tabs: {
