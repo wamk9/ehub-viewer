@@ -5,6 +5,7 @@ import navbar from './components/general/navbar/navbar.vue'
 import customFooter from './components/general/footer.vue'
 import AppToast from './components/AppToast.vue'
 import TopLoadingBar from './components/TopLoadingBar.vue'
+import { syncSeo } from './helpers/General/seo.js'
 import { useI18n } from 'vue-i18n'
 const { locale, t } = useI18n()
 
@@ -18,8 +19,10 @@ router.beforeEach(() => {
   clearTimeout(doneTimer)
   pageLoading.value = true
 })
-router.afterEach(() => {
+router.afterEach((to, from) => {
   doneTimer = setTimeout(() => { pageLoading.value = false }, 350)
+  // First load already carries the server-rendered tags.
+  if (from.matched.length && to.path !== from.path) syncSeo(to.path).catch(() => {})
 })
 </script>
 

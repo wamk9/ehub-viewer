@@ -1,8 +1,8 @@
 <script setup>
-import { htmlToText } from '@/helpers/General/sanitizeHtml.js'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { categoryGradient } from '@/helpers/General/CategoryConfig.js'
+import { useI18n } from 'vue-i18n'
+import { categoryConfig, categoryIcon } from '@/helpers/General/CategoryConfig.js'
 import { slugify } from '../wizardState.js'
 
 const props = defineProps({
@@ -11,6 +11,7 @@ const props = defineProps({
 })
 
 const route = useRoute()
+const { locale } = useI18n()
 
 function onSlugInput() {
   props.form.route_manually_edited = true
@@ -19,11 +20,15 @@ function onSlugInput() {
 
 const urlFull = computed(() => `https://ehubapp.com/org/${route.params.orgRoute}/event/${props.form.route || '…'}`)
 
-const previewTitle = computed(() => props.form.meta_title.trim() || props.form.name || '—')
-const previewDesc = computed(() => props.form.meta_description.trim() || htmlToText(props.form.description).slice(0, 160) || '—')
-const previewCoverStyle = computed(() => props.form.cover_image
-  ? { backgroundImage: `url(${props.form.cover_image})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-  : { background: categoryGradient(props.form.category) })
+// Mirrors the share image eHub generates: event colour, logo, name, organization and start date.
+const ogColor = computed(() => props.form.color || props.org.color || categoryConfig(props.form.category).grad[0])
+const ogStyle = computed(() => ({ background: `linear-gradient(135deg, ${ogColor.value}, color-mix(in srgb, ${ogColor.value}, #000 38%))` }))
+const logoUrl = computed(() => props.form.logo_image || props.form._existing_logo_url || '')
+const startLabel = computed(() => {
+  if (!props.form.start_at) return ''
+  const d = new Date(props.form.start_at + 'T12:00:00')
+  return isNaN(d) ? '' : d.toLocaleDateString(locale.value, { day: '2-digit', month: 'short', year: 'numeric' })
+})
 </script>
 
 <template>
@@ -45,32 +50,23 @@ const previewCoverStyle = computed(() => props.form.cover_image
     </div>
 
     <div class="form-section">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s6.metaTitle') }}</label>
-      <input type="text" class="form-control" v-model="form.meta_title" maxlength="60" :placeholder="$t('pages.organization.manage.eventWizard.s6.metaTitlePh')" />
-      <div class="seo-char-row">
-        <p class="field-hint">{{ $t('pages.organization.manage.eventWizard.s6.metaTitleHint') }}</p>
-        <span class="char-count">{{ form.meta_title.length }}/60</span>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s6.metaDesc') }}</label>
-      <textarea class="form-control" rows="3" maxlength="155" style="resize:vertical" v-model="form.meta_description" :placeholder="$t('pages.organization.manage.eventWizard.s6.metaDescPh')"></textarea>
-      <div class="seo-char-row">
-        <p class="field-hint">{{ $t('pages.organization.manage.eventWizard.s6.metaDescHint') }}</p>
-        <span class="char-count">{{ form.meta_description.length }}/155</span>
-      </div>
-    </div>
-
-    <div class="form-section">
       <div class="form-section-label">{{ $t('pages.organization.manage.eventWizard.s6.socialPreview') }}</div>
-      <div class="social-preview-card">
-        <div class="spc-cover" :style="previewCoverStyle"></div>
-        <div class="spc-body">
-          <div class="spc-domain">EHUBAPP.COM</div>
-          <div class="spc-title">{{ previewTitle }}</div>
-          <div class="spc-desc">{{ previewDesc }}</div>
+      <div class="auto-note">
+        <font-awesome-icon :icon="['fas', 'wand-magic-sparkles']" />
+        <div>
+          <strong>{{ $t('pages.organization.manage.eventWizard.s6.autoTitle') }}</strong>
+          <p>{{ $t('pages.organization.manage.eventWizard.s6.autoHint') }}</p>
         </div>
+      </div>
+      <div class="og-preview" :style="ogStyle" aria-hidden="true">
+        <div class="og-stripes"></div>
+        <div class="og-tile">
+          <img v-if="logoUrl" :src="logoUrl" alt="" />
+          <font-awesome-icon v-else :icon="categoryIcon(form.category)" />
+        </div>
+        <div class="og-name">{{ form.name || '—' }}</div>
+        <div class="og-org">{{ org.name }}</div>
+        <div v-if="startLabel" class="og-chip"><font-awesome-icon :icon="['fas', 'calendar-days']" /> {{ startLabel }}</div>
       </div>
     </div>
   </div>
@@ -88,13 +84,18 @@ const previewCoverStyle = computed(() => props.form.cover_image
 .seo-prefix { font-size: .78rem; white-space: nowrap; }
 .url-preview-bar { display: flex; align-items: center; gap: 9px; margin-top: 8px; padding: 9px 13px; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 8px; font-size: .82rem; color: var(--ehub-ink); word-break: break-all; }
 .url-preview-bar svg { color: var(--ehub-primary-text); flex-shrink: 0; }
-.seo-char-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-top: 5px; }
-.char-count { font-size: .73rem; color: var(--ehub-muted); flex-shrink: 0; }
 
-.social-preview-card { border: 1px solid var(--ehub-line); border-radius: 12px; overflow: hidden; max-width: 460px; background: var(--ehub-card); }
-.spc-cover { height: 90px; }
-.spc-body { padding: 11px 15px 15px; }
-.spc-domain { font-size: .72rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ehub-muted); margin-bottom: 4px; }
-.spc-title { font-size: .92rem; font-weight: 700; color: var(--ehub-ink); margin-bottom: 4px; line-height: 1.3; }
-.spc-desc { font-size: .78rem; color: var(--ehub-muted); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.auto-note { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--ehub-line); border-radius: 10px; background: var(--ehub-field-bg); margin-bottom: 14px; }
+.auto-note svg { color: var(--ehub-primary-text); margin-top: 3px; flex-shrink: 0; }
+.auto-note strong { font-size: .86rem; color: var(--ehub-ink); }
+.auto-note p { font-size: .78rem; color: var(--ehub-muted); margin: 2px 0 0; }
+
+/* 1200x630 share image, scaled down */
+.og-preview { position: relative; overflow: hidden; max-width: 460px; aspect-ratio: 1200 / 630; border-radius: 12px; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 24px; }
+.og-stripes { position: absolute; inset: 0; background-image: repeating-linear-gradient(118deg, transparent 0 16px, rgba(255, 255, 255, .07) 16px 17px); }
+.og-tile { position: relative; width: 58px; height: 58px; border-radius: 13px; background: rgba(255, 255, 255, .16); border: 2px solid rgba(255, 255, 255, .9); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; overflow: hidden; }
+.og-tile img { width: 100%; height: 100%; object-fit: cover; }
+.og-name { position: relative; font-size: 1.25rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; margin: 10px 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.og-org { position: relative; font-size: .8rem; font-weight: 600; opacity: .92; }
+.og-chip { position: relative; margin-top: 10px; background: #fff; color: #1a1d24; font-size: .74rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; display: inline-flex; gap: 6px; align-items: center; }
 </style>
