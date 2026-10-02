@@ -127,6 +127,10 @@ export default {
       return this.event?.color || this.orgColor || this.baseCatColor;
     },
     eventFormat() {
+      // The organizer's choice wins; the category guess is only for old events without it.
+      const fmt = this.event?.format;
+      if (fmt === 'groups') return 'bracket';
+      if (['points', 'bracket', 'time'].includes(fmt)) return fmt;
       const cat = this.event?.category;
       const timeCategories = ['running', 'triathlon', 'swimming', 'cycling', 'hiking', 'rowing'];
       const bracketCategories = ['esports-fps', 'esports-moba', 'esports-fighting', 'esports-strategy', 'esports-sports', 'chess', 'archery', 'drone-racing'];
