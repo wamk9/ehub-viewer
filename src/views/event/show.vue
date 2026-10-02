@@ -414,6 +414,7 @@ export default {
       this.showRegisterModal = true;
     },
     async confirmRegister() {
+      if (this.registering) return; // double tap
       const errors = validateAnswers(this.regTemplate, this.formData);
       this.formErrors = errors;
       if (Object.keys(errors).length) return;

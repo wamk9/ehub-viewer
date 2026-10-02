@@ -5,7 +5,10 @@
       <template #company>
         <a href="https://johnjohn3d.com.br" target="_blank" rel="noopener noreferrer">JohnJohn 3D</a>
       </template>
-    </i18n-t>
+    </i18n-t><br>
+    <router-link to="/privacy">{{ $t('legal.privacy.title') }}</router-link>
+    <span aria-hidden="true"> · </span>
+    <router-link to="/terms">{{ $t('legal.terms.title') }}</router-link>
   </footer>
 </template>
 

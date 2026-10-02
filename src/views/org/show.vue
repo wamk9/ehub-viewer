@@ -8,6 +8,7 @@ import Article from '@/helpers/communication/Article.js'
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js'
 import { createSSE } from '@/helpers/communication/useLiveSSE.js'
 import SystemVars from '@/helpers/General/SystemVars'
+import { safeUrl } from '@/helpers/General/safeUrl.js'
 import { toast } from '@/helpers/toast.js'
 import EhubEventCard from '@/components/EhubEventCard.vue'
 import EhubTabs from '@/components/EhubTabs.vue'
@@ -388,7 +389,7 @@ onBeforeUnmount(() => {
               <span class="ico"><font-awesome-icon :icon="['fas', 'globe']" /></span>
               <span class="meta">
                 <span class="k">{{ $t('pages.organization.show.about.website') }}</span>
-                <a :href="org.website.startsWith('http') ? org.website : 'https://' + org.website" target="_blank" rel="noopener" class="val">{{ org.website }}</a>
+                <a :href="safeUrl(org.website)" target="_blank" rel="noopener" class="val">{{ org.website }}</a>
               </span>
             </li>
             <li v-if="org.contact_email">

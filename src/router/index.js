@@ -45,6 +45,22 @@ const router = createRouter({
       meta: { authPage: true }
     },
     {
+      path: '/privacy',
+      name: 'legal-privacy',
+      component: () => import('@/views/legal.vue'),
+    },
+    {
+      path: '/terms',
+      name: 'legal-terms',
+      component: () => import('@/views/legal.vue'),
+    },
+    {
+      path: '/forgot-password',
+      name: 'user-forgot-password',
+      component: () => import('@/views/user/forgot-password.vue'),
+      meta: { authPage: true }
+    },
+    {
       path: '/login',
       name: 'user-login',
       component: () => import('@/views/user/login.vue'),
@@ -127,6 +143,13 @@ const router = createRouter({
       name: 'manage-organization-members',
       component: () => import('@/views/org/manage.vue'),
       props: () => ({ forceOption: ['members'] }),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/org/:orgRoute/manage/news',
+      name: 'manage-organization-news',
+      component: () => import('@/views/org/manage.vue'),
+      props: () => ({ forceOption: ['news'] }),
       meta: { requiresAuth: true }
     },
     {

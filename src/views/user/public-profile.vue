@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import Api from '@/helpers/communication/Connection'
 import SystemVars from '@/helpers/General/SystemVars'
+import { safeUrl } from '@/helpers/General/safeUrl.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -259,7 +260,7 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
                   <a v-if="profile.discord" class="pub-social-link" :href="`https://discord.com/users/${profile.discord}`" target="_blank" rel="noopener" title="Discord">
                     <font-awesome-icon :icon="['fab', 'discord']" />
                   </a>
-                  <a v-if="profile.youtube" class="pub-social-link" :href="profile.youtube" target="_blank" rel="noopener" title="YouTube">
+                  <a v-if="safeUrl(profile.youtube)" class="pub-social-link" :href="safeUrl(profile.youtube)" target="_blank" rel="noopener" title="YouTube">
                     <font-awesome-icon :icon="['fab', 'youtube']" />
                   </a>
                   <a v-if="profile.twitch" class="pub-social-link" :href="`https://twitch.tv/${profile.twitch}`" target="_blank" rel="noopener" title="Twitch">
@@ -268,10 +269,10 @@ const recentResults = computed(() => (profile.value?.recent_results || []).slice
                   <a v-if="profile.x_twitter" class="pub-social-link" :href="`https://x.com/${profile.x_twitter}`" target="_blank" rel="noopener" title="X / Twitter">
                     <font-awesome-icon :icon="['fab', 'x-twitter']" />
                   </a>
-                  <a v-if="profile.linkedin" class="pub-social-link" :href="profile.linkedin" target="_blank" rel="noopener" title="LinkedIn">
+                  <a v-if="safeUrl(profile.linkedin)" class="pub-social-link" :href="safeUrl(profile.linkedin)" target="_blank" rel="noopener" title="LinkedIn">
                     <font-awesome-icon :icon="['fab', 'linkedin']" />
                   </a>
-                  <a v-if="profile.website" class="pub-social-link" :href="profile.website" target="_blank" rel="noopener" title="Website">
+                  <a v-if="safeUrl(profile.website)" class="pub-social-link" :href="safeUrl(profile.website)" target="_blank" rel="noopener" title="Website">
                     <font-awesome-icon :icon="['fas', 'globe']" />
                   </a>
                 </div>

@@ -62,6 +62,9 @@ async function submit() {
         const last = localStorage.getItem('lastKnowRoute')
         router.push(last ? JSON.parse(last) : { name: 'events' })
       }
+    } else if (result.code === 429) {
+      const minutes = Math.max(1, Math.ceil(Number(result.response?.retry_after || 60) / 60))
+      toast.error(t('users.login.too_many', { minutes }))
     } else {
       toast.error(t('users.login.error'))
     }
@@ -120,9 +123,9 @@ async function submit() {
                 {{ $t('users.login.remember') }}
               </label>
             </div>
-            <a href="#" class="small fw-medium" @click.prevent>
+            <router-link :to="{ name: 'user-forgot-password', query: form.mail ? { mail: form.mail } : {} }" class="small fw-medium">
               {{ $t('users.login.forgot') }}
-            </a>
+            </router-link>
           </div>
 
           <!-- Submit -->

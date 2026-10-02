@@ -1,4 +1,9 @@
 export default {
+  legal: 'By creating an account you agree to the {terms} and the {privacy}.',
+  legal_terms: 'Terms of use',
+  legal_privacy: 'Privacy policy',
+  verify: { send: 'Send code', verified: 'Verified', send_error: 'We could not send the code. Check the e-mail and try again.', too_many: 'Wait {seconds}s to ask for another code — the previous one still works.', wrong: 'Wrong code. Check the 6 digits in the e-mail.', expired: 'The code has expired. Click "Resend".', blocked: 'Too many wrong attempts. Click "Resend" to get a new code.', verify_error: 'We could not verify right now. Try again.' },
+  phone_optional: 'Phone (optional)',
   coming_back: 'Free. When you finish, you go right back to where you were.',
   title: 'Welcome to eHub{name}!',
   description: 'Fill in your details below to create your account on our platform',
@@ -62,7 +67,7 @@ export default {
   },
   tips: {
     step1: 'Photo is optional — use a square image (min 400×400px). Your name and surname will identify you in events.',
-    step2: 'Use a valid email for notifications. Your username will be public on your profile and cannot be changed later.',
+    step2: 'Use an e-mail you check: the code goes there. Your username is part of your profile address (letters, numbers, "_" and "-" only).',
     step3: 'Use a password with at least 8 characters. Confirm it exactly the same to avoid errors.',
   },
   has_account: 'Already have an account?',

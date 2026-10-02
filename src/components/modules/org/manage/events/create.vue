@@ -174,8 +174,26 @@ function validateStep(n) {
     toast.error(t('pages.organization.manage.eventWizard.err.rules'))
     return false
   }
+  if (n === 2 && form.runmode === 'irl' && !String(form.location || '').trim()) {
+    toast.error(t('pages.organization.manage.eventWizard.err.location'))
+    return false
+  }
   if (n === 6 && !form.start_at) {
     toast.error(t('pages.organization.manage.eventWizard.err.start'))
+    return false
+  }
+  // Dates are YYYY-MM-DD strings, so plain comparison works.
+  const today = new Date().toLocaleDateString('en-CA')
+  if (n === 6 && !isEditMode.value && form.start_at < today) {
+    toast.error(t('pages.organization.manage.eventWizard.err.startPast'))
+    return false
+  }
+  if (n === 6 && form.registration_deadline && form.registration_deadline > form.start_at) {
+    toast.error(t('pages.organization.manage.eventWizard.err.deadlineAfterStart'))
+    return false
+  }
+  if (n === 6 && form.end_at && form.end_at < form.start_at) {
+    toast.error(t('pages.organization.manage.eventWizard.err.endBeforeStart'))
     return false
   }
   if (n === 8 && !form.route.trim()) {

@@ -167,6 +167,7 @@ export default {
       free_notice: 'Free registration: your registration will be confirmed automatically.',
       fee_warning: 'This event requires payment of {fee} after registration.',
       confirm_text: 'Do you want to register for this event?',
+      privacy: 'The organizer will see your name, username and the answers above. Your e-mail and phone are not shared.',
       confirm: 'Register',
       cancel: 'Cancel',
       field_required: 'This field is required.',

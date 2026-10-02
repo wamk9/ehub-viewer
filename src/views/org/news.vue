@@ -1,5 +1,6 @@
 <script setup>
 import Article from '@/helpers/communication/Article.js';
+import { sanitizeHtml } from '@/helpers/General/sanitizeHtml.js';
 import SystemVars from '@/helpers/General/SystemVars';
 </script>
 
@@ -42,7 +43,7 @@ import SystemVars from '@/helpers/General/SystemVars';
             </div>
 
             <div class="row w-100 my-4">
-                <div class="col-12 col-md-8 article-content" v-html="item.content"></div>
+                <div class="col-12 col-md-8 article-content" v-html="sanitizeHtml(item.content)"></div>
             </div>
 
             <div class="row w-100 my-4">

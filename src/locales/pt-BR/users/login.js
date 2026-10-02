@@ -17,6 +17,7 @@ export default {
   google:        'Entrar com Google',
   microsoft:     'Entrar com Microsoft',
   error:         'Usuário/e-mail ou senha incorretos',
+  too_many:      'Muitas tentativas. Espere {minutes} min ou use "Esqueceu a senha?".',
   oauth_error: {
     '1':                     'Falha ao autenticar com o provedor. Tente novamente.',
     no_email:                'Não foi possível obter o e-mail da sua conta.',

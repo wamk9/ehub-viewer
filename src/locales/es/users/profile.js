@@ -167,7 +167,7 @@ export default {
     verified:    'Correo verificado',
     export:      'Exportar Datos',
     export_desc: 'Descarga todos tus datos personales, resultados e historial en JSON.',
-    export_btn:  'Solicitar exportación',
+    export_btn:  'Descargar mis datos',
     oauth: {
       title:         'Conexiones OAuth',
       desc:          'Cuentas externas vinculadas a tu perfil eHub.',
@@ -176,6 +176,12 @@ export default {
       not_connected: 'No conectado',
     },
     danger: {
+      blocked: 'Antes de eliminar la cuenta, pasa la responsabilidad a otra persona:',
+      blocked_org: 'Organización "{name}": transfiere la propiedad en Gestionar > Miembros (o elimina la organización).',
+      blocked_team: 'Equipo "{name}": haz administrador a otro miembro en Gestionar equipo.',
+      confirm_username: 'Entraste con Google. Para confirmar, escribe tu nombre de usuario: {username}',
+      wrong_username: 'El nombre de usuario no coincide.',
+      done: 'Tu cuenta fue eliminada.',
       title:       'Zona de Peligro',
       description: 'La eliminación de la cuenta es permanente e irreversible. Todos tus datos serán eliminados.',
       placeholder: 'Ingresa tu contraseña para confirmar',

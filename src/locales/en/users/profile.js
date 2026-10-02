@@ -167,7 +167,7 @@ export default {
     verified:    'Email verified',
     export:      'Export Data',
     export_desc: 'Download all your personal data, results and history in JSON format.',
-    export_btn:  'Request export',
+    export_btn:  'Download my data',
     oauth: {
       title:         'OAuth Connections',
       desc:          'External accounts linked to your eHub profile.',
@@ -176,6 +176,12 @@ export default {
       not_connected: 'Not connected',
     },
     danger: {
+      blocked: 'Before deleting the account, hand over responsibility to someone else:',
+      blocked_org: 'Organization "{name}": transfer ownership in Manage > Members (or delete the organization).',
+      blocked_team: 'Team "{name}": make another member an admin in Manage team.',
+      confirm_username: 'You signed in with Google. To confirm, type your username: {username}',
+      wrong_username: 'The username you typed does not match.',
+      done: 'Your account was deleted.',
       title:       'Danger Zone',
       description: 'Account deletion is permanent and irreversible. All your data will be removed.',
       placeholder: 'Enter your password to confirm',

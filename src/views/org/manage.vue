@@ -17,6 +17,7 @@ import EhubCardSetupDialog from '@/components/modules/org/EhubCardSetupDialog.vu
 import EhubUsageChart from '@/components/modules/org/EhubUsageChart.vue';
 import EhubFiscalDataDialog from '@/components/modules/org/EhubFiscalDataDialog.vue';
 import EventCreateWizard from '@/components/modules/org/manage/events/create.vue';
+import OrgNewsManager from '@/components/modules/org/manage/news/index.vue';
 
 const ORG_GRADS = [
   ['#0098D8', '#00d4ff'],
@@ -65,7 +66,7 @@ const ROLE_CLASS = {
 };
 
 export default {
-  components: { EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubVisualFields, EhubCardSetupDialog, EhubUsageChart, EhubFiscalDataDialog },
+  components: { OrgNewsManager, EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubVisualFields, EhubCardSetupDialog, EhubUsageChart, EhubFiscalDataDialog },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -73,7 +74,7 @@ export default {
 
   data() {
     const forced = this.forceOption?.[0] ?? null;
-    const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', roles: 'roles', activity: 'activity', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
+    const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', roles: 'roles', activity: 'activity', news: 'news', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
     return {
       activePanel: panelMap[forced] ?? 'overview',
       F: 'pages.organization.manage.financeiro.',
@@ -253,6 +254,7 @@ export default {
         { key: 'members', icon: 'users', label: t('members') },
         { key: 'roles', icon: 'shield-halved', label: t('roles') },
         { key: 'activity', icon: 'clock-rotate-left', label: t('activity') },
+        { key: 'news', icon: 'newspaper', label: t('news') },
         { key: 'financeiro', icon: 'file-invoice-dollar', label: t('financeiro') },
         { key: 'reports', icon: 'chart-bar', label: t('reports') },
         { key: 'settings', icon: 'gear', label: t('settings') },
@@ -268,7 +270,7 @@ export default {
 
   watch: {
     forceOption(val) {
-      const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', roles: 'roles', activity: 'activity', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
+      const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', roles: 'roles', activity: 'activity', news: 'news', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
       const panel = panelMap[val?.[0]] ?? 'overview';
       this.activePanel = panel;
       if (panel === 'financeiro' && !this.finLoaded) this.loadFinances();
@@ -1160,6 +1162,11 @@ export default {
         @update:model-value="(v) => { if (!v) evDelete = null; }"
         @confirm="deleteEvent"
       />
+
+      <!-- ═══ NEWS (organization articles) ═══ -->
+      <section v-if="activePanel === 'news'" class="mgmt-pane">
+        <OrgNewsManager :org-route="orgRoute" @close="switchPanel('overview')" />
+      </section>
 
       <!-- ═══ ACTIVITY (same component as teams) ═══ -->
       <section v-show="activePanel === 'activity'" class="mgmt-pane">

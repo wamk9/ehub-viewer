@@ -1,6 +1,7 @@
 export default {
   subtitle: 'Gerenciamento da Organização',
   nav: {
+    news: 'Notícias',
     activity: "Atividades",
     overview: 'Visão Geral',
     events: 'Eventos',
@@ -72,7 +73,7 @@ export default {
     tbl: {
       event: 'Evento',
       date: 'Data',
-      slots: 'Vagas',
+      slots: 'Inscritos',
       status: 'Status',
     },
   },

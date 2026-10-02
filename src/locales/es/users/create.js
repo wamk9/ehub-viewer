@@ -1,4 +1,9 @@
 export default {
+  legal: 'Al crear la cuenta aceptas los {terms} y la {privacy}.',
+  legal_terms: 'Términos de uso',
+  legal_privacy: 'Política de privacidad',
+  verify: { send: 'Enviar código', verified: 'Verificado', send_error: 'No pudimos enviar el código. Revisa el e-mail e inténtalo de nuevo.', too_many: 'Espera {seconds}s para pedir otro código — el anterior sigue valiendo.', wrong: 'Código incorrecto. Revisa los 6 números del e-mail.', expired: 'El código expiró. Haz clic en "Reenviar".', blocked: 'Demasiados intentos incorrectos. Haz clic en "Reenviar" para recibir otro código.', verify_error: 'No pudimos verificar ahora. Inténtalo de nuevo.' },
+  phone_optional: 'Teléfono (opcional)',
   coming_back: 'Gratis. Al terminar, vuelves directo a donde estabas.',
   title: '¡Bienvenido a eHub{name}!',
   description: 'Completa tus datos a continuación para crear tu cuenta en nuestra plataforma',
@@ -62,7 +67,7 @@ export default {
   },
   tips: {
     step1: 'Foto opcional — usa imagen cuadrada (mín. 400×400px). Nombre y apellido se usan para identificarte en los eventos.',
-    step2: 'Usa un correo válido para notificaciones. El nombre de usuario será público en tu perfil y no podrá cambiarse después.',
+    step2: 'Usa un e-mail que revises: el código llega ahí. El nombre de usuario forma parte de la dirección de tu perfil (solo letras, números, "_" y "-").',
     step3: 'Usa una contraseña con al menos 8 caracteres. Confírmala exactamente igual para evitar errores.',
   },
   has_account: '¿Ya tienes una cuenta?',

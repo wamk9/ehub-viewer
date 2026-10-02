@@ -104,29 +104,29 @@
           >
             <template #text="{ activity }">
               <span v-if="activity.type === 'team_role_changed'" v-html="$t('pages.teams.manage.activity_role_changed', {
-                actor: activity.params.actor,
-                target: activity.params.target,
+                actor: esc(activity.params.actor),
+                target: esc(activity.params.target),
                 old_role: $t(`pages.teams.manage.roles.${activity.params.old_role}`),
                 new_role: $t(`pages.teams.manage.roles.${activity.params.new_role}`),
               })" />
               <span v-else-if="activity.type === 'team_member_removed'" v-html="$t('pages.teams.manage.activity_member_removed', {
-                actor: activity.params.actor,
-                target: activity.params.target,
+                actor: esc(activity.params.actor),
+                target: esc(activity.params.target),
                 role: $t(`pages.teams.manage.roles.${activity.params.role}`),
               })" />
               <span v-else-if="activity.type === 'team_member_joined_application'" v-html="$t('pages.teams.manage.activity_member_joined_application', {
-                actor: activity.params.actor,
-                target: activity.params.target,
+                actor: esc(activity.params.actor),
+                target: esc(activity.params.target),
                 role: $t(`pages.teams.manage.roles.${activity.params.role}`),
               })" />
               <span v-else-if="activity.type === 'team_member_joined_invite'" v-html="$t('pages.teams.manage.activity_member_joined_invite', {
-                actor: activity.params.actor,
-                target: activity.params.target,
+                actor: esc(activity.params.actor),
+                target: esc(activity.params.target),
                 role: $t(`pages.teams.manage.roles.${activity.params.role}`),
               })" />
               <span v-else-if="activity.type === 'team_invite_sent'" v-html="$t('pages.teams.manage.activity_invite_sent', {
-                actor: activity.params.actor,
-                target: activity.params.target,
+                actor: esc(activity.params.actor),
+                target: esc(activity.params.target),
                 role: $t(`pages.teams.manage.roles.${activity.params.role}`),
               })" />
             </template>
@@ -456,7 +456,7 @@
       size="sm"
       @close="closeModal"
     >
-      <p v-if="modal?.type === 'remove_member'" class="cm-desc" v-html="$t('pages.teams.manage.roster.remove_confirm_desc', { name: modal.data?.name })" />
+      <p v-if="modal?.type === 'remove_member'" class="cm-desc" v-html="$t('pages.teams.manage.roster.remove_confirm_desc', { name: esc(modal.data?.name) })" />
       <p v-else-if="modal?.type === 'leave'" class="cm-desc">{{ $t('pages.teams.manage.settings.leave_confirm') }}</p>
       <p v-else-if="modal" class="cm-desc">{{ $t('pages.teams.manage.settings.delete_confirm') }}</p>
       <template #footer>
@@ -779,19 +779,23 @@ export default {
       await this.loadAllActivities()
     },
 
+    // Names are user input and these strings are rendered with v-html.
+    esc(v) {
+      return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+    },
     activityHtml(a) {
       const p = a.params || {}
       const r  = (key) => this.$t(`pages.teams.manage.roles.${key}`)
       if (a.type === 'team_role_changed')
-        return this.$t('pages.teams.manage.activity_role_changed', { actor: p.actor, target: p.target, old_role: r(p.old_role), new_role: r(p.new_role) })
+        return this.$t('pages.teams.manage.activity_role_changed', { actor: this.esc(p.actor), target: this.esc(p.target), old_role: r(p.old_role), new_role: r(p.new_role) })
       if (a.type === 'team_member_removed')
-        return this.$t('pages.teams.manage.activity_member_removed', { actor: p.actor, target: p.target, role: r(p.role) })
+        return this.$t('pages.teams.manage.activity_member_removed', { actor: this.esc(p.actor), target: this.esc(p.target), role: r(p.role) })
       if (a.type === 'team_member_joined_application')
-        return this.$t('pages.teams.manage.activity_member_joined_application', { actor: p.actor, target: p.target, role: r(p.role) })
+        return this.$t('pages.teams.manage.activity_member_joined_application', { actor: this.esc(p.actor), target: this.esc(p.target), role: r(p.role) })
       if (a.type === 'team_member_joined_invite')
-        return this.$t('pages.teams.manage.activity_member_joined_invite', { actor: p.actor, target: p.target, role: r(p.role) })
+        return this.$t('pages.teams.manage.activity_member_joined_invite', { actor: this.esc(p.actor), target: this.esc(p.target), role: r(p.role) })
       if (a.type === 'team_invite_sent')
-        return this.$t('pages.teams.manage.activity_invite_sent', { actor: p.actor, target: p.target, role: r(p.role) })
+        return this.$t('pages.teams.manage.activity_invite_sent', { actor: this.esc(p.actor), target: this.esc(p.target), role: r(p.role) })
       return a.type
     },
 

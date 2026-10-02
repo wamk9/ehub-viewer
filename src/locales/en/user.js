@@ -11,10 +11,12 @@ export default {
     unique:   'This email is already in use.',
   },
   phone: {
+    invalid:  'Invalid phone. Use digits only with area code.',
     required: 'Phone is required.',
     unique:   'This phone number is already in use.',
   },
   username: {
+    invalid:  'Use 5 to 60 characters: letters, numbers, "_" or "-" (no spaces or accents).',
     required: 'Username is required.',
     unique:   'This username is already taken.',
   },

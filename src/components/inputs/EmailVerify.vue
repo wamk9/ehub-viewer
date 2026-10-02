@@ -67,6 +67,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Api from '@/helpers/communication/Connection'
 
 const props = defineProps({
@@ -75,6 +76,8 @@ const props = defineProps({
   placeholder: { type: String, default: '' },
 })
 const emit = defineEmits(['update:modelValue', 'verified'])
+
+const { t } = useI18n()
 
 const EMAIL_RE = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/
 
@@ -86,9 +89,9 @@ const errorMsg = ref('')
 const isValidFormat = computed(() => EMAIL_RE.test(mail.value))
 
 const btnLabel = computed(() => {
-  if (state.value === 'verified') return 'Verificado'
+  if (state.value === 'verified') return t('users.create.verify.verified')
   if (state.value === 'sending')  return '...'
-  return 'Enviar código'
+  return t('users.create.verify.send')
 })
 
 function onMailInput() {
@@ -107,15 +110,19 @@ async function sendCode() {
   errorMsg.value = ''
   state.value    = 'sending'
   try {
-    const result = await Api.postAsync('/auth/email/send-code', { mail: mail.value })
+    const result = await Api.postAsync('/auth/email/send-code', { mail: mail.value.trim() })
     if (result.code === 200) {
       state.value = 'code_sent'
+    } else if (result.code === 429) {
+      // A code was sent moments ago and is still valid: let them type it.
+      errorMsg.value = t('users.create.verify.too_many', { seconds: result.response?.retry_after ?? 60 })
+      state.value = 'code_sent'
     } else {
-      errorMsg.value = result.response?.message ?? 'Erro ao enviar código.'
+      errorMsg.value = t('users.create.verify.send_error')
       state.value = 'idle'
     }
   } catch {
-    errorMsg.value = 'Erro ao enviar código.'
+    errorMsg.value = t('users.create.verify.send_error')
     state.value = 'idle'
   }
 }
@@ -124,16 +131,19 @@ async function verifyCode() {
   errorMsg.value = ''
   state.value    = 'verifying'
   try {
-    const result = await Api.postAsync('/auth/email/verify-code', { mail: mail.value, code: code.value })
+    const result = await Api.postAsync('/auth/email/verify-code', { mail: mail.value.trim(), code: code.value })
     if (result.code === 200) {
       state.value = 'verified'
       emit('verified', mail.value)
     } else {
-      errorMsg.value = result.response?.message ?? 'Código incorreto.'
+      const msg = String(result.response?.message || '')
+      errorMsg.value = result.code === 429 ? t('users.create.verify.blocked')
+        : /expir|solicit/i.test(msg) ? t('users.create.verify.expired')
+        : t('users.create.verify.wrong')
       state.value = 'code_sent'
     }
   } catch {
-    errorMsg.value = 'Erro ao verificar código.'
+    errorMsg.value = t('users.create.verify.verify_error')
     state.value = 'code_sent'
   }
 }

@@ -28,6 +28,11 @@
           </p>
           <EhubRegistrationFields v-if="fields.length" :fields="fields" :model-value="modelValue" :errors="errors" @update:model-value="$emit('update:modelValue', $event)" />
           <p v-else class="mb-0 small">{{ $t('events.show.registration.modal.confirm_text') }}</p>
+          <p v-if="!preview" class="modal-card__privacy">
+            <font-awesome-icon :icon="['fas', 'shield-halved']" />
+            {{ $t('events.show.registration.modal.privacy') }}
+            <router-link to="/privacy" target="_blank">{{ $t('legal.privacy.title') }}</router-link>
+          </p>
           <div v-if="preview && previewOk" class="modal-card__ok">
             <font-awesome-icon :icon="['fas', 'circle-check']" />{{ $t('common.regForm.previewOk') }}
           </div>
@@ -76,6 +81,7 @@ export default {
 
 <style scoped>
 .modal-card__rules { font-size: .8rem; color: var(--ehub-muted); margin: 0 0 12px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.modal-card__privacy { font-size: .74rem; color: var(--ehub-muted); margin: 12px 0 0; display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap; }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 1050; padding: 1rem; }
 .modal-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: 14px; width: 100%; max-width: 420px; max-height: calc(100vh - 2rem); display: flex; flex-direction: column; overflow: hidden; }

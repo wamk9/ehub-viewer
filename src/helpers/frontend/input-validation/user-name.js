@@ -1,1 +1,1 @@
-export default { regex: /^[a-zA-Z ]{1,180}$/, rewrite: true, onBlur: true };
+export default { regex: /^[\p{L}\p{M}' .-]{1,180}$/u, rewrite: true, onBlur: true };

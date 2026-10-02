@@ -17,6 +17,7 @@ export default {
   google:        'Sign in with Google',
   microsoft:     'Sign in with Microsoft',
   error:         'Incorrect username/e-mail or password',
+  too_many:      'Too many attempts. Wait {minutes} min or use "Forgot password?".',
   oauth_error: {
     '1':                     'Failed to authenticate with the provider. Please try again.',
     no_email:                'Could not retrieve your e-mail from the provider.',

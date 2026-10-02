@@ -259,7 +259,7 @@ export default {
       const { min, max } = this.parseQuantifier(validationRegex);
 
       return {
-        cleanRegex: new RegExp(`[^${charClass}]+`, "g"),
+        cleanRegex: new RegExp(`[^${charClass}]+`, validationRegex.flags.includes("u") ? "gu" : "g"),
         min,
         max
       };

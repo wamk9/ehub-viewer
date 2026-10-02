@@ -11,10 +11,12 @@ export default {
     unique:   'Este e-mail já está em uso.',
   },
   phone: {
+    invalid:  'Telefone inválido. Use só números com DDD, ex.: 11999990000.',
     required: 'O telefone é obrigatório.',
     unique:   'Este telefone já está em uso.',
   },
   username: {
+    invalid:  'Use de 5 a 60 caracteres: letras, números, "_" ou "-" (sem espaços nem acentos).',
     required: 'O nome de usuário é obrigatório.',
     unique:   'Este nome de usuário já está em uso.',
   },

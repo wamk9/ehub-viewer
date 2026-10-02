@@ -222,7 +222,7 @@ async function submit() {
           />
           <PhoneInput
             v-model="form.phone"
-            :label="$t('users.create.form.phone.label')"
+            :label="$t('users.create.phone_optional')"
             :placeholder="$t('users.create.form.phone.placeholder')"
           />
           <ehubInput v-model="form.username" id="reg-username" type="text"
@@ -249,8 +249,13 @@ async function submit() {
             :ref="collectRef" />
         </div>
 
+        <i18n-t v-if="step === STEPS" keypath="users.create.legal" tag="p" class="small text-muted mt-3 mb-0">
+          <template #terms><router-link to="/terms" target="_blank">{{ $t('users.create.legal_terms') }}</router-link></template>
+          <template #privacy><router-link to="/privacy" target="_blank">{{ $t('users.create.legal_privacy') }}</router-link></template>
+        </i18n-t>
+
         <!-- Navigation -->
-        <div class="d-flex justify-content-between mt-3 gap-2">
+        <div class="d-flex justify-content-between mt-3 gap-2 reg-nav">
           <button v-if="step > 1" class="btn btn-outline-secondary round px-4" @click="prevStep">
             <font-awesome-icon :icon="['fas', 'arrow-left']" class="me-2" />
             {{ $t('users.create.steps.back') }}
@@ -281,4 +286,6 @@ async function submit() {
 
 <style scoped>
 .min-w-0 { min-width: 0; }
+/* Long labels ("Cadastre-me no eHub!") must wrap on phones instead of leaving the screen. */
+.reg-nav .btn { white-space: normal; min-width: 0; }
 </style>

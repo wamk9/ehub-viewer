@@ -68,6 +68,24 @@ const fNotifications = reactive({
 const pwd = reactive({ current_password: '', password: '', password_confirmation: '' })
 const deletePassword = ref('')
 const deleteConfirm  = ref(false)
+const deleteBlockers = ref(null)
+const exporting = ref(false)
+
+// LGPD art. 18: the person downloads everything eHub keeps about them.
+async function exportData() {
+  exporting.value = true
+  try {
+    const result = await Api.getAsync('/user/export')
+    if (result.code !== 200) { toast.error(t('users.profile.error.generic')); return }
+    const blob = new Blob([JSON.stringify(result.response, null, 2)], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `ehub-${profile.username || 'meus-dados'}.json`
+    a.click()
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+  } catch { toast.error(t('users.profile.error.generic')) }
+  finally { exporting.value = false }
+}
 
 const GRAD_SWATCHES = [
   ['#0098D8', '#00d4ff'],
@@ -273,9 +291,12 @@ async function deleteAccount() {
   if (!deletePassword.value) { toast.error(t('users.profile.privacy.password.error.wrong')); return }
   isSaving.value = true
   try {
-    const result = await Api.deleteAsync('/user', { password: deletePassword.value })
-    if (result.code === 200) { store.dispatch('removeToken'); router.push({ name: 'events' }) }
-    else if (result.code === 403) toast.error(t('users.profile.privacy.password.error.wrong'))
+    deleteBlockers.value = null
+    const body = profile.auth_provider ? { confirm: deletePassword.value.trim() } : { password: deletePassword.value }
+    const result = await Api.deleteAsync('/user', body)
+    if (result.code === 200) { store.dispatch('removeToken'); toast.success(t('users.profile.account.danger.done')); router.push({ name: 'events' }) }
+    else if (result.code === 409) deleteBlockers.value = { organizations: result.response?.organizations || [], teams: result.response?.teams || [] }
+    else if (result.code === 403 || result.code === 422) toast.error(t(profile.auth_provider ? 'users.profile.account.danger.wrong_username' : 'users.profile.privacy.password.error.wrong'))
     else toast.error(t('users.profile.error.generic'))
   } catch { toast.error(t('users.profile.error.generic')) }
   finally { isSaving.value = false }
@@ -803,8 +824,8 @@ onMounted(() => {
         <div class="set-card mb-4">
           <h3><font-awesome-icon :icon="['fas', 'download']" class="set-ico" />{{ $t('users.profile.account.export') }}</h3>
           <p class="set-desc">{{ $t('users.profile.account.export_desc') }}</p>
-          <button class="btn btn-outline-secondary round px-4">
-            <font-awesome-icon :icon="['fas', 'download']" class="me-2" />{{ $t('users.profile.account.export_btn') }}
+          <button class="btn btn-outline-secondary round px-4" :disabled="exporting" @click="exportData">
+            <font-awesome-icon :icon="['fas', exporting ? 'spinner' : 'download']" :spin="exporting" class="me-2" />{{ $t('users.profile.account.export_btn') }}
           </button>
         </div>
 
@@ -840,9 +861,22 @@ onMounted(() => {
               <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-2" />
               {{ $t('users.profile.account.danger.confirm') }}
             </div>
+            <div v-if="deleteBlockers" class="alert alert-danger py-2 small mb-3" role="alert">
+              <div>{{ $t('users.profile.account.danger.blocked') }}</div>
+              <ul class="mb-0 mt-1">
+                <li v-for="o in deleteBlockers.organizations" :key="'o' + o">{{ $t('users.profile.account.danger.blocked_org', { name: o }) }}</li>
+                <li v-for="tm in deleteBlockers.teams" :key="'t' + tm">{{ $t('users.profile.account.danger.blocked_team', { name: tm }) }}</li>
+              </ul>
+            </div>
             <div class="mb-3">
-              <label class="form-label">{{ $t('users.profile.privacy.password.form.current.label') }}</label>
-              <input v-model="deletePassword" type="password" class="form-control" :placeholder="$t('users.profile.account.danger.placeholder')" />
+              <template v-if="profile.auth_provider">
+                <label class="form-label" for="del-confirm">{{ $t('users.profile.account.danger.confirm_username', { username: profile.username }) }}</label>
+                <input id="del-confirm" v-model="deletePassword" type="text" class="form-control" autocomplete="off" :placeholder="profile.username" />
+              </template>
+              <template v-else>
+                <label class="form-label" for="del-pass">{{ $t('users.profile.privacy.password.form.current.label') }}</label>
+                <input id="del-pass" v-model="deletePassword" type="password" class="form-control" :placeholder="$t('users.profile.account.danger.placeholder')" />
+              </template>
             </div>
             <div class="d-flex gap-2">
               <button class="btn btn-outline-secondary round" @click="deleteConfirm = false; deletePassword = ''">
