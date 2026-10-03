@@ -4,6 +4,7 @@ import EhubBracket from '@/components/modules/competition/EhubBracket.vue';
 import { parseTime, formatMs } from '@/components/modules/competition/time.js';
 import EhubGroupTable from '@/components/modules/competition/EhubGroupTable.vue';
 import EhubGroupMatches from '@/components/modules/competition/EhubGroupMatches.vue';
+import { maxSetsOf } from '@/components/modules/competition/sets.js';
 import EmMatchSchedule from './EmMatchSchedule.vue';
 import OrganizationEventStage from '@/helpers/communication/OrganizationEventStage.js';
 import { toast } from '@/helpers/toast.js';
@@ -18,6 +19,7 @@ export default {
   },
   computed: {
     ev() { return this.em.event; },
+    maxSets() { return maxSetsOf(this.em.event); },
     /** Marketing reads results; only managers edit. Finished events are frozen for everyone. */
     // Entering results / deciding matches is open to event-day helpers (results.write);
     // drawing groups and building the bracket stays with event managers.
@@ -204,15 +206,15 @@ export default {
         toast.success(this.$t('competition.group.drawn'));
       } else toast.error(apiError(this, res.data));
     },
-    async saveGame({ match, score_a, score_b }) {
-      return this.decide({ match, winner: null, score_a, score_b });
+    async saveGame({ match, score_a, score_b, sets }) {
+      return this.decide({ match, winner: null, score_a, score_b, sets });
     },
-    async decide({ match, winner, score_a, score_b }) {
+    async decide({ match, winner, score_a, score_b, sets }) {
       if (!this.stage || this.busyMatch) return;
       this.busyMatch = match.id;
-      const res = await OrganizationEventStage.decideMatch(this.em.orgRoute, this.em.eventRoute, this.stage.route, match.id, {
-        winner, score_a: score_a === '' ? null : score_a, score_b: score_b === '' ? null : score_b,
-      });
+      const res = await OrganizationEventStage.decideMatch(this.em.orgRoute, this.em.eventRoute, this.stage.route, match.id, sets
+        ? { sets }
+        : { winner, score_a: score_a === '' || score_a === undefined ? null : score_a, score_b: score_b === '' || score_b === undefined ? null : score_b });
       this.busyMatch = null;
       if (res.code === 200) {
         this.em.putStage(res.data);
@@ -311,10 +313,10 @@ export default {
               <div v-else class="bk-wrap">
                 <p class="hint mb-2">
                   <font-awesome-icon :icon="['fas', 'circle-info']" />
-                  {{ $t(!stage.initialized ? 'competition.group.hint_not_started' : (readonly ? 'competition.bracket.hint_readonly' : 'competition.group.hint')) }}
+                  {{ $t(!stage.initialized ? 'competition.group.hint_not_started' : (readonly ? 'competition.bracket.hint_readonly' : (maxSets ? 'competition.sets.group_hint' : 'competition.group.hint'))) }}
                 </p>
                 <EhubGroupTable :results="stage.results || []" :name-of="nameOf" class="mb-3" />
-                <EhubGroupMatches :matches="groupMatches" :editable="!readonly && stage.initialized && !stage.finished" :busy-id="busyMatch" @save="saveGame" />
+                <EhubGroupMatches :matches="groupMatches" :editable="!readonly && stage.initialized && !stage.finished" :busy-id="busyMatch" :max-sets="maxSets" @save="saveGame" />
                 <div v-if="!noStructure && !groupStages.some((g) => (g.matches || []).some((m) => m.status === 'done')) && !stage.finished" class="mt-3">
                   <button class="btn btn-sm btn-outline-secondary round px-3" :disabled="saving" @click="drawGroups('random')">
                     <font-awesome-icon :icon="['fas', 'shuffle']" class="me-2" />{{ $t('competition.group.redraw') }}
@@ -350,7 +352,7 @@ export default {
                   <font-awesome-icon :icon="['fas', 'circle-info']" />
                   {{ $t(!stage.initialized ? 'competition.bracket.hint_not_started' : (readonly ? 'competition.bracket.hint_readonly' : 'competition.bracket.hint')) }}
                 </p>
-                <EhubBracket :matches="bracketMatches" :editable="!readonly && stage.initialized && !stage.finished" :busy-id="busyMatch" @decide="decide" />
+                <EhubBracket :matches="bracketMatches" :editable="!readonly && stage.initialized && !stage.finished" :busy-id="busyMatch" :max-sets="maxSets" @decide="decide" />
                 <div v-if="!noStructure && !bracketPlayed && !stage.finished" class="mt-3">
                   <button class="btn btn-sm btn-outline-secondary round px-3" :disabled="saving" @click="drawBracket('random')">
                     <font-awesome-icon :icon="['fas', 'shuffle']" class="me-2" />{{ $t('competition.bracket.redraw') }}

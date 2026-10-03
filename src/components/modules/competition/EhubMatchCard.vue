@@ -5,6 +5,7 @@ import InitialsAvatar from '@/components/general/InitialsAvatar.vue'
 import EhubStatusBadge from '@/components/EhubStatusBadge.vue'
 import EhubStreamPanel from '@/components/EhubStreamPanel.vue'
 import { matchPublicState, sideName } from './phases.js'
+import EhubSetsLine from './EhubSetsLine.vue'
 
 /**
  * One match as a schedule card (public stage page): both sides, phase, date/time,
@@ -49,6 +50,7 @@ const side = (k) => ({
         <span v-if="played" class="emc__score">{{ match.score_a }}<span class="sep">–</span>{{ match.score_b }}</span>
         <span v-else-if="state === 'done' || state === 'bye'" class="emc__score vs">{{ state === 'bye' ? $t('competition.bracket.bye') : $t('stages.decided') }}</span>
         <span v-else class="emc__score vs">{{ $t('stages.vs') }}</span>
+        <EhubSetsLine v-if="played && match.sets" :sets="match.sets" center />
       </div>
       <div class="emc__side right">
         <InitialsAvatar :name="side('b').name" :image="side('b').avatar" :size="36" />

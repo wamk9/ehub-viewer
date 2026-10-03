@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import EhubStatusBadge from '@/components/EhubStatusBadge.vue'
 import EhubStreamPanel from '@/components/EhubStreamPanel.vue'
 import EhubPodium from '@/components/EhubPodium.vue'
+import EhubCalendarButton from '@/components/EhubCalendarButton.vue'
 import EhubBracket from './EhubBracket.vue'
 import EhubGroupTable from './EhubGroupTable.vue'
 import EhubMatchCard from './EhubMatchCard.vue'
@@ -28,6 +29,7 @@ const { t, locale } = useI18n()
 const ICON = { points: 'list-ol', bracket: 'sitemap', group: 'table-cells', time: 'stopwatch' }
 const state = computed(() => stagePublicState(props.stage))
 const results = computed(() => props.stage.results || [])
+const hasDates = computed(() => !!props.stage.start_at || (props.stage.matches || []).some((m) => m.scheduled_at))
 const matches = computed(() => props.stage.matches || [])
 const hasMatches = computed(() => matches.value.some((m) => m.kind === 'bracket' || m.kind === 'group'))
 const totalRounds = computed(() => bracketRounds(matches.value))
@@ -105,6 +107,7 @@ const participants = computed(() => {
           <a v-if="stage.location" :href="mapsUrl" target="_blank" rel="noopener noreferrer"><font-awesome-icon :icon="['fas', 'location-dot']" /> {{ stage.location }}</a>
           <span v-else-if="event.runmode === 'online'"><font-awesome-icon :icon="['fas', 'desktop']" /> {{ $t('stages.online') }}</span>
           <span v-if="participants"><font-awesome-icon :icon="['fas', 'users']" /> {{ $t('stages.participants', { n: participants }, participants) }}</span>
+          <EhubCalendarButton v-if="hasDates && state !== 'done' && event.organization?.route" :org-route="event.organization.route" :event-route="event.route" :stage="stage.route" compact />
         </div>
         <div v-if="info.length" class="esc__chips">
           <span v-for="f in info" :key="f.key" class="esc__chip"><font-awesome-icon :icon="['fas', f.icon || 'circle-info']" /> <span class="lbl">{{ f.name }}:</span> {{ f.value }}</span>

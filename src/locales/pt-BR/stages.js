@@ -1,5 +1,7 @@
 // Public stage cards, matches and broadcasts.
 export default {
+  "calendar": "Adicionar à agenda",
+  "calendar_stage": "Adicionar esta etapa e as partidas marcadas à sua agenda",
   "status": {
     "done": "Concluída",
     "live": "Ao vivo",

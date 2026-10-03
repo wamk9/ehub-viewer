@@ -144,7 +144,7 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
     </EhubDialog>
 
     <div v-if="schemaDate" class="last-upd-bar">
-      <font-awesome-icon :icon="['far', 'clock']" />
+      <font-awesome-icon :icon="['fas', 'clock']" />
       <span class="last-upd-label">{{ $t('pages.organization.manage.eventWizard.s3x.lastUpd') }}</span>
       <span>{{ $d(schemaDate, 'dateOnly') }}</span>
     </div>
@@ -176,30 +176,30 @@ const i18nPath = computed(() => `categories.${props.form.category}.${props.form.
               <hr class="mt-0 mb-3" v-else-if="input.type === 'separator'" />
 
               <div v-else class="spec-field">
-                <label class="field-label">
+                <label class="field-label" :for="'spec-' + input.name">
                   {{ te(`${i18nPath}.${input.name}.label`) ? $t(`${i18nPath}.${input.name}.label`) : humanize(input.name) }}
                 </label>
 
                 <ehubInput v-if="input.type === 'list'" class="w-100 mb-3"
-                  :name="input.name"
+                  :id="'spec-' + input.name" :name="input.name"
                   :option="{ ...input.inputValue, i18nPath: `${i18nPath}.${input.name}.values` }"
                   type="select" v-model="input.eventValue"
                   :validation="{ ...input.validate, i18nPath: `${i18nPath}.${input.name}.validation` }"
                   ref="advancedRef" />
 
                 <ehubInput v-else-if="['text','number','textarea'].includes(input.type)" class="w-100 mb-3"
-                  :name="input.name" :type="input.type" v-model="input.eventValue"
+                  :id="'spec-' + input.name" :name="input.name" :type="input.type" v-model="input.eventValue"
                   :validation="{ ...input.validate, i18nPath: `${i18nPath}.${input.name}.validation` }"
                   ref="advancedRef" />
 
                 <ehubInput v-else-if="input.type === 'switch'" class="w-100 mb-3"
-                  :name="input.name" type="switch"
+                  :id="'spec-' + input.name" :name="input.name" type="switch"
                   :checkedLabel="te(`${i18nPath}.${input.name}.checked`) ? $t(`${i18nPath}.${input.name}.checked`) : $t('pages.organization.manage.eventWizard.s3x.yes')"
                   :uncheckedLabel="te(`${i18nPath}.${input.name}.unchecked`) ? $t(`${i18nPath}.${input.name}.unchecked`) : $t('pages.organization.manage.eventWizard.s3x.no')"
                   v-model="input.eventValue" ref="advancedRef" />
 
                 <ehubInput v-else-if="input.type === 'checkbox'" class="w-100 mb-3"
-                  :name="input.name" type="checkbox"
+                  :id="'spec-' + input.name" :name="input.name" type="checkbox"
                   :label="te(`${i18nPath}.${input.name}.label`) ? $t(`${i18nPath}.${input.name}.label`) : input.name"
                   v-model="input.eventValue" ref="advancedRef" />
               </div>

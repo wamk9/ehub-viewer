@@ -23,6 +23,8 @@ export default {
     team_role_changed:             'Sua função em {team} foi alterada para {role}.',
     team_removed:                  'Você foi removido(a) de {team}.',
     event_stage_started: 'A etapa "{stage}" de {event} começou!',
+    event_match_live: 'Sua partida em {event} ({stage}) está ao vivo agora!',
+    event_match_scheduled: 'Sua partida em {event} ({stage}) foi marcada para {when}.',
     event_results_published: 'Resultados de "{stage}" publicados em {event}',
     event_registration_confirmed: 'Sua inscrição em {event} foi confirmada',
     event_registration_refunded: 'Sua inscrição em {event} foi cancelada e {amount} será devolvido no mesmo meio de pagamento.',

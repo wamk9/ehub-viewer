@@ -1,5 +1,7 @@
 // Public stage cards, matches and broadcasts.
 export default {
+  "calendar": "Add to calendar",
+  "calendar_stage": "Add this stage and its scheduled matches to your calendar",
   "status": {
     "done": "Finished",
     "live": "Live",

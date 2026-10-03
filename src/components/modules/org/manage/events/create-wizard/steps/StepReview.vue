@@ -11,7 +11,9 @@ const { t, te, locale } = useI18n()
 
 const categoryLabel = computed(() => {
   const key = `categories.names.${props.form.category}`
-  return props.form.category ? (te(key) ? t(key) : props.form.category) : '—'
+  if (!props.form.category) return '—'
+  const sub = props.form.subcategory ? `categories.subcategories.${props.form.subcategory}` : null
+  return (te(key) ? t(key) : props.form.category) + (sub && te(sub) ? ' · ' + t(sub) : '')
 })
 const runmodeLabel = computed(() => {
   const key = `categories.runmode.${props.form.runmode}`
@@ -43,6 +45,9 @@ const summary = computed(() => {
     { k: t(wz + 'mode'), v: runmodeLabel.value },
     { k: t(wz + 'format'), v: props.form.format ? t(`pages.organization.manage.eventWizard.fmt.${props.form.format}`) : '—' },
     { k: t(wz + 'start'), v: fmtDate(props.form.start_at) + (props.form.start_time ? ' · ' + props.form.start_time : '') },
+    { k: t(wz + 'entry'), v: props.form.entry_type === 'team'
+      ? t('pages.organization.manage.eventWizard.et.team') + (props.form.team_size ? ' · ' + t(wz + 'perTeam', { n: props.form.team_size }) : '')
+      : t('pages.organization.manage.eventWizard.et.individual') },
     { k: t(wz + 'slots'), v: props.form.max_registrations || t(wz + 'unlimited') },
     { k: t(wz + 'fee'), v: (+props.form.fee > 0) ? money(props.form.fee, props.form.currency) : t(wz + 'free') },
     { k: t(wz + 'url'), v: props.form.route || '—' },

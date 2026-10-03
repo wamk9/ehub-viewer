@@ -1,13 +1,16 @@
 <script setup>
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InitialsAvatar from '@/components/general/InitialsAvatar.vue'
+import EhubSetsDialog from './EhubSetsDialog.vue'
+import EhubSetsLine from './EhubSetsLine.vue'
 
 const props = defineProps({
   matches: { type: Array, required: true },   // stage.matches with kind = bracket
   editable: { type: Boolean, default: false },
   highlight: { type: String, default: null },  // registration id of the viewer
   busyId: { type: String, default: null },
+  maxSets: { type: Number, default: 0 },       // > 0: set sport, the winner comes from the sets
 })
 const emit = defineEmits(['decide'])
 const { t } = useI18n()
@@ -45,6 +48,13 @@ function saveScore(m) {
   if (!props.editable || !m.winner) return
   emit('decide', { match: m, winner: m.winner, score_a: scores[m.id].a, score_b: scores[m.id].b })
 }
+const setsOf = ref(null)
+const setsOpen = ref(false)
+function openSets(m) { setsOf.value = m; setsOpen.value = true }
+function saveSets(sets) {
+  emit('decide', { match: setsOf.value, sets })
+  setsOpen.value = false
+}
 function label(p, m) {
   if (p) return p.name || p.username || t('events.show.removed_participant')
   return m.status === 'bye' ? t('competition.bracket.bye') : t('competition.bracket.tbd')
@@ -68,17 +78,24 @@ function label(p, m) {
                 @click="pick(m, side)" @keydown.enter.prevent="pick(m, side)">
                 <InitialsAvatar v-if="m[side]" :name="label(m[side], m)" :image="m[side].avatar" :size="20" />
                 <span class="bk-name">{{ label(m[side], m) }}</span>
-                <input v-if="editable && m.a && m.b && m.status !== 'bye'" v-model="scores[m.id][side]" class="bk-score-in" maxlength="20" inputmode="numeric"
+                <input v-if="editable && !maxSets && m.a && m.b && m.status !== 'bye'" v-model="scores[m.id][side]" class="bk-score-in" maxlength="20" inputmode="numeric"
                   :aria-label="$t('competition.bracket.score_of', { name: label(m[side], m) })" @click.stop @keydown.enter.prevent="saveScore(m)" @blur="saveScore(m)" />
                 <span v-else-if="m['score_' + side] !== null && m['score_' + side] !== undefined && m['score_' + side] !== ''" class="bk-score">{{ m['score_' + side] }}</span>
                 <font-awesome-icon v-if="m.winner === side && m.status !== 'bye'" :icon="['fas', 'check']" class="bk-tick" />
               </div>
             </template>
+            <div v-if="m.sets?.length || (editable && maxSets && canPick(m))" class="bk-sets">
+              <EhubSetsLine :sets="m.sets || []" />
+              <button v-if="editable && maxSets && canPick(m)" class="btn btn-sm btn-link p-0 ms-auto" @click="openSets(m)">
+                {{ $t(m.sets?.length ? 'competition.sets.button' : 'competition.sets.enter') }}
+              </button>
+            </div>
           </div>
           </template>
         </div>
       </div>
     </div>
+    <EhubSetsDialog v-if="maxSets" v-model="setsOpen" :match="setsOf" :max-sets="maxSets" :name-a="label(setsOf?.a, setsOf || {})" :name-b="label(setsOf?.b, setsOf || {})" :busy="!!busyId" @save="saveSets" />
   </div>
 </template>
 
@@ -103,5 +120,6 @@ function label(p, m) {
 .bk-score { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ehub-ink); }
 .bk-score-in { width: 42px; padding: 2px 6px; font-size: .8rem; border: 1px solid var(--ehub-line); border-radius: 6px; background: var(--ehub-field-bg); color: var(--ehub-ink); text-align: center; }
 .bk-third-lbl { font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ehub-muted); text-align: center; margin-top: 6px; }
+.bk-sets { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-top: 1px solid var(--ehub-line); font-size: .74rem; }
 .bk-tick { color: var(--ehub-success-text); }
 </style>

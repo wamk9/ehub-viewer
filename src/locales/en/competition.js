@@ -1,4 +1,19 @@
 export default {
+  sets: {
+    group_hint: 'Click “Enter sets” on each game and type the points of every set. A win scores the stage points; ties are broken by set difference, then point difference.',
+    title: 'Score by sets',
+    button: 'Sets',
+    enter: 'Enter sets',
+    set_n: 'Set {n}',
+    of: 'Points of {name} in set {n}',
+    add: 'Add set',
+    remove: 'Remove last set',
+    result: 'Result: {a} × {b} in sets',
+    tie: 'A set cannot end in a tie.',
+    tied: 'Sets are level — enter the deciding set.',
+    hint: 'Type the points of each set. The score and the winner come from the number of sets won.',
+    rules_tip: 'In groups, ties are broken by set difference and then point difference.',
+  },
   time: {
     time: 'Time',
     status: 'Status',
@@ -30,6 +45,8 @@ export default {
     ga_full: 'Score against',
     sg: 'Diff',
     sg_full: 'Difference (for − against)',
+    sp: 'PD',
+    sp_full: 'Point difference inside the sets (tiebreak)',
     qualified: 'Qualified',
     round: 'Round {n}',
     clear: 'Clear score',

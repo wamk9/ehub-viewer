@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
@@ -8,7 +9,8 @@ const { t } = useI18n()
 
 // Starting point for organizers who have never written a regulation.
 function useTemplate() {
-  const tpl = t('pages.organization.manage.eventWizard.s5.template')
+  const k = 'pages.organization.manage.eventWizard.s5.'
+  const tpl = t(k + 'template', { reg: t(k + (props.form.entry_type === 'team' ? 'templateRegTeam' : 'templateRegIndividual')) })
   props.form.rules = props.form.rules.trim() ? props.form.rules.trim() + '\n\n' + tpl : tpl
 }
 
@@ -21,6 +23,8 @@ function removeExtra(form, i) {
 
 // Group games score win / draw / loss (default 3 / 1 / 0) on every group stage.
 const GP_DEFAULT = { win: 3, draw: 1, loss: 0 }
+// Set sports (volleyball, tennis…) never end level: no draw points to set.
+const pointKeys = computed(() => (props.form.event_data?.['sets-to-win'] ? ['win', 'loss'] : ['win', 'draw', 'loss']))
 function groupPoint(k) {
   const g = (props.form.stages || []).find((st) => st.stage_type === 'group')
   return g?.config?.['points_' + k] ?? GP_DEFAULT[k]
@@ -54,7 +58,7 @@ function setGroupPoint(k, v) {
       <div class="form-section-label">{{ $t('pages.organization.manage.eventWizard.s5.groupPtsLabel') }}</div>
       <p class="field-hint mb-3">{{ $t('pages.organization.manage.eventWizard.s5.groupPtsTip') }}</p>
       <div class="d-flex gap-3 flex-wrap">
-        <label v-for="k in ['win', 'draw', 'loss']" :key="k" class="gp-field">
+        <label v-for="k in pointKeys" :key="k" class="gp-field">
           <span>{{ $t('pages.organization.manage.eventWizard.s5.gp_' + k) }}</span>
           <input type="number" min="0" class="pts-input" :value="groupPoint(k)" @input="setGroupPoint(k, $event.target.value)" />
         </label>

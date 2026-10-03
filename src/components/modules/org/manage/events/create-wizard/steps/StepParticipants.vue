@@ -19,7 +19,16 @@ onMounted(async () => {
   if (result.code === 200) gateways.value = result.data ?? []
 })
 
-function selectEntryType(v) { props.form.entry_type = v }
+// Team size suggested by the sport's own fields (players + substitutes per team).
+const suggestedTeamSize = computed(() => {
+  const d = props.form.event_data || {}
+  const players = parseInt(d['players-per-team'], 10) || 0
+  return players >= 2 ? players + (parseInt(d.substitutes, 10) || 0) : null
+})
+function selectEntryType(v) {
+  props.form.entry_type = v
+  if (v === 'team' && suggestedTeamSize.value) props.form.team_size = suggestedTeamSize.value
+}
 function selectFee(v) { props.form.fee = v === 'paid' ? (props.form.fee || 1) : 0 }
 const feeMode = computed(() => (props.form.fee && +props.form.fee > 0) ? 'paid' : 'free')
 
@@ -57,6 +66,10 @@ watch(() => props.form.format, (fmt) => {
         <input id="wz-participants-1" type="number" class="form-control" v-model.number="form.team_size" min="2" max="100" />
         <span class="input-group-text">{{ $t('pages.organization.manage.eventWizard.s4.players') }}</span>
       </div>
+      <p v-if="suggestedTeamSize && suggestedTeamSize !== form.team_size" class="field-hint">
+        {{ $t('pages.organization.manage.eventWizard.s4.teamSizeSuggested', { n: suggestedTeamSize }) }}
+        <button type="button" class="btn btn-link btn-sm p-0 align-baseline" @click="form.team_size = suggestedTeamSize">{{ $t('pages.organization.manage.eventWizard.s4.teamSizeUse') }}</button>
+      </p>
     </div>
 
     <div class="form-section">

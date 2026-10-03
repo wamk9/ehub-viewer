@@ -17,7 +17,7 @@ export default {
   ov: {
     next: {
       label: 'Next step',
-      start_first_title: 'Kick off: start {s}',
+      start_first_title: 'Start the championship: begin {s}',
       start_first_text: 'When the championship begins, click here. Registration will close.',
       start_first_cta: 'Start {s}',
       start_title: 'Start {s}',
@@ -101,7 +101,7 @@ export default {
     add_session: 'Add session', session_name: 'Session name',
     r_start: 'Start', r_finish: 'Finish', r_remove: 'Remove session',
     move_up: 'Move up', move_down: 'Move down',
-    m_name: 'Stage name', m_type: 'Type', m_date: 'Date and time', m_desc: 'Description', m_location: "Stage venue", m_location_ph: "e.g. Interlagos circuit, São Paulo — leave empty if it is the event venue", r_edit: "Edit session",
+    m_name: 'Stage name', m_type: 'Type', m_date: 'Date and time', m_desc: 'Description', m_location: "Stage venue", m_location_ph: "e.g. City Sports Hall, Court 2 — leave empty if it is the event venue", r_edit: "Edit session",
     m_sessions: 'Sessions', m_sessions_hint: 'One per line. E.g. Qualifier, Semifinal, Final.',
     m_preset: 'Use Practice / Qualifying / Race',
     preset: ['Practice', 'Qualifying', 'Race'],

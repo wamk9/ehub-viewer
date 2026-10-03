@@ -13,6 +13,7 @@ import { normalizePrizes } from '@/components/modules/event-prizes/prizes.js';
 import EhubLivePlayer from '@/components/modules/event-live/EhubLivePlayer.vue';
 import { formatMs } from '@/components/modules/competition/time.js';
 import EhubStagesTab from '@/components/modules/competition/EhubStagesTab.vue';
+import EhubCalendarButton from '@/components/EhubCalendarButton.vue';
 import { watchUrl } from '@/helpers/General/liveStream.js';
 import { downloadStandingsImage } from '@/helpers/General/standingsImage.js';
 import Api from '@/helpers/communication/Connection';
@@ -21,7 +22,7 @@ import { initialValues, validateAnswers } from '@/components/modules/event-regis
 
 
 export default {
-  components: { EhubRegistrationModal, EhubPrizeList, EhubLivePlayer, EhubStagesTab },
+  components: { EhubRegistrationModal, EhubPrizeList, EhubLivePlayer, EhubStagesTab, EhubCalendarButton },
   data() {
     return {
       waitlistBusy: false,
@@ -685,6 +686,7 @@ export default {
               <button type="button" class="btn btn-ghost round px-3" :title="$t('events.show.join.share')" @click="shareEvent">
                 <font-awesome-icon :icon="['fas', 'share-nodes']" class="me-1" />{{ $t('events.show.join.share') }}
               </button>
+              <EhubCalendarButton v-if="event.start_at && !event.finished" :org-route="orgRoute" :event-route="eventRoute" />
             </div>
           </div>
 

@@ -60,18 +60,18 @@ function beforeStart(stage) {
     <div class="form-section">
       <div class="form-section-label">{{ $t('pages.organization.manage.eventWizard.s3.datesLabel') }}</div>
       <div class="row g-3">
-        <div class="col-md-4">
+        <div class="col-sm-6 col-xl-3">
           <label class="form-label" for="wz-schedule-1">{{ $t('pages.organization.manage.eventWizard.s3.regDeadline') }}</label>
           <input id="wz-schedule-1" type="date" class="form-control" v-model="form.registration_deadline" />
         </div>
-        <div class="col-md-4">
+        <div class="col-sm-12 col-xl-6">
           <label class="form-label" for="wz-schedule-2">{{ $t('pages.organization.manage.eventWizard.s3.start') }} <span class="req-mark">*</span></label>
           <div class="d-flex gap-2">
             <input id="wz-schedule-2" type="date" class="form-control" v-model="form.start_at" :aria-label="$t('pages.organization.manage.eventWizard.s3.start')" />
             <input type="time" class="form-control start-time" v-model="form.start_time" required :aria-label="$t('pages.organization.manage.eventWizard.s3.startTime')" />
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-sm-6 col-xl-3">
           <label class="form-label" for="wz-schedule-3">{{ $t('pages.organization.manage.eventWizard.s3.end') }}</label>
           <input id="wz-schedule-3" type="date" class="form-control" v-model="form.end_at" />
         </div>
@@ -182,5 +182,5 @@ function beforeStart(stage) {
 .stage-del { width: 26px; height: 26px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: var(--ehub-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .75rem; flex-shrink: 0; }
 .stage-del:hover { border-color: color-mix(in srgb,#e23b3b 35%,transparent); background: color-mix(in srgb,#e23b3b 10%,transparent); color: var(--ehub-danger-text); }
 .empty-state { text-align: center; padding: 24px; border: 1px dashed var(--ehub-line); border-radius: 12px; }
-.start-time { max-width: 120px; }
+.start-time { flex: 0 0 116px; }
 </style>

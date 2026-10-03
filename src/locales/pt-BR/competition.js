@@ -1,4 +1,19 @@
 export default {
+  sets: {
+    group_hint: 'Clique em “Lançar sets” em cada jogo e digite os pontos de cada set. Vitória vale os pontos da fase; desempate por saldo de sets e depois saldo de pontos.',
+    title: 'Placar por sets',
+    button: 'Sets',
+    enter: 'Lançar sets',
+    set_n: '{n}º set',
+    of: 'Pontos de {name} no {n}º set',
+    add: 'Adicionar set',
+    remove: 'Remover último set',
+    result: 'Resultado: {a} × {b} em sets',
+    tie: 'Um set não pode terminar empatado.',
+    tied: 'Os sets estão empatados — lance o set decisivo.',
+    hint: 'Digite os pontos de cada set. O placar e o vencedor saem sozinhos pelo número de sets ganhos.',
+    rules_tip: 'Nos grupos, o desempate usa saldo de sets e depois saldo de pontos.',
+  },
   time: {
     time: 'Tempo',
     status: 'Situação',
@@ -30,6 +45,8 @@ export default {
     ga_full: 'Placar contra',
     sg: 'Saldo',
     sg_full: 'Saldo (a favor − contra)',
+    sp: 'Saldo pts',
+    sp_full: 'Saldo de pontos dentro dos sets (desempate)',
     qualified: 'Classificado',
     round: 'Rodada {n}',
     clear: 'Apagar placar',

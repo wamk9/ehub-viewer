@@ -1,4 +1,19 @@
 export default {
+  sets: {
+    group_hint: 'Haz clic en “Cargar sets” en cada partido y escribe los puntos de cada set. La victoria suma los puntos de la fase; desempate por diferencia de sets y luego de puntos.',
+    title: 'Marcador por sets',
+    button: 'Sets',
+    enter: 'Cargar sets',
+    set_n: '{n}.º set',
+    of: 'Puntos de {name} en el {n}.º set',
+    add: 'Agregar set',
+    remove: 'Quitar último set',
+    result: 'Resultado: {a} × {b} en sets',
+    tie: 'Un set no puede terminar empatado.',
+    tied: 'Los sets están empatados: carga el set decisivo.',
+    hint: 'Escribe los puntos de cada set. El marcador y el ganador salen del número de sets ganados.',
+    rules_tip: 'En grupos, el desempate usa diferencia de sets y luego de puntos.',
+  },
   time: {
     time: 'Tiempo',
     status: 'Situación',
@@ -30,6 +45,8 @@ export default {
     ga_full: 'Marcador en contra',
     sg: 'Dif.',
     sg_full: 'Diferencia (a favor − en contra)',
+    sp: 'Dif. pts',
+    sp_full: 'Diferencia de puntos dentro de los sets (desempate)',
     qualified: 'Clasificado',
     round: 'Fecha {n}',
     clear: 'Borrar marcador',

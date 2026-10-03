@@ -17,7 +17,7 @@ export default {
   ov: {
     next: {
       label: 'Próximo paso',
-      start_first_title: 'Dar la largada: iniciar {s}',
+      start_first_title: 'Comenzar el campeonato: iniciar {s}',
       start_first_text: 'Cuando empiece el campeonato, haz clic aquí. Las inscripciones se cerrarán.',
       start_first_cta: 'Iniciar {s}',
       start_title: 'Iniciar {s}',
@@ -101,7 +101,7 @@ export default {
     add_session: 'Agregar sesión', session_name: 'Nombre de la sesión',
     r_start: 'Iniciar', r_finish: 'Finalizar', r_remove: 'Eliminar sesión',
     move_up: 'Subir', move_down: 'Bajar',
-    m_name: 'Nombre de la etapa', m_type: 'Tipo', m_date: 'Fecha y hora', m_desc: 'Descripción', m_location: "Lugar de la etapa", m_location_ph: "ej.: Autódromo de Interlagos, São Paulo — déjalo vacío si es el mismo del evento", r_edit: "Editar sesión",
+    m_name: 'Nombre de la etapa', m_type: 'Tipo', m_date: 'Fecha y hora', m_desc: 'Descripción', m_location: "Lugar de la etapa", m_location_ph: "ej.: Polideportivo Municipal, Cancha 2 — déjalo vacío si es el lugar del evento", r_edit: "Editar sesión",
     m_sessions: 'Sesiones', m_sessions_hint: 'Una por línea. Ej.: Clasificatoria, Semifinal, Final.',
     m_preset: 'Usar Práctica libre / Clasificación / Carrera',
     preset: ['Práctica libre', 'Clasificación', 'Carrera'],

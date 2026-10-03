@@ -15,9 +15,12 @@ const rows = computed(() => [...props.results].sort((a, b) => a.position - b.pos
   return {
     ...r, p: d.p ?? 0, w: d.w ?? 0, d: d.d ?? 0, l: d.l ?? 0, gf: d.gf ?? 0, ga: d.ga ?? 0,
     sg: (d.gf ?? 0) - (d.ga ?? 0),
+    sp: (d.pf ?? 0) - (d.pa ?? 0),
     name: r.team?.name || r.user?.name || r.user?.username || props.nameOf?.(r.registration_id) || t('events.show.removed_participant'),
   }
 }))
+// Set sports also rank by the points inside the sets.
+const hasPoints = computed(() => props.results.some((r) => r.result_data?.pf || r.result_data?.pa))
 const num = (v) => (Number.isInteger(Number(v)) ? Number(v) : Number(v).toFixed(1))
 </script>
 
@@ -36,6 +39,7 @@ const num = (v) => (Number.isInteger(Number(v)) ? Number(v) : Number(v).toFixed(
           <th class="c hide-sm" :title="$t('competition.group.gf_full')">{{ $t('competition.group.gf') }}</th>
           <th class="c hide-sm" :title="$t('competition.group.ga_full')">{{ $t('competition.group.ga') }}</th>
           <th class="c" :title="$t('competition.group.sg_full')">{{ $t('competition.group.sg') }}</th>
+          <th v-if="hasPoints" class="c" :title="$t('competition.group.sp_full')">{{ $t('competition.group.sp') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -56,6 +60,7 @@ const num = (v) => (Number.isInteger(Number(v)) ? Number(v) : Number(v).toFixed(
           <td class="c hide-sm">{{ num(r.gf) }}</td>
           <td class="c hide-sm">{{ num(r.ga) }}</td>
           <td class="c">{{ r.sg > 0 ? '+' : '' }}{{ num(r.sg) }}</td>
+          <td v-if="hasPoints" class="c">{{ r.sp > 0 ? '+' : '' }}{{ r.sp }}</td>
         </tr>
       </tbody>
     </table>
