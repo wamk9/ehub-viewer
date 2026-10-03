@@ -160,7 +160,12 @@ export default {
     async remove() {
       const tpl = this.confirmDelete; this.confirmDelete = null;
       const r = await Api.deleteAsync(this.base + '/templates/' + tpl.id);
-      if (r.code === 200) { toast.success(this.t('deleted')); this.loadTemplates(); } else toast.error(this.t('error'));
+      if (r.code === 200) {
+        // The open report no longer has a saved layout behind it.
+        if (this.editingId === tpl.id) { this.editingId = null; this.schedule = 'none'; }
+        toast.success(this.t('deleted'));
+        this.loadTemplates();
+      } else toast.error(this.t('error'));
     },
     colLabel(key) {
       if (key === 'group') return this.def?.group_by ? this.$t('reports.groups.' + this.def.group_by) : this.t('result.group');
@@ -460,6 +465,15 @@ export default {
 </template>
 
 <style scoped>
+/* Ready-made report cards (lived in org/manage.vue scoped CSS, which never reached this component). */
+.rep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin-bottom: 22px; }
+.rep-card { background: var(--ehub-card); border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); padding: 20px 22px; display: flex; flex-direction: column; }
+.rep-card-ico { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: .84rem; margin-bottom: 12px; flex-shrink: 0; }
+.rep-card h4 { font-size: .9rem; font-weight: 700; color: var(--ehub-ink); margin: 0 0 5px; }
+.rep-card p { font-size: .8rem; color: var(--ehub-muted); margin: 0 0 14px; line-height: 1.45; flex: 1; }
+.rep-card-foot { display: flex; align-items: center; gap: 7px; margin-top: auto; }
+.rep-last { font-size: .72rem; color: var(--ehub-muted); flex: 1; }
+.td-name { font-weight: 600; }
 .erb-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .erb-count { margin-left: 6px; font-size: .7rem; background: var(--ehub-primary-tint); color: var(--ehub-primary-text); border-radius: 999px; padding: 1px 7px; }
 .erb-ico { background: var(--ehub-primary-tint); color: var(--ehub-primary-text); }
