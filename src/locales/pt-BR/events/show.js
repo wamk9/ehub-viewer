@@ -195,11 +195,12 @@ export default {
     payment_failure: 'Pagamento falhou. Tente se inscrever novamente.',
   },
   waitlist: {
+    held: "Abriu uma vaga e ela está guardada para você até {date}. Inscreva-se agora!",
     join: "Entrar na lista de espera",
     pitch: "As vagas acabaram. Entre na lista: se alguém sair, avisamos você por aqui e por e-mail.",
     count: "{n} pessoa já está esperando. | {n} pessoas já estão esperando.",
     you_are: "Você está na lista de espera — posição {n}",
-    how: "Se abrir uma vaga, avisamos você. A vaga fica com quem se inscrever primeiro.",
+    how: "Se abrir uma vaga, avisamos você. A vaga fica guardada para você por 24 horas.",
     leave: "Sair da lista de espera",
     joined: "Você entrou na lista de espera (posição {n}).",
     left: "Você saiu da lista de espera.",

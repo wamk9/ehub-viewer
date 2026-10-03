@@ -20,4 +20,19 @@ export default {
   // IRL + Online
   chess:             'Chess',
   'drone-racing':    'Drone Racing',
+  // Ball, racket, combat and board sports
+  football: 'Football (soccer)',
+  futsal: 'Futsal',
+  volleyball: 'Volleyball',
+  'beach-volleyball': 'Beach volleyball',
+  basketball: 'Basketball',
+  handball: 'Handball',
+  tennis: 'Tennis',
+  'beach-tennis': 'Beach tennis',
+  padel: 'Padel',
+  'table-tennis': 'Table tennis',
+  'martial-arts': 'Combat sports & martial arts',
+  surf: 'Surfing',
+  skateboarding: 'Skateboarding',
+  'other-sports': 'Other sport',
 }

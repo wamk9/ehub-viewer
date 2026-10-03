@@ -1,5 +1,6 @@
 <script>
 import EhubDialog from '@/components/modals/EhubDialog.vue';
+import EhubStreamUrlInput from '@/components/inputs/EhubStreamUrlInput.vue';
 import OrganizationEventStage from '@/helpers/communication/OrganizationEventStage.js';
 import { toast } from '@/helpers/toast.js';
 import { stageState, roundState, apiError } from './store.js';
@@ -13,14 +14,16 @@ function slugify(v) {
 
 export default {
   name: 'EmStages',
-  components: { EhubDialog },
+  components: { EhubDialog, EhubStreamUrlInput },
   inject: ['em'],
   data() {
     return {
       dialog: false,
       editing: null, // stage being edited, null = new
-      form: { name: '', stage_type: 'points', start_at: '', description: '', sessions: '' },
+      form: { name: '', stage_type: 'points', start_at: '', description: '', sessions: '', location: '', stream_url: '' },
       saving: false,
+      roundDialog: false,
+      roundForm: { stage: null, id: null, name: '', start_at: '', stream_url: '' },
       newRound: {}, // stageId → name being typed
       busy: null,
     };
@@ -60,7 +63,7 @@ export default {
     // ── Stage CRUD ──
     openNew() {
       this.editing = null;
-      this.form = { name: '', stage_type: 'points', start_at: '', description: '', sessions: '' };
+      this.form = { name: '', stage_type: 'points', start_at: '', description: '', sessions: '', location: '', stream_url: '' };
       this.dialog = true;
     },
     openEdit(stage) {
@@ -71,6 +74,8 @@ export default {
         start_at: stage.start_at ? this.toLocalInput(stage.start_at) : '',
         description: stage.description || '',
         sessions: '',
+        location: stage.location || '',
+        stream_url: stage.stream_url || '',
       };
       this.dialog = true;
     },
@@ -95,6 +100,8 @@ export default {
       const payload = {
         name: this.form.name.trim(),
         description: this.form.description || null,
+        location: this.form.location.trim() || null,
+        stream_url: this.form.stream_url.trim() || null,
         // Dates are stored as typed (local, no time zone): never convert to UTC.
         start_at: this.form.start_at ? this.form.start_at.replace('T', ' ') : null,
       };
@@ -166,6 +173,26 @@ export default {
       if (res.code === 201) {
         this.em.putStage(res.data);
         this.newRound[stage.id] = '';
+      } else toast.error(apiError(this, res.data));
+    },
+    openRound(stage, round) {
+      this.roundForm = { stage, id: round.id, name: round.name, start_at: round.start_at ? this.toLocalInput(round.start_at) : '', stream_url: round.stream_url || '' };
+      this.roundDialog = true;
+    },
+    async saveRound() {
+      const f = this.roundForm;
+      if (!f.name.trim() || this.saving) return;
+      this.saving = true;
+      const res = await OrganizationEventStage.updateRound(this.em.orgRoute, this.em.eventRoute, f.stage.route, f.id, {
+        name: f.name.trim(),
+        start_at: f.start_at ? f.start_at.replace('T', ' ') : null,
+        stream_url: f.stream_url.trim() || null,
+      });
+      this.saving = false;
+      if (res.code === 200) {
+        this.em.putStage(res.data);
+        this.roundDialog = false;
+        toast.success(this.$t('pages.event.manage.toast.saved'));
       } else toast.error(apiError(this, res.data));
     },
     async removeRound(stage, round) {
@@ -258,10 +285,13 @@ export default {
             <div class="rnd-st">
               <span v-if="roundState(r) === 'live'" class="live-txt">● {{ $t('pages.event.manage.ov.live_now') }}</span>
               <template v-else>{{ $t('pages.event.manage.stg.state.' + roundState(r)) }}</template>
+              <template v-if="r.start_at"> · {{ fmtDT(r.start_at) }}</template>
+              <font-awesome-icon v-if="r.stream_url" :icon="['fas', 'tower-broadcast']" class="ms-1" :title="$t('stream_input.label')" />
             </div>
           </div>
           <button v-if="canRun && canStartRound(s, j)" class="btn btn-xs btn-outline-secondary" :disabled="busy === r.id" @click="controlRound(s, r, 'start')">{{ $t('pages.event.manage.stg.r_start') }}</button>
           <button v-else-if="canRun && roundState(r) === 'live'" class="btn btn-xs btn-outline-secondary" :disabled="busy === r.id" @click="controlRound(s, r, 'finish')">{{ $t('pages.event.manage.stg.r_finish') }}</button>
+          <button v-if="em.can('live.write') && !s.finished" class="act-btn" :aria-label="$t('pages.event.manage.stg.r_edit')" :title="$t('pages.event.manage.stg.r_edit')" @click="openRound(s, r)"><font-awesome-icon :icon="['fas', 'pen']" /></button>
           <button v-if="canRun && !r.initialized && !s.finished" class="act-btn del rnd-del" :title="$t('pages.event.manage.stg.r_remove')" @click="removeRound(s, r)"><font-awesome-icon :icon="['fas', 'xmark']" /></button>
         </div>
       </div>
@@ -279,12 +309,12 @@ export default {
     <EhubDialog v-model="dialog" :title="editing ? $t('pages.event.manage.stg.edit') : $t('pages.event.manage.stg.new')">
       <div class="row g-3">
         <div class="col-12">
-          <label class="form-label">{{ $t('pages.event.manage.stg.m_name') }}</label>
-          <input v-model="form.name" class="form-control" maxlength="255" />
+          <label class="form-label" for="stg-name">{{ $t('pages.event.manage.stg.m_name') }}</label>
+          <input id="stg-name" v-model="form.name" class="form-control" maxlength="255" />
         </div>
         <div class="col-md-6">
-          <label class="form-label">{{ $t('pages.event.manage.stg.m_type') }}</label>
-          <select v-model="form.stage_type" class="form-select" :disabled="editing?.initialized">
+          <label class="form-label" for="stg-type">{{ $t('pages.event.manage.stg.m_type') }}</label>
+          <select id="stg-type" v-model="form.stage_type" class="form-select" :disabled="editing?.initialized">
             <option value="points">{{ $t('pages.event.manage.stg.type.points') }}</option>
             <option value="bracket">{{ $t('pages.event.manage.stg.type.bracket') }}</option>
             <option value="group">{{ $t('pages.event.manage.stg.type.group') }}</option>
@@ -293,12 +323,19 @@ export default {
           <div v-if="editing?.initialized" class="form-text">{{ $t('pages.event.manage.stg.type_locked') }}</div>
         </div>
         <div class="col-md-6">
-          <label class="form-label">{{ $t('pages.event.manage.stg.m_date') }}</label>
-          <input v-model="form.start_at" type="datetime-local" class="form-control" />
+          <label class="form-label" for="stg-date">{{ $t('pages.event.manage.stg.m_date') }}</label>
+          <input id="stg-date" v-model="form.start_at" type="datetime-local" class="form-control" />
         </div>
         <div class="col-12">
-          <label class="form-label">{{ $t('pages.event.manage.stg.m_desc') }}</label>
-          <textarea v-model="form.description" class="form-control" rows="3" style="resize:vertical"></textarea>
+          <label class="form-label" for="stg-location">{{ $t('pages.event.manage.stg.m_location') }}</label>
+          <input id="stg-location" v-model="form.location" class="form-control" maxlength="255" :placeholder="$t('pages.event.manage.stg.m_location_ph')" />
+        </div>
+        <div class="col-12">
+          <EhubStreamUrlInput id="stg-stream" v-model="form.stream_url" />
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="stg-desc">{{ $t('pages.event.manage.stg.m_desc') }}</label>
+          <textarea id="stg-desc" v-model="form.description" class="form-control" rows="3" style="resize:vertical"></textarea>
         </div>
         <div v-if="!editing" class="col-12">
           <div class="d-flex align-items-center justify-content-between mb-1 gap-2 flex-wrap">
@@ -314,6 +351,27 @@ export default {
         <button class="btn btn-primary round px-4" :disabled="!form.name.trim() || saving" @click="save">
           {{ editing ? $t('pages.event.manage.c.save') : $t('pages.event.manage.stg.create') }}
         </button>
+      </template>
+    </EhubDialog>
+
+    <!-- Edit session (round): name, time, broadcast -->
+    <EhubDialog v-model="roundDialog" :title="$t('pages.event.manage.stg.r_edit')">
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label" for="rnd-name">{{ $t('pages.event.manage.stg.session_name') }}</label>
+          <input id="rnd-name" v-model="roundForm.name" class="form-control" maxlength="100" :disabled="!canRun" />
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="rnd-date">{{ $t('pages.event.manage.stg.m_date') }}</label>
+          <input id="rnd-date" v-model="roundForm.start_at" type="datetime-local" class="form-control" :disabled="!canRun" />
+        </div>
+        <div class="col-12">
+          <EhubStreamUrlInput id="rnd-stream" v-model="roundForm.stream_url" />
+        </div>
+      </div>
+      <template #footer>
+        <button class="btn btn-outline-secondary round px-3" @click="roundDialog = false">{{ $t('pages.event.manage.c.cancel') }}</button>
+        <button class="btn btn-primary round px-4" :disabled="!roundForm.name.trim() || saving" @click="saveRound">{{ $t('pages.event.manage.c.save') }}</button>
       </template>
     </EhubDialog>
   </section>

@@ -1,5 +1,6 @@
 <script>
 import { sanitizeHtml } from '@/helpers/General/sanitizeHtml.js';
+import { categoryConfig, categoryGradient, categoryIcon } from '@/helpers/General/CategoryConfig.js';
 import OrganizationEvent from '@/helpers/communication/OrganizationEvent.js';
 import OrganizationEventRegistration from '@/helpers/communication/OrganizationEventRegistration.js';
 import Teams from '@/helpers/communication/Teams.js';
@@ -10,51 +11,17 @@ import EhubRegistrationModal from '@/components/modules/event-registration/EhubR
 import EhubPrizeList from '@/components/modules/event-prizes/EhubPrizeList.vue';
 import { normalizePrizes } from '@/components/modules/event-prizes/prizes.js';
 import EhubLivePlayer from '@/components/modules/event-live/EhubLivePlayer.vue';
-import EhubBracket from '@/components/modules/competition/EhubBracket.vue';
 import { formatMs } from '@/components/modules/competition/time.js';
-import EhubGroupTable from '@/components/modules/competition/EhubGroupTable.vue';
-import EhubGroupMatches from '@/components/modules/competition/EhubGroupMatches.vue';
+import EhubStagesTab from '@/components/modules/competition/EhubStagesTab.vue';
 import { watchUrl } from '@/helpers/General/liveStream.js';
 import { downloadStandingsImage } from '@/helpers/General/standingsImage.js';
 import Api from '@/helpers/communication/Connection';
 import { initialValues, validateAnswers } from '@/components/modules/event-registration/regForm.js';
 
-const CAT_GRAD = {
-  simracing:          ['#0098D8', '#00d4ff'],
-  racingcars:         ['#0098D8', '#00d4ff'],
-  rally:              ['#f08c00', '#ffc93c'],
-  'esports-fps':      ['#e23b3b', '#ff8a3b'],
-  'esports-moba':     ['#7C3AED', '#b06bff'],
-  'esports-fighting': ['#d6336c', '#ff6b9d'],
-  'esports-strategy': ['#1a6e4f', '#51cf66'],
-  'esports-sports':   ['#2563eb', '#60a5fa'],
-  motorsport:         ['#f08c00', '#ffc93c'],
-  motorbike:          ['#dc4f00', '#ff8a3b'],
-  cycling:            ['#1971c2', '#4dabf7'],
-  running:            ['#1f8a5b', '#51cf66'],
-  swimming:           ['#0284c7', '#38bdf8'],
-  triathlon:          ['#7C3AED', '#c084fc'],
-  hiking:             ['#4d7c0f', '#a3e635'],
-  crossfit:           ['#9a3412', '#fb923c'],
-  rowing:             ['#1d4ed8', '#93c5fd'],
-  archery:            ['#92400e', '#fbbf24'],
-  chess:              ['#495057', '#868e96'],
-  'drone-racing':     ['#0e7490', '#22d3ee'],
-}
 
-const CAT_ICON = {
-  simracing: 'car-side', racingcars: 'car-side', rally: 'car-side',
-  'esports-fps': 'crosshairs', 'esports-moba': 'dragon',
-  'esports-fighting': 'hand-fist', 'esports-strategy': 'chess-pawn',
-  'esports-sports': 'futbol', motorsport: 'car-side', motorbike: 'motorcycle',
-  cycling: 'bicycle', running: 'person-running', swimming: 'person-swimming',
-  triathlon: 'person-running', hiking: 'mountain-sun', crossfit: 'dumbbell',
-  rowing: 'water', archery: 'bullseye', chess: 'chess-knight',
-  'drone-racing': 'helicopter',
-}
 
 export default {
-  components: { EhubRegistrationModal, EhubPrizeList, EhubLivePlayer, EhubBracket, EhubGroupTable, EhubGroupMatches },
+  components: { EhubRegistrationModal, EhubPrizeList, EhubLivePlayer, EhubStagesTab },
   data() {
     return {
       waitlistBusy: false,
@@ -119,20 +86,9 @@ export default {
       return Array.isArray(this.event?.registration_form_template)
         ? this.event.registration_form_template : [];
     },
-    catGrad() {
-      const cat = this.event?.category;
-      const g = cat ? CAT_GRAD[cat] : null;
-      return g ? `linear-gradient(135deg, ${g[0]}, ${g[1]})` : 'linear-gradient(135deg, #0098D8, #00d4ff)';
-    },
-    catIcon() {
-      const cat = this.event?.category;
-      return CAT_ICON[cat] || 'trophy';
-    },
-    baseCatColor() {
-      const cat = this.event?.category;
-      const g = cat ? CAT_GRAD[cat] : null;
-      return g ? g[0] : '#0098D8';
-    },
+    catGrad() { return categoryGradient(this.event?.category); },
+    catIcon() { return categoryIcon(this.event?.category); },
+    baseCatColor() { return categoryConfig(this.event?.category).grad[0]; },
     eventColor() {
       return this.event?.color || this.orgColor || this.baseCatColor;
     },
@@ -219,18 +175,6 @@ export default {
         .filter((x) => x.r);
     },
     // Participant's pending head-to-head with both players known.
-    myNextMatch() {
-      if (!this.myRegId) return null;
-      for (const st of this.event?.stages || []) {
-        const m = (st.matches || []).find((x) => x.status === 'pending' && x.a && x.b
-          && (x.a.registration_id === this.myRegId || x.b.registration_id === this.myRegId));
-        if (m) {
-          const rival = m.a.registration_id === this.myRegId ? m.b : m.a;
-          return { stage: st, match: m, rival };
-        }
-      }
-      return null;
-    },
     nextStage() { return (this.event?.stages || []).find(s => !s.finished) || null; },
     regulationCards() { return this.$tm(`events.show.regulation.${this.eventFormat}`) || []; },
     eventGrad() {
@@ -439,18 +383,6 @@ export default {
       if (event.fee == 0) return this.$t('pages.organization.show.events.free');
       return (event.currency?.toUpperCase() || '') + ' ' + Number(event.fee).toFixed(2);
     },
-    stageStatusClass(stage) {
-      if (stage.finished)    return 'finished';
-      if (stage.in_progress) return 'active';
-      if (stage.initialized) return 'active';
-      return '';
-    },
-    stageStatusLabel(stage) {
-      if (stage.finished)    return this.$t('events.show.stages.status.finished');
-      if (stage.in_progress) return this.$t('events.show.stages.status.in_progress');
-      if (stage.initialized) return this.$t('events.show.stages.status.initialized');
-      return this.$t('events.show.stages.status.pending');
-    },
     async loadParticipants() {
       this.activeTab = 'participants';
       if (this.$route.params.tab !== 'participants') this.goTab('participants');
@@ -462,12 +394,6 @@ export default {
       if (result.code === 200 && Array.isArray(result.data)) this.participants = result.data;
     },
     isUrl(v) { return /^https?:\/\/\S+$/i.test(String(v || '').trim()); },
-    stageInfo(stage) {
-      const values = stage?.config?.info || {};
-      return (Array.isArray(this.event?.stage_fields) ? this.event.stage_fields : [])
-        .filter(f => f?.key && String(values[f.key] ?? '').trim())
-        .map(f => ({ ...f, value: values[f.key] }));
-    },
     async joinWaitlist() {
       if (!this.$store.getters.getToken) {
         this.$router.push({ name: 'user-login', query: { redirect: this.$route.fullPath } });
@@ -957,6 +883,10 @@ export default {
             </template>
             <!-- Open -->
             <template v-else-if="regOpen">
+              <p v-if="event.user_waitlist_hold_until" class="ev-join__hold" role="status">
+                <font-awesome-icon :icon="['fas', 'door-open']" />
+                {{ $t('events.show.waitlist.held', { date: formatDateTime(event.user_waitlist_hold_until) }) }}
+              </p>
               <p class="ev-join__note">{{ event.fee == 0 ? $t('events.show.join.note_free') : $t('events.show.join.note_paid') }}</p>
               <p v-if="refundPolicyKey" class="ev-join__policy">
                 <font-awesome-icon :icon="['fas', refundPolicyKey === 'policy_full' ? 'rotate-left' : 'circle-info']" />
@@ -1010,91 +940,7 @@ export default {
 
         <!-- ═══ TAB: STAGES ═══ -->
         <section v-if="activeTab === 'stages'" class="tab-pane active">
-          <div v-if="!event.stages?.length" class="ev-empty">
-            <font-awesome-icon :icon="['fas', 'layer-group']" />
-            <p class="mb-0 mt-2">{{ $t('events.show.stages.empty') }}</p>
-          </div>
-          <div v-if="myNextMatch" class="my-match">
-            <font-awesome-icon :icon="['fas', 'bolt']" class="my-match__ico" />
-            <div>
-              <div class="my-match__lbl">{{ $t('competition.bracket.next_match') }} · {{ myNextMatch.stage.name }}</div>
-              <strong>{{ $t('competition.bracket.vs') }} {{ myNextMatch.rival.name || myNextMatch.rival.username || $t('events.show.removed_participant') }}</strong>
-            </div>
-          </div>
-          <div v-if="event.stages?.length" class="stage-list">
-            <div v-for="(stage, idx) in event.stages" :key="stage.id" :id="'stage-' + stage.route" class="stage-item" :class="{ focus: focusStage === stage.route }">
-              <div class="stage-head" role="button">
-                <div class="lhs">
-                  <div class="stage-flag">
-                    <font-awesome-icon :icon="['fas', 'layer-group']" />
-                  </div>
-                  <div>
-                    <div class="stage-title">
-                      {{ idx + 1 }}. {{ stage.name }}
-                      <span class="badge-pill" :class="stageStatusClass(stage)" style="font-size:.72rem;padding:3px 10px">
-                        {{ stageStatusLabel(stage) }}
-                      </span>
-                    </div>
-                    <div v-if="stage.start_at" class="stage-date">
-                      <font-awesome-icon :icon="['fas', 'calendar']" class="me-1" />
-                      {{ formatDate(stage.start_at) }}
-                    </div>
-                    <div v-if="stageInfo(stage).length" class="stage-info">
-                      <span v-for="f in stageInfo(stage)" :key="f.key" class="stage-info__chip">
-                        <font-awesome-icon :icon="['fas', f.icon || 'circle-info']" />
-                        <span class="lbl">{{ f.name }}:</span> {{ f.value }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Knockout bracket (live) -->
-              <div v-if="stage.stage_type === 'bracket' && stage.matches?.some((m) => m.kind === 'bracket')" class="stage-body">
-                <EhubBracket :matches="stage.matches" :highlight="myRegId" />
-              </div>
-
-              <!-- Group: live table and games -->
-              <div v-if="stage.stage_type === 'group' && stage.matches?.some((m) => m.kind === 'group')" class="stage-body">
-                <EhubGroupTable :results="stage.results || []" :highlight="myRegId" />
-                <EhubGroupMatches :matches="stage.matches" :highlight="myRegId" class="mt-3" />
-              </div>
-
-              <!-- Stage results -->
-              <div v-if="stage.finished && stage.results?.length && stage.stage_type !== 'group'" class="stage-body">
-                <div class="table-wrap">
-                  <table class="ev-table">
-                    <thead>
-                      <tr>
-                        <th class="l" style="width:64px">{{ $t('events.show.standings.pos') }}</th>
-                        <th class="l">{{ $t('events.show.stages.results.participant') }}</th>
-                        <th class="c">{{ $t(stage.stage_type === 'time' ? 'competition.time.time' : 'events.show.stages.results.score') }}</th>
-                        <th v-if="stage.results.some((x) => x.qualified)" class="c">{{ $t('events.show.stages.results.qualified_full') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="result in stage.results" :key="result.registration_id || result.position" :class="{ mine: result.registration_id === myRegId }">
-                        <td class="l">
-                          <span class="pos-badge" :class="{ 1: 'p1', 2: 'p2', 3: 'p3' }[result.position] || ''">{{ result.position ?? '—' }}</span>
-                        </td>
-                        <td class="l driver-cell">
-                          <router-link v-if="result.user?.username" :to="`/profile/${result.user.username}`" style="text-decoration:none;color:inherit;">
-                            <div class="nm">{{ result.team?.name || result.user?.name || $t('events.show.removed_participant') }}<span v-if="result.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
-                          </router-link>
-                          <div v-else class="nm">{{ result.team?.name || result.user?.name || $t('events.show.removed_participant') }}<span v-if="result.registration_id === myRegId" class="you-chip">{{ $t('events.show.me.you') }}</span></div>
-                        </td>
-                        <td v-if="stage.stage_type === 'time'" class="c pts-cell">{{ result.result_data?.time || (result.result_data?.status || '—').toUpperCase() }}</td>
-                        <td v-else class="c pts-cell">{{ result.score ?? '—' }}</td>
-                        <td v-if="stage.results.some((x) => x.qualified)" class="c">
-                          <font-awesome-icon v-if="result.qualified" :icon="['fas', 'circle-check']" class="qualified-ico" />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
+          <EhubStagesTab :event="event" :highlight="myRegId" :focus="focusStage" />
         </section>
 
         <!-- ═══ TAB: PARTICIPANTS ═══ -->
@@ -1345,12 +1191,8 @@ export default {
 .hl-me__stages { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .hl-me__chip { border: 1px solid var(--ehub-line); background: var(--ehub-card); color: var(--ehub-ink); font-size: .78rem; padding: 4px 10px; border-radius: 50rem; min-height: 30px; }
 .hl-me__chip:hover { border-color: var(--ehub-primary); }
-.you-chip { display: inline-block; margin-left: 8px; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ehub-primary-text); background: var(--ehub-primary-tint); padding: 1px 8px; border-radius: 50rem; vertical-align: middle; }
-table.ev-table tr.mine td { background: color-mix(in srgb, var(--ehub-primary) 6%, transparent); }
-table.ev-table th.c, table.ev-table td.c { text-align: center; }
 .standings-note { display: flex; gap: 6px; align-items: flex-start; font-size: .8rem; color: var(--ehub-muted); margin: 10px 4px 0; }
 .standings-note svg { margin-top: 3px; }
-.stage-item.focus { box-shadow: 0 0 0 2px var(--ehub-primary); }
 
 .ev-orgbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 16px; padding: 10px 14px; border-radius: 12px; background: var(--ehub-primary-tint); border: 1px solid var(--ehub-primary-border); }
 .ev-orgbar__ico { color: var(--ehub-primary-text); }
@@ -1470,25 +1312,8 @@ html[data-bs-theme="dark"] .badge-pill.active { color: #51cf66; }
 .ev-description :deep(ul), .ev-description :deep(ol) { padding-left: 1.4rem; margin-bottom: .6rem; }
 
 /* ── Stages ── */
-.stage-list { display: flex; flex-direction: column; gap: 10px; }
-.stage-item { border: 1px solid var(--ehub-line); border-radius: 12px; overflow: hidden; background: var(--ehub-card); }
-.stage-head { padding: 15px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
-.stage-head .lhs { display: flex; align-items: center; gap: 14px; min-width: 0; }
-.stage-flag { width: 42px; height: 42px; border-radius: 10px; background: var(--ehub-field-bg); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--ehub-muted); flex-shrink: 0; }
-.stage-title { font-size: .98rem; font-weight: 700; color: var(--ehub-ink); display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
-.stage-date { font-size: .8rem; color: var(--ehub-muted); margin-top: 3px; }
-.stage-body { border-top: 1px solid var(--ehub-line); }
 
 /* ── Table ── */
-.table-wrap { overflow-x: auto; border: none; background: transparent; }
-table.ev-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-table.ev-table th { padding: 12px 14px; font-size: .72rem; font-weight: 700; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--ehub-line); }
-table.ev-table th.l, table.ev-table td.l { text-align: left; }
-table.ev-table td { padding: 12px 14px; color: var(--ehub-ink); border-bottom: 1px solid var(--ehub-line); text-align: center; vertical-align: middle; }
-table.ev-table tbody tr:last-child td { border-bottom: 0; }
-.driver-cell .nm { font-weight: 600; }
-.driver-cell .sub { font-size: .76rem; color: var(--ehub-muted); }
-.qualified-ico { color: var(--org-accent-text); }
 
 /* ── Participants ── */
 .reg-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
@@ -1537,14 +1362,6 @@ html[data-bs-theme="dark"] .hl-card.leader .hl-ico { color: var(--ehub-gold, #f5
 
 /* ── Standings ── */
 .standings-wrap { overflow-x: auto; border: 1px solid var(--ehub-line); border-radius: var(--ehub-radius-card); background: var(--ehub-card); }
-.pos-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; font-weight: 700; font-size: .85rem; }
-.pos-badge.p1 { background: color-mix(in srgb, var(--ehub-gold, #f59e0b) 22%, transparent); color: color-mix(in srgb, var(--ehub-gold, #f59e0b), #000 26%); }
-.pos-badge.p2 { background: rgba(150,150,160,.22); color: #8a8f99; }
-.pos-badge.p3 { background: rgba(205,127,50,.20); color: #b5703a; }
-html[data-bs-theme="dark"] .pos-badge.p1 { color: var(--ehub-gold, #f59e0b); }
-.pts-total { font-weight: 800; font-size: 1rem; color: var(--org-accent-text); }
-.pts-cell.top { color: var(--ehub-ink); font-weight: 600; }
-.pts-cell { color: var(--ehub-muted); }
 
 /* ── Regulation ── */
 .reg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
@@ -1553,8 +1370,6 @@ html[data-bs-theme="dark"] .pos-badge.p1 { color: var(--ehub-gold, #f59e0b); }
 .reg-card p { color: var(--ehub-ink); font-size: .92rem; line-height: 1.6; margin: 0; }
 
 /* ── Empty state ── */
-.ev-empty { text-align: center; padding: 54px 20px; color: var(--ehub-muted); border: 1px dashed var(--ehub-line); border-radius: var(--ehub-radius-card); }
-.ev-empty svg { font-size: 2rem; opacity: .4; display: block; margin: 0 auto; }
 
 /* ── Modals ── */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 1050; padding: 1rem; }
@@ -1570,10 +1385,6 @@ html[data-bs-theme="dark"] .pos-badge.p1 { color: var(--ehub-gold, #f59e0b); }
 .ev-extra__lbl { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ehub-muted); }
 .ev-extra__val { font-size: .86rem; font-weight: 500; color: var(--ehub-ink); overflow-wrap: anywhere; white-space: pre-line; }
 a.ev-extra__val { color: var(--org-accent-text); }
-.stage-info { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-.stage-info__chip { display: inline-flex; align-items: center; gap: 5px; font-size: .74rem; color: var(--ehub-ink); background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 50rem; padding: 2px 10px; }
-.stage-info__chip svg { color: var(--org-accent-text); font-size: .7rem; }
-.stage-info__chip .lbl { color: var(--ehub-muted); }
 .reg-field__label { display: block; font-size: .8rem; font-weight: 600; color: var(--ehub-ink); margin-bottom: .3rem; }
 .reg-input { background: var(--ehub-field-bg); border-color: var(--ehub-line); color: var(--ehub-ink); border-radius: 7px; }
 .reg-input:focus { background: var(--ehub-field-bg); border-color: var(--org-accent, var(--ehub-primary)); box-shadow: none; color: var(--ehub-ink); }
@@ -1581,9 +1392,6 @@ a.ev-extra__val { color: var(--org-accent-text); }
 .gateway-btn { display: flex; align-items: center; width: 100%; padding: .9rem 1.2rem; background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); border-radius: 10px; color: var(--ehub-ink); font-size: .95rem; font-weight: 500; cursor: pointer; transition: background .15s, border-color .15s; text-align: left; }
 .gateway-btn:hover:not(:disabled) { border-color: var(--org-accent, var(--ehub-primary)); }
 .gateway-btn:disabled { opacity: .6; cursor: not-allowed; }
-.my-match { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 14px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--org-accent, var(--ehub-primary)) 40%, transparent); background: color-mix(in srgb, var(--org-accent, var(--ehub-primary)) 10%, var(--ehub-card)); }
-.my-match__ico { font-size: 1.2rem; color: var(--org-accent, var(--ehub-primary)); }
-.my-match__lbl { font-size: .74rem; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
 .reg-done { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 12px; background: color-mix(in srgb, #1f8a5b 14%, var(--ehub-card)); border: 1px solid color-mix(in srgb, #1f8a5b 45%, transparent); color: var(--ehub-ink); }
 .reg-done__ico { font-size: 1.5rem; color: var(--ehub-success-text); }
 .reg-done span { display: flex; flex-direction: column; line-height: 1.25; }
@@ -1591,6 +1399,7 @@ a.ev-extra__val { color: var(--org-accent-text); }
 .ev-waitlist { border: 1px dashed var(--ehub-line); border-radius: 12px; padding: 12px 14px; margin-top: 10px; }
 .standings-tools { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-bottom: 10px; }
 .standings-print-title { display: none; }
+.ev-join__hold { display: flex; gap: 8px; align-items: flex-start; font-size: .84rem; font-weight: 600; color: var(--ehub-success-text); background: color-mix(in srgb, #1f8a5b 10%, transparent); border: 1px solid color-mix(in srgb, #1f8a5b 28%, var(--ehub-line)); border-radius: 10px; padding: 8px 10px; }
 </style>
 
 <style>

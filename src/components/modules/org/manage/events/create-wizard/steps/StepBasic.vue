@@ -32,7 +32,7 @@ function readFile(file, key) {
 
     <div class="form-section">
       <label class="form-label">{{ $t('pages.organization.manage.eventWizard.s1.desc') }}</label>
-      <EhubRichTextEditor v-model="form.description" :max-chars="DESCRIPTION_MAX" :min-height="140"
+      <EhubRichTextEditor :label="$t('pages.organization.manage.eventWizard.s1.desc')" v-model="form.description" :max-chars="DESCRIPTION_MAX" :min-height="140"
         :placeholder="$t('pages.organization.manage.eventWizard.s1.descPh')" />
     </div>
 

@@ -4,13 +4,14 @@ import EhubBracket from '@/components/modules/competition/EhubBracket.vue';
 import { parseTime, formatMs } from '@/components/modules/competition/time.js';
 import EhubGroupTable from '@/components/modules/competition/EhubGroupTable.vue';
 import EhubGroupMatches from '@/components/modules/competition/EhubGroupMatches.vue';
+import EmMatchSchedule from './EmMatchSchedule.vue';
 import OrganizationEventStage from '@/helpers/communication/OrganizationEventStage.js';
 import { toast } from '@/helpers/toast.js';
 import { POINTS, stageState, userName, apiError } from './store.js';
 
 export default {
   name: 'EmResults',
-  components: { InitialsAvatar, EhubBracket, EhubGroupTable, EhubGroupMatches },
+  components: { InitialsAvatar, EhubBracket, EhubGroupTable, EhubGroupMatches, EmMatchSchedule },
   inject: ['em'],
   data() {
     return { stageId: null, rows: [], auto: true, dirty: false, saving: false, addId: '', busyMatch: null, thirdPlace: false };
@@ -471,6 +472,7 @@ export default {
           </div>
         </div>
       </div>
+      <EmMatchSchedule v-if="stage && (isGroup || isBracket)" :stage="stage" />
     </template>
   </section>
 </template>

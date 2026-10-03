@@ -30,6 +30,7 @@ export default {
       def: null,
       editingId: null,
       name: '',
+      schedule: 'none',
       result: null,
       running: false,
       saving: false,
@@ -88,7 +89,7 @@ export default {
     },
     newReport() {
       this.def = this.blankDef(this.datasets[0]?.key);
-      this.editingId = null; this.name = ''; this.result = null; this.view = 'builder';
+      this.editingId = null; this.name = ''; this.schedule = 'none'; this.result = null; this.view = 'builder';
     },
     openPreset(p) {
       const def = { ...this.blankDef(p.definition.dataset), ...p.definition };
@@ -100,7 +101,7 @@ export default {
       const def = { ...this.blankDef(tpl.definition.dataset), ...tpl.definition };
       def.filters = { period: 'all', ...(tpl.definition.filters || {}) };
       def.sort = { by: null, dir: 'asc', ...(tpl.definition.sort || {}) };
-      this.def = def; this.editingId = tpl.id; this.name = tpl.name; this.result = null; this.view = 'builder';
+      this.def = def; this.editingId = tpl.id; this.name = tpl.name; this.schedule = tpl.schedule || 'none'; this.result = null; this.view = 'builder';
       if (runNow) this.run();
     },
     onDatasetChange() {
@@ -145,7 +146,7 @@ export default {
     async save(asNew = false) {
       if (!this.name.trim()) { toast.error(this.t('builder.name_required')); return; }
       this.saving = true;
-      const body = { name: this.name.trim(), definition: this.payload() };
+      const body = { name: this.name.trim(), definition: this.payload(), schedule: this.schedule };
       const r = this.editingId && !asNew
         ? await Api.patchAsync(this.base + '/templates/' + this.editingId, body)
         : await Api.postAsync(this.base + '/templates', body);
@@ -261,7 +262,7 @@ export default {
               <thead><tr><th>{{ t('col_name') }}</th><th>{{ t('col_data') }}</th><th>{{ t('col_last') }}</th><th></th></tr></thead>
               <tbody>
                 <tr v-for="tpl in templates" :key="tpl.id">
-                  <td class="td-name">{{ tpl.name }}</td>
+                  <td class="td-name">{{ tpl.name }}<span v-if="tpl.schedule && tpl.schedule !== 'none'" class="erb-sched-badge"><font-awesome-icon :icon="['fas', 'envelope']" /> {{ t('builder.schedule_' + tpl.schedule) }}</span></td>
                   <td class="td-muted">{{ dsLabel(tpl.definition.dataset) }}<template v-if="tpl.definition.group_by"> · {{ $t('reports.groups.' + tpl.definition.group_by) }}</template></td>
                   <td class="td-muted small">{{ tpl.last_run_at ? t('last_run', { date: fmtWhen(tpl.last_run_at) }) : t('never') }}<template v-if="tpl.author"> · {{ t('by', { name: tpl.author }) }}</template></td>
                   <td>
@@ -381,6 +382,12 @@ export default {
               <div class="erb-save">
                 <label class="visually-hidden" for="erb-name">{{ t('builder.name') }}</label>
                 <input id="erb-name" v-model="name" class="form-control" maxlength="120" :placeholder="t('builder.name_ph')" />
+                <label class="visually-hidden" for="erb-schedule">{{ t('builder.schedule') }}</label>
+                <select id="erb-schedule" v-model="schedule" class="form-select erb-sched" :title="t('builder.schedule_hint')">
+                  <option value="none">{{ t('builder.schedule_none') }}</option>
+                  <option value="weekly">{{ t('builder.schedule_weekly') }}</option>
+                  <option value="monthly">{{ t('builder.schedule_monthly') }}</option>
+                </select>
                 <button class="btn btn-outline-secondary round px-3" :disabled="saving" @click="save(false)">
                   <font-awesome-icon :icon="['fas', 'bookmark']" class="me-2" />{{ t('builder.save') }}
                 </button>
@@ -466,6 +473,8 @@ export default {
 .erb-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--ehub-line); padding-top: 14px; }
 .erb-save { display: flex; gap: 8px; flex: 1; min-width: 260px; flex-wrap: wrap; }
 .erb-save input { flex: 1; min-width: 200px; }
+.erb-sched { width: auto; min-width: 170px; }
+.erb-sched-badge { margin-left: 8px; font-size: .7rem; font-weight: 700; color: var(--ehub-primary-text); background: var(--ehub-primary-tint); border-radius: 50rem; padding: 1px 8px; white-space: nowrap; }
 .erb-result { margin-top: 16px; }
 .erb-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 10px 17px 0; font-size: .78rem; color: var(--ehub-muted); }
 .erb-warn { margin: 8px 17px 0; font-size: .8rem; color: var(--ehub-warning-text, #8a5a00); }

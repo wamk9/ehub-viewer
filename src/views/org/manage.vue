@@ -16,6 +16,7 @@ import EhubVisualFields from '@/components/inputs/EhubVisualFields.vue';
 import EhubCardSetupDialog from '@/components/modules/org/EhubCardSetupDialog.vue';
 import EhubUsageChart from '@/components/modules/org/EhubUsageChart.vue';
 import EhubReportBuilder from '@/components/EhubReportBuilder.vue';
+import EhubRichTextEditor from '@/components/inputs/EhubRichTextEditor.vue';
 import EhubFiscalDataDialog from '@/components/modules/org/EhubFiscalDataDialog.vue';
 import EventCreateWizard from '@/components/modules/org/manage/events/create.vue';
 import OrgNewsManager from '@/components/modules/org/manage/news/index.vue';
@@ -72,7 +73,7 @@ const ROLE_CLASS = {
 };
 
 export default {
-  components: { OrgNewsManager, EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubVisualFields, EhubCardSetupDialog, EhubUsageChart, EhubFiscalDataDialog, EhubReportBuilder },
+  components: { OrgNewsManager, EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubVisualFields, EhubCardSetupDialog, EhubUsageChart, EhubFiscalDataDialog, EhubReportBuilder, EhubRichTextEditor },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -110,7 +111,7 @@ export default {
       inviteSending: false,
 
       // settings panel
-      settingsForm: { name: '', description: '', founded_at: '', instagram: '', facebook: '', x_twitter: '', website: '', color: '', contact_email: '', phone: '' },
+      settingsForm: { name: '', description: '', about: '', certificate_signer: '', certificate_signer_role: '', founded_at: '', instagram: '', facebook: '', x_twitter: '', website: '', color: '', contact_email: '', phone: '' },
       settingsSaving: false,
       visualSaving: false,
       logoFile: null,
@@ -343,6 +344,9 @@ export default {
         this.org = result.data;
         this.settingsForm.name = result.data.name || '';
         this.settingsForm.description = result.data.description || '';
+        this.settingsForm.about = result.data.about || '';
+        this.settingsForm.certificate_signer = result.data.certificate_signer || '';
+        this.settingsForm.certificate_signer_role = result.data.certificate_signer_role || '';
         this.settingsForm.founded_at = result.data.founded_at ? result.data.founded_at.slice(0, 7) : '';
         this.settingsForm.instagram = result.data.instagram || '';
         this.settingsForm.facebook = result.data.facebook || '';
@@ -1476,12 +1480,18 @@ export default {
           <p class="set-desc">{{ $t('pages.organization.manage.settings.general_desc') }}</p>
           <div class="row g-3">
             <div class="col-12">
-              <label class="form-label set-label">{{ $t('pages.organization.manage.settings.name') }}</label>
-              <input type="text" class="form-control" v-model="settingsForm.name" />
+              <label class="form-label set-label" for="org-name">{{ $t('pages.organization.manage.settings.name') }}</label>
+              <input id="org-name" type="text" class="form-control" v-model="settingsForm.name" />
             </div>
             <div class="col-12">
-              <label class="form-label set-label">{{ $t('pages.organization.manage.settings.description') }}</label>
-              <textarea class="form-control" rows="3" v-model="settingsForm.description" style="resize:vertical"></textarea>
+              <label class="form-label set-label" for="org-desc">{{ $t('pages.organization.manage.settings.description') }}</label>
+              <textarea id="org-desc" class="form-control" rows="2" maxlength="500" v-model="settingsForm.description" style="resize:vertical"></textarea>
+              <p class="set-hint mb-0">{{ $t('pages.organization.manage.settings.description_hint') }}</p>
+            </div>
+            <div class="col-12">
+              <span class="form-label set-label d-block">{{ $t('pages.organization.manage.settings.about') }}</span>
+              <p class="set-hint">{{ $t('pages.organization.manage.settings.about_hint') }}</p>
+              <EhubRichTextEditor :label="$t('pages.organization.manage.settings.about')" v-model="settingsForm.about" :max-chars="5000" :min-height="160" />
             </div>
             <div class="col-md-6">
               <label class="form-label set-label">{{ $t('pages.organization.manage.settings.founded_at') }}</label>
@@ -1542,6 +1552,28 @@ export default {
             <div class="col-md-6">
               <label class="form-label set-label" for="org-contact-phone">{{ $t('pages.organization.manage.settings.contact_phone') }}</label>
               <div class="input-group"><span class="input-group-text"><font-awesome-icon :icon="['fas', 'phone']" /></span><input id="org-contact-phone" type="tel" class="form-control" v-model="settingsForm.phone" placeholder="(11) 99999-9999" autocomplete="tel" /></div>
+            </div>
+            <div class="col-12 d-flex justify-content-end">
+              <button class="btn btn-primary round px-4" :disabled="settingsSaving" @click="saveSettings">
+                <span v-if="settingsSaving" class="spinner-border spinner-border-sm me-2"></span>
+                {{ $t('pages.organization.manage.settings.save') }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Participation certificates -->
+        <div class="set-card mb-4">
+          <h3>{{ $t('pages.organization.manage.settings.cert_title') }}</h3>
+          <p class="set-desc">{{ $t('pages.organization.manage.settings.cert_desc') }}</p>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label set-label" for="org-cert-signer">{{ $t('pages.organization.manage.settings.cert_signer') }}</label>
+              <input id="org-cert-signer" v-model="settingsForm.certificate_signer" type="text" class="form-control" maxlength="120" :placeholder="$t('pages.organization.manage.settings.cert_signer_ph')" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label set-label" for="org-cert-role">{{ $t('pages.organization.manage.settings.cert_role') }}</label>
+              <input id="org-cert-role" v-model="settingsForm.certificate_signer_role" type="text" class="form-control" maxlength="120" :placeholder="$t('pages.organization.manage.settings.cert_role_ph')" />
             </div>
             <div class="col-12 d-flex justify-content-end">
               <button class="btn btn-primary round px-4" :disabled="settingsSaving" @click="saveSettings">

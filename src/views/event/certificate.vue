@@ -72,7 +72,10 @@ export default {
       <article class="cert" :style="{ '--cert-color': color }">
         <div class="cert__frame">
           <header class="cert__head">
-            <span class="cert__org">{{ cert.organization.name }}</span>
+            <span class="cert__org">
+              <img v-if="cert.organization.logo" :src="cert.organization.logo" :alt="cert.organization.name" class="cert__logo" />
+              {{ cert.organization.name }}
+            </span>
             <span class="cert__brand">eHub</span>
           </header>
           <h1 class="cert__title">{{ $t('events.certificate.title') }}</h1>
@@ -83,6 +86,11 @@ export default {
             <font-awesome-icon :icon="['fas', cert.final_position <= 3 ? 'medal' : 'trophy']" class="me-2" />
             {{ $t(cert.event.finished ? 'events.certificate.place_final' : 'events.certificate.place_stage', { n: cert.final_position, stage: cert.final_stage }) }}
           </p>
+          <div v-if="cert.organization.signer" class="cert__sign">
+            <span class="cert__sign-line" aria-hidden="true"></span>
+            <strong>{{ cert.organization.signer }}</strong>
+            <span>{{ cert.organization.signer_role || cert.organization.name }}</span>
+          </div>
           <footer class="cert__foot">
             <div>
               <span class="cert__k">{{ $t('events.certificate.category') }}</span>
@@ -116,6 +124,11 @@ export default {
 .cert__head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: clamp(.75rem, 1.6vw, 1rem); }
 .cert__org { color: var(--cert-color); text-transform: uppercase; letter-spacing: .08em; }
 .cert__brand { color: #7a8699; letter-spacing: .04em; }
+.cert__org { display: inline-flex; align-items: center; gap: 10px; }
+.cert__logo { height: clamp(28px, 5vw, 48px); width: auto; max-width: 140px; object-fit: contain; }
+.cert__sign { margin: 1.2em auto 0; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: clamp(.75rem, 1.5vw, .92rem); color: #5b6677; }
+.cert__sign strong { color: #1b2433; }
+.cert__sign-line { width: min(260px, 60%); border-top: 1.5px solid #1b2433; margin-bottom: 6px; }
 .cert__title { font-size: clamp(1.3rem, 4vw, 2.6rem); font-weight: 800; margin: auto 0 .3em; letter-spacing: -.01em; }
 .cert__lead { color: #5b6677; margin: 0; font-size: clamp(.8rem, 1.6vw, 1rem); }
 .cert__name { font-size: clamp(1.5rem, 5vw, 3rem); font-weight: 800; color: var(--cert-color); margin: .25em 0; line-height: 1.1; word-break: break-word; }

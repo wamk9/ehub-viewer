@@ -6,6 +6,7 @@ import { useStore } from 'vuex'
 import Api from '@/helpers/communication/Connection'
 import SystemVars from '@/helpers/General/SystemVars'
 import { safeUrl } from '@/helpers/General/safeUrl.js'
+import { categoryGradient } from '@/helpers/General/CategoryConfig.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -136,17 +137,7 @@ function teamGrad(team) {
     const light = '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('')
     return `linear-gradient(135deg, ${team.color}, ${light})`
   }
-  const CAT_COLORS = {
-    simracing: ['#0098D8', '#00d4ff'],
-    'esports-fps': ['#e23b3b', '#ff8a3b'],
-    'esports-moba': ['#7C3AED', '#b06bff'],
-    'esports-fighting': ['#d6336c', '#ff6b9d'],
-    motorsport: ['#f08c00', '#ffc93c'],
-    chess: ['#495057', '#868e96'],
-    running: ['#1f8a5b', '#51cf66'],
-  }
-  const c = CAT_COLORS[team.category]
-  return c ? `linear-gradient(135deg, ${c[0]}, ${c[1]})` : 'linear-gradient(135deg, #495057, #868e96)'
+  return categoryGradient(team.category)
 }
 
 function orgLogoUrl(org) {

@@ -1,4 +1,5 @@
 <script setup>
+import { sanitizeHtml } from '@/helpers/General/sanitizeHtml.js'
 import { ref, computed, watch, onMounted, onBeforeUnmount, useCssVars } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -360,7 +361,8 @@ onBeforeUnmount(() => {
         <!-- Description -->
         <div class="about-card">
           <h3>{{ $t('pages.organization.show.about.title') }}</h3>
-          <p v-if="org.about || org.description" class="body">{{ org.about || org.description }}</p>
+          <div v-if="org.about" class="body org-about" v-html="sanitizeHtml(org.about)"></div>
+          <p v-else-if="org.description" class="body">{{ org.description }}</p>
           <p v-else class="body" style="opacity:.5">{{ $t('pages.organization.show.about.empty') }}</p>
         </div>
 
@@ -566,4 +568,6 @@ onBeforeUnmount(() => {
   opacity: .4;
   margin-bottom: 12px;
 }
+.org-about :deep(img) { max-width: 100%; height: auto; border-radius: 10px; }
+.org-about :deep(p:last-child) { margin-bottom: 0; }
 </style>

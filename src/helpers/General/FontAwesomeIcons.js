@@ -1,6 +1,14 @@
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
+  faVolleyball,
+  faBasketball,
+  faHand,
+  faBaseball,
+  faTableTennisPaddleBall,
+  faPersonSkating,
+  faTableCells,
+  faDesktop,
   faFileCsv,
   faPrint,
   faSackDollar,
@@ -217,6 +225,14 @@ import {
 //import { faBell } from "@fortawesome/free-regular-svg-icons";
 
 library.add(
+  faVolleyball,
+  faBasketball,
+  faHand,
+  faBaseball,
+  faTableTennisPaddleBall,
+  faPersonSkating,
+  faTableCells,
+  faDesktop,
   faFileCsv,
   faPrint,
   faSackDollar,

@@ -192,11 +192,12 @@ export default {
     },
   },
   waitlist: {
+    held: "Se abrió una plaza y está reservada para ti hasta {date}. ¡Inscríbete ahora!",
     join: "Entrar en la lista de espera",
     pitch: "No quedan plazas. Entra en la lista: si alguien se va, te avisamos aquí y por e-mail.",
     count: "{n} persona ya está esperando. | {n} personas ya están esperando.",
     you_are: "Estás en la lista de espera — posición {n}",
-    how: "Si se abre una plaza te avisamos. La plaza es para quien se inscriba primero.",
+    how: "Si se abre una plaza te avisamos. La plaza queda reservada para ti por 24 horas.",
     leave: "Salir de la lista de espera",
     joined: "Entraste en la lista de espera (posición {n}).",
     left: "Saliste de la lista de espera.",

@@ -195,11 +195,12 @@ export default {
     payment_failure: 'Payment failed. Please try registering again.',
   },
   waitlist: {
+    held: "A spot opened and it is held for you until {date}. Register now!",
     join: "Join the waiting list",
     pitch: "No spots left. Join the list: if someone drops out, we will tell you here and by e-mail.",
     count: "{n} person is already waiting. | {n} people are already waiting.",
     you_are: "You are on the waiting list — position {n}",
-    how: "If a spot opens we will tell you. The spot goes to whoever registers first.",
+    how: "If a spot opens we will tell you. The spot is held for you for 24 hours.",
     leave: "Leave the waiting list",
     joined: "You joined the waiting list (position {n}).",
     left: "You left the waiting list.",

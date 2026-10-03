@@ -68,7 +68,7 @@ export default {
     slotsLabel: 'Slots', maxSlots: 'Maximum entries', slotsHint: 'Leave empty for unlimited.',
     slotsHintGroups: 'Required for the groups format. Set by the Groups Configurator in Schedule.',
     minSlots: 'Minimum to hold event', minSlotsHint: 'Minimum registrations expected for the event to happen (informational).',
-    feeLabel: 'Entry fee', prize: 'Total prize pool', prizeDist: 'Who gets what', prizeDistHint: 'Set the prize for each place or special award (e.g. fastest lap, MVP): a share of the cash pool, a product, or both. Leave the name blank to use the place.', prizeHint: 'Optional. Leave empty if there is no cash prize.',
+    feeLabel: 'Entry fee', prize: 'Total prize pool', prizeDist: 'Who gets what', prizeDistHint: 'Set the prize for each place or special award (e.g. best player, rookie of the year): a share of the cash pool, a product, or both. Leave the name blank to use the place.', prizeHint: 'Optional. Leave empty if there is no cash prize.',
     requirements: 'Participation requirements', requirementsPh: 'e.g. Category B license; minimum iRating 2000; must reside in Brazil…',
   },
   s5: {

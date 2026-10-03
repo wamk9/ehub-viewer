@@ -68,7 +68,7 @@ export default {
     slotsLabel: 'Plazas', maxSlots: 'Máximo de inscritos', slotsHint: 'Deja vacío para ilimitado.',
     slotsHintGroups: 'Obligatorio para el formato de grupos. Definido por el Configurador de Grupos en el Cronograma.',
     minSlots: 'Mínimo para realizar', minSlotsHint: 'Mínimo de inscritos esperado para que el evento se realice (informativo).',
-    feeLabel: 'Inscripción', prize: 'Premio total', prizeDist: 'Quién recibe qué', prizeDistHint: 'Define el premio de cada posición o premio especial (ej.: vuelta rápida, MVP): una parte del valor en dinero, un producto, o ambos. Deja el nombre en blanco para usar la posición.', prizeHint: 'Opcional. Deja vacío si no hay premio en dinero.',
+    feeLabel: 'Inscripción', prize: 'Premio total', prizeDist: 'Quién recibe qué', prizeDistHint: 'Define el premio de cada posición o premio especial (ej.: mejor jugador, revelación): una parte del valor en dinero, un producto, o ambos. Deja el nombre en blanco para usar la posición.', prizeHint: 'Opcional. Deja vacío si no hay premio en dinero.',
     requirements: 'Requisitos de participación', requirementsPh: 'ej: Licencia categoría B; iRating mínimo 2000; residir en Brasil…',
   },
   s5: {

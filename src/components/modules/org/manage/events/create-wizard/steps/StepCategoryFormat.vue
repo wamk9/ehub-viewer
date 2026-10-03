@@ -46,7 +46,9 @@ const filteredCategories = computed(() => {
 
 const filteredSubcategories = computed(() => {
   const q = norm(subcatSearch.value.trim())
+  // "Outros" always last.
   return subcategories.value.filter(s => !q || norm(subName(s)).includes(q) || norm(s.route).includes(q))
+    .sort((a, b) => (a.route === 'other') - (b.route === 'other'))
 })
 
 async function selectCategory(cat) {

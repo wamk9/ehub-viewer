@@ -1,0 +1,26 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Public result tables (event page, stage cards, standings).
+   Shared so every component that shows a result looks the same.
+   ───────────────────────────────────────────────────────────────────────── */
+.you-chip { display: inline-block; margin-left: 8px; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ehub-primary-text); background: var(--ehub-primary-tint); padding: 1px 8px; border-radius: 50rem; vertical-align: middle; }
+table.ev-table tr.mine td { background: color-mix(in srgb, var(--ehub-primary) 6%, transparent); }
+table.ev-table th.c, table.ev-table td.c { text-align: center; }
+.table-wrap { overflow-x: auto; border: none; background: transparent; }
+table.ev-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+table.ev-table th { padding: 12px 14px; font-size: .72rem; font-weight: 700; color: var(--ehub-muted); text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--ehub-line); }
+table.ev-table th.l, table.ev-table td.l { text-align: left; }
+table.ev-table td { padding: 12px 14px; color: var(--ehub-ink); border-bottom: 1px solid var(--ehub-line); text-align: center; vertical-align: middle; }
+table.ev-table tbody tr:last-child td { border-bottom: 0; }
+.driver-cell .nm { font-weight: 600; }
+.driver-cell .sub { font-size: .76rem; color: var(--ehub-muted); }
+.qualified-ico { color: var(--org-accent-text); }
+.pos-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; font-weight: 700; font-size: .85rem; }
+.pos-badge.p1 { background: color-mix(in srgb, var(--ehub-gold, #f59e0b) 22%, transparent); color: color-mix(in srgb, var(--ehub-gold, #f59e0b), #000 26%); }
+.pos-badge.p2 { background: rgba(150,150,160,.22); color: #8a8f99; }
+.pos-badge.p3 { background: rgba(205,127,50,.20); color: #b5703a; }
+html[data-bs-theme="dark"] .pos-badge.p1 { color: var(--ehub-gold, #f59e0b); }
+.pts-total { font-weight: 800; font-size: 1rem; color: var(--org-accent-text); }
+.pts-cell.top { color: var(--ehub-ink); font-weight: 600; }
+.pts-cell { color: var(--ehub-muted); }
+.ev-empty { text-align: center; padding: 54px 20px; color: var(--ehub-muted); border: 1px dashed var(--ehub-line); border-radius: var(--ehub-radius-card); }
+.ev-empty svg { font-size: 2rem; opacity: .4; display: block; margin: 0 auto; }

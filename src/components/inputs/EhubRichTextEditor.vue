@@ -48,6 +48,8 @@ export default {
     placeholder: { type: String, default: '' },
     maxChars: { type: Number, default: 0 },
     minHeight: { type: Number, default: 120 },
+    // Accessible name of the text area (screen readers): the visible label text.
+    label: { type: String, default: '' },
   },
   emits: ['update:modelValue'],
   data() {
@@ -61,6 +63,7 @@ export default {
   mounted() {
     this.editor = new Editor({
       content: this.modelValue || '',
+      editorProps: { attributes: { role: 'textbox', 'aria-multiline': 'true', ...(this.label ? { 'aria-label': this.label } : {}) } },
       extensions: [
         StarterKit.configure({ heading: { levels: [2, 3] }, link: { openOnClick: false }, codeBlock: false, code: false }),
         TextAlign.configure({ types: ['heading', 'paragraph'] }),

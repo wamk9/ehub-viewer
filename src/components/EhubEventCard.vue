@@ -1,4 +1,5 @@
 <script setup>
+import { categoryGradient, categoryIcon } from '@/helpers/General/CategoryConfig.js'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SystemVars from '@/helpers/General/SystemVars'
@@ -11,38 +12,7 @@ const props = defineProps({
 
 const { t, locale } = useI18n()
 
-const CAT_GRAD = {
-  simracing:          ['#0098D8', '#00d4ff'],
-  racingcars:         ['#0098D8', '#00d4ff'],
-  rally:              ['#f08c00', '#ffc93c'],
-  'esports-fps':      ['#e23b3b', '#ff8a3b'],
-  'esports-moba':     ['#7C3AED', '#b06bff'],
-  'esports-fighting': ['#d6336c', '#ff6b9d'],
-  'esports-strategy': ['#1a6e4f', '#51cf66'],
-  'esports-sports':   ['#2563eb', '#60a5fa'],
-  motorsport:         ['#f08c00', '#ffc93c'],
-  motorbike:          ['#dc4f00', '#ff8a3b'],
-  cycling:            ['#1971c2', '#4dabf7'],
-  running:            ['#1f8a5b', '#51cf66'],
-  swimming:           ['#0284c7', '#38bdf8'],
-  triathlon:          ['#7C3AED', '#c084fc'],
-  hiking:             ['#4d7c0f', '#a3e635'],
-  crossfit:           ['#9a3412', '#fb923c'],
-  rowing:             ['#1d4ed8', '#93c5fd'],
-  archery:            ['#92400e', '#fbbf24'],
-  chess:              ['#495057', '#868e96'],
-  'drone-racing':     ['#0e7490', '#22d3ee'],
-}
 
-const CAT_ICON = {
-  simracing: 'flag-checkered', racingcars: 'flag-checkered', rally: 'car-side',
-  'esports-fps': 'crosshairs', 'esports-moba': 'dragon', 'esports-fighting': 'hand-fist',
-  'esports-strategy': 'chess-pawn', 'esports-sports': 'futbol', motorsport: 'car-side',
-  motorbike: 'motorcycle', cycling: 'bicycle', running: 'person-running',
-  swimming: 'person-swimming', triathlon: 'trophy', hiking: 'mountain-sun',
-  crossfit: 'dumbbell', rowing: 'water', archery: 'bullseye',
-  chess: 'chess-knight', 'drone-racing': 'helicopter',
-}
 
 const grad = computed(() => {
   if (props.orgColor && /^#[0-9A-Fa-f]{6}$/.test(props.orgColor)) {
@@ -53,11 +23,10 @@ const grad = computed(() => {
     const dark = '#' + [r, g, b].map(c => c.toString(16).padStart(2, '0')).join('')
     return `linear-gradient(135deg, ${props.orgColor}, ${dark})`
   }
-  const g = CAT_GRAD[props.event.category]
-  return g ? `linear-gradient(135deg, ${g[0]}, ${g[1]})` : 'linear-gradient(135deg, #0098D8, #00d4ff)'
+  return categoryGradient(props.event.category)
 })
 
-const catIcon = computed(() => CAT_ICON[props.event.category] || 'trophy')
+const catIcon = computed(() => categoryIcon(props.event.category))
 
 // Same wording as the event page: can a visitor still join?
 const cardStatus = computed(() => {

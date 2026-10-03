@@ -42,6 +42,15 @@ const OrganizationEventStage = {
         const result = await Api.postAsync(`/org/${orgRoute}/event/${eventRoute}/stage/${stageRoute}/round`, data);
         return { code: result.code, data: result.response?.message };
     },
+    async updateRound(orgRoute, eventRoute, stageRoute, roundId, data) {
+        const result = await Api.patchAsync(`/org/${orgRoute}/event/${eventRoute}/stage/${stageRoute}/round/${roundId}`, data);
+        return { code: result.code, data: result.response?.message };
+    },
+    /** Schedule, broadcast link and "on now" of one match. */
+    async updateMatch(orgRoute, eventRoute, stageRoute, matchId, data) {
+        const result = await Api.patchAsync(`/org/${orgRoute}/event/${eventRoute}/stage/${stageRoute}/match/${matchId}/details`, data);
+        return { code: result.code, data: result.response?.message };
+    },
     async removeRound(orgRoute, eventRoute, stageRoute, roundId) {
         const result = await Api.deleteAsync(`/org/${orgRoute}/event/${eventRoute}/stage/${stageRoute}/round/${roundId}`);
         return { code: result.code, data: result.response?.message };
