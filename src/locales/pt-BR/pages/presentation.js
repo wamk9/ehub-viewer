@@ -1,9 +1,9 @@
 export default {
   hero: {
-    eyebrow: 'Gestão de e-sports e competições',
-    title_pre: 'Organizações, eventos e times',
+    eyebrow: 'Campeonatos de qualquer esporte, online ou presenciais',
+    title_pre: 'Organizações, eventos e equipes',
     title_accent: 'conectados em um só lugar',
-    subtitle: 'O eHub reúne toda a sua operação competitiva em uma única plataforma: crie sua organização, publique campeonatos, gerencie etapas e times, e acompanhe resultados — do primeiro convite ao pódio.',
+    subtitle: 'O eHub reúne toda a sua operação competitiva em uma única plataforma: crie sua organização, publique campeonatos, gerencie etapas e equipes, e acompanhe resultados — do primeiro convite ao pódio.',
     cta_primary: 'Criar minha conta grátis',
     cta_create_org: 'Criar minha organização',
     cta_my_orgs: 'Minhas organizações',

@@ -407,7 +407,7 @@ export default {
           <span v-if="ownerName">{{ ownerName }}</span>
           <span>{{ dsLabel(def.dataset) }}<template v-if="grouped"> · {{ $t('reports.groups.' + def.group_by) }}</template></span>
           <span v-if="ds.filters.includes('period')">{{ periodText() }}</span>
-          <span>{{ t('result.rows', { n: result.rows.length }) }}</span>
+          <span>{{ $t('reports.result.rows', { n: result.rows.length }, result.rows.length) }}</span>
           <span>{{ t('result.generated_at', { date: fmtWhen(generatedAt) }) }}</span>
         </div>
         <p v-if="result.truncated" class="erb-warn">{{ t('result.truncated') }}</p>

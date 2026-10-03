@@ -1,6 +1,6 @@
 export default {
   hero: {
-    eyebrow: 'E-sports & competition management',
+    eyebrow: 'Competitions for any sport, online or in person',
     title_pre: 'Organizations, events and teams',
     title_accent: 'connected in one place',
     subtitle: 'eHub brings your entire competitive operation into a single platform: create your organization, publish championships, manage stages and teams, and track results — from the first invite to the podium.',

@@ -67,7 +67,7 @@ export default {
     "custom": "Pick dates"
   },
   "result": {
-    "rows": "{n} rows",
+    "rows": "No rows | 1 row | {n} rows",
     "total": "Total",
     "count": "Count",
     "sum": "Sum",

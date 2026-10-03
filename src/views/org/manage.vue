@@ -241,16 +241,19 @@ export default {
     navItems() {
       const t = (k) => this.$t('pages.organization.manage.nav.' + k);
       if (this.billingBlocked) return [{ key: 'financeiro', icon: 'file-invoice-dollar', label: t('financeiro') }];
+      // Each role only sees what the API lets it use (see ORG_ROLE_PERMS).
+      const r = this.myRole;
+      const has = (roles) => !r || roles.includes(r);
       return [
         { key: 'overview', icon: 'chart-line', label: t('overview') },
         { key: 'events', icon: 'calendar-days', label: t('events') },
         { key: 'members', icon: 'users', label: t('members') },
         { key: 'roles', icon: 'shield-halved', label: t('roles') },
         { key: 'activity', icon: 'clock-rotate-left', label: t('activity') },
-        { key: 'news', icon: 'newspaper', label: t('news') },
-        { key: 'financeiro', icon: 'file-invoice-dollar', label: t('financeiro') },
-        ...(REPORT_ROLES.includes(this.myRole) ? [{ key: 'reports', icon: 'chart-bar', label: t('reports') }] : []),
-        { key: 'settings', icon: 'gear', label: t('settings') },
+        ...(has(['owner', 'admin', 'marketing']) ? [{ key: 'news', icon: 'newspaper', label: t('news') }] : []),
+        ...(has(['owner', 'admin', 'financial']) ? [{ key: 'financeiro', icon: 'file-invoice-dollar', label: t('financeiro') }] : []),
+        ...(REPORT_ROLES.includes(r) ? [{ key: 'reports', icon: 'chart-bar', label: t('reports') }] : []),
+        ...(has(['owner', 'admin']) ? [{ key: 'settings', icon: 'gear', label: t('settings') }] : []),
       ];
     },
     navLinks() {
@@ -281,6 +284,8 @@ export default {
       this.loadFinances();
       return;
     }
+    // A link to a panel this role can't use falls back to the overview.
+    if (!this.navItems.some((i) => i.key === this.activePanel)) this.activePanel = 'overview';
     // Opening /finances directly (reload, deep link, gateway return) never goes through switchPanel.
     if (this.activePanel === 'financeiro' && !this.finLoaded) this.loadFinances();
     this.initOnboarding();

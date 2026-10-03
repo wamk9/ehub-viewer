@@ -67,15 +67,15 @@
             <!-- Name + Tag -->
             <div class="row g-3 mb-3">
               <div class="col-8">
-                <label class="form-label">{{ $t('pages.teams.create.s1.name') }} <span style="color:var(--ehub-danger-text)">*</span></label>
-                <input v-model="form.name" type="text" class="form-control" :placeholder="$t('pages.teams.create.s1.name_ph')" maxlength="60" />
+                <label class="form-label" for="tc-name">{{ $t('pages.teams.create.s1.name') }} <span style="color:var(--ehub-danger-text)">*</span></label>
+                <input id="tc-name" v-model="form.name" type="text" class="form-control" :placeholder="$t('pages.teams.create.s1.name_ph')" maxlength="60" />
                 <div class="char-count"><span>{{ form.name.length }}</span>/60</div>
               </div>
               <div class="col-4">
-                <label class="form-label">{{ $t('pages.teams.create.s1.tag') }} <span style="color:var(--ehub-danger-text)">*</span></label>
+                <label class="form-label" for="tc-tag">{{ $t('pages.teams.create.s1.tag') }} <span style="color:var(--ehub-danger-text)">*</span></label>
                 <div class="input-group">
                   <span class="input-group-text tag-prefix">#</span>
-                  <input v-model="form.tag" type="text" class="form-control" :placeholder="$t('pages.teams.create.s1.tag_ph')" maxlength="5" @input="form.tag = form.tag.toUpperCase()" />
+                  <input id="tc-tag" v-model="form.tag" type="text" class="form-control" :placeholder="$t('pages.teams.create.s1.tag_ph')" maxlength="5" @input="form.tag = form.tag.toUpperCase()" />
                 </div>
                 <div class="field-hint">{{ $t('pages.teams.create.s1.tag_hint') }}</div>
               </div>
@@ -83,8 +83,8 @@
 
             <!-- Description -->
             <div class="form-section">
-              <label class="form-label">{{ $t('pages.teams.create.s1.desc') }}</label>
-              <textarea v-model="form.description" class="form-control" rows="3" maxlength="280" :placeholder="$t('pages.teams.create.s1.desc_ph')" style="resize:vertical"></textarea>
+              <label class="form-label" for="tc-desc">{{ $t('pages.teams.create.s1.desc') }}</label>
+              <textarea id="tc-desc" v-model="form.description" class="form-control" rows="3" maxlength="280" :placeholder="$t('pages.teams.create.s1.desc_ph')" style="resize:vertical"></textarea>
               <div class="char-count">{{ form.description.length }}/280</div>
             </div>
 
@@ -137,8 +137,8 @@
                 ></div>
               </div>
               <div class="color-custom-wrap">
-                <input type="color" v-model="form.color" style="width:36px;height:36px;border-radius:8px;border:1px solid var(--ehub-line);cursor:pointer;padding:2px" />
-                <input type="text" class="form-control color-hex-inp" v-model="form.color" placeholder="#0098D8" maxlength="7" />
+                <input type="color" v-model="form.color" :aria-label="$t('pages.teams.create.s1.color')" style="width:36px;height:36px;border-radius:8px;border:1px solid var(--ehub-line);cursor:pointer;padding:2px" />
+                <input type="text" class="form-control color-hex-inp" v-model="form.color" :aria-label="$t('pages.teams.create.s1.color')" placeholder="#0098D8" maxlength="7" />
                 <span class="field-hint mb-0">{{ $t('pages.teams.create.s1.color_hint') }}</span>
               </div>
             </div>
@@ -156,7 +156,7 @@
               <div v-if="!form.category">
                 <div class="cat-search-wrap">
                   <font-awesome-icon icon="magnifying-glass" class="search-ico" />
-                  <input v-model="catSearch" type="text" class="form-control cat-search-inp" :placeholder="$t('pages.teams.create.s2.cat_search')" />
+                  <input v-model="catSearch" type="text" class="form-control cat-search-inp" :aria-label="$t('pages.teams.create.s2.cat_search')" :placeholder="$t('pages.teams.create.s2.cat_search')" />
                 </div>
                 <div class="cat-scroll">
                   <div class="cat-grid">
@@ -263,7 +263,7 @@
               <div class="form-section-label">{{ $t('pages.teams.create.s3.size_label') }}</div>
               <div class="row g-2 align-items-center">
                 <div class="col-auto">
-                  <input v-model.number="form.max_members" type="number" class="form-control" min="2" max="100" style="width:100px" />
+                  <input v-model.number="form.max_members" type="number" :aria-label="$t('pages.teams.create.s3.size_label')" class="form-control" min="2" max="100" style="width:100px" />
                 </div>
                 <div class="col">
                   <span class="field-hint mb-0">{{ $t('pages.teams.create.s3.size_hint') }}</span>
@@ -307,19 +307,19 @@
               <div class="form-section-label">{{ $t('pages.teams.create.s3.social_label') }}</div>
               <div class="social-row">
                 <div class="social-ico" style="color:#1DA1F2"><font-awesome-icon :icon="['fab', 'twitter']" /></div>
-                <input v-model="form.social_twitter" type="url" class="form-control" placeholder="https://twitter.com/suaequipe" />
+                <input v-model="form.social_twitter" type="url" aria-label="X / Twitter" class="form-control" placeholder="https://twitter.com/suaequipe" />
               </div>
               <div class="social-row">
                 <div class="social-ico" style="color:#833AB4"><font-awesome-icon :icon="['fab', 'instagram']" /></div>
-                <input v-model="form.social_instagram" type="url" class="form-control" placeholder="https://instagram.com/suaequipe" />
+                <input v-model="form.social_instagram" type="url" aria-label="Instagram" class="form-control" placeholder="https://instagram.com/suaequipe" />
               </div>
               <div class="social-row">
                 <div class="social-ico" style="color:#5865F2"><font-awesome-icon :icon="['fab', 'discord']" /></div>
-                <input v-model="form.social_discord" type="url" class="form-control" placeholder="https://discord.gg/convite" />
+                <input v-model="form.social_discord" type="url" aria-label="Discord" class="form-control" placeholder="https://discord.gg/convite" />
               </div>
               <div class="social-row">
                 <div class="social-ico" style="color:#FF0000"><font-awesome-icon :icon="['fab', 'youtube']" /></div>
-                <input v-model="form.social_youtube" type="url" class="form-control" placeholder="https://youtube.com/@suaequipe" />
+                <input v-model="form.social_youtube" type="url" aria-label="YouTube" class="form-control" placeholder="https://youtube.com/@suaequipe" />
               </div>
             </div>
           </div>

@@ -165,8 +165,10 @@ const slotsBarColor = computed(() => {
         </div>
         <span class="ec-slots-label">
           <font-awesome-icon :icon="['fas', 'users']" />
-          {{ event.registrations_count }}{{ hasSlotLimit ? '/' + event.max_registrations : '' }}
-          <span v-if="!hasSlotLimit" class="ec-slots-unlimited">∞</span>
+          {{ hasSlotLimit
+            ? $t('events.card.registered_of', { n: event.registrations_count, max: event.max_registrations })
+            : $t('events.card.registered', { n: event.registrations_count }, event.registrations_count) }}
+          <span v-if="!hasSlotLimit" class="ec-slots-unlimited">· {{ $t('events.card.unlimited') }}</span>
         </span>
       </div>
     </div>

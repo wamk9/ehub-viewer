@@ -104,6 +104,13 @@ async function submit() {
     const result = await Api.postAsync('/users', payload)
     if (result.code === 201) {
       loadingText.value = i18n.t('users.create.loading.created.title')
+      // The new session can be lost when another request answers with the old cookie
+      // right after sign-up: check it and, if needed, sign in with what was just typed.
+      const me = await Api.getAsync('/user/profile')
+      if (me.code === 401) {
+        await Api.fetchCsrf()
+        await Api.postAsync('/auth/login', { mail: payload.username, password: payload.password, remember: true })
+      }
       store.dispatch('setAuthenticated', true)
 
       if (inviteToken.value) {

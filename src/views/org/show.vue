@@ -71,7 +71,8 @@ const eventsLoading = ref(false)
 const articles = ref([])
 const articlesLoaded = ref(false)
 const articlesLoading = ref(false)
-const activeTab = computed(() => route.params.tab || 'about')
+// Without an "about" text, open on the events (what visitors come for).
+const activeTab = computed(() => route.params.tab || (org.value && !(org.value.about || org.value.description) ? 'events' : 'about'))
 function tabTo(key) {
   return { name: 'show-organization-info', params: { orgRoute: route.params.orgRoute, tab: key } }
 }
@@ -236,6 +237,7 @@ onMounted(async () => {
   orgSSE.connect()
 
   loadEvents()
+  loadMembers() // the header shows how many members there are
   loadTabData(activeTab.value)
 })
 

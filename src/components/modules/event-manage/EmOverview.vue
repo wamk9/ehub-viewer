@@ -173,7 +173,7 @@ export default {
         :label="$t('pages.event.manage.ov.k_regs')" @click="go('regs')" />
       <EhubStatCard v-if="seesRegs" :icon="['fas', 'clock']" icon-class="gold" :value="pending"
         :label="$t('pages.event.manage.ov.k_pending')" @click="go('regs')" />
-      <EhubStatCard v-if="seesRegs" :icon="['fas', 'wallet']" icon-class="green" :value="revenue"
+      <EhubStatCard v-if="em.canPanel('finance')" :icon="['fas', 'wallet']" icon-class="green" :value="revenue"
         :label="$t('pages.event.manage.ov.k_revenue')" @click="go('finance')" />
       <EhubStatCard :icon="['fas', 'stopwatch']" icon-bg="color-mix(in srgb,#e23b3b 14%,transparent)" icon-color="#e23b3b"
         :value="next ? (next.round ? next.round.name : next.stage.name) : '—'"

@@ -77,6 +77,7 @@ export default {
     champion: 'Campeão',
     next_stage: 'Próxima etapa',
     pts: 'pts',
+    time: 'Tempo:',
   },
   standings: {
     image: "Baixar imagem",
@@ -179,7 +180,7 @@ export default {
       free_notice: 'Inscrição gratuita: sua inscrição será confirmada automaticamente.',
       fee_warning: 'Este evento requer pagamento de {fee} após a inscrição.',
       confirm_text: 'Deseja se inscrever neste evento?',
-      privacy: "O organizador verá seu nome, usuário, e-mail, telefone (se informado) e as respostas acima, para falar com você sobre este evento.",
+      privacy: "O organizador verá seu nome, usuário, e-mail, telefone (se informado) e as respostas do formulário (se houver), para falar com você sobre este evento.",
       confirm: 'Confirmar inscrição',
       cancel: 'Cancelar',
       field_required: 'Campo obrigatório.',

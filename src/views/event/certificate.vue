@@ -18,6 +18,13 @@ export default {
       const d = this.cert?.event?.start_at;
       return d ? new Intl.DateTimeFormat(this.$i18n.locale, { dateStyle: 'long' }).format(new Date(String(d).replace(' ', 'T'))) : '';
     },
+    sentence() {
+      const c = this.cert;
+      const parts = [this.$t(c.is_team ? 'events.certificate.text_team' : 'events.certificate.text', { event: c.event.name, org: c.organization.name })];
+      if (this.dateText) parts.push(this.$t('events.certificate.on_date', { date: this.dateText }));
+      if (c.event.location) parts.push(this.$t('events.certificate.at_place', { place: c.event.location }));
+      return parts.join(' ') + '.';
+    },
     categoryText() {
       const c = this.cert?.event?.category;
       return c && this.$te('categories.names.' + c) ? this.$t('categories.names.' + c) : '';
@@ -71,9 +78,7 @@ export default {
           <h1 class="cert__title">{{ $t('events.certificate.title') }}</h1>
           <p class="cert__lead">{{ $t('events.certificate.lead') }}</p>
           <p class="cert__name">{{ cert.participant }}</p>
-          <p class="cert__text">
-            {{ $t(cert.is_team ? 'events.certificate.text_team' : 'events.certificate.text', { event: cert.event.name, org: cert.organization.name }) }}<template v-if="dateText"> {{ $t('events.certificate.on_date', { date: dateText }) }}</template><template v-if="cert.event.location"> {{ $t('events.certificate.at_place', { place: cert.event.location }) }}</template>.
-          </p>
+          <p class="cert__text">{{ sentence }}</p>
           <p v-if="cert.final_position" class="cert__place">
             <font-awesome-icon :icon="['fas', cert.final_position <= 3 ? 'medal' : 'trophy']" class="me-2" />
             {{ $t(cert.event.finished ? 'events.certificate.place_final' : 'events.certificate.place_stage', { n: cert.final_position, stage: cert.final_stage }) }}

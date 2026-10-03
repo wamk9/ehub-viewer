@@ -67,7 +67,7 @@ export default {
     "custom": "Escolher datas"
   },
   "result": {
-    "rows": "{n} linhas",
+    "rows": "Nenhuma linha | 1 linha | {n} linhas",
     "total": "Total",
     "count": "Quantidade",
     "sum": "Soma",

@@ -40,7 +40,7 @@
         </div>
       </div>
     </div>
-    <p class="euc-note">* {{ $t(K + 'partial_note') }}<template v-if="!showFee"> {{ $t(K + 'fee_brl_note') }}</template></p>
+    <p class="euc-note">* {{ $t(K + 'partial_note') }}<template v-if="!showFee">{{ ' ' + $t(K + 'fee_brl_note') }}</template></p>
   </div>
 </template>
 

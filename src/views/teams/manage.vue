@@ -106,28 +106,28 @@
               <span v-if="activity.type === 'team_role_changed'" v-html="$t('pages.teams.manage.activity_role_changed', {
                 actor: esc(activity.params.actor),
                 target: esc(activity.params.target),
-                old_role: $t(`pages.teams.manage.roles.${activity.params.old_role}`),
-                new_role: $t(`pages.teams.manage.roles.${activity.params.new_role}`),
+                old_role: esc($t(`pages.teams.manage.roles.${activity.params.old_role}`)),
+                new_role: esc($t(`pages.teams.manage.roles.${activity.params.new_role}`)),
               })" />
               <span v-else-if="activity.type === 'team_member_removed'" v-html="$t('pages.teams.manage.activity_member_removed', {
                 actor: esc(activity.params.actor),
                 target: esc(activity.params.target),
-                role: $t(`pages.teams.manage.roles.${activity.params.role}`),
+                role: esc($t(`pages.teams.manage.roles.${activity.params.role}`)),
               })" />
               <span v-else-if="activity.type === 'team_member_joined_application'" v-html="$t('pages.teams.manage.activity_member_joined_application', {
                 actor: esc(activity.params.actor),
                 target: esc(activity.params.target),
-                role: $t(`pages.teams.manage.roles.${activity.params.role}`),
+                role: esc($t(`pages.teams.manage.roles.${activity.params.role}`)),
               })" />
               <span v-else-if="activity.type === 'team_member_joined_invite'" v-html="$t('pages.teams.manage.activity_member_joined_invite', {
                 actor: esc(activity.params.actor),
                 target: esc(activity.params.target),
-                role: $t(`pages.teams.manage.roles.${activity.params.role}`),
+                role: esc($t(`pages.teams.manage.roles.${activity.params.role}`)),
               })" />
               <span v-else-if="activity.type === 'team_invite_sent'" v-html="$t('pages.teams.manage.activity_invite_sent', {
                 actor: esc(activity.params.actor),
                 target: esc(activity.params.target),
-                role: $t(`pages.teams.manage.roles.${activity.params.role}`),
+                role: esc($t(`pages.teams.manage.roles.${activity.params.role}`)),
               })" />
             </template>
           </EhubActivityLog>
@@ -798,7 +798,7 @@ export default {
     },
     activityHtml(a) {
       const p = a.params || {}
-      const r  = (key) => this.$t(`pages.teams.manage.roles.${key}`)
+      const r  = (key) => this.esc(this.$t(`pages.teams.manage.roles.${key}`))
       if (a.type === 'team_role_changed')
         return this.$t('pages.teams.manage.activity_role_changed', { actor: this.esc(p.actor), target: this.esc(p.target), old_role: r(p.old_role), new_role: r(p.new_role) })
       if (a.type === 'team_member_removed')

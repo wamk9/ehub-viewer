@@ -16,6 +16,7 @@ export default {
   computed: {
     ev() { return this.em.event; },
     canRun() { return this.em.can('event.manage'); },
+    canCheckin() { return this.em.can('regs.checkin'); },
     canConfirm() { return this.em.can('regs.confirm_payment'); },
     canFormData() { return this.em.can('regs.form_data'); },
     regs() { return this.em.regs; },
@@ -239,7 +240,7 @@ export default {
               <td class="td-muted">{{ fmtDate(r.registered_at) }}</td>
               <td>
                 <div class="form-check form-switch m-0">
-                  <input class="form-check-input" type="checkbox" :checked="r.checked_in" :disabled="!canRun || busyId === r.id" @change="toggleCheck(r, $event)" />
+                  <input class="form-check-input" type="checkbox" :checked="r.checked_in" :disabled="!canCheckin || busyId === r.id" @change="toggleCheck(r, $event)" />
                 </div>
               </td>
               <td>

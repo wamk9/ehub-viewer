@@ -67,7 +67,7 @@ export default {
     "custom": "Elegir fechas"
   },
   "result": {
-    "rows": "{n} filas",
+    "rows": "Ninguna fila | 1 fila | {n} filas",
     "total": "Total",
     "count": "Cantidad",
     "sum": "Suma",

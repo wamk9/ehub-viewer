@@ -18,7 +18,10 @@ export default {
   computed: {
     ev() { return this.em.event; },
     /** Marketing reads results; only managers edit. Finished events are frozen for everyone. */
-    readonly() { return !this.em.can('event.manage') || this.ev.finished; },
+    // Entering results / deciding matches is open to event-day helpers (results.write);
+    // drawing groups and building the bracket stays with event managers.
+    readonly() { return !this.em.can('results.write') || this.ev.finished; },
+    noStructure() { return this.readonly || !this.em.can('event.manage'); },
     stages() { return [...(this.ev.stages || [])].sort((a, b) => a.stage_order - b.stage_order); },
     stage() { return this.stages.find((s) => s.id === this.stageId) || null; },
     eligible() { return this.em.regs.filter((r) => r.payment_status !== 'pending'); },
@@ -294,7 +297,7 @@ export default {
                 <font-awesome-icon :icon="['fas', 'layer-group']" class="ico" />
                 <p class="mb-1"><strong>{{ $t('competition.group.empty_title') }}</strong></p>
                 <p class="mb-3 small">{{ $t('competition.group.preview', { n: eligible.length, g: groupStages.length }) }}</p>
-                <div v-if="!readonly" class="d-flex gap-2 justify-content-center flex-wrap">
+                <div v-if="!noStructure" class="d-flex gap-2 justify-content-center flex-wrap">
                   <button class="btn btn-primary round px-3" :disabled="saving || eligible.length < groupStages.length * 2" @click="drawGroups('random')">
                     <font-awesome-icon :icon="['fas', 'shuffle']" class="me-2" />{{ $t('competition.group.draw_random') }}
                   </button>
@@ -311,7 +314,7 @@ export default {
                 </p>
                 <EhubGroupTable :results="stage.results || []" :name-of="nameOf" class="mb-3" />
                 <EhubGroupMatches :matches="groupMatches" :editable="!readonly && stage.initialized && !stage.finished" :busy-id="busyMatch" @save="saveGame" />
-                <div v-if="!readonly && !groupStages.some((g) => (g.matches || []).some((m) => m.status === 'done')) && !stage.finished" class="mt-3">
+                <div v-if="!noStructure && !groupStages.some((g) => (g.matches || []).some((m) => m.status === 'done')) && !stage.finished" class="mt-3">
                   <button class="btn btn-sm btn-outline-secondary round px-3" :disabled="saving" @click="drawGroups('random')">
                     <font-awesome-icon :icon="['fas', 'shuffle']" class="me-2" />{{ $t('competition.group.redraw') }}
                   </button>
@@ -323,7 +326,7 @@ export default {
                 <font-awesome-icon :icon="['fas', 'sitemap']" class="ico" />
                 <p class="mb-1"><strong>{{ $t('competition.bracket.empty_title') }}</strong></p>
                 <p class="mb-3 small">{{ $t(groupStages.length ? 'competition.bracket.preview_groups' : (bracketPreview.byes ? 'competition.bracket.preview_byes' : 'competition.bracket.preview'), bracketPreview) }}</p>
-                <div v-if="!readonly" class="d-flex gap-2 justify-content-center flex-wrap">
+                <div v-if="!noStructure" class="d-flex gap-2 justify-content-center flex-wrap">
                   <button v-if="groupStages.length" class="btn btn-primary round px-3" :disabled="saving || !groupsDone" @click="drawBracket('groups')">
                     <font-awesome-icon :icon="['fas', 'sitemap']" class="me-2" />{{ $t('competition.bracket.draw_groups') }}
                   </button>
@@ -334,7 +337,7 @@ export default {
                     <font-awesome-icon :icon="['fas', 'list-ol']" class="me-2" />{{ $t('competition.bracket.draw_order') }}
                   </button>
                 </div>
-                <div v-if="!readonly && bracketPreview.size >= 4" class="form-check form-switch d-inline-flex gap-2 mt-3">
+                <div v-if="!noStructure && bracketPreview.size >= 4" class="form-check form-switch d-inline-flex gap-2 mt-3">
                   <input id="thirdPlace" v-model="thirdPlace" class="form-check-input" type="checkbox" />
                   <label class="form-check-label small" for="thirdPlace">{{ $t('competition.bracket.third_place_opt') }}</label>
                 </div>
@@ -347,7 +350,7 @@ export default {
                   {{ $t(!stage.initialized ? 'competition.bracket.hint_not_started' : (readonly ? 'competition.bracket.hint_readonly' : 'competition.bracket.hint')) }}
                 </p>
                 <EhubBracket :matches="bracketMatches" :editable="!readonly && stage.initialized && !stage.finished" :busy-id="busyMatch" @decide="decide" />
-                <div v-if="!readonly && !bracketPlayed && !stage.finished" class="mt-3">
+                <div v-if="!noStructure && !bracketPlayed && !stage.finished" class="mt-3">
                   <button class="btn btn-sm btn-outline-secondary round px-3" :disabled="saving" @click="drawBracket('random')">
                     <font-awesome-icon :icon="['fas', 'shuffle']" class="me-2" />{{ $t('competition.bracket.redraw') }}
                   </button>

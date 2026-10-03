@@ -77,6 +77,7 @@ export default {
     champion: 'Champion',
     next_stage: 'Next stage',
     pts: 'pts',
+    time: 'Time:',
   },
   standings: {
     image: "Download image",
@@ -179,7 +180,7 @@ export default {
       free_notice: 'Free registration: your registration will be confirmed automatically.',
       fee_warning: 'This event requires payment of {fee} after registration.',
       confirm_text: 'Do you want to register for this event?',
-      privacy: "The organizer will see your name, username, e-mail, phone (if given) and the answers above, to contact you about this event.",
+      privacy: "The organizer will see your name, username, e-mail, phone (if given) and your form answers (if any), to contact you about this event.",
       confirm: 'Register',
       cancel: 'Cancel',
       field_required: 'This field is required.',

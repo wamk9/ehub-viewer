@@ -170,10 +170,10 @@ async function submit() {
       <p class="text-center text-muted mt-3 mb-0" style="font-size:.74rem">
         <i18n-t keypath="users.login.terms" tag="span">
           <template #terms>
-            <a href="#">{{ $t('users.login.terms_link') }}</a>
+            <router-link to="/terms">{{ $t('users.login.terms_link') }}</router-link>
           </template>
           <template #privacy>
-            <a href="#">{{ $t('users.login.privacy_link') }}</a>
+            <router-link to="/privacy">{{ $t('users.login.privacy_link') }}</router-link>
           </template>
         </i18n-t>
       </p>

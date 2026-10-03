@@ -747,6 +747,10 @@ export default {
                   {{ $t('events.show.registration.no_compatible_gateway') }}
                 </p>
               </template>
+              <span v-else-if="waitlistOpen && event.user_waitlist_position" class="badge-pill" role="status">
+                <font-awesome-icon :icon="['fas', 'hourglass-half']" />
+                {{ $t('events.show.waitlist.you_are', { n: event.user_waitlist_position }) }}
+              </span>
               <template v-else-if="waitlistOpen && !event.user_waitlist_position">
                 <button class="btn btn-outline-primary round px-4" :disabled="waitlistBusy" @click="joinWaitlist">
                   <font-awesome-icon :icon="['fas', 'hourglass-half']" class="me-2" />{{ $t('events.show.waitlist.join') }}
@@ -799,6 +803,7 @@ export default {
             </span>
             <span v-else-if="event.registrations_count" class="m">
               <font-awesome-icon :icon="['fas', 'users']" />
+              <span class="lbl">{{ $t('events.show.tabs.participants') }}</span>
               {{ event.registrations_count }}
             </span>
           </div>
@@ -809,7 +814,7 @@ export default {
               <div class="hl-ico"><font-awesome-icon :icon="['fas', 'user']" /></div>
               <div class="hl-me">
                 <div class="k">{{ $t('events.show.me.title') }}</div>
-                <div class="v">{{ $t('events.show.me.position', { p: myStanding.position, n: standings.length }) }}<template v-if="standings.filter((e) => e.position === myStanding.position).length > 1">{{ ' (' + $t('events.show.me.tie') + ')' }}</template> · {{ myStanding.total }}<template v-if="event.format !== 'time'"> {{ $t('events.show.highlights.pts') }}</template></div>
+                <div class="v">{{ $t('events.show.me.position', { p: myStanding.position, n: standings.length }) }}<template v-if="standings.filter((e) => e.position === myStanding.position).length > 1">{{ ' (' + $t('events.show.me.tie') + ')' }}</template> · {{ myStanding.total }}<template v-if="event.format !== 'time'">{{ ' ' + $t('events.show.highlights.pts') }}</template></div>
                 <div class="hl-me__stages">
                   <button v-for="x in myStageResults" :key="x.stage.id" type="button" class="hl-me__chip" @click="openStage(x.stage.route)">
                     {{ x.stage.name }}: <b>{{ x.r.position }}º</b> · {{ x.r.score ?? 0 }} {{ $t('events.show.highlights.pts') }}
@@ -828,7 +833,7 @@ export default {
                     <span v-else>{{ l.team?.name || l.user?.name || $t('events.show.removed_participant') }}</span>
                   </template>
                 </div>
-                <div class="s">{{ leaderEntry.total }}<template v-if="event.format !== 'time'"> {{ $t('events.show.highlights.pts') }}</template><template v-if="leaders.length > 1"> · {{ $t('events.show.me.tied') }}</template></div>
+                <div class="s"><template v-if="event.format === 'time'">{{ $t('events.show.highlights.time') + ' ' }}</template>{{ leaderEntry.total }}<template v-if="event.format !== 'time'">{{ ' ' + $t('events.show.highlights.pts') }}</template><template v-if="leaders.length > 1"> · {{ $t('events.show.me.tied') }}</template></div>
               </div>
             </div>
             <div v-if="nextStage" class="hl-card next">
@@ -943,7 +948,7 @@ export default {
                   <button type="button" class="btn btn-link btn-sm p-0" :disabled="waitlistBusy" @click="leaveWaitlist">{{ $t('events.show.waitlist.leave') }}</button>
                 </template>
                 <template v-else>
-                  <p class="ev-join__note">{{ $t('events.show.waitlist.pitch') }}<template v-if="event.waitlist_count"> {{ $t('events.show.waitlist.count', { n: event.waitlist_count }, event.waitlist_count) }}</template></p>
+                  <p class="ev-join__note">{{ $t('events.show.waitlist.pitch') }}<template v-if="event.waitlist_count">{{ ' ' + $t('events.show.waitlist.count', { n: event.waitlist_count }, event.waitlist_count) }}</template></p>
                   <button type="button" class="btn btn-primary round w-100" :disabled="waitlistBusy" @click="joinWaitlist">
                     <font-awesome-icon :icon="['fas', 'hourglass-half']" class="me-2" />{{ $t('events.show.waitlist.join') }}
                   </button>
