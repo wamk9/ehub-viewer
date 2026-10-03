@@ -103,6 +103,10 @@ export default {
     sub:     'Control who can see and interact with your profile.',
     success: 'Privacy updated!',
     submit:  'Save Privacy',
+    search_title: "Search engines (Google, Bing)",
+    search_label: "Show my profile in search results",
+    search_desc: "People searching your name on Google may find your public eHub profile. It can take a few days to appear or disappear.",
+    search_needs_public: "Only available with a public profile.",
     contact_title: "Who sees your contact details",
     contact_desc: "Your e-mail, phone and birth date never appear on your public profile. When you join an event, its organizers see your e-mail and phone (if given) to contact you about it.",
     visibility: {

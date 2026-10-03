@@ -51,5 +51,6 @@ export default {
     financial: 'Financeiro',
     event_manager: 'Gerente de Eventos',
     marketing: 'Marketing',
+    staff: 'Equipe de apoio',
   },
 }

@@ -79,6 +79,10 @@ export default {
     pts: 'pts',
   },
   standings: {
+    image: "Download image",
+    print: "Print / PDF",
+    title_img: "Standings",
+    more_img: "+ {n} participants at ehubapp.com",
     stage_n: 'Stage {n}',
     note: 'Points added up from every finished stage. Open the Stages tab to see each full result.',
     tie_note: 'Participants with the same points and the same number of wins share the position; the final tie-break follows the rules.',
@@ -189,4 +193,17 @@ export default {
     payment_pending: 'Payment is being processed. Your registration will be confirmed shortly.',
     payment_failure: 'Payment failed. Please try registering again.',
   },
+  waitlist: {
+    join: "Join the waiting list",
+    pitch: "No spots left. Join the list: if someone drops out, we will tell you here and by e-mail.",
+    count: "{n} person is already waiting. | {n} people are already waiting.",
+    you_are: "You are on the waiting list — position {n}",
+    how: "If a spot opens we will tell you. The spot goes to whoever registers first.",
+    leave: "Leave the waiting list",
+    joined: "You joined the waiting list (position {n}).",
+    left: "You left the waiting list.",
+    spot_now: "A spot just opened! Reload the page to register.",
+    error: "Could not update the waiting list.",
+  },
+  certificate: { cta: "Participation certificate" },
 }

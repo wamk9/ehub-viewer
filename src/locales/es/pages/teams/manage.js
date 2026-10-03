@@ -19,6 +19,7 @@ export default {
     roster: 'Plantilla',
     applications: 'Solicitudes',
     activity: 'Actividades',
+    reports: 'Informes',
     roles: 'Funciones',
     settings: 'Configuración',
     public: 'Ver página pública',
@@ -46,6 +47,7 @@ export default {
       manage_roster:       'Gestionar plantilla',
       manage_settings:     'Configuración del equipo',
       manage_visual:       'Visual del equipo',
+      view_reports:        'Ver informes',
     },
   },
   roles: {

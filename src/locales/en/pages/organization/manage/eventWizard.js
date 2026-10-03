@@ -57,7 +57,7 @@ export default {
   },
   s3: { beforeStart: 'This stage starts before the event start date.', slotsCount: '{n} slots',
     title: 'Schedule', sub: 'Event dates and competition stages.',
-    datesLabel: 'Dates', regDeadline: 'Registration deadline', start: 'Event start', startTime: 'Start time', end: 'Expected end',
+    datesLabel: 'Dates', regDeadline: 'Registration deadline', start: 'Event start', stage_when: 'Stage date and time', startTime: 'Start time', end: 'Expected end',
     stagesLabel: 'Stages / Phases', stagesHint: 'Add the competition phases. Per-stage info (Form step) appears below each one.',
     addStage: 'Add stage', timezone: 'Timezone',
     groupsSchedLabel: 'Groups Schedule', autoFill: 'Auto-fill groups',

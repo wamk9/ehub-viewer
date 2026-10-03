@@ -79,6 +79,10 @@ export default {
     pts: 'pts',
   },
   standings: {
+    image: "Baixar imagem",
+    print: "Imprimir / PDF",
+    title_img: "Classificação",
+    more_img: "+ {n} participantes em ehubapp.com",
     stage_n: 'Etapa {n}',
     note: 'Pontos somados de todas as etapas finalizadas. Abra a aba Etapas para ver o resultado completo de cada uma.',
     tie_note: 'Participantes com a mesma pontuação e o mesmo número de vitórias dividem a posição; o desempate final segue o regulamento.',
@@ -189,4 +193,17 @@ export default {
     payment_pending: 'Pagamento em processamento. Sua inscrição será confirmada em breve.',
     payment_failure: 'Pagamento falhou. Tente se inscrever novamente.',
   },
+  waitlist: {
+    join: "Entrar na lista de espera",
+    pitch: "As vagas acabaram. Entre na lista: se alguém sair, avisamos você por aqui e por e-mail.",
+    count: "{n} pessoa já está esperando. | {n} pessoas já estão esperando.",
+    you_are: "Você está na lista de espera — posição {n}",
+    how: "Se abrir uma vaga, avisamos você. A vaga fica com quem se inscrever primeiro.",
+    leave: "Sair da lista de espera",
+    joined: "Você entrou na lista de espera (posição {n}).",
+    left: "Você saiu da lista de espera.",
+    spot_now: "Abriu uma vaga agora! Recarregue a página para se inscrever.",
+    error: "Não foi possível atualizar a lista de espera.",
+  },
+  certificate: { cta: "Certificado de participação" },
 }

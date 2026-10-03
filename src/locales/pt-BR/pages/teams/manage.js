@@ -19,6 +19,7 @@ export default {
     roster: 'Elenco',
     applications: 'Candidaturas',
     activity: 'Atividades',
+    reports: 'Relatórios',
     roles: 'Funções',
     settings: 'Configurações',
     public: 'Ver página pública',
@@ -54,6 +55,7 @@ export default {
       manage_roster:       'Gerenciar elenco',
       manage_settings:     'Configurações da equipe',
       manage_visual:       'Visual da equipe',
+      view_reports:        'Ver relatórios',
     },
   },
   roster: {

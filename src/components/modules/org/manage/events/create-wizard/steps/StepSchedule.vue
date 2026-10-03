@@ -90,7 +90,7 @@ function beforeStart(stage) {
             :placeholder="$t('pages.organization.manage.eventWizard.stagePh')"
             @input="onStageNameInput(stage)"
           />
-          <input type="date" class="stage-date-inp" :class="{ warn: beforeStart(stage) }" v-model="stage.start_at" />
+          <input type="datetime-local" class="stage-date-inp" :class="{ warn: beforeStart(stage) }" v-model="stage.start_at" :aria-label="$t('pages.organization.manage.eventWizard.s3.stage_when')" />
           <button :aria-label="$t('a11y.delete')" :title="$t('a11y.delete')" type="button" class="stage-del" @click="removeStage(i)"><font-awesome-icon :icon="['fas', 'trash']" /></button>
           <div v-if="beforeStart(stage)" class="stage-warn">
             <font-awesome-icon :icon="['fas', 'triangle-exclamation']" class="me-1" />{{ $t('pages.organization.manage.eventWizard.s3.beforeStart') }}
@@ -125,7 +125,7 @@ function beforeStart(stage) {
             </div>
             <span class="stage-name-inp">{{ stage.name }}</span>
             <span class="stage-slots-count">{{ $t('pages.organization.manage.eventWizard.s3.slotsCount', { n: stage.config.slots?.length || 0 }) }}</span>
-            <input type="date" class="stage-date-inp" v-model="stage.start_at" />
+            <input type="datetime-local" class="stage-date-inp" v-model="stage.start_at" :aria-label="$t('pages.organization.manage.eventWizard.s3.stage_when')" />
             <div v-if="form.stage_fields?.length" class="stage-info">
               <label v-for="f in form.stage_fields" :key="f.key" class="stage-info-field">
                 <span class="stage-info-lbl"><font-awesome-icon :icon="['fas', f.icon || 'circle-info']" />{{ f.name }}</span>
@@ -178,7 +178,7 @@ function beforeStart(stage) {
 .stage-name-inp { flex: 1; border: 0; background: transparent; font-size: .88rem; font-weight: 600; color: var(--ehub-ink); padding: 0; }
 .stage-name-inp:focus { outline: none; }
 .stage-slots-count { font-size: .72rem; color: var(--ehub-muted); background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); padding: 2px 8px; border-radius: 50rem; white-space: nowrap; }
-.stage-date-inp { border: 1px solid var(--ehub-line); border-radius: 7px; padding: 4px 8px; font-size: .8rem; background: var(--ehub-field-bg); color: var(--ehub-ink); }
+.stage-date-inp { min-width: 190px; border: 1px solid var(--ehub-line); border-radius: 7px; padding: 4px 8px; font-size: .8rem; background: var(--ehub-field-bg); color: var(--ehub-ink); }
 .stage-del { width: 26px; height: 26px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: var(--ehub-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .75rem; flex-shrink: 0; }
 .stage-del:hover { border-color: color-mix(in srgb,#e23b3b 35%,transparent); background: color-mix(in srgb,#e23b3b 10%,transparent); color: var(--ehub-danger-text); }
 .empty-state { text-align: center; padding: 24px; border: 1px dashed var(--ehub-line); border-radius: 12px; }

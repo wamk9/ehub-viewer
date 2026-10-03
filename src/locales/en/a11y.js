@@ -21,4 +21,5 @@ export default {
   finished: 'Stage finished',
   previous: 'Previous',
   next: 'Next',
+  maximize: 'Full screen',
 }

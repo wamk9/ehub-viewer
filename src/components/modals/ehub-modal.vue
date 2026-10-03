@@ -7,7 +7,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title justify-content-center align-items-center d-flex">
                         <span>{{ title }}</span>
-                        <button class="ms-3 btn btn-primary" style="font-size: .75rem; padding: 2px 5px;"
+                        <button :aria-label="$t('a11y.maximize')" :title="$t('a11y.maximize')" class="ms-3 btn btn-primary" style="font-size: .75rem; padding: 2px 5px;"
                             v-if="enableFullScreen" @click="() => { fullScreen(true); }">
                             <font-awesome-icon :icon="['fas', 'maximize']" />
                         </button>

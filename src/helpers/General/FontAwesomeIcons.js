@@ -1,6 +1,11 @@
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
+  faFileCsv,
+  faPrint,
+  faSackDollar,
+  faClipboardCheck,
+  faCertificate,
   faTrophy,
   faRightToBracket,
   faPeopleGroup,
@@ -206,11 +211,17 @@ import {
   faDiscord,
   faTwitch,
   faLinkedin,
+  faGoogle,
 } from "@fortawesome/free-brands-svg-icons";
 
 //import { faBell } from "@fortawesome/free-regular-svg-icons";
 
 library.add(
+  faFileCsv,
+  faPrint,
+  faSackDollar,
+  faClipboardCheck,
+  faCertificate,
   faChevronLeft,
   faEnvelopeOpenText,
   faFileInvoice,
@@ -364,6 +375,7 @@ library.add(
   faUserClock,
   faDiscord,
   faLinkedin,
+  faGoogle,
   faGamepad,
   faMedal,
   faGraduationCap,

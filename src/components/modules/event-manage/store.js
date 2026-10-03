@@ -60,6 +60,7 @@ export function createEventManageStore(orgRoute, eventRoute) {
     eventRoute,
     event: null,
     regs: [],
+    waitlist: [], // people waiting for a spot (full events)
     articles: [],
     notices: [],
     replyToSet: true, // organization has a contact e-mail for replies
@@ -98,7 +99,7 @@ export function createEventManageStore(orgRoute, eventRoute) {
 
   s.loadRegs = async () => {
     const res = await OrganizationEventRegistration.manage(s.orgRoute, s.eventRoute);
-    if (res.code === 200) s.regs = res.data || [];
+    if (res.code === 200) { s.regs = res.data || []; s.waitlist = res.waitlist || []; }
   };
 
   s.loadArticles = async () => {

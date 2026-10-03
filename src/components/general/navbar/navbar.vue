@@ -74,6 +74,7 @@ const notifToggle = ref(null)
 
 // Short headline + icon per kind, so each notice reads at a glance.
 const NOTIF_KINDS = [
+  { match: /waitlist_spot/, kind: 'waitlist', icon: 'door-open', tone: 'ok' },
   { match: /results_published/, kind: 'results', icon: 'trophy', tone: 'gold' },
   { match: /stage_started/, kind: 'stage', icon: 'flag-checkered', tone: 'live' },
   { match: /registration_(confirmed)/, kind: 'registration', icon: 'circle-check', tone: 'ok' },

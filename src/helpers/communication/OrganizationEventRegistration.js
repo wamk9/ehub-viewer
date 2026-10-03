@@ -7,7 +7,7 @@ const OrganizationEventRegistration = {
     },
     async manage(orgRoute, eventRoute) {
         const result = await Api.getAsync(`/org/${orgRoute}/event/${eventRoute}/manage/participants`);
-        return { code: result.code, data: result.response?.message };
+        return { code: result.code, data: result.response?.message, waitlist: result.response?.waitlist || [] };
     },
     async manageUpdate(orgRoute, eventRoute, registrationId, data) {
         const result = await Api.patchAsync(`/org/${orgRoute}/event/${eventRoute}/manage/participants/${registrationId}`, data);

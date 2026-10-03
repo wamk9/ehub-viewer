@@ -129,6 +129,7 @@ export default {
     financial: 'Financeiro',
     event_manager: 'Gerente de Eventos',
     marketing: 'Marketing',
+    staff: 'Equipe de apoio',
   },
   activity: {
     title: "Atividade recente",
@@ -163,8 +164,11 @@ export default {
       event_registrations: "Ver inscrições",
       event_form_data: "Ver dados do formulário dos inscritos",
       event_payments: "Confirmar pagamentos manualmente",
+      event_checkin: "Fazer check-in dos inscritos",
+      event_results_write: "Lançar resultados e decidir partidas",
       event_results: "Ver etapas e resultados",
       event_news: "Notícias, avisos e transmissão",
+      reports: "Gerar relatórios",
     },
   },
   settings: {

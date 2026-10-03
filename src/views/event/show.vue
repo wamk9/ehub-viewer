@@ -15,6 +15,8 @@ import { formatMs } from '@/components/modules/competition/time.js';
 import EhubGroupTable from '@/components/modules/competition/EhubGroupTable.vue';
 import EhubGroupMatches from '@/components/modules/competition/EhubGroupMatches.vue';
 import { watchUrl } from '@/helpers/General/liveStream.js';
+import { downloadStandingsImage } from '@/helpers/General/standingsImage.js';
+import Api from '@/helpers/communication/Connection';
 import { initialValues, validateAnswers } from '@/components/modules/event-registration/regForm.js';
 
 const CAT_GRAD = {
@@ -55,6 +57,7 @@ export default {
   components: { EhubRegistrationModal, EhubPrizeList, EhubLivePlayer, EhubBracket, EhubGroupTable, EhubGroupMatches },
   data() {
     return {
+      waitlistBusy: false,
       event: null,
       loading: true,
       activeTab: 'info',
@@ -263,8 +266,18 @@ export default {
       return Math.max(0, Math.floor((end.getTime() - Date.now()) / 86400000));
     },
     isFull() {
+      if (typeof this.event?.is_full === 'boolean') return this.event.is_full; // server counts pending payments too
       const max = this.event?.max_registrations;
       return !!max && (this.event.registrations_count || 0) >= max;
+    },
+    // Full but still before the start: people can wait for a spot.
+    waitlistOpen() {
+      return !!this.event && this.isFull && !this.event.initialized && !this.event.finished && !this.deadlinePassed && !this.event.user_registration;
+    },
+    // Certificate once there is something to certify: results published or event over.
+    canCertificate() {
+      const r = this.event?.user_registration;
+      return !!r && ['free', 'confirmed'].includes(r.payment_status) && (this.event.finished || (this.event.stages || []).some((st) => st.results_published));
     },
     spotsLeft() {
       const max = this.event?.max_registrations;
@@ -454,6 +467,49 @@ export default {
       return (Array.isArray(this.event?.stage_fields) ? this.event.stage_fields : [])
         .filter(f => f?.key && String(values[f.key] ?? '').trim())
         .map(f => ({ ...f, value: values[f.key] }));
+    },
+    async joinWaitlist() {
+      if (!this.$store.getters.getToken) {
+        this.$router.push({ name: 'user-login', query: { redirect: this.$route.fullPath } });
+        return;
+      }
+      this.waitlistBusy = true;
+      const r = await Api.postAsync(`/org/${this.orgRoute}/event/${this.eventRoute}/waitlist`, {});
+      this.waitlistBusy = false;
+      if (r.code === 200) {
+        this.event.user_waitlist_position = r.response.position;
+        this.event.waitlist_count = (this.event.waitlist_count || 0) + 1;
+        toast.success(this.$t('events.show.waitlist.joined', { n: r.response.position }));
+      } else if (r.response?.message === 'spots_available') {
+        this.event.is_full = false;
+        toast.info(this.$t('events.show.waitlist.spot_now'));
+      } else toast.error(this.$t('events.show.waitlist.error'));
+    },
+    async leaveWaitlist() {
+      this.waitlistBusy = true;
+      const r = await Api.deleteAsync(`/org/${this.orgRoute}/event/${this.eventRoute}/waitlist`);
+      this.waitlistBusy = false;
+      if (r.code === 200) {
+        this.event.user_waitlist_position = null;
+        this.event.waitlist_count = Math.max(0, (this.event.waitlist_count || 1) - 1);
+        toast.success(this.$t('events.show.waitlist.left'));
+      } else toast.error(this.$t('events.show.waitlist.error'));
+    },
+    standingsImage() {
+      downloadStandingsImage({
+        event: this.event.name,
+        org: this.event.organization?.name || '',
+        color: this.event.color || this.event.organization?.color,
+        rows: this.standings.map((e) => ({ position: e.position, name: e.team?.name || e.user?.name || this.$t('events.show.removed_participant'), total: e.total })),
+        labels: { title: this.$t('events.show.standings.title_img'), more: this.$t('events.show.standings.more_img', { n: Math.max(0, this.standings.length - 10) }) },
+      });
+    },
+    printStandings() {
+      document.body.classList.add('print-standings');
+      const done = () => { document.body.classList.remove('print-standings'); window.removeEventListener('afterprint', done); };
+      window.addEventListener('afterprint', done);
+      window.print();
+      setTimeout(done, 1000);
     },
     async handleRegister() {
       if (!this.$store.getters.getToken) {
@@ -691,6 +747,11 @@ export default {
                   {{ $t('events.show.registration.no_compatible_gateway') }}
                 </p>
               </template>
+              <template v-else-if="waitlistOpen && !event.user_waitlist_position">
+                <button class="btn btn-outline-primary round px-4" :disabled="waitlistBusy" @click="joinWaitlist">
+                  <font-awesome-icon :icon="['fas', 'hourglass-half']" class="me-2" />{{ $t('events.show.waitlist.join') }}
+                </button>
+              </template>
               <button type="button" class="btn btn-ghost round px-3" :title="$t('events.show.join.share')" @click="shareEvent">
                 <font-awesome-icon :icon="['fas', 'share-nodes']" class="me-1" />{{ $t('events.show.join.share') }}
               </button>
@@ -862,9 +923,32 @@ export default {
                 <font-awesome-icon :icon="['fas', event.user_registration.payment_status === 'pending' ? 'clock' : 'circle-check']" />
                 {{ event.user_registration.payment_status === 'pending' ? $t('events.show.registration.pending') : $t('events.show.join.you_are_in') }}
               </div>
+              <router-link v-if="canCertificate" :to="{ name: 'event-certificate', params: { orgRoute, eventRoute, registrationId: event.user_registration.id } }" class="btn btn-outline-primary round btn-sm w-100 mt-2">
+                <font-awesome-icon :icon="['fas', 'certificate']" class="me-2" />{{ $t('events.show.certificate.cta') }}
+              </router-link>
               <button v-if="canCancel" type="button" class="btn btn-link btn-sm ev-join__cancel" @click="cancelOpen = true">
                 {{ $t('events.show.join.cancel') }}
               </button>
+            </template>
+            <!-- Full: waiting list -->
+            <template v-else-if="waitlistOpen">
+              <div class="ev-join__state closed">
+                <font-awesome-icon :icon="['fas', 'lock']" />
+                {{ $t('events.show.join.closed.full') }}
+              </div>
+              <div class="ev-waitlist">
+                <template v-if="event.user_waitlist_position">
+                  <p class="mb-2"><strong>{{ $t('events.show.waitlist.you_are', { n: event.user_waitlist_position }) }}</strong></p>
+                  <p class="ev-join__note">{{ $t('events.show.waitlist.how') }}</p>
+                  <button type="button" class="btn btn-link btn-sm p-0" :disabled="waitlistBusy" @click="leaveWaitlist">{{ $t('events.show.waitlist.leave') }}</button>
+                </template>
+                <template v-else>
+                  <p class="ev-join__note">{{ $t('events.show.waitlist.pitch') }}<template v-if="event.waitlist_count"> {{ $t('events.show.waitlist.count', { n: event.waitlist_count }, event.waitlist_count) }}</template></p>
+                  <button type="button" class="btn btn-primary round w-100" :disabled="waitlistBusy" @click="joinWaitlist">
+                    <font-awesome-icon :icon="['fas', 'hourglass-half']" class="me-2" />{{ $t('events.show.waitlist.join') }}
+                  </button>
+                </template>
+              </div>
             </template>
             <!-- Open -->
             <template v-else-if="regOpen">
@@ -1062,6 +1146,15 @@ export default {
             <p class="mb-0 mt-2">{{ $t('events.show.standings.empty') }}</p>
           </div>
           <div v-else class="standings-wrap">
+            <div class="standings-tools">
+              <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="standingsImage">
+                <font-awesome-icon :icon="['fas', 'image']" class="me-2" />{{ $t('events.show.standings.image') }}
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary round px-3" @click="printStandings">
+                <font-awesome-icon :icon="['fas', 'print']" class="me-2" />{{ $t('events.show.standings.print') }}
+              </button>
+            </div>
+            <h2 class="standings-print-title">{{ event.name }}</h2>
             <table class="ev-table">
               <thead>
                 <tr>
@@ -1490,4 +1583,18 @@ a.ev-extra__val { color: var(--org-accent-text); }
 .reg-done__ico { font-size: 1.5rem; color: var(--ehub-success-text); }
 .reg-done span { display: flex; flex-direction: column; line-height: 1.25; }
 .reg-done small { color: var(--ehub-muted); font-size: .76rem; }
+.ev-waitlist { border: 1px dashed var(--ehub-line); border-radius: 12px; padding: 12px 14px; margin-top: 10px; }
+.standings-tools { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-bottom: 10px; }
+.standings-print-title { display: none; }
+</style>
+
+<style>
+/* Printing the standings: only the table, with the event name on top. */
+@media print {
+  body.print-standings * { visibility: hidden !important; }
+  body.print-standings .standings-wrap, body.print-standings .standings-wrap * { visibility: visible !important; }
+  body.print-standings .standings-wrap { position: absolute; left: 0; top: 0; width: 100%; }
+  body.print-standings .standings-tools { display: none !important; }
+  body.print-standings .standings-print-title { display: block !important; font-size: 18pt; margin-bottom: 12pt; }
+}
 </style>

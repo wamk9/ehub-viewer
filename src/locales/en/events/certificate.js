@@ -1,0 +1,23 @@
+// Participation certificate page.
+export default {
+  title: "Certificate of participation",
+  lead: "This certifies that",
+  text: "took part in “{event}”, organized by {org}",
+  text_team: "took part as a team in “{event}”, organized by {org}",
+  on_date: "on {date}",
+  at_place: "at {place}",
+  place_final: "Final placing: {n}",
+  place_stage: "Placing: {n} ({stage})",
+  category: "Sport",
+  code: "Code",
+  verify_at: "Check at",
+  print: "Print / Save PDF",
+  print_hint: "In the print window, choose “Save as PDF” to keep the file.",
+  back: "Back to the event",
+  valid: "Valid certificate, issued by eHub.",
+  invalid_title: "Certificate not found",
+  invalid_desc: "Check the code. Certificates of cancelled registrations are no longer valid.",
+  missing_title: "Certificate unavailable",
+  missing_desc: "Only the registered person and the event organizer can open this certificate.",
+  events: "See events",
+}

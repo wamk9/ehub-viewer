@@ -15,6 +15,7 @@ import EhubLeaveCard from '@/components/modules/members/EhubLeaveCard.vue';
 import EhubVisualFields from '@/components/inputs/EhubVisualFields.vue';
 import EhubCardSetupDialog from '@/components/modules/org/EhubCardSetupDialog.vue';
 import EhubUsageChart from '@/components/modules/org/EhubUsageChart.vue';
+import EhubReportBuilder from '@/components/EhubReportBuilder.vue';
 import EhubFiscalDataDialog from '@/components/modules/org/EhubFiscalDataDialog.vue';
 import EventCreateWizard from '@/components/modules/org/manage/events/create.vue';
 import OrgNewsManager from '@/components/modules/org/manage/news/index.vue';
@@ -34,20 +35,24 @@ const ORG_GRADS = [
 // owner > admin > everyone else (mirrors OrganizationController::roleLevel).
 const ROLE_LEVEL = { owner: 3, admin: 2 };
 const roleLevel = (role) => (role ? ROLE_LEVEL[role] ?? 1 : 0);
-const ASSIGNABLE_ROLES = ['owner', 'admin', 'event_manager', 'financial', 'marketing'];
+const ASSIGNABLE_ROLES = ['owner', 'admin', 'event_manager', 'financial', 'marketing', 'staff'];
+// Same roles the API lets into reports.
+const REPORT_ROLES = ['owner', 'admin', 'event_manager', 'financial'];
 
 // Org permission matrix shown in the Roles panel (keep in sync with the API:
 // OrganizationController canManage/roleLevel and EventPermissions).
 const ORG_PERM_KEYS = [
   'manage_members', 'manage_org', 'billing', 'manage_events', 'delete_events',
-  'event_registrations', 'event_form_data', 'event_payments', 'event_results', 'event_news',
+  'event_registrations', 'event_form_data', 'event_payments', 'event_checkin', 'event_results_write', 'event_results', 'event_news', 'reports',
 ];
+// Mirrors the API (EventPermissions + ReportController).
 const ORG_ROLE_PERMS = {
   owner: ORG_PERM_KEYS,
   admin: ORG_PERM_KEYS,
-  event_manager: ['manage_events', 'event_registrations', 'event_form_data', 'event_payments', 'event_results', 'event_news'],
-  financial: ['billing', 'event_registrations', 'event_payments'],
+  event_manager: ['manage_events', 'event_registrations', 'event_form_data', 'event_payments', 'event_checkin', 'event_results_write', 'event_results', 'event_news', 'reports'],
+  financial: ['billing', 'event_registrations', 'event_payments', 'reports'],
   marketing: ['event_results', 'event_news'],
+  staff: ['event_registrations', 'event_checkin', 'event_results_write', 'event_results'],
 };
 
 const ORG_ACTIVITY_ICONS = {
@@ -63,10 +68,11 @@ const ROLE_CLASS = {
   event_manager: 'manager',
   financial: 'staff',
   marketing: 'marketing',
+  staff: 'helper',
 };
 
 export default {
-  components: { OrgNewsManager, EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubVisualFields, EhubCardSetupDialog, EhubUsageChart, EhubFiscalDataDialog },
+  components: { OrgNewsManager, EhubMgmtLayout, EhubActivityLog, EhubStatCard, EventCreateWizard, EhubRolePermissionsTable, EhubDialog, EhubConfirmNameDialog, EhubInviteCard, EhubLeaveCard, EhubVisualFields, EhubCardSetupDialog, EhubUsageChart, EhubFiscalDataDialog, EhubReportBuilder },
 
   props: {
     forceOption: { type: Array, default: () => [] },
@@ -132,13 +138,8 @@ export default {
       onbDismissed: false,
       onbGateways: null,
 
-      // reports
-      repTab: 'standard',
-      customReports: [],
-      repNewForm: false,
-      repNewName: '',
-      repNewType: 'registrations',
-      repNewPeriod: '30d',
+      // reports (loaded the first time the panel opens)
+      reportsOpened: false,
     };
   },
 
@@ -208,14 +209,6 @@ export default {
     assignableRoles() {
       return ASSIGNABLE_ROLES.filter((r) => roleLevel(r) < roleLevel(this.myRole) || (r === 'owner' && this.myRole === 'owner'));
     },
-    standardReports() {
-      return [
-        { key: 'registrations', icon: 'user-plus', bg: 'var(--ehub-primary-tint)', color: 'var(--ehub-primary)' },
-        { key: 'revenue', icon: 'dollar-sign', bg: 'color-mix(in srgb, #1f8a5b 14%, transparent)', color: '#1f8a5b' },
-        { key: 'members', icon: 'users', bg: 'color-mix(in srgb, var(--ehub-gold) 18%, transparent)', color: 'color-mix(in srgb, var(--ehub-gold), #000 28%)' },
-        { key: 'events', icon: 'calendar-days', bg: 'color-mix(in srgb, #7C3AED 14%, transparent)', color: '#7C3AED' },
-      ];
-    },
     // Invoices come newest first: the first one is the last closed month.
     finLastInvoice() { return this.finBilling?.invoices?.[0] || null; },
     finOlderInvoices() { return (this.finBilling?.invoices || []).slice(1); },
@@ -256,7 +249,7 @@ export default {
         { key: 'activity', icon: 'clock-rotate-left', label: t('activity') },
         { key: 'news', icon: 'newspaper', label: t('news') },
         { key: 'financeiro', icon: 'file-invoice-dollar', label: t('financeiro') },
-        { key: 'reports', icon: 'chart-bar', label: t('reports') },
+        ...(REPORT_ROLES.includes(this.myRole) ? [{ key: 'reports', icon: 'chart-bar', label: t('reports') }] : []),
         { key: 'settings', icon: 'gear', label: t('settings') },
       ];
     },
@@ -269,6 +262,10 @@ export default {
   },
 
   watch: {
+    activePanel: {
+      immediate: true,
+      handler(p) { if (p === 'reports') this.reportsOpened = true; },
+    },
     forceOption(val) {
       const panelMap = { general: 'settings', events: 'events', finances: 'financeiro', members: 'members', roles: 'roles', activity: 'activity', news: 'news', reports: 'reports', settings: 'settings', overview: 'overview', financeiro: 'financeiro' };
       const panel = panelMap[val?.[0]] ?? 'overview';
@@ -789,22 +786,6 @@ export default {
       return parseFloat(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
     },
 
-    // ── Reports ─────────────────────────────────────────────────────────
-    repAddReport() {
-      if (!this.repNewName.trim()) return;
-      this.customReports.push({
-        id: Date.now(),
-        name: this.repNewName.trim(),
-        type: this.repNewType,
-        period: this.repNewPeriod,
-      });
-      this.repNewForm = false;
-      this.repNewName = '';
-    },
-
-    repDeleteReport(id) {
-      this.customReports = this.customReports.filter(r => r.id !== id);
-    },
   },
 };
 </script>
@@ -1059,7 +1040,7 @@ export default {
             <input type="text" class="form-control" v-model="mbSearch" :placeholder="$t('pages.organization.manage.members.search')" />
           </div>
           <div class="role-seg">
-            <button v-for="r in ['all','owner','admin','event_manager','financial','marketing']" :key="r"
+            <button v-for="r in ['all','owner','admin','event_manager','financial','marketing','staff']" :key="r"
               :class="{ active: mbRoleFilter === r }" @click="mbRoleFilter = r">
               {{ r === 'all' ? $t('pages.organization.manage.members.all') : $t('pages.organization.manage.roles.' + r) }}
             </button>
@@ -1468,108 +1449,11 @@ export default {
       <section v-show="activePanel === 'reports'" class="mgmt-pane">
         <div class="pnl-hd">
           <div>
-            <h1>{{ $t('pages.organization.manage.reports.title') }}</h1>
-            <p>{{ $t('pages.organization.manage.reports.sub') }}</p>
-          </div>
-          <div class="spacer"></div>
-          <button v-if="repTab === 'custom'" class="btn btn-primary round px-3" @click="repNewForm = true">
-            <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />
-            {{ $t('pages.organization.manage.reports.new') }}
-          </button>
-        </div>
-
-        <div class="sec-bar" style="margin-bottom:16px">
-          <div class="role-seg">
-            <button :class="{ active: repTab === 'standard' }" @click="repTab = 'standard'">{{ $t('pages.organization.manage.reports.standard') }}</button>
-            <button :class="{ active: repTab === 'custom' }" @click="repTab = 'custom'">{{ $t('pages.organization.manage.reports.custom') }}</button>
+            <h1>{{ $t('reports.title') }}</h1>
+            <p>{{ $t('reports.sub_org') }}</p>
           </div>
         </div>
-
-        <!-- Standard reports -->
-        <div v-show="repTab === 'standard'" class="rep-grid">
-          <div v-for="rep in standardReports" :key="rep.key" class="rep-card">
-            <div class="rep-card-ico" :style="{ background: rep.bg, color: rep.color }">
-              <font-awesome-icon :icon="['fas', rep.icon]" />
-            </div>
-            <h4>{{ $t('pages.organization.manage.reports.type_' + rep.key) }}</h4>
-            <p>{{ $t('pages.organization.manage.reports.type_' + rep.key + '_desc') }}</p>
-            <div class="rep-card-foot">
-              <span class="rep-last">{{ $t('pages.organization.manage.reports.never') }}</span>
-              <button class="btn btn-sm btn-outline-secondary round px-3" disabled>
-                {{ $t('pages.organization.manage.reports.generate') }}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Custom reports -->
-        <div v-show="repTab === 'custom'">
-          <div v-if="repNewForm" class="cc mb-3" style="padding:18px 20px">
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label class="form-label set-label">{{ $t('pages.organization.manage.reports.form_name') }}</label>
-                <input type="text" class="form-control" v-model="repNewName" :placeholder="$t('pages.organization.manage.reports.form_name_ph')" />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label set-label">{{ $t('pages.organization.manage.reports.form_type') }}</label>
-                <select class="form-select" v-model="repNewType">
-                  <option value="registrations">{{ $t('pages.organization.manage.reports.type_registrations') }}</option>
-                  <option value="revenue">{{ $t('pages.organization.manage.reports.type_revenue') }}</option>
-                  <option value="members">{{ $t('pages.organization.manage.reports.type_members') }}</option>
-                  <option value="events">{{ $t('pages.organization.manage.reports.type_events') }}</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label set-label">{{ $t('pages.organization.manage.reports.form_period') }}</label>
-                <select class="form-select" v-model="repNewPeriod">
-                  <option value="30d">{{ $t('pages.organization.manage.reports.per30') }}</option>
-                  <option value="90d">{{ $t('pages.organization.manage.reports.per90') }}</option>
-                  <option value="365d">{{ $t('pages.organization.manage.reports.per365') }}</option>
-                </select>
-              </div>
-              <div class="col-12 d-flex gap-2 justify-content-end">
-                <button class="btn btn-outline-secondary round px-3" @click="repNewForm = false; repNewName = ''">{{ $t('pages.organization.manage.members.cancel') }}</button>
-                <button class="btn btn-primary round px-4" @click="repAddReport">{{ $t('pages.organization.manage.reports.create') }}</button>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="!customReports.length" class="empty-state">
-            <div class="ico"><font-awesome-icon :icon="['fas', 'chart-bar']" /></div>
-            <p>{{ $t('pages.organization.manage.reports.no_custom') }}</p>
-            <button class="btn btn-primary round px-4 mt-2" @click="repNewForm = true">
-              <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />
-              {{ $t('pages.organization.manage.reports.new') }}
-            </button>
-          </div>
-
-          <div v-else class="cc">
-            <table class="mgmt-tbl">
-              <thead>
-                <tr>
-                  <th>{{ $t('pages.organization.manage.reports.col_name') }}</th>
-                  <th>{{ $t('pages.organization.manage.reports.col_type') }}</th>
-                  <th>{{ $t('pages.organization.manage.reports.col_period') }}</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="r in customReports" :key="r.id">
-                  <td class="td-name">{{ r.name }}</td>
-                  <td class="td-muted">{{ $t('pages.organization.manage.reports.type_' + r.type) }}</td>
-                  <td class="td-muted">{{ $t('pages.organization.manage.reports.per' + r.period.replace('d', '')) }}</td>
-                  <td>
-                    <div class="act-row">
-                      <button :aria-label="$t('a11y.delete')" :title="$t('a11y.delete')" class="act-btn del" @click="repDeleteReport(r.id)">
-                        <font-awesome-icon :icon="['fas', 'trash']" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <EhubReportBuilder v-if="reportsOpened" :base="'/org/' + orgRoute + '/reports'" scope="org" :owner-name="org?.name || ''" />
       </section>
 
       <!-- ═══ SETTINGS ═══ -->
@@ -1767,6 +1651,7 @@ export default {
 .role-chip.manager { background: color-mix(in srgb, #7C3AED 14%, transparent); color: #7C3AED; }
 .role-chip.staff   { background: var(--ehub-field-bg); color: var(--ehub-muted); }
 .role-chip.marketing { background: color-mix(in srgb, #d6336c 14%, transparent); color: #d6336c; }
+.role-chip.helper { background: color-mix(in srgb, #0f9d8a 14%, transparent); color: #0b7d6e; }
 html[data-bs-theme="dark"] .role-chip.owner { color: var(--ehub-gold); }
 
 /* ── Settings cards ── */

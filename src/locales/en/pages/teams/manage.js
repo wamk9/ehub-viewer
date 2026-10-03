@@ -19,6 +19,7 @@ export default {
     roster: 'Roster',
     applications: 'Applications',
     activity: 'Activity',
+    reports: 'Reports',
     roles: 'Roles',
     settings: 'Settings',
     public: 'View public page',
@@ -46,6 +47,7 @@ export default {
       manage_roster:       'Manage roster',
       manage_settings:     'Team settings',
       manage_visual:       'Team visual',
+      view_reports:        'View reports',
     },
   },
   roles: {

@@ -129,6 +129,7 @@ export default {
     financial: 'Financial',
     event_manager: 'Event Manager',
     marketing: 'Marketing',
+    staff: 'Event staff',
   },
   activity: {
     title: "Recent activity",
@@ -163,8 +164,11 @@ export default {
       event_registrations: "View registrations",
       event_form_data: "View registration form data",
       event_payments: "Confirm payments manually",
+      event_checkin: "Check participants in",
+      event_results_write: "Enter results and decide matches",
       event_results: "View stages and results",
       event_news: "News, notices and streaming",
+      reports: "Generate reports",
     },
   },
   settings: {

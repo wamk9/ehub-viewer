@@ -95,6 +95,7 @@ export default {
       financial: 'Financial',
       event_manager: 'Event Manager',
       marketing: 'Marketing',
+      staff: 'Event staff',
     },
     success_add: '{email} invited successfully.',
     success_remove: '{username} removed.',

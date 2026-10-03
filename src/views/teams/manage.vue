@@ -302,6 +302,17 @@
         </div>
       </section>
 
+      <!-- REPORTS -->
+      <section v-if="activePanel === 'reports' && team">
+        <div class="pnl-hd">
+          <div>
+            <h1>{{ $t('reports.title') }}</h1>
+            <p>{{ $t('reports.sub_team') }}</p>
+          </div>
+        </div>
+        <EhubReportBuilder :base="'/team/' + teamRoute + '/reports'" scope="team" :owner-name="team.name" />
+      </section>
+
       <!-- ACTIVITY -->
       <section v-show="activePanel === 'activity'">
         <div class="pnl-hd">
@@ -524,6 +535,7 @@ import EhubStatCard from '@/components/EhubStatCard.vue'
 import EhubActivityLog from '@/components/EhubActivityLog.vue'
 import EhubRolePermissionsTable from '@/components/EhubRolePermissionsTable.vue'
 import EhubMgmtLayout from '@/components/general/EhubMgmtLayout.vue'
+import EhubReportBuilder from '@/components/EhubReportBuilder.vue'
 import EhubDialog from '@/components/modals/EhubDialog.vue'
 import EhubInviteCard from '@/components/modules/members/EhubInviteCard.vue'
 import EhubLeaveCard from '@/components/modules/members/EhubLeaveCard.vue'
@@ -538,7 +550,7 @@ function strHash(s) {
 
 export default {
   name: 'TeamManage',
-  components: { EhubMgmtLayout, EhubDialog, EhubInviteCard, EhubLeaveCard, EhubColorPicker, EhubVisualFields, EhubStatCard, EhubActivityLog, EhubRolePermissionsTable },
+  components: { EhubMgmtLayout, EhubReportBuilder, EhubDialog, EhubInviteCard, EhubLeaveCard, EhubColorPicker, EhubVisualFields, EhubStatCard, EhubActivityLog, EhubRolePermissionsTable },
 
   data() {
     return {
@@ -690,6 +702,7 @@ export default {
       if (this.can('manage_applications')) items.push({ key: 'applications', icon: 'inbox', label: t('applications') })
       items.push({ key: 'activity', icon: 'calendar-days', label: t('activity') })
       items.push({ key: 'roles', icon: 'shield-halved', label: t('roles') })
+      if (this.can('view_reports')) items.push({ key: 'reports', icon: 'chart-bar', label: t('reports') })
       if (this.can('manage_settings') || this.can('manage_visual')) {
         items.push({ divider: true }, { key: 'settings', icon: 'gear', label: t('settings') })
       }

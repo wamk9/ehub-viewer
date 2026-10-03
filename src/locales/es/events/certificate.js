@@ -1,0 +1,23 @@
+// Participation certificate page.
+export default {
+  title: "Certificado de participación",
+  lead: "Certificamos que",
+  text: "participó en el evento “{event}”, organizado por {org}",
+  text_team: "participó como equipo en el evento “{event}”, organizado por {org}",
+  on_date: "el {date}",
+  at_place: "en {place}",
+  place_final: "Posición final: {n}º lugar",
+  place_stage: "Posición: {n}º lugar ({stage})",
+  category: "Modalidad",
+  code: "Código",
+  verify_at: "Verifica en",
+  print: "Imprimir / Guardar PDF",
+  print_hint: "En la ventana de impresión elige “Guardar como PDF” para conservar el archivo.",
+  back: "Volver al evento",
+  valid: "Certificado válido, emitido por eHub.",
+  invalid_title: "Certificado no encontrado",
+  invalid_desc: "Revisa el código. Los certificados de inscripciones canceladas dejan de valer.",
+  missing_title: "Certificado no disponible",
+  missing_desc: "Solo la persona inscrita y la organización del evento pueden abrir este certificado.",
+  events: "Ver eventos",
+}

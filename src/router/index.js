@@ -234,6 +234,19 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      // Participation certificate (participant or organizer) — printable.
+      path: '/org/:orgRoute/event/:eventRoute/certificate/:registrationId',
+      name: 'event-certificate',
+      component: () => import('@/views/event/certificate.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      // Anyone holding a printed certificate checks it here.
+      path: '/certificate/:code',
+      name: 'certificate-verify',
+      component: () => import('@/views/event/certificate.vue'),
+    },
+    {
       // Event page: /tab, /stages/<stage>, /join (after sign-in) and /payment/<status> (gateway return).
       path: '/org/:orgRoute/event/:eventRoute/:tab(info|stages|standings|participants|regulation|news|join|payment)?/:sub?',
       name: 'show-event-info',

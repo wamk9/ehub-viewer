@@ -255,6 +255,28 @@ export default {
       </div>
     </div>
 
+    <!-- Waiting list (full events) -->
+    <div v-if="em.waitlist.length" class="cc" style="margin-top:16px">
+      <div class="cc-hd">
+        <h3><font-awesome-icon :icon="['fas', 'hourglass-half']" />{{ $t('pages.event.manage.reg.waitlist_title', { n: em.waitlist.length }) }}</h3>
+      </div>
+      <p class="small text-muted" style="padding:10px 17px 0;margin:0">{{ $t('pages.event.manage.reg.waitlist_hint') }}</p>
+      <div style="overflow-x:auto">
+        <table class="mgmt-tbl">
+          <thead><tr><th>#</th><th>{{ $t('pages.event.manage.reg.col_part') }}</th><th v-if="em.waitlist.some((w) => w.mail)">{{ $t('pages.event.manage.reg.contact_mail') }}</th><th>{{ $t('pages.event.manage.reg.waitlist_since') }}</th><th>{{ $t('pages.event.manage.reg.waitlist_notified') }}</th></tr></thead>
+          <tbody>
+            <tr v-for="w in em.waitlist" :key="w.id">
+              <td class="td-muted">{{ w.position }}</td>
+              <td class="td-name">{{ w.name || w.username }}<div class="small text-muted">@{{ w.username }}</div></td>
+              <td v-if="em.waitlist.some((x) => x.mail)" class="td-muted"><a v-if="w.mail" :href="'mailto:' + w.mail">{{ w.mail }}</a></td>
+              <td class="td-muted">{{ fmtDate(w.joined_at, true) }}</td>
+              <td class="td-muted">{{ w.notified_at ? fmtDate(w.notified_at, true) : '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Registration sheet -->
     <EhubDialog :model-value="!!sheet" :title="$t('pages.event.manage.reg.sheet')" @close="sheet = null">
       <template v-if="sheet">
@@ -335,6 +357,9 @@ export default {
       </template>
       <template #footer>
         <button v-if="canConfirm && sheet?.payment_status === 'pending'" class="btn btn-primary round px-3" @click="confirmPay(sheet)">{{ $t('pages.event.manage.reg.confirm_manual') }}</button>
+        <router-link v-if="sheet && sheet.user && ['free', 'confirmed'].includes(sheet.payment_status)" :to="{ name: 'event-certificate', params: { orgRoute: em.orgRoute, eventRoute: em.eventRoute, registrationId: sheet.id } }" class="btn btn-outline-primary round px-3">
+          <font-awesome-icon :icon="['fas', 'certificate']" class="me-2" />{{ $t('pages.event.manage.reg.certificate') }}
+        </router-link>
         <button class="btn btn-outline-secondary round px-3" @click="sheet = null">{{ $t('pages.event.manage.c.close') }}</button>
       </template>
     </EhubDialog>

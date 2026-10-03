@@ -28,6 +28,7 @@ export default {
     event_registration_refunded: 'Tu inscripción en {event} fue cancelada y {amount} será devuelto al mismo medio de pago.',
     event_registration_refunded_org: 'Un participante canceló su inscripción en {event} y recibió {amount} de reembolso.',
     event_registration_removed: 'Tu inscripción en {event} fue eliminada por la organización',
+    event_waitlist_spot: "¡Se abrió una plaza en {event}! Inscríbete antes de que otra persona de la lista la tome.",
     event_message: 'Mensaje de la organización de {event}: {subject}',
     event_notice: '{event}: {subject}',
     bell_unread: 'Notificaciones: {n} sin leer | Notificaciones: {n} sin leer',
@@ -36,6 +37,7 @@ export default {
     remove: 'Eliminar notificación',
     empty_hint: 'Aquí aparecen avisos de inscripciones, etapas y resultados.',
     kind: {
+      waitlist: 'Lista de espera',
       results: 'Resultados publicados',
       stage: 'Comenzó la etapa',
       registration: 'Inscripción confirmada',

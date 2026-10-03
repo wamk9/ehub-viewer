@@ -151,3 +151,9 @@
 
 /* Centered loading / error state inside the main area. */
 .ehub-mgmt .mgmt-state { display: flex; align-items: center; justify-content: center; min-height: 40vh; }
+
+/* ── Segmented pill switch (tabs inside a panel) ── */
+.ehub-mgmt .role-seg { display: flex; gap: 4px; flex-wrap: wrap; }
+.ehub-mgmt .role-seg button { background: var(--ehub-field-bg); border: 1px solid var(--ehub-line); color: var(--ehub-muted); font-size: .78rem; font-weight: 600; padding: 5px 13px; border-radius: 50rem; cursor: pointer; transition: all .14s; }
+.ehub-mgmt .role-seg button:hover { border-color: var(--ehub-primary); color: var(--ehub-ink); }
+.ehub-mgmt .role-seg button.active { background: var(--ehub-primary-strong); border-color: var(--ehub-primary); color: #fff; }

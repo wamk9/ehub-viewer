@@ -79,6 +79,10 @@ export default {
     pts: 'pts',
   },
   standings: {
+    image: "Descargar imagen",
+    print: "Imprimir / PDF",
+    title_img: "Clasificación",
+    more_img: "+ {n} participantes en ehubapp.com",
     stage_n: 'Etapa {n}',
     note: 'Puntos sumados de todas las etapas finalizadas. Abre la pestaña Etapas para ver cada resultado completo.',
     tie_note: 'Los participantes con los mismos puntos y la misma cantidad de victorias comparten la posición; el desempate final sigue el reglamento.',
@@ -186,4 +190,17 @@ export default {
       stripe_connect: 'Tarjeta de crédito (Stripe)',
     },
   },
+  waitlist: {
+    join: "Entrar en la lista de espera",
+    pitch: "No quedan plazas. Entra en la lista: si alguien se va, te avisamos aquí y por e-mail.",
+    count: "{n} persona ya está esperando. | {n} personas ya están esperando.",
+    you_are: "Estás en la lista de espera — posición {n}",
+    how: "Si se abre una plaza te avisamos. La plaza es para quien se inscriba primero.",
+    leave: "Salir de la lista de espera",
+    joined: "Entraste en la lista de espera (posición {n}).",
+    left: "Saliste de la lista de espera.",
+    spot_now: "¡Se abrió una plaza! Recarga la página para inscribirte.",
+    error: "No se pudo actualizar la lista de espera.",
+  },
+  certificate: { cta: "Certificado de participación" },
 }

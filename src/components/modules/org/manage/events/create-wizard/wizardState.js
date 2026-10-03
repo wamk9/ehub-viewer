@@ -83,6 +83,16 @@ export function createWizardForm() {
 // Visible-text limit for the rich-text description (markup doesn't count).
 export const DESCRIPTION_MAX = 5000
 
+/** Stage start for <input type="datetime-local">: "YYYY-MM-DDTHH:MM" in local time. */
+function toDateTimeInput(v) {
+  if (!v) return ''
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v + 'T00:00'
+  const d = new Date(String(v).replace(' ', 'T'))
+  if (isNaN(d)) return ''
+  const p = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`
+}
+
 function toDateInput(v) {
   if (!v) return ''
   if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v
@@ -143,8 +153,8 @@ export function populateFormFromEvent(form, event, baseUrl) {
   if (Array.isArray(event.stages)) {
     form.stages = event.stages.map(s => ({
       id: s.id, name: s.name, route: s.route, stage_type: s.stage_type,
-      start_at: toDateInput(s.start_at), config: s.config || {}, _persisted: true,
-      _initial: { name: s.name, start_at: toDateInput(s.start_at), config: JSON.stringify(s.config || {}) },
+      start_at: toDateTimeInput(s.start_at), config: s.config || {}, _persisted: true,
+      _initial: { name: s.name, start_at: toDateTimeInput(s.start_at), config: JSON.stringify(s.config || {}) },
     }))
   }
 }

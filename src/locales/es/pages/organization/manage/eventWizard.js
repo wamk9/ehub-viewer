@@ -57,7 +57,7 @@ export default {
   },
   s3: { beforeStart: 'Esta etapa comienza antes del inicio del evento.', slotsCount: '{n} cupos',
     title: 'Cronograma', sub: 'Fechas del evento y etapas de la competición.',
-    datesLabel: 'Fechas', regDeadline: 'Plazo de inscripción', start: 'Inicio del evento', startTime: 'Hora de inicio', end: 'Fin previsto',
+    datesLabel: 'Fechas', regDeadline: 'Plazo de inscripción', start: 'Inicio del evento', stage_when: 'Fecha y hora de la etapa', startTime: 'Hora de inicio', end: 'Fin previsto',
     stagesLabel: 'Etapas / Fases', stagesHint: 'Agrega las fases de la competición. La información por etapa (paso Formulario) aparece debajo de cada una.',
     addStage: 'Agregar etapa', timezone: 'Zona horaria',
     groupsSchedLabel: 'Cronograma de Grupos', autoFill: 'Auto-completar grupos',

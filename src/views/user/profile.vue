@@ -56,7 +56,7 @@ const fSocial = reactive({
 })
 
 const fPrivacy = reactive({
-  profile_visibility: 'public',
+  profile_visibility: 'public', profile_indexable: false,
   show_email: false, show_phone: false, show_birthdate: false, show_followers: true,
 })
 
@@ -172,10 +172,14 @@ const avatarGrad = computed(() => {
   return gradStyle(idx)
 })
 
+// Competition number / style only matter for racing sports (eHub is multi-sport).
+const RACING = ['simracing', 'racingcars', 'rally', 'motorsport', 'motorbike', 'karting', 'drone-racing']
+const isRacing = computed(() => RACING.includes(profile.favorite_category))
 const completeness = computed(() => {
   const checks = [
-    !!profile.bio, !!profile.location, !!profile.birthdate, !!profile.car_number,
-    !!profile.driving_style, !!profile.favorite_category, !!profile.motto,
+    !!profile.bio, !!profile.location, !!profile.birthdate,
+    ...(isRacing.value ? [!!profile.car_number, !!profile.driving_style] : []),
+    !!profile.favorite_category, !!profile.motto,
     !!profile.image, !!profile.cover,
     !!(profile.discord || profile.youtube || profile.twitch || profile.x_twitter || profile.linkedin || profile.website),
   ]
@@ -225,6 +229,7 @@ function applyProfile(d) {
   })
   const prefs = profile.notification_prefs ?? defaultPrefs()
   fPrivacy.profile_visibility = d.profile_visibility ?? 'public'
+  fPrivacy.profile_indexable = !!d.profile_indexable
   fPrivacy.show_email     = prefs.privacy?.show_email     ?? false
   fPrivacy.show_phone     = prefs.privacy?.show_phone     ?? false
   fPrivacy.show_birthdate = prefs.privacy?.show_birthdate ?? false
@@ -303,7 +308,9 @@ async function savePrivacy() {
     privacy: { show_email: fPrivacy.show_email, show_phone: fPrivacy.show_phone, show_birthdate: fPrivacy.show_birthdate, show_followers: fPrivacy.show_followers },
   }
   try {
-    const result = await Api.patchAsync('/user/profile', { profile_visibility: fPrivacy.profile_visibility, notification_prefs: prefs })
+    // Search engines only make sense for a public profile.
+    const indexable = fPrivacy.profile_visibility === 'public' && fPrivacy.profile_indexable
+    const result = await Api.patchAsync('/user/profile', { profile_visibility: fPrivacy.profile_visibility, profile_indexable: indexable, notification_prefs: prefs })
     if (result.code === 200) { toast.success(t('users.profile.privacy.success')); await fetchProfile() }
     else toast.error(parseErrors(result.response).join('\n'))
   } catch { toast.error(t('users.profile.error.generic')) }
@@ -455,11 +462,11 @@ onMounted(() => {
               <font-awesome-icon :icon="['fas', profile.location ? 'check' : 'circle']" />
               <span>{{ $t('users.profile.personal.form.location.label') }}</span>
             </button>
-            <button type="button" class="comp-item" :class="profile.car_number ? 'done' : 'miss'" @click="switchPanel('personal')">
+            <button v-if="isRacing" type="button" class="comp-item" :class="profile.car_number ? 'done' : 'miss'" @click="switchPanel('personal')">
               <font-awesome-icon :icon="['fas', profile.car_number ? 'check' : 'circle']" />
               <span>{{ $t('users.profile.personal.form.car_number.label') }}</span>
             </button>
-            <button type="button" class="comp-item" :class="profile.driving_style ? 'done' : 'miss'" @click="switchPanel('personal')">
+            <button v-if="isRacing" type="button" class="comp-item" :class="profile.driving_style ? 'done' : 'miss'" @click="switchPanel('personal')">
               <font-awesome-icon :icon="['fas', profile.driving_style ? 'check' : 'circle']" />
               <span>{{ $t('users.profile.personal.form.driving_style.label') }}</span>
             </button>
@@ -754,6 +761,19 @@ onMounted(() => {
             <label for="vis-fol"><font-awesome-icon :icon="['fas', 'users']" /><span>{{ $t('users.profile.privacy.visibility.followers') }}</span></label>
             <input type="radio" name="vis" id="vis-prv" :value="'private'" v-model="fPrivacy.profile_visibility" />
             <label for="vis-prv"><font-awesome-icon :icon="['fas', 'lock']" /><span>{{ $t('users.profile.privacy.visibility.private') }}</span></label>
+          </div>
+        </div>
+
+        <div class="set-card mb-4">
+          <h3><font-awesome-icon :icon="['fab', 'google']" class="set-ico" />{{ $t('users.profile.privacy.search_title') }}</h3>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <label class="ti-label" for="pv-index">{{ $t('users.profile.privacy.search_label') }}</label>
+              <div class="ti-desc">{{ $t(fPrivacy.profile_visibility === 'public' ? 'users.profile.privacy.search_desc' : 'users.profile.privacy.search_needs_public') }}</div>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input id="pv-index" v-model="fPrivacy.profile_indexable" class="form-check-input" type="checkbox" role="switch" :disabled="fPrivacy.profile_visibility !== 'public'" />
+            </div>
           </div>
         </div>
 

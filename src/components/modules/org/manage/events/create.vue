@@ -273,7 +273,7 @@ async function submit(publication) {
       if (i && i.name === stage.name && i.start_at === (stage.start_at || '') && i.config === JSON.stringify(stage.config || {})) continue
       await OrganizationEventStage.update(route.params.orgRoute, form.route, stage.route, {
         name: stage.name,
-        start_at: stage.start_at || null,
+        start_at: stage.start_at ? String(stage.start_at).replace('T', ' ') + (String(stage.start_at).length === 16 ? ':00' : '') : null,
         config: stage.config,
       })
     } else {
@@ -281,7 +281,7 @@ async function submit(publication) {
         name: stage.name,
         route: stage.route,
         stage_type: stage.stage_type,
-        start_at: stage.start_at || null,
+        start_at: stage.start_at ? String(stage.start_at).replace('T', ' ') + (String(stage.start_at).length === 16 ? ':00' : '') : null,
         config: stage.config,
       })
     }

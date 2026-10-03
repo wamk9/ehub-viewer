@@ -21,4 +21,5 @@ export default {
   finished: 'Etapa finalizada',
   previous: 'Anterior',
   next: 'Próxima',
+  maximize: 'Tela cheia',
 }
